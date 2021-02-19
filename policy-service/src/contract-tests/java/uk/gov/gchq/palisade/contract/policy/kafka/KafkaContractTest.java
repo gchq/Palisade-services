@@ -170,18 +170,18 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
-                        .as("Check the size of the returned results")
+                        .as("Each message should produce a single result so the number of requests and results should match")
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .as("Message headers should contain the request token %s\", test-request-token")
+                                        .as("Message headers should contain the request token %s", "test-request-token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
-        assertAll("StreamMarkers are correct START and END",
+        assertAll("The START and END StreamMarkers are correct",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
                         .as("The first message should contain the START Marker")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
@@ -196,13 +196,13 @@ class KafkaContractTest {
         results.removeLast();
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
-                        .as("There should be one message left")
+                        .as("There should be one message left after the first and last result have been removed")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .as("The message should contain the request token %s\", test-request-token")
+                                        .as("The message should contain the request token %s", "test-request-token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertThat(results.stream()
@@ -213,26 +213,26 @@ class KafkaContractTest {
                         .isSorted(),
 
                 () -> assertThat(results)
-                        .as("The message should have been processed and deseralized correctly")
+                        .as("The message should have been processed and deserialized correctly")
                         .allSatisfy(result -> {
                             assertThat(result.value().get("user").get("userId").get("id").asText())
-                                    .as("The userId inside the message should be %s\" test-user-id")
+                                    .as("The userId inside the message should be %s", "test-user-id")
                                     .isEqualTo("test-user-id");
 
                             assertThat(result.value().get("resourceId").asText())
-                                    .as("The resourceId inside the message should be %s\" file:/test/resourceId")
+                                    .as("The resourceId inside the message should be %s", "file:/test/resourceId")
                                     .isEqualTo("file:/test/resourceId");
 
                             assertThat(result.value().get("context").get("contents").get("purpose").asText())
-                                    .as("The purpose inside the context object should be %s\" test-purpose")
+                                    .as("The purpose inside the context object should be %s", "test-purpose")
                                     .isEqualTo("test-purpose");
 
                             assertThat(result.value().get("rules").get("message").asText())
-                                    .as("The message inside the rules object should be %s\" no rules set")
+                                    .as("The message inside the rules object should be %s", "no rules set")
                                     .isEqualTo("no rules set");
 
                             assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
-                                    .as("The class of the rules object inside the message should be %s\" PassThroughRule")
+                                    .as("The class of the rules object inside the message should be %s", "PassThroughRule")
                                     .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule");
                         })
         );
@@ -301,7 +301,7 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .as("Message headers should contain the request token %s\", test-request-token")
+                                        .as("Message headers should contain the request token %s", "test-request-token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
@@ -333,12 +333,12 @@ class KafkaContractTest {
                 () -> assertThat(errorResults)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .as("Message headers should contain the request token %s\", test-request-token")
+                                        .as("Message headers should contain the request token %s", "test-request-token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .as("The error message on the error queue should be %s\", No Resource Rules found for the resource")
+                        .as("The error message on the error queue should be %s", "No Resource Rules found for the resource")
                         .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
         );
     }
@@ -379,17 +379,17 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
-                        .as("There should be one message on the kafka queue")
+                        .as("There should be one message on the kafka input-topic")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                    .as("Message headers should contain the request token %s\", test-request-token")
+                                    .as("Message headers should contain the request token %s", "test-request-token")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                             assertThat(result.value())
                                     .usingRecursiveComparison()
-                                    .as("The message from the input topic should have been processed and deseralized " +
+                                    .as("The message from the input topic should have been processed and deserialized " +
                                             "correctly and should match the same object in ContractTestData")
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
@@ -451,7 +451,7 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .as("Message headers should contain the request token %s\", test-request-token")
+                                        .as("Message headers should contain the request token %s", "test-request-token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
@@ -474,7 +474,7 @@ class KafkaContractTest {
                 .isEmpty();
     }
 
-    // Serialiser for upstream test input
+    // Serializer for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode policyRequest) {
@@ -486,7 +486,7 @@ class KafkaContractTest {
         }
     }
 
-    // Deserialiser for downstream test output
+    // Deserializer for downstream test output
     static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] policyResponse) {
