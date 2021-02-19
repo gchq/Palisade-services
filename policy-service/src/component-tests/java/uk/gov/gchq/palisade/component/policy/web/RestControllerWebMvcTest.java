@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @WebMvcTest(controllers = {PolicyRestController.class})
 @ContextConfiguration(classes = {RestControllerWebMvcTest.class, PolicyRestController.class})
@@ -63,8 +64,15 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertAll(
+                () -> assertThat(controller)
+                        .as("The 'controller' should not be null")
+                        .isNotNull(),
+
+                () -> assertThat(mockMvc)
+                        .as("The 'mockMvc' should not be null")
+                        .isNotNull()
+        );
     }
 
     @Test

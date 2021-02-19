@@ -62,11 +62,11 @@ class AuditablePolicyResourceResponseTest extends CommonTestData {
         assertAll("AuditablePolicyResourceResponse serializing and deserializing comparison",
                 //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
                 () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
-                        .as("Compare the AuditablePolicyResourceResponse objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RESOURCE_RESPONSE),
 
                 () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
-                        .as("Recursively compare the AuditablePolicyResourceResponse object")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RESOURCE_RESPONSE)
         );
@@ -92,11 +92,11 @@ class AuditablePolicyResourceResponseTest extends CommonTestData {
         assertAll("AuditablePolicyResourceResponse with error serializing and deserializing comparison",
                 //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
                 () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
-                        .as("Compare the AuditablePolicyResourceResponse objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RESOURCE_RESPONSE_ERROR),
 
                 () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
-                        .as("Recursively compare the AuditablePolicyResourceResponse object, ignoring the Throwable value")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RESOURCE_RESPONSE_ERROR)
         );

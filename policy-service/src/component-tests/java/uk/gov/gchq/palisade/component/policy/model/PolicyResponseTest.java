@@ -53,14 +53,14 @@ class PolicyResponseTest extends CommonTestData {
         ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(policyResponseJsonContent.getJson());
         PolicyResponse policyResponseMessageObject = policyResponseObjectContent.getObject();
 
-        assertAll(
+        assertAll("PolicyResponse serializing and deserializing comparison",
                 () -> assertThat(policyResponseMessageObject)
-                        .as("Check deserialized object")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RESPONSE),
 
                 () -> assertThat(policyResponseMessageObject)
                         .usingRecursiveComparison()
-                        .as("Recursively compare the PolicyResponse object")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .isEqualTo(POLICY_RESPONSE)
         );
     }

@@ -105,11 +105,11 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
     void testContextLoads() {
         assertAll(
                 () -> assertThat(cacheProxy)
-                        .as("Check the caching proxy is not null")
+                        .as("The 'cacheProxy' should not be null")
                         .isNotNull(),
 
                 () -> assertThat(redisTemplate)
-                        .as("Check the redis template is not null")
+                        .as("The 'redisTemplate' should not be null")
                         .isNotNull()
         );
     }
@@ -125,10 +125,10 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
             // Then
             assertThat(resourceRules)
-                    .as("Check the returned resource rules is not empty")
+                    .as("The returned rules optional should have a value present")
                     .isPresent()
                     .map(Rules::getRules)
-                    .as("Check the resource rule is not null")
+                    .as("The rules inside the optional should not be null")
                     .isNotNull();
         }
     }
@@ -142,7 +142,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         // Then
         assertThat(recordRules)
-                .as("Check the returned record rules are empty")
+                .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
 
@@ -165,7 +165,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         // Then the returned policy should have the updated resource rules
         assertAll(
                 () -> assertThat(recordRules)
-                        .as("Check the returned record rules is not empty")
+                        .as("The returned rules optional should have a value present")
                         .isPresent(),
 
                 () -> assertThat(recordRules).isPresent().get()
@@ -189,7 +189,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         // Then - it has been evicted
         assertThat(recordRules)
-                .as("Check the returned record rules are empty")
+                .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
 

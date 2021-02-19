@@ -74,6 +74,8 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned
         assertThat(secretDirRules)
+                .as("The returned rules should not be null")
+                .isNotNull()
                 .as("Recursively check the returned rules")
                 .usingRecursiveComparison()
                 .isEqualTo(PASS_THROUGH_POLICY);
@@ -84,7 +86,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned (and include all those of the parent directory)
         assertThat(secretFileRules)
-                .as("Check the rules are not null")
+                .as("The returned rules should not be null")
                 .isNotNull()
                 .as("Recursively check the returned rules")
                 .usingRecursiveComparison()
@@ -101,7 +103,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         //Then an error is thrown
         assertThat(noSuchPolicy.getMessage())
-                .as("Check the exception message")
+                .as("The message of the error should be %s", "No Resource Rules found for the resource")
                 .isEqualTo("No Record Rules found for the resource");
     }
 
@@ -119,7 +121,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, ACCESSIBLE_JSON_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("Check the returned resource is not null")
+                    .as("The returned resource should not be null")
                     .isNotNull();
         }
 
@@ -132,7 +134,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SENSITIVE_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("Check the returned resource is not null")
+                    .as("The returned resource should not be null")
                     .isNotNull();
         }
 
@@ -144,7 +146,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SECRET_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("Check the returned resource is not null")
+                    .as("The returned resource should not be null")
                     .isNotNull();
 
         }
@@ -163,7 +165,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(USER, fileResource, CONTEXT, HIERARCHY_POLICY.getResourceRules(fileResource));
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("Check the returned resource is not null")
+                    .as("The returned resource should not be null")
                     .isNotNull()
                     .as("Recursively check the returned resource")
                     .usingRecursiveComparison()
@@ -182,7 +184,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("Check the returned resource is null")
+                    .as("The returned resource should be null")
                     .isNull();
         }
 
@@ -197,7 +199,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("Check the returned resource is null")
+                    .as("The returned resource should be null")
                     .isNull();
         }
     }

@@ -62,11 +62,11 @@ class AuditablePolicyResourceRulesTest extends CommonTestData {
         assertAll("AuditablePolicyResourceRules serializing and deserializing comparison",
                 //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
-                        .as("Compare the AuditablePolicyResourceRules objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RESOURCE_RULES),
 
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
-                        .as("Recursively compare the AuditablePolicyResourceRules object")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RESOURCE_RULES)
         );
@@ -92,11 +92,11 @@ class AuditablePolicyResourceRulesTest extends CommonTestData {
         assertAll("AuditablePolicyResourceRules with error serializing and deserializing comparison",
                 //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
-                        .as("Compare the AuditablePolicyResourceRules objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RESOURCE_RULES_ERROR),
 
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
-                        .as("Recursively compare the AuditablePolicyResourceRules object")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RESOURCE_RULES_ERROR)
         );

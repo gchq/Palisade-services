@@ -58,15 +58,15 @@ class AuditErrorMessageTest extends CommonTestData {
                 () -> assertThat(auditErrorMessageObject)
                         .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(Throwable.class)
-                        .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable value")
+                        .as("The serialized and deserialized object should have the same values as the original, ignoring the Throwable value")
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
 
                 () -> assertThat(auditErrorMessageObject)
                         .extracting(AuditErrorMessage::getError)
-                        .as("Check that there is an error value")
+                        .as("The serialized and deserialized object should have an error")
                         .isNotNull()
                         .extracting(Throwable::getMessage)
-                        .as("Check the message of the thrown error")
+                        .as("The serialized and deserialized object should have the same error message as the original")
                         .isEqualTo(AUDIT_ERROR_MESSAGE.getError().getMessage())
         );
     }

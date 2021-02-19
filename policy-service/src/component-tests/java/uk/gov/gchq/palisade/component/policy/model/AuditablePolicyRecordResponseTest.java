@@ -59,11 +59,11 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
 
         assertAll("AuditablePolicyRecordResponse serializing and deserializing comparison",
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("Compare the AuditablePolicyRecordResponse objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RECORD_RESPONSE),
 
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("Recursively compare the AuditablePolicyRecordResponse object")
+                        .as("The serialized and deserialized object should have the same values as the original")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RECORD_RESPONSE)
         );
@@ -87,13 +87,13 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
 
         assertAll("AuditablePolicyRecordResponse with error serializing and deserializing comparison",
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("Compare the AuditablePolicyRecordResponse objects")
+                        .as("The serialized and deserialized object should match the original")
                         .isEqualTo(POLICY_RECORD_RESPONSE_ERROR),
 
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
                         .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(Throwable.class)
-                        .as("Recursively compare the AuditablePolicyRecordResponse object, ignoring the Throwable value")
+                        .as("The serialized and deserialized object should have the same values as the original, ignoring the Throwable value")
                         .isEqualTo(POLICY_RECORD_RESPONSE_ERROR)
         );
     }
@@ -108,14 +108,14 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
         AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(null);
         // Then
-        assertAll(
+        assertAll("AuditablePolicyRecordResponse comparison after chaining with 'null' error",
                 () -> assertThat(chainedResponse)
-                        .usingRecursiveComparison()
-                        .as("Recursively check the chained response has not changed")
+                        .as("The updated object should match the original")
                         .isEqualTo(auditablePolicyRecordResponse),
 
                 () -> assertThat(chainedResponse)
-                        .as("Check the chained response is the same as the original response")
+                        .usingRecursiveComparison()
+                        .as("The updated object should have the same values as the original")
                         .isEqualTo(auditablePolicyRecordResponse)
         );
     }
@@ -130,22 +130,22 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
         AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
         // Then
-        assertAll(
+        assertAll("AuditablePolicyRecordResponse comparison after chaining with an AuditErrorMessage",
                 () -> assertThat(chainedResponse)
                         .usingRecursiveComparison()
-                        .as("Recursively check that an AuditErrorMessage has been added to the original AuditablePolicyRecordResponse object")
+                        .as("The updated object should not match the original")
                         .isNotEqualTo(auditablePolicyRecordResponse),
 
                 () -> assertThat(chainedResponse.getAuditErrorMessage())
                         .usingRecursiveComparison()
-                        .as("Recursively check the AuditErrorMessage within the response")
+                        .as("The AuditErrorMessage should have the expected values")
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
 
                 () -> assertThat(chainedResponse.getAuditErrorMessage())
                         .extracting(AuditErrorMessage::getError)
-                        .as("Check the cause of the thrown error")
+                        .as("The exception cause should be 'NoSuchPolicyException'")
                         .isInstanceOf(NoSuchPolicyException.class)
-                        .as("Check the message in the exception")
+                        .as("The exception should contain the message 'No rules found for the resource'")
                         .extracting(Throwable::getMessage)
                         .isEqualTo("No rules found for the resource")
         );

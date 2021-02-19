@@ -93,7 +93,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testContextLoads() {
         assertThat(policyService)
-                .as("Check the Policy Service is not null")
+                .as("The 'policyService' should not be null")
                 .isNotNull();
     }
 
@@ -111,7 +111,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
             // Then
             assertThat(recordRules)
-                    .as("Check the returned record rules is not empty")
+                    .as("The returned rules optional should have a value present")
                     .isPresent();
         }
     }
@@ -128,7 +128,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // Then
         assertThat(recordRules)
-                .as("Check the returned record rules object is empty")
+                .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
 
@@ -153,7 +153,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // Then - it has been evicted
         assertThat(recordRules)
-                .as("Check the returned record rules object is empty")
+                .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
 
@@ -176,7 +176,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // Then - it has been evicted
         assertThat(recordRules)
-                .as("Check the returned record rules object is empty")
+                .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
 }

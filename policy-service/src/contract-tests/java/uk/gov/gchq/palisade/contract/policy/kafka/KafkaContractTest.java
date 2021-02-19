@@ -338,7 +338,8 @@ class KafkaContractTest {
 
                 // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .as("The error message on the error queue should be %s", "No Resource Rules found for the resource")
+                        .as("The error message within the result on the error queue should be %s",
+                                "No Resource Rules found for the resource")
                         .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
         );
     }

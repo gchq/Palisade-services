@@ -130,16 +130,16 @@ class PolicyServiceAsyncProxyTest {
                         .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES),
 
                 () -> assertThat(response.getAuditErrorMessage())
-                        .as("Recursively check the AuditErrorMessage object")
+                        .as("Recursively check the AuditErrorMessage object, ignoring the timestamp field")
                         .usingRecursiveComparison()
                         .ignoringFields("timestamp")
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
 
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
-                        .as("Check the cause of the thrown error")
+                        .as("The exception cause should be 'NoSuchPolicyException'")
                         .isInstanceOf(NoSuchPolicyException.class)
-                        .as("Check the message in the exception")
+                        .as("The exception should contain the message 'No rules found for the resource'")
                         .extracting(Throwable::getMessage)
                         .isEqualTo("No rules found for the resource")
         );
@@ -194,9 +194,9 @@ class PolicyServiceAsyncProxyTest {
 
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
-                        .as("Check the cause of the thrown exception")
+                        .as("The exception cause should be 'NoSuchPolicyException'")
                         .isInstanceOf(NoSuchPolicyException.class)
-                        .as("Check the message of the thrown exception")
+                        .as("The exception should contain the message 'No rules found for the resource'")
                         .extracting(Throwable::getMessage)
                         .isEqualTo("No rules found for the resource")
                         .isNotNull()
