@@ -64,7 +64,7 @@ public class AuditServiceAsyncProxy {
                         }
                         LOGGER.warn("An AuditSuccessMessage should only be sent by the `filtered-resource-service` or the `data-service`. Message received from `{}`",
                                 message.getServiceName());
-                    return false;
+                        return false;
                     } else if (message instanceof AuditErrorMessage) {
                         AuditErrorMessage errorMessage = (AuditErrorMessage) message;
                         auditService.audit(token, errorMessage);

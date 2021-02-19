@@ -61,8 +61,10 @@ public class StroomAuditService implements AuditService {
     private static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
     private static final System SYSTEM = new System();
 
-    static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
-    static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
+    /** read request completed */
+    public static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
+    /** register request completed */
+    public static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
 
     private final DefaultEventLoggingService eventLogger;
 
@@ -206,8 +208,12 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * @param systemName the name of the system from which the audit service is receiving audit logs from
+     * Sets the new system name from which the audit service is receiving audit logs
+     * from
+     *
+     * @param systemName the name of the system
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code systemName} is null
      */
     @Generated
     public StroomAuditService systemName(final String systemName) {
@@ -228,9 +234,11 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * Sets the new system name
+     * Sets the new system name from which the audit service is receiving audit logs
+     * from
      *
-     * @param systemName the new system name to set
+     * @param systemName the name of the system
+     * @throws NullPointerException is {@code systemName} is null
      */
     @Generated
     public void setSystemName(final String systemName) {
@@ -238,8 +246,11 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
+     * Sets the new organisation
+     *
      * @param organisation the organisation that the system belongs too
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code organisation} is null
      */
     @Generated
     public StroomAuditService organisation(final String organisation) {
@@ -263,7 +274,8 @@ public class StroomAuditService implements AuditService {
     /**
      * Sets the new organisation
      *
-     * @param organisation the new organisation to set
+     * @param organisation the organisation that the system belongs too
+     * @throws NullPointerException is {@code organisation} is null
      */
     @Generated
     public void setOrganisation(final String organisation) {
@@ -272,14 +284,17 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * @param env the system environment of this deployment, e.g prod, ref, test
+     * Sets the new system environment of this deployment, e.g prod, ref, test
+     *
+     * @param systemEnv the system environment
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code env} is null
      */
     @Generated
-    public StroomAuditService systemEnv(final String env) {
-        requireNonNull(env, "The env cannot be null.");
-        LOGGER.debug("systemEnv is {}", env);
-        SYSTEM.setEnvironment(env);
+    public StroomAuditService systemEnv(final String systemEnv) {
+        requireNonNull(systemEnv, "The env cannot be null.");
+        LOGGER.debug("systemEnv is {}", systemEnv);
+        SYSTEM.setEnvironment(systemEnv);
         return this;
     }
 
@@ -294,9 +309,10 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * Sets the new system environment
+     * Sets the new system environment of this deployment, e.g prod, ref, test
      *
-     * @param systemEnv the new system environment to set
+     * @param systemEnv the system environment
+     * @throws NullPointerException is {@code env} is null
      */
     @Generated
     public void setSystemEnv(final String systemEnv) {
@@ -304,8 +320,12 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * @param description the description of the system from which the audit service is receiving audit logs from
+     * Sets the new system description from which the audit service is receiving
+     * audit logs from
+     *
+     * @param description the system description
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code description} is null
      */
     @Generated
     public StroomAuditService systemDescription(final String description) {
@@ -326,9 +346,11 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * Sets the new system description
+     * Sets the new system description from which the audit service is receiving
+     * audit logs from
      *
-     * @param description the new system description to set
+     * @param description the system description
+     * @throws NullPointerException is {@code description} is null
      */
     @Generated
     public void setSystemDescription(final String description) {
@@ -336,8 +358,11 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * @param systemVersion the system version of this deployment, v1, v1.0.2, v2, etc
+     * Sets the new system version of this deployment, v1, v1.0.2, v2, etc
+     *
+     * @param systemVersion the system version
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code systemVersion} is null
      */
     @Generated
     public StroomAuditService systemVersion(final String systemVersion) {
@@ -357,9 +382,10 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * Sets the new system version
+     * Sets the new system version of this deployment, v1, v1.0.2, v2, etc
      *
-     * @param systemVersion the new system version
+     * @param systemVersion the system version
+     * @throws NullPointerException is {@code systemVersion} is null
      */
     @Generated
     public void setSystemVersion(final String systemVersion) {
@@ -367,8 +393,12 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * @param systemClassification the classification of the system from which the audit service is receiving audit logs from
+     * Sets the new system classification of the system from which the audit service
+     * is receiving audit logs from
+     *
+     * @param systemClassification the new system classification
      * @return {@link StroomAuditService}
+     * @throws NullPointerException is {@code systemClassification} is null
      */
     @Generated
     public StroomAuditService systemClassification(final String systemClassification) {
@@ -392,9 +422,11 @@ public class StroomAuditService implements AuditService {
     }
 
     /**
-     * Sets the new system classification
+     * Sets the new system classification of the system from which the audit service
+     * is receiving audit logs from
      *
-     * @param systemClassification the new system classification to set
+     * @param systemClassification the new system classification
+     * @throws NullPointerException is {@code systemClassification} is null
      */
     @Generated
     public void setSystemClassification(final String systemClassification) {

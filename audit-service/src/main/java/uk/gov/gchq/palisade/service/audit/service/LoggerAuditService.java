@@ -62,6 +62,7 @@ public class LoggerAuditService implements AuditService {
         DISPATCHER.put(AuditErrorMessage.class, LoggerAuditService::auditErrorMessage);
     }
 
+    @SuppressWarnings("java:S1312")
     private final Logger auditLogger;
 
     /**
