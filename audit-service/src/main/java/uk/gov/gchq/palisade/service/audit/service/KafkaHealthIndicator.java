@@ -66,9 +66,8 @@ public class KafkaHealthIndicator implements HealthIndicator {
     public Health health() {
         if (performCheck()) {
             return Health.up().withDetail("group", this.groupId).build();
-        } else {
-            return Health.down().withDetail("group", this.groupId).build();
         }
+        return Health.down().withDetail("group", this.groupId).build();
     }
 
     private boolean performCheck() {

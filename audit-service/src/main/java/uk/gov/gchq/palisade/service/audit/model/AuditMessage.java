@@ -39,17 +39,29 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = new ObjectMapper();
 
-    protected final String userId; //Unique identifier for the user.
-    protected final String resourceId;  //Resource that that is being asked to access.
-    protected final JsonNode context;   //Relevant context information about the request.
-    protected final String serviceName;  //service that sent the message
-    protected final String timestamp;  //when the message was created
-    protected final String serverIP;  //the server IP address for the service
-    protected final String serverHostname;  //the hostname of the server hosting the service
-    protected final JsonNode attributes;  //JsonNode holding Map<String, Object> holding optional extra information
+    private final String userId; // Unique identifier for the user.
+    private final String resourceId; // Resource that that is being asked to access.
+    private final JsonNode context; // Relevant context information about the request.
+    private final String serviceName; // service that sent the message
+    private final String timestamp; // when the message was created
+    private final String serverIP; // the server IP address for the service
+    private final String serverHostname; // the hostname of the server hosting the service
+    private final JsonNode attributes; // JsonNode holding Map<String, Object> holding optional extra information
 
+    /**
+     * Creates and returns a new {@code AuditMessage}
+     *
+     * @param userId         the user id
+     * @param resourceId     the resource id
+     * @param context        the context
+     * @param serviceName    the service name
+     * @param timestamp      the timestamp
+     * @param serverIP       the server IP
+     * @param serverHostname the server hostname
+     * @param attributes     the attributes
+     */
     @JsonCreator
     protected AuditMessage(
             final @JsonProperty("userId") String userId,
@@ -69,49 +81,97 @@ public class AuditMessage {
         this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new IllegalArgumentException("Server IP address cannot be null"));
         this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new IllegalArgumentException("Server Hostname cannot be null"));
         this.attributes = Optional.ofNullable(attributes).orElseThrow(() -> new IllegalArgumentException("Attributes cannot be null"));
-
     }
 
+    /**
+     * Returns the user id
+     *
+     * @return the user id
+     */
     @Generated
     public String getUserId() {
         return userId;
     }
 
+    /**
+     * Returns the resource id
+     *
+     * @return the resource id
+     */
     @Generated
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Returns the context
+     *
+     * @return the context
+     * @throws JsonProcessingException if an error occurs when generating the
+     *                                 context
+     */
     @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }
 
+    /**
+     * Returns the service name
+     *
+     * @return the service name
+     */
     @Generated
     public String getServiceName() {
         return serviceName;
     }
 
+    /**
+     * Returns the timestamp
+     *
+     * @return the timestamp
+     */
     @Generated
     public String getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Returns the server IP
+     *
+     * @return the server IP
+     */
     @Generated
     public String getServerIP() {
         return serverIP;
     }
 
+    /**
+     * Returns the server host name
+     *
+     * @return the server host name
+     */
     @Generated
     public String getServerHostname() {
         return serverHostname;
     }
 
+    /**
+     * Returns the attributes
+     *
+     * @return the attributes
+     * @throws JsonProcessingException if an error occurs when generating the
+     *                                 context
+     */
     @Generated
     public Map<String, String> getAttributes() throws JsonProcessingException {
         return MAPPER.treeToValue(attributes, Map.class);
     }
 
+    /**
+     * Returns the attributes json node
+     *
+     * @return the attributes json node
+     */
     @JsonIgnore
     @Generated
     public JsonNode getAttributesNode() {
@@ -159,5 +219,6 @@ public class AuditMessage {
                 .add(super.toString())
                 .toString();
     }
+
 }
 

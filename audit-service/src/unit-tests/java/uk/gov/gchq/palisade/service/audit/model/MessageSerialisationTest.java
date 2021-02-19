@@ -23,40 +23,52 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
-import uk.gov.gchq.palisade.service.audit.service.ServiceName;
-
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.DATA_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.FILTERED_RESOURCE_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.POLICY_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 class MessageSerialisationTest {
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static class MessageTypeSource implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
-                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.name())),
-                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.name())),
-                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.name())),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.name())),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.name())),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.name()))
+                arguments(auditErrorMessage(USER_SERVICE)),
+                arguments(auditErrorMessage(RESOURCE_SERVICE)),
+                arguments(auditErrorMessage(POLICY_SERVICE)),
+                arguments(auditSuccessMessage(DATA_SERVICE)),
+                arguments(auditSuccessMessage(FILTERED_RESOURCE_SERVICE)),
+                arguments(auditSuccessMessage(USER_SERVICE))
             );
         }
     }
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void testSerialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
-        // Given some test data
+    void testSerialiseDeserialiseIsConsistent(final Object expectedMessage) throws JsonProcessingException {
 
-        // When a Request is serialised and deserialised
-        String serialisedRequest = MAPPER.writeValueAsString(message);
-        Object deserialisedRequest = MAPPER.readValue(serialisedRequest, message.getClass());
+        var type = expectedMessage.getClass();
+        var actualMessage = MAPPER.readValue(MAPPER.writeValueAsString(expectedMessage), type);
 
-        // Then the deserialised object is unchanged (equal)
-        assertThat(deserialisedRequest).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(message);
+        assertThat(actualMessage)
+            .as("check deserialised %s is the same as the original using recursive comparison", type)
+            .usingRecursiveComparison()
+            .ignoringFieldsOfTypes(Throwable.class)
+            .isEqualTo(expectedMessage);
+
+        assertThat(actualMessage)
+            .as("check deserialisaed %s is the same as the original using equals", type)
+            .isEqualTo(expectedMessage);
+
     }
 }

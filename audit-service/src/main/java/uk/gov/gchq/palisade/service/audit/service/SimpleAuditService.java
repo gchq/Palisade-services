@@ -25,7 +25,12 @@ import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
  * A SimpleAuditService is a simple implementation of a {@link AuditService} that keeps user data in the cache service
  */
 public class SimpleAuditService implements AuditService {
+
+    /**
+     * The configuration key
+     */
     public static final String CONFIG_KEY = "simple";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override

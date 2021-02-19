@@ -28,6 +28,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class SerDesHealthIndicator implements HealthIndicator {
 
+    /**
+     * Serialisation exceptions
+     */
     protected static final Queue<Exception> SER_DES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
 
     /**

@@ -46,6 +46,10 @@ import static java.util.Objects.requireNonNull;
  * it using the Stroom EventLoggingService.
  */
 public class StroomAuditService implements AuditService {
+
+    /**
+     * The configuration key
+     */
     public static final String CONFIG_KEY = "stroom";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
@@ -57,8 +61,8 @@ public class StroomAuditService implements AuditService {
     private static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
     private static final System SYSTEM = new System();
 
-    protected static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
-    protected static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
+    static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
+    static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
 
     private final DefaultEventLoggingService eventLogger;
 
@@ -213,11 +217,21 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the system name
+     *
+     * @return the system name
+     */
     @Generated
     public String getSystemName() {
         return SYSTEM.getName();
     }
 
+    /**
+     * Sets the new system name
+     *
+     * @param systemName the new system name to set
+     */
     @Generated
     public void setSystemName(final String systemName) {
         systemName(systemName);
@@ -235,12 +249,22 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the organisation
+     *
+     * @return the organisation
+     */
     @Generated
     public String getOrganisation() {
         LOGGER.debug(ORGANISATION, SYSTEM.getOrganisation());
         return SYSTEM.getOrganisation();
     }
 
+    /**
+     * Sets the new organisation
+     *
+     * @param organisation the new organisation to set
+     */
     @Generated
     public void setOrganisation(final String organisation) {
         LOGGER.debug(ORGANISATION, organisation);
@@ -259,11 +283,21 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the system environment
+     *
+     * @return the system environment
+     */
     @Generated
     public String getSystemEnv() {
         return SYSTEM.getEnvironment();
     }
 
+    /**
+     * Sets the new system environment
+     *
+     * @param systemEnv the new system environment to set
+     */
     @Generated
     public void setSystemEnv(final String systemEnv) {
         systemEnv(systemEnv);
@@ -281,11 +315,21 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the system description
+     *
+     * @return the system description
+     */
     @Generated
     public String getSystemDescription() {
         return SYSTEM.getDescription();
     }
 
+    /**
+     * Sets the new system description
+     *
+     * @param description the new system description to set
+     */
     @Generated
     public void setSystemDescription(final String description) {
         systemDescription(description);
@@ -302,11 +346,21 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the system version
+     *
+     * @return the system version
+     */
     @Generated
     public String getSystemVersion() {
         return SYSTEM.getVersion();
     }
 
+    /**
+     * Sets the new system version
+     *
+     * @param systemVersion the new system version
+     */
     @Generated
     public void setSystemVersion(final String systemVersion) {
         systemVersion(systemVersion);
@@ -326,12 +380,22 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    /**
+     * Returns the system classification
+     *
+     * @return the system classification
+     */
     @Generated
     public String getSystemClassification() {
         LOGGER.debug(SYSTEM_CLASSIFICATION, SYSTEM.getClassification().getText());
         return SYSTEM.getClassification().getText();
     }
 
+    /**
+     * Sets the new system classification
+     *
+     * @param systemClassification the new system classification to set
+     */
     @Generated
     public void setSystemClassification(final String systemClassification) {
         LOGGER.debug(SYSTEM_CLASSIFICATION, systemClassification);
@@ -345,11 +409,11 @@ public class StroomAuditService implements AuditService {
             if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                 auditSuccessMessage(token, eventLogger, successMessage);
                 return true;
-            } else {
-                LOGGER.warn("An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
-                        message.getServiceName());
-                return false;
             }
+            LOGGER.warn(
+                "An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                message.getServiceName());
+            return false;
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;
             auditErrorMessage(token, eventLogger, errorMessage);

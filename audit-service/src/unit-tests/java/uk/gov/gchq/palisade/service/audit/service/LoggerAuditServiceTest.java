@@ -26,10 +26,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_TOKEN;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
+import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.DATA_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.FILTERED_RESOURCE_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.POLICY_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 @ExtendWith(MockitoExtension.class)
 class LoggerAuditServiceTest {
@@ -44,98 +53,88 @@ class LoggerAuditServiceTest {
     @Captor
     ArgumentCaptor<String> errorCaptor;
 
-    private static LoggerAuditService auditService;
+    private LoggerAuditService auditService;
 
     @BeforeEach
     public void setUp() {
-        auditService = new LoggerAuditService(logger);
+        this.auditService = new LoggerAuditService(logger);
     }
 
     @Test
     void testDataServiceAuditSuccessMessage() {
         // Given
-        Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
+        doNothing().when(logger).info(anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .hasSize(1)
-                .first().isEqualTo(ApplicationTestData.auditSuccessMessage("data-service"));
+        assertThat(infoCaptor).containsOnly(auditSuccessMessage(DATA_SERVICE));
     }
 
     @Test
     void testFilteredResourceServiceAuditSuccessMessage() {
         // Given
-        Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
+        Mockito.doNothing().when(logger).info(anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .hasSize(1).first()
-                .isEqualTo(ApplicationTestData.auditSuccessMessage("filtered-resource-service"));
+        assertThat(infoCaptor).containsOnly(auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
     }
 
     @Test
     void testOtherServiceAuditSuccessMessage() {
         // Given
-        Mockito.doNothing().when(logger).warn(errorCaptor.capture(), errorCaptor.capture());
+        doNothing().when(logger).warn(errorCaptor.capture(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditSuccessMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .isEmpty();
-        assertThat(errorCaptor.getAllValues())
-                .hasSize(2).contains(BAD_AUDIT_SUCCESS_MESSAGE, "user-service");
+        assertThat(infoCaptor).isEmpty();
+        assertThat(errorCaptor).containsOnly(BAD_AUDIT_SUCCESS_MESSAGE, USER_SERVICE.value);
     }
 
     @Test
     void testUserServiceAuditErrorMessage() {
+
         // Given
-        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+        doNothing().when(logger).error(anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .isEmpty();
-        assertThat(errorCaptor.getAllValues())
-                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("user-service"));
+        assertThat(infoCaptor).isEmpty();
+        assertThat(errorCaptor).containsOnly(auditErrorMessage(USER_SERVICE));
     }
 
     @Test
     void testResourceServiceAuditErrorMessage() {
+
         // Given
-        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+        doNothing().when(logger).error(anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditErrorMessage(RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .isEmpty();
-        assertThat(errorCaptor.getAllValues())
-                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("resource-service"));
+        assertThat(infoCaptor).isEmpty();
+        assertThat(errorCaptor).containsOnly(auditErrorMessage(RESOURCE_SERVICE));
     }
 
     @Test
     void testOtherServiceAuditErrorMessage() {
         // Given
-        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+        doNothing().when(logger).error(anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.value));
+        auditService.audit(TEST_TOKEN, auditErrorMessage(POLICY_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues())
-                .isEmpty();
-        assertThat(errorCaptor.getAllValues())
-                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("policy-service"));
+        assertThat(infoCaptor).isEmpty();
+        assertThat(errorCaptor).containsOnly(auditErrorMessage(POLICY_SERVICE));
     }
 }

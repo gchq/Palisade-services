@@ -69,6 +69,7 @@ public class AuditApplication {
      *
      * @param args command-line arguments passed to the application
      */
+    @SuppressWarnings("resource")
     public static void main(final String[] args) {
         LOGGER.debug("AuditApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)

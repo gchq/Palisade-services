@@ -42,10 +42,14 @@ import static java.util.Objects.requireNonNull;
  * </pre>
  */
 public class LoggerAuditService implements AuditService {
+
+    /**
+     * The key
+     */
     public static final String CONFIG_KEY = "logger";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
-    private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
+    private static final Map<Class<?>, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
     private static final String AUDIT_MESSAGE = "AuditMessage: {}";
     private static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
     private static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
@@ -96,11 +100,12 @@ public class LoggerAuditService implements AuditService {
             if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                 auditSuccessMessage(auditLogger, successMessage);
                 return true;
-            } else {
-                auditLogger.warn("An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
-                        message.getServiceName());
-                return false;
             }
+            auditLogger.warn(
+                "An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
+                message.getServiceName());
+            return false;
+
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;
             auditErrorMessage(auditLogger, errorMessage);
