@@ -38,6 +38,7 @@ public class Assertions {
      * Returns a new ArgumentCaptorAssert with the provided actual
      * {@code argumentCaptor}
      *
+     * @param <T>            The captured argument type
      * @param argumentCaptor the actual value
      * @return a new ArgumentCaptorAssert
      */
@@ -49,6 +50,7 @@ public class Assertions {
      * Returns a new ResponseEntityAssert with the provided actual
      * {@code responseEntity}
      *
+     * @param <T>            The captured argument type
      * @param responseEntity the actual value
      * @return a new ResponseEntityAssert
      */
