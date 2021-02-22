@@ -65,6 +65,9 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @TimeToLive
     protected Long timeToLive;
 
+    /**
+     * Empty-constructor for (de)serialisation functions
+     */
     public TokenAuditErrorMessageEntity() {
         // no-args constructor
     }

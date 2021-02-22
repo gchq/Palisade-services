@@ -178,6 +178,7 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
                             ),
+                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
@@ -201,6 +202,7 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
                             ),
+                            List.of(),
                             List.of(),
                             Map.of(
                                     "test-token-2", 0L
@@ -230,6 +232,7 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
                             ),
+                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg
@@ -255,6 +258,7 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
                             ),
+                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg
@@ -268,6 +272,47 @@ class KafkaRestWebSocketContractTest {
                                             .withContext(new Context().purpose("unknown"))
                                             .withAttributes(Collections.emptyMap())
                                             .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    ),
+                    // Test no resources - query was suspicious
+                    // Expect to receive no resources, and expect one error on the audit error topic
+                    Arguments.of(
+                            "test-token-5",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")),
+                                            AuditErrorMessage.Builder.create().withUserId("userId")
+                                                    .withResourceId("file:/file/resource.1")
+                                                    .withContext(new Context().purpose("purpose"))
+                                                    .withAttributes(Collections.emptyMap())
+                                                    .withError(new Throwable("No userId matching: " + "userId"))
+                                            )
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-5")
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/resource.1")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No userId matching: " + "userId"))
                             )
                     )
             );
@@ -296,6 +341,7 @@ class KafkaRestWebSocketContractTest {
             final String requestToken,
             final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
             final List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic,
+            final List<Pair<Iterable<HttpHeader>, AuditErrorMessage>> errorTopic,
             final Map<String, Long> offsetsPersistence,
             final List<WebSocketMessage> websocketRequests,
             // Expected output
@@ -320,6 +366,14 @@ class KafkaRestWebSocketContractTest {
                 .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource-offset", HOST, port))
                         .withHeaders(offset.first())
                         .withEntity(jsonType, serialize(offset.second()).getBytes()))
+                .toCompletableFuture()
+                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
+                .join());
+        // POST error to KafkaController
+        errorTopic.forEach(error -> http
+                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/error", HOST, port))
+                        .withHeaders(error.first())
+                        .withEntity(jsonType, serialize(error.second()).getBytes()))
                 .toCompletableFuture()
                 .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
                 .join());
