@@ -71,9 +71,11 @@ class DataControllerTest {
     }
 
     /**
-     * Tests the Data Service endpoint.  It is expecting a Json string to be sent for a DataRequestModel and will return
-     * with an OutputStream for the resources.  There will be two calls method call related to accessing the resource
-     * and an audit message for sending an message to the Audit Service.
+     * Tests the Data Service endpoint.  It is expecting a Json string to be sent representing a DataRequestModel and
+     * will return with an {@code OutputStream}.  There are three expected service calls related to to this one web request.
+     * The first two service calls are to the {@link AuditableDataService} with the first for the authorisation for the
+     * resource request and the second for the creation of an {@code OutputStream}.  The third service call is for the
+     * {@link AuditMessageService} which is for sending a message to the Audit Service.
      *
      * @throws Exception if the test fails to run
      */
@@ -95,18 +97,6 @@ class DataControllerTest {
                 .content(mapper.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
-        /*
-
-       MvcResult result = mockMvc.perform(post("/read/chunked")
-                .contentType("application/json")
-                .characterEncoding(StandardCharsets.UTF_8.name())
-                .content(mapper.writeValueAsBytes(DATA_REQUEST)))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-
-      MockHttpServletResponse obj =   result.getResponse();
-
-         */
 
         verify(serviceMock, times(1)).authoriseRequest(any());
         verify(serviceMock, times(1)).read(any(), any());
@@ -115,7 +105,8 @@ class DataControllerTest {
 
     /**
      * Tests the Data Service endpoint for an invalid request.  The expected response will be an HTTP error status
-     * code of 500 and the body will be empty.  There will also be a call to send an error message to the Audit Service.
+     * code of 500 and the body will be empty.  There will also be a call to the {@link AuditMessageService} to forward
+     * a message to the Audit Service.
      *
      * @throws Exception if the test fails to run
      */
