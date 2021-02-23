@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -71,11 +72,11 @@ class DataControllerTest {
     }
 
     /**
-     * Tests the Data Service endpoint.  It is expecting a Json string to be sent representing a DataRequestModel and
-     * will return with an {@code OutputStream}.  There are three expected service calls related to to this one web request.
-     * The first two service calls are to the {@link AuditableDataService} with the first for the authorisation for the
-     * resource request and the second for the creation of an {@code OutputStream}.  The third service call is for the
-     * {@link AuditMessageService} which is for sending a message to the Audit Service.
+     * Tests the Data Service endpoint.  It is expecting a Json string to be sent representing a DataRequestModel.
+     * There are three expected service calls related to to this one web request.  The first two service calls are to
+     * the {@link AuditableDataService} with the first for the authorisation for the resource request and the second
+     * for the creation of an {@code OutputStream}.  The third service call is for the {@link AuditMessageService}
+     * which is for sending a message to the Audit Service.
      *
      * @throws Exception if the test fails to run
      */
@@ -92,12 +93,13 @@ class DataControllerTest {
                 .thenReturn(CompletableFuture.completedFuture(null));
 
         mockMvc.perform(post("/read/chunked")
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .content(mapper.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
 
+        //verifies the three service calls the Controller is expected to make
         verify(serviceMock, times(1)).authoriseRequest(any());
         verify(serviceMock, times(1)).read(any(), any());
         verify(auditMessageServiceMock, times(1)).auditMessage(any());
@@ -131,7 +133,9 @@ class DataControllerTest {
                 .andDo(print())
                 .andReturn();
 
+        //verifies the two service calls the Controller is expected to make and confirms it does not call the read method
         verify(serviceMock, times(1)).authoriseRequest(any());
+        verify(serviceMock, times(0)).read(any(), any());
         verify(auditMessageServiceMock, times(1)).auditMessage(any());
     }
 }
