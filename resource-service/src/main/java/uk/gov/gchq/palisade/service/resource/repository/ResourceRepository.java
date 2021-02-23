@@ -84,7 +84,7 @@ public interface ResourceRepository extends ReactiveCrudRepository<ResourceEntit
      * @param entity Information about the resource Object
      * @return the {@link ResourceEntity} that was saved in the backing store
      */
-    default CompletableFuture<ResourceEntity> futureSave(ResourceEntity entity) {
-        return this.save(entity).toFuture();
+    default Mono<ResourceEntity> futureSave(ResourceEntity entity) {
+        return this.save(entity);
     }
 }
