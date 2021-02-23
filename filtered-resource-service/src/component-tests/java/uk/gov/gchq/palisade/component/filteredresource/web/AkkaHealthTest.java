@@ -38,7 +38,8 @@ import org.springframework.boot.availability.LivenessState;
 import org.springframework.boot.availability.ReadinessState;
 
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringHealthRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringActuatorRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringHealthRouter;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ class AkkaHealthTest {
 
     // Health endpoint to be tested
     SpringHealthRouter healthRouter = new SpringHealthRouter(healthEndpoint, applicationAvailability);
+    SpringActuatorRouter actuatorRouter = new SpringActuatorRouter(List.of(healthRouter));
     AkkaHttpServer server;
 
     // Akka runtime
@@ -67,7 +69,7 @@ class AkkaHealthTest {
 
     @BeforeEach
     void setUp() {
-        server = new AkkaHttpServer(HOST, PORT, List.of(healthRouter));
+        server = new AkkaHttpServer(HOST, PORT, List.of(actuatorRouter));
         server.serveForever(system);
     }
 
@@ -79,12 +81,12 @@ class AkkaHealthTest {
     @Test
     void testHealthReturns200() {
         // Given the server is running
-        // Set the root-level /health to report healthy
+        // Set the root-level /actuator/health to report healthy
         Mockito.doReturn(new Health.Builder(Status.UP).build()).when(healthEndpoint).health();
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -101,7 +103,7 @@ class AkkaHealthTest {
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/valid-health-component", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/valid-health-component", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -117,7 +119,7 @@ class AkkaHealthTest {
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/invalid-health-component", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/invalid-health-component", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -130,12 +132,12 @@ class AkkaHealthTest {
     @Test
     void testCorrectLivenessReturns200() {
         // Given the server is running
-        // Set /health/liveness to report healthy
+        // Set /actuator/health/liveness to report healthy
         Mockito.when(applicationAvailability.getLivenessState()).thenReturn(LivenessState.CORRECT);
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/liveness", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/liveness", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -148,12 +150,12 @@ class AkkaHealthTest {
     @Test
     void testBrokenLivenessReturnsNot200() {
         // Given the server is running
-        // Set /health/liveness to report healthy
+        // Set /actuator/health/liveness to report healthy
         Mockito.when(applicationAvailability.getLivenessState()).thenReturn(LivenessState.BROKEN);
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/liveness", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/liveness", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -166,12 +168,12 @@ class AkkaHealthTest {
     @Test
     void testAcceptingTrafficReadinessReturns200() {
         // Given the server is running
-        // Set /health/readiness to report healthy
+        // Set /actuator/health/readiness to report healthy
         Mockito.when(applicationAvailability.getReadinessState()).thenReturn(ReadinessState.ACCEPTING_TRAFFIC);
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/readiness", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/readiness", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
@@ -184,12 +186,12 @@ class AkkaHealthTest {
     @Test
     void testRefusingTrafficReadinessReturnsNot200() {
         // Given the server is running
-        // Set /health/readiness to report healthy
+        // Set /actuator/health/readiness to report healthy
         Mockito.when(applicationAvailability.getReadinessState()).thenReturn(ReadinessState.REFUSING_TRAFFIC);
 
         // When
         CompletableFuture<HttpResponse> response = Http.get(system)
-                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/health/readiness", HOST, PORT)))
+                .singleRequest(HttpRequest.GET(String.format("http://%s:%d/actuator/health/readiness", HOST, PORT)))
                 .toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while getting HTTP response", throwable));
 
