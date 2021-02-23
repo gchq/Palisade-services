@@ -31,7 +31,7 @@ example:
   path: ../Palisade-examples
   perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
   service-profiles: &profiles
-    - eureka
+    - static
     - example-perf
 
 manager:
@@ -57,13 +57,19 @@ manager:
     performance-test:
       jar: ${example.perf}
       profiles:
-        - eureka
+        - static
       log: performance-test.log
+
+    attribute-masking-service:
+      profiles: *profiles
 
     audit-service:
       profiles: *profiles
 
     data-service:
+      profiles: *profiles
+
+    filtered-resource-service:
       profiles: *profiles
 
     palisade-service:
@@ -73,6 +79,9 @@ manager:
       profiles: *profiles
 
     resource-service:
+      profiles: *profiles
+
+    topic-offset-service:
       profiles: *profiles
 
     user-service:

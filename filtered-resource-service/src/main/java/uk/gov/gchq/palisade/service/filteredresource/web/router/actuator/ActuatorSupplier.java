@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.discovery;
+package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
 
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+import akka.http.javadsl.server.Route;
 
-@EnableEurekaServer
-@SpringBootApplication
-public class DiscoveryApplication {
+import java.util.function.Supplier;
 
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(DiscoveryApplication.class).web(WebApplicationType.SERVLET)
-                .run(args);
-    }
-
+/**
+ * Interface for supplying akka routes.
+ * Functionally equivalent to {@link uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier}
+ * but allows Spring to differentiate between routes under localhost/... and actuators under localhost/actuator/...
+ */
+public interface ActuatorSupplier extends Supplier<Route> {
+    // Marker interface for Spring autowiring
 }
