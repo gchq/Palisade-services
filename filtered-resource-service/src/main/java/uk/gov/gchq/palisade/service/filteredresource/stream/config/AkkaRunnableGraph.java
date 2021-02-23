@@ -375,7 +375,7 @@ public class AkkaRunnableGraph {
                 ))
 
                 // Filter out anything from this service
-                .filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
+                //.filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
 
                 // Write exception to persistence
                 .mapAsync(PARALLELISM, (Tuple3<CommittableOffset, String, AuditErrorMessage> committableTokenAuditErrorMessage) -> {

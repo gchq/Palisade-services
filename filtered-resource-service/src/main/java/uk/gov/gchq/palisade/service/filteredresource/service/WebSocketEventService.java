@@ -155,10 +155,10 @@ public class WebSocketEventService {
      */
     private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCts(final String token) {
         Source<AuditableWebSocketMessage, NotUsed> ctsSource = Source.<AuditableWebSocketMessage>empty()
-                .concat(this.createErrorSource(token)) // Handle early error messages
-                .concat(this.createResourceSource(token)) // Handle the resources
-                .concat(this.createErrorSource(token)) // Handle late error messages
-                .concat(this.createCompleteSource(token)); // Finally add the complete message to the Flow
+                .concat(Source.lazySource(() -> this.createErrorSource(token))) // Handle early error messages
+                .concat(Source.lazySource(() -> this.createResourceSource(token))) // Handle the resources
+                .concat(Source.lazySource(() -> this.createErrorSource(token))) // Handle late error messages
+                .concat(Source.lazySource(() -> this.createCompleteSource(token))); // Finally add the complete message to the Flow
 
         return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
