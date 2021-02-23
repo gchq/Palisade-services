@@ -76,6 +76,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.SERVICE_NAME;
+
 /**
  * Configuration for the Akka Runnable Graph used by the {@link FilteredResourceApplication}.
  * Configures the connection between Kafka, Akka and the service
@@ -372,10 +374,15 @@ public class AkkaRunnableGraph {
                         committableMessage.record().value()
                 ))
 
+                // Filter out anything from this service
+                .filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
+
                 // Write exception to persistence
-                .mapAsync(PARALLELISM, committableTokenAuditErrorMessage -> auditErrorMessageEventService
-                        .putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
-                        .thenApply(ignored -> committableTokenAuditErrorMessage))
+                .mapAsync(PARALLELISM, (Tuple3<CommittableOffset, String, AuditErrorMessage> committableTokenAuditErrorMessage) -> {
+                    LOGGER.info("error in AkkaRunnableGraph is {}", committableTokenAuditErrorMessage.t3().getError().getMessage());
+                    return auditErrorMessageEventService.putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
+                            .thenApply(ignored -> committableTokenAuditErrorMessage);
+                })
 
                 // Commit processed message to kafka
                 .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()

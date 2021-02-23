@@ -17,9 +17,10 @@ package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
 import akka.japi.Pair;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,11 +32,10 @@ public interface TokenAuditErrorMessagePersistenceLayer {
     /**
      * Save the token and AuditErrorMessage in the persistence
      *
-     * @param token             the unique token
-     * @param auditErrorMessage the {@link AuditErrorMessage} associated with this token
+     * @param token the unique token
      * @return a {@link CompletableFuture} of a {@link TokenAuditErrorMessageEntity} containing the value just persisted
      */
-    CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, AuditErrorMessage auditErrorMessage);
+    CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, String resourceId, String userId, Context context, Map<String, String> attributes, Throwable error);
 
     /**
      * Get it, delete from repository and return to client

@@ -45,12 +45,11 @@ public class AuditErrorMessageEventService {
     /**
      * Store the {@link TokenAuditErrorMessageEntity} containing the token and the exception from the error kafka queue
      *
-     * @param token             the unique request token
-     * @param auditErrorMessage the {@link AuditErrorMessage} assosiated with the token
+     * @param token the unique request token
      * @return a {@link CompletableFuture} of a {@link TokenAuditErrorMessageEntity} representing the async completion of the store request
      */
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
-        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage);
+        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError());
     }
 
 }

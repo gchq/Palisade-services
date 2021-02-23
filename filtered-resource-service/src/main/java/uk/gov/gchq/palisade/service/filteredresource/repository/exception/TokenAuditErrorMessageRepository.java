@@ -17,9 +17,11 @@ package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
 import org.springframework.data.repository.CrudRepository;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,12 +33,11 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
      * Put a token and its {@link AuditErrorMessage} into persistence.
      * This is a ease-of-use wrapper around {@link CrudRepository#save}.
      *
-     * @param token             the unique request token
-     * @param auditErrorMessage the {@link AuditErrorMessage} assosiated with this token
+     * @param token the unique request token
      * @return the newly saved {@link TokenAuditErrorMessageEntity} containing the excpetion and unique token
      */
-    default TokenAuditErrorMessageEntity save(final String token, final AuditErrorMessage auditErrorMessage) {
-        return save(new TokenAuditErrorMessageEntity(token, auditErrorMessage));
+    default TokenAuditErrorMessageEntity save(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
+        return save(new TokenAuditErrorMessageEntity(token, resourceId, userId, context, attributes, error));
     }
 
     /**

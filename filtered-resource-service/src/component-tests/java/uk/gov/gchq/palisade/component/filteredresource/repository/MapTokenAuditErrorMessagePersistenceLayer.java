@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.component.filteredresource.repository;
 
 import akka.japi.Pair;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.CrudRepositoryPop;
@@ -35,7 +36,8 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     final Map<String, AuditErrorMessage> tokenAuditErrorMessage = new HashMap<>();
 
     @Override
-    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
+    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
+        var auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(userId).withResourceId(resourceId).withContext(context).withAttributes(attributes).withError(error);
         return CompletableFuture.completedFuture(new TokenAuditErrorMessageEntity(token, tokenAuditErrorMessage.putIfAbsent(token, auditErrorMessage)));
     }
 
@@ -43,6 +45,6 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
         var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
         this.tokenAuditErrorMessage.remove(token);
-        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(token, auditErrorMessage), null)));
+        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError()), null)));
     }
 }

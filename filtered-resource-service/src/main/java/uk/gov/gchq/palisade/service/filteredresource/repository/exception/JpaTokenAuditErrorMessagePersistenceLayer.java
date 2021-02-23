@@ -16,10 +16,14 @@
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
 import akka.japi.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -31,6 +35,8 @@ import java.util.concurrent.Executor;
 public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {
     private final TokenAuditErrorMessageRepository repository;
     private final Executor executor;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTokenAuditErrorMessagePersistenceLayer.class);
+
 
     /**
      * Construct a new Jpa-style persistence layer from a CrudRepository and async executor.
@@ -45,8 +51,13 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     }
 
     @Override
-    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
-        return CompletableFuture.supplyAsync(() -> repository.save(token, auditErrorMessage), executor);
+    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
+        LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer put error is {}", error.getMessage());
+        return CompletableFuture.supplyAsync(() -> repository.save(token, resourceId, userId, context, attributes, error), executor)
+                .thenApply((TokenAuditErrorMessageEntity entity) -> {
+                    LOGGER.info("entity was: {}", entity);
+                    return entity;
+                });
     }
 
     @Override
@@ -54,7 +65,11 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
         // Get the exception from the repository
         return CompletableFuture.supplyAsync(() -> repository.findFirstByToken(token), executor)
                 // Then delete the exception from the repositry
-                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(this::asyncDelete, entity))));
+                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(this::asyncDelete, entity))))
+                .thenApply((Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>> repositoryPopPair) -> {
+                    LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer pop error is {}", repositoryPopPair.map(entity -> entity.first().toString()).orElse("empty"));
+                    return repositoryPopPair;
+                });
     }
 
     /**
