@@ -44,6 +44,9 @@ services-launcher/.log
 eclipse-formatter.xml
 .vscode/
 
+# Ignore H2 generated databases - dbz120896 [2021-02-23]
+*.db
+
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/eclipse
