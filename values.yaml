@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 # Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
@@ -39,6 +38,7 @@ global:
   kafka:
     # install: install kafka streaming platform
     install: true
+    # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
       nameOverride: "kafka"
 
@@ -62,11 +62,17 @@ global:
     cluster:
       nodes: 6
 
+  create-kafka-queues:
+    exports:
+      # imported from sub-chart, default values here are overridden by sub-chart values
+      zookeeper: palisade-zookeeper:2181
+
   # hosting: [local | aws | metal] the target environment to deploy to
   hosting: local
 
-  # Set to true to enable redis cluster. leave as false for master/worker
-  redisClusterEnabled: false
+  # Set to true to configures services for redis-cluster. leave as false for master/worker
+  # Should match up with redis.install or redis-cluster.install
+  redis-cluster-enabled: false
 
   # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
@@ -88,9 +94,6 @@ global:
     _default:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "k8s"
-
-  # see charts/kafka/charts/zookeeper
-  zookeeperConnectString: palisade-zookeeper:2181
 
   # persistent-volume and associated claims configurations
   persistence:
@@ -198,8 +201,8 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    # redisMaster: Writeable store used by redis master node for persistence and caching
-    redisMaster:
+    # redis-master: Writeable store used by redis master node for persistence and caching
+    redis-master:
       name: redis-persistence-master
       storageClassName:
         _default: hostpath
@@ -220,8 +223,8 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    # redisSlave: Readable store used by redis slave nodes for persistence and caching
-    redisSlave:
+    # redis-slave: Readable store used by redis slave nodes for persistence and caching
+    redis-slave:
       name: redis-persistence-slave
       storageClassName:
         _default: hostpath
@@ -242,8 +245,8 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    # redisCluster: Read/writeable store used by redis cluster nodes for persistence and caching
-    redisCluster:
+    # redis-cluster: Read/writeable store used by redis cluster nodes for persistence and caching
+    redis-cluster:
       name: redis-persistence-cluster
       storageClassName:
         _default: hostpath
@@ -264,8 +267,8 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
-    statefulSet:
+    # global.persistence.stateful-set.pv.enabled: Global variable that controls the generation of stateful-set pv/pvc(s)
+    stateful-set:
       pv:
         enabled: true
 
