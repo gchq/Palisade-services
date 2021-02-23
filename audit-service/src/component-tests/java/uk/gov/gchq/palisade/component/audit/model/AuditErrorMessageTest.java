@@ -50,7 +50,7 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
             .withAttributes(Map.<String, Object>of("messagesSent", "23"))
             .withError(new InternalError("Something went wrong!"));
 
-        testInstance(expected);
+        testInstance(expected.getClass(), expected);
 
     }
 }

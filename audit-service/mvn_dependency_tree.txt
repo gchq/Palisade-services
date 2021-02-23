@@ -115,5 +115,4 @@ uk.gov.gchq.palisade:audit-service:jar:0.5.0-SNAPSHOT
 |        \- net.java.dev.jna:jna:jar:5.5.0:test
 +- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.8:test
 |  \- com.typesafe.akka:akka-testkit_2.13:jar:2.6.8:test
-+- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.0.4:test
-\- org.assertj:assertj-guava:jar:3.3.0:test
+\- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.0.4:test

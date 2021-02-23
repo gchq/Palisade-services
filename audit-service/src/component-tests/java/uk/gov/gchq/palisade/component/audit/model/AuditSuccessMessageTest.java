@@ -50,7 +50,8 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
             .withAttributes(Map.<String, Object>of("messagesSent", "23"))
             .withLeafResourceId("testLeafResourceId");
 
-        testInstance(expected);
+        testInstance(expected.getClass(), expected);
+
 
     }
 

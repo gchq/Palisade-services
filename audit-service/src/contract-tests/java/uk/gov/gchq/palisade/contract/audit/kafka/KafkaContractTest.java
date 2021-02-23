@@ -29,12 +29,9 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +72,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,55 +112,37 @@ import static uk.gov.gchq.palisade.service.audit.model.Token.HEADER;
 @Import(KafkaContractTest.KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
 @ActiveProfiles({"akka-test"})
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
 
-    // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
-        private final ObjectMapper objectMapper = new ObjectMapper();
-
-        @Override
-        public byte[] serialize(final String s, final JsonNode auditRequest) {
-            try {
-                return objectMapper.writeValueAsBytes(auditRequest);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + auditRequest.toString(), e);
-            }
-        }
-    }
-
+    @Autowired()
+    Serializer<String> keySerializer;
+    @Autowired
+    Serializer<JsonNode> valueSerializer;
     @Autowired
     ActorSystem akkaActorSystem;
     @Autowired
     Materializer akkaMaterializer;
+    @Autowired
+    AuditServiceConfigProperties auditServiceConfigProperties;
 
     @SpyBean
     private AuditService auditService;
-    private int errorBefore;
-    private int successBefore;
-    private int after;
 
-    @BeforeEach
-    void setup() {
+    private final Function<String, Integer> fileCount = (final String prefix) -> Arrays
+        .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+        .filter(file -> file.getName().startsWith(prefix))
+        .collect(Collectors.toSet())
+        .size();
 
-        errorBefore = Arrays
-            .stream(new File(".").listFiles())
-            .filter(file -> file.getName().startsWith("Error"))
-            .collect(Collectors.toSet())
-            .size();
+    private final Supplier<Integer> currentErrorCount = () -> fileCount.apply("Error");
+    private final Supplier<Integer> currentSuccessCount = () -> fileCount.apply("Success");
 
-        successBefore = Arrays
-            .stream(new File(".").listFiles())
-            .filter(file -> file.getName().startsWith("Success"))
-            .collect(Collectors.toSet())
-            .size();
-    }
-
-    @AfterAll
-    static void tearDown() {
-        Arrays.stream(new File(".").listFiles())
+    @AfterEach
+    void tearDown() {
+        Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
             .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
             .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
             .forEach(File::deleteOnExit);
@@ -285,6 +265,8 @@ class KafkaContractTest {
     void testFailedErrorDeserialization(
             @Autowired final AuditServiceConfigProperties auditServiceConfigProperties) throws InterruptedException {
 
+        var expectedErrorCount = currentErrorCount.get() + 1;
+
         // Add a message to the 'error' topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         var requests = BAD_ERROR_MESSAGE_NODE_FACTORY.get().limit(1L);
@@ -294,21 +276,18 @@ class KafkaContractTest {
         waitForService();
 
         // Then check an "Error-..." file has been created
-        after = Arrays
-            .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-            .filter(file -> file.getName().startsWith("Error"))
-            .collect(Collectors.toSet())
-            .size();
+        var actualErrorCount = currentErrorCount.get();
 
-        assertThat(after)
-            .as("Check at least 1 'Error' file has been created")
-            .isEqualTo(errorBefore + 1);
+        assertThat(actualErrorCount)
+            .as("Check exactly 1 'Error' file has been created")
+            .isEqualTo(expectedErrorCount);
     }
 
     @Test
     @DirtiesContext
-    void testFailedSuccessDeserialization(
-            @Autowired final AuditServiceConfigProperties auditServiceConfigProperties) throws InterruptedException {
+    void testFailedSuccessDeserialization() throws InterruptedException {
+
+        var expectedSuccessCount = currentSuccessCount.get() + 1;
 
         // Add a message to the 'success' topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
@@ -319,15 +298,11 @@ class KafkaContractTest {
         waitForService();
 
         // Then check a "Success-..." file has been created
-        after = Arrays
-            .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-            .filter(file -> file.getName().startsWith("Success"))
-            .collect(Collectors.toSet())
-            .size();
+        var actualSuccessCount = currentSuccessCount.get();
 
-        assertThat(after)
-            .as("Check at least 1 'Success' file has been created")
-            .isEqualTo(successBefore + 1);
+        assertThat(actualSuccessCount)
+            .as("Check exactly 1 'Success' file has been created")
+            .isEqualTo(expectedSuccessCount);
 
     }
 
@@ -335,8 +310,6 @@ class KafkaContractTest {
     private final void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) {
 
         var bootstrapServers = KafkaInitializer.kafka.getBootstrapServers();
-        var keySerializer = new StringSerializer();
-        var valueSerializer = new RequestSerializer();
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -429,6 +402,24 @@ class KafkaContractTest {
             Materializer materializer(final ActorSystem system) {
                 return Materializer.createMaterializer(system);
             }
+
+            @Bean
+            Serializer<JsonNode> requestSerializer(@Autowired final ObjectMapper objectMapper) {
+                return (final String s, final JsonNode auditRequest) -> {
+                    try {
+                        return objectMapper.writeValueAsBytes(auditRequest);
+                    } catch (JsonProcessingException e) {
+                        throw new SerializationFailedException("Failed to serialize " + auditRequest.toString(), e);
+                    }
+                };
+            }
+
+            @Bean
+            Serializer<String> stringSerializer() {
+                return new StringSerializer();
+            }
+
         }
     }
+
 }

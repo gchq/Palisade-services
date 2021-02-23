@@ -163,13 +163,13 @@
             <version>${alpakka.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+ <!--        <dependency>
           <groupId>org.assertj</groupId>
           <artifactId>assertj-guava</artifactId>
           <version>3.3.0</version>
           <scope>test</scope>
         </dependency>
-    </dependencies>
+ -->    </dependencies>
 
     <profiles>
         <profile>

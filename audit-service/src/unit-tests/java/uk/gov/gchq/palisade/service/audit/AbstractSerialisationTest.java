@@ -54,11 +54,15 @@ public class AbstractSerialisationTest {
      * the instance</li>
      * </ul>
      *
+     * @param type             The type class
+     * @param <O>              The type of the object itself
+     * @param <T>              The type of the object
      * @param expectedInstance The expected instance
+     * @return The object being tested
      * @throws Exception if an error occurs
      */
-    protected void testInstance(final Object expectedInstance) throws Exception {
-        testInstance(expectedInstance, null);
+    protected <O, T extends O> T testInstance(final Class<T> type, final O expectedInstance) throws Exception {
+        return testInstance(type, expectedInstance, null);
     }
 
     /**
@@ -75,17 +79,23 @@ public class AbstractSerialisationTest {
      * instance matches the provided JSON string</li>
      * </ul>
      *
+     * @param type             The type class
+     * @param <O>              The type of the object itself
+     * @param <T>              The type
      * @param expectedInstance The expected instance
-     * @param expectedJson     The expected JSON of the provided instance
+     * @param expectedJson     The expected JSON of the provided instance. This JSON
+     *                         string is asserted of ignored is {@code expectedJson}
+     *                         is null.
+     * @return The object being tested
      * @throws Exception if an error occurs
      */
-    protected void testInstance(final Object expectedInstance, final String expectedJson) throws Exception {
+    protected <O, T extends O> T testInstance(final Class<T> type, final O expectedInstance, final String expectedJson)
+        throws Exception {
 
         var objectMapper = getObjectMapper();
 
-        var valueType = expectedInstance.getClass();
         var actualJson = objectMapper.writeValueAsString(expectedInstance);
-        var actualInstance = objectMapper.readValue(actualJson, valueType);
+        var actualInstance = objectMapper.readValue(actualJson, type);
 
         assertThat(actualInstance)
             .as("Using toString(), the original %s is the same as the deserialised version",
@@ -102,6 +112,7 @@ public class AbstractSerialisationTest {
             assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
         }
 
+        return actualInstance;
     }
 
     /**
