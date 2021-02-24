@@ -21,10 +21,16 @@ warn-level: &warn
 
 manager:
   services:
+    attribute-masking-service:
+      level: *warn
+
     audit-service:
       level: *warn
 
     data-service:
+      level: *warn
+
+    filtered-resource-service:
       level: *warn
 
     palisade-service:
@@ -34,6 +40,9 @@ manager:
       level: *warn
 
     resource-service:
+      level: *warn
+
+    topic-offset-service:
       level: *warn
 
     user-service:

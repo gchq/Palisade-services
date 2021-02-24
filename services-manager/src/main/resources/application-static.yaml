@@ -37,17 +37,21 @@ manager:
 # i.e. map from what-i-call-a-service -> service-URI
 web:
   client:
+    attribute-masking-service:
+      - http://localhost:8091
     audit-service:
       - http://localhost:8089
     data-service:
       - http://localhost:8082
-    discovery-service:
-      - http://localhost:8083
+    filtered-resource-service:
+      - http://localhost:8092
     palisade-service:
       - http://localhost:8084
     policy-service:
       - http://localhost:8085
     resource-service:
       - http://localhost:8086
+    topic-offset-service:
+      - http://localhost:8093
     user-service:
       - http://localhost:8087
