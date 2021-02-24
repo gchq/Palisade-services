@@ -44,7 +44,7 @@ import static java.util.Objects.requireNonNull;
 public class LoggerAuditService implements AuditService {
 
     /**
-     * The key
+     * The configuration key
      */
     public static final String CONFIG_KEY = "logger";
 
