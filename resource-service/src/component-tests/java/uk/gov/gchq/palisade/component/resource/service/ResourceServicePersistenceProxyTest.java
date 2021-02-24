@@ -103,14 +103,14 @@ class ResourceServicePersistenceProxyTest {
     }
 
     @Test
-    void testGetResourcesByIdSuccess() throws ExecutionException, InterruptedException {
+    void testGetResourcesByIdSuccess() {
         // Given a user request
         final ResourceRequest resourceRequest = requestFactoryObj.apply(1);
 
         // Then retrieving a resource from the cache
         final Source<AuditableResourceResponse, NotUsed> subject = this.resourceServiceAsyncProxy.getResourcesById(resourceRequest);
         final CompletionStage<List<AuditableResourceResponse>> future = subject.runWith(Sink.seq(), materializer);
-        final List<AuditableResourceResponse> result = future.toCompletableFuture().get();
+        final List<AuditableResourceResponse> result = future.toCompletableFuture().join();
 
         // Then check there is no error and check the returned resource ID
         assertAll(

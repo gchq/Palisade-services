@@ -81,33 +81,37 @@ public class ResourceServicePersistenceProxy {
     public Source<AuditableResourceResponse, NotUsed> getResourcesById(final ResourceRequest request) {
         LOGGER.info(STORE);
         // Try first from persistence
-        return persistence.getResourcesById(request.resourceId)
-                // If persistence returned a "cache hit"
-                .map(persisted -> persisted
-                        // Wrap with a success
-                        .map(leafResource -> AuditableResourceResponse.Builder.create()
-                                .withResourceResponse(ResourceResponse.Builder.create(request)
-                                        .withResource(leafResource)))
-                        // Persistence threw an error, create an AuditErrorMessage
-                        .recover(new PFBuilder<Throwable, AuditableResourceResponse>()
-                                .match(Exception.class, ex -> AuditableResourceResponse.Builder.create()
-                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
-                                                Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.PERSISTENCE.toString()))
-                                                .withError(new NoSuchResourceException("Exception thrown while querying persistence", ex)))).build()))
-                // If persistence is empty, a "cache miss"
-                .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
-                        .alsoTo(Flow.<AuditableResourceResponse>create()
-                                // Add the returned result to the persistence
-                                // If it wasn't an error, get the leaf resource
-                                .map(auditableResponse -> Optional.ofNullable(auditableResponse.getResourceResponse())
-                                        .map(ResourceResponse::getResource))
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                // Persist the leaf resource
-                                .via(persistence.withPersistenceById(request.resourceId))
-                                // We don't care about the result as we will return the AuditableResourceResponse
-                                .to(Sink.ignore()))
-                );
+        return Source.completionStageSource(persistence.getResourcesById(request.resourceId)
+                .thenApply(persistenceHit -> persistenceHit
+                        // If persistence returned a "cache hit"
+                        .map(persisted -> persisted
+                                // Wrap with a success
+                                .map(leafResource -> AuditableResourceResponse.Builder.create()
+                                        .withResourceResponse(ResourceResponse.Builder.create(request)
+                                                .withResource(leafResource)))
+                                // Persistence threw an error, create an AuditErrorMessage
+                                .recover(new PFBuilder<Throwable, AuditableResourceResponse>()
+                                        .match(Exception.class, ex -> AuditableResourceResponse.Builder.create()
+                                                .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
+                                                        Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.PERSISTENCE.toString()))
+                                                        .withError(new NoSuchResourceException("Exception thrown while querying persistence", ex)))).build())
+                        )
+                        // If persistence is empty, a "cache miss"
+                        .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
+                                .alsoTo(Flow.<AuditableResourceResponse>create()
+                                        // Add the returned result to the persistence
+                                        // If it wasn't an error, get the leaf resource
+                                        .map(auditableResponse -> Optional.ofNullable(auditableResponse.getResourceResponse())
+                                                .map(ResourceResponse::getResource))
+                                        .filter(Optional::isPresent)
+                                        .map(Optional::get)
+                                        // Persist the leaf resource
+                                        .via(persistence.withPersistenceById(request.resourceId))
+                                        // We don't care about the result as we will return the AuditableResourceResponse
+                                        .to(Sink.ignore()))
+                        )
+                )
+        ).mapMaterializedValue(ignored -> NotUsed.notUsed());
     }
 
     /**
@@ -145,51 +149,43 @@ public class ResourceServicePersistenceProxy {
      *
      * @param request the the {@link ResourceRequest} that contains the resourceId used to retrieve resources
      * @param type    the type to be queried
-     * @return a {@link Source} of {@link LeafResource}s associated with the type
+     * @return a {@link Source} of {@link AuditableResourceResponse}s associated with the type
      */
     public Source<AuditableResourceResponse, NotUsed> getResourcesByType(final ResourceRequest request, final String type) {
         // Try first from persistence
         LOGGER.info(STORE);
-        return persistence.getResourcesByType(type)
-                .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesByType(type))
-                        .via(persistence.withPersistenceByType(type)))
-                // Wrap with a success
-                .map(leafResource -> AuditableResourceResponse.Builder.create()
-                        .withResourceResponse(ResourceResponse.Builder.create(request)
-                                .withResource(leafResource)));
+        return Source.completionStageSource(persistence.getResourcesByType(type)
+                .thenApply(persistenceHit -> persistenceHit
+                        .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesByType(type))
+                                .via(persistence.withPersistenceByType(type)))
+                        // Wrap with a success
+                        .map(leafResource -> AuditableResourceResponse.Builder.create()
+                                .withResourceResponse(ResourceResponse.Builder.create(request)
+                                        .withResource(leafResource)))
+                )
+        ).mapMaterializedValue(ignored -> NotUsed.notUsed());
     }
 
     /**
      * Uses a serialisedFormat to get any {@link LeafResource}s associated with the it.
      *
-     * @param request          the the {@link ResourceRequest} that contains the resourceId used to retrieve resources
+     * @param request          the {@link ResourceRequest} that contains the resourceId used to retrieve resources
      * @param serialisedFormat the serialisedFormat to be queried
-     * @return a {@link FunctionalIterator} of {@link LeafResource}s associated with the type
+     * @return a {@link Source} of {@link AuditableResourceResponse}s associated with the serialisedFormat
      */
     public Source<AuditableResourceResponse, NotUsed> getResourcesBySerialisedFormat(final ResourceRequest request, final String serialisedFormat) {
         // Try first from persistence
         LOGGER.debug(STORE);
-        return persistence.getResourcesBySerialisedFormat(serialisedFormat)
-                .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesBySerialisedFormat(serialisedFormat))
-                        .via(persistence.withPersistenceBySerialisedFormat(serialisedFormat)))
-                // Wrap with a success
-                .map(leafResource -> AuditableResourceResponse.Builder.create()
-                        .withResourceResponse(ResourceResponse.Builder.create(request)
-                                .withResource(leafResource)));
+        return Source.completionStageSource(persistence.getResourcesBySerialisedFormat(serialisedFormat)
+                .thenApply(persistenceHit -> persistenceHit
+                        .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesBySerialisedFormat(serialisedFormat))
+                                .via(persistence.withPersistenceBySerialisedFormat(serialisedFormat)))
+                        // Wrap with a success
+                        .map(leafResource -> AuditableResourceResponse.Builder.create()
+                                .withResourceResponse(ResourceResponse.Builder.create(request)
+                                        .withResource(leafResource)))
+                )
+        ).mapMaterializedValue(ignored -> NotUsed.notUsed());
 
-    }
-
-    /**
-     * Adds a {@link LeafResource} to the backing store and returns a boolean value if this was successful or not
-     *
-     * @param leafResource the resource that will be persisted via the {@link PersistenceLayer}
-     * @return a boolean true or false if the resource has been persisted or not
-     */
-    public Boolean addResource(final LeafResource leafResource) {
-        boolean success = delegate.addResource(leafResource);
-        if (success) {
-            persistence.addResource(leafResource);
-        }
-        return success;
     }
 }

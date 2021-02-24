@@ -52,6 +52,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -184,7 +185,7 @@ class ScenarioPersistenceTest {
         returnedAuditable.forEach(response -> returnedMultiFileRequest.add(response.getResourceResponse().resource));
         expectedReturned = Collections.singleton(MULTI_FILE_ONE);
         expectedPersisted = Collections.singleton(MULTI_FILE_ONE);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -209,7 +210,7 @@ class ScenarioPersistenceTest {
         returnedAuditable.forEach(response -> returnedMultiFileDirRequest.add(response.getResourceResponse().resource));
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -235,7 +236,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR,
                 SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -261,7 +262,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Collections.emptySet();
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR,
                 SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -287,7 +288,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE,
                 SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -304,14 +305,14 @@ class ScenarioPersistenceTest {
         LOGGER.debug("");
     }
 
-    boolean extractResourceCompleteness(final Resource resource) {
+    CompletableFuture<Boolean> extractResourceCompleteness(final Resource resource) {
         try {
-            return ((boolean) isResourceIdComplete.invoke(persistenceLayer, resource.getId()));
+            return (CompletableFuture<Boolean>) isResourceIdComplete.invoke(persistenceLayer, resource.getId());
         } catch (Exception ex) {
             LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
             LOGGER.error("Exception was", ex);
             fail();
-            return false;
+            return CompletableFuture.completedFuture(null);
         }
     }
 }
