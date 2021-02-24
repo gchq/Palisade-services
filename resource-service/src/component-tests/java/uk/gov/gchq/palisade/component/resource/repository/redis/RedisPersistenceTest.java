@@ -158,10 +158,9 @@ class RedisPersistenceTest {
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
                     .via(persistenceLayer.withPersistenceByType(file.getType()))
                     .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
-                    .runWith(Sink.seq(), materializer);
+                    .runWith(Sink.seq(), materializer)
+                    .toCompletableFuture().join();
         }
-
-        TimeUnit.SECONDS.sleep(1);
     }
 
     @Test

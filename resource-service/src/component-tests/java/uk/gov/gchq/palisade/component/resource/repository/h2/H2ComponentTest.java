@@ -121,10 +121,9 @@ class H2ComponentTest {
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
                     .via(persistenceLayer.withPersistenceByType(file.getType()))
                     .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
-                    .runWith(Sink.ignore(), materializer);
+                    .runWith(Sink.ignore(), materializer)
+                    .toCompletableFuture().join();
         }
-
-        TimeUnit.SECONDS.sleep(1);
     }
 
     @Test
