@@ -22,3 +22,12 @@ spring:
 
 spring:
   profiles: static-config
+
+akka:
+  kafka:
+    consumer.topics:
+      success-topic.partitions: 1
+      error-topic.partitions: 1
+  discovery.config.services.kafka.endpoints:
+  - host: localhost
+    port: 9092

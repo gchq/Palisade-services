@@ -61,7 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @AutoConfigureDataJpa
-@ActiveProfiles({"static"})
+@ActiveProfiles({"static", "h2"})
 class RestContractTest {
     private static final String CURRENT_PATH = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toUri().toString();
     private static final AvroSerialiser<Employee> AVRO_SERIALISER = new AvroSerialiser<>(Employee.class);

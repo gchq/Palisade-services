@@ -22,6 +22,7 @@ import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.availability.ApplicationAvailability;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,9 +31,12 @@ import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventServi
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.KafkaRestWriterRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringHealthRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringLoggersRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringActuatorRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.ActuatorSupplier;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringHealthRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringLoggersRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringShutdownRouter;
 
 import java.net.InetAddress;
 import java.util.Collection;
@@ -86,6 +90,17 @@ public class EndpointConfiguration {
     }
 
     /**
+     * Route for "/actuator" Spring actuator imitators, which are all Spring***Routers
+     *
+     * @param actuatorSuppliers below beans for {@link ActuatorSupplier}s
+     * @return an endpoint concatenating all provided actuators
+     */
+    @Bean
+    SpringActuatorRouter springActuatorRouter(final Collection<ActuatorSupplier> actuatorSuppliers) {
+        return new SpringActuatorRouter(actuatorSuppliers);
+    }
+
+    /**
      * Route for "/health[/|/liveliness|/readiness|/{component}]" to the Spring {@link HealthEndpoint}
      * or {@link ApplicationAvailability} objects
      *
@@ -107,5 +122,16 @@ public class EndpointConfiguration {
     @Bean
     SpringLoggersRouter springLoggersRouter(final LoggersEndpoint loggersEndpoint) {
         return new SpringLoggersRouter(loggersEndpoint);
+    }
+
+    /**
+     * Route for "/shutdown" to the Spring {@link org.springframework.context.ApplicationContext} for exiting the application
+     *
+     * @param applicationContext Spring application context
+     * @return the spring loggers router
+     */
+    @Bean
+    SpringShutdownRouter springShutdownRouter(final ApplicationContext applicationContext) {
+        return new SpringShutdownRouter(applicationContext);
     }
 }

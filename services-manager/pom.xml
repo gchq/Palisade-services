@@ -31,11 +31,6 @@
     <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
     <!--  *********** Aritfact ID ***********    -->
 
-    <properties>
-        <eureka.version>1.9.16</eureka.version>
-        <jetcd.core>0.3.0</jetcd.core>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
@@ -43,42 +38,12 @@
             <version>0.5.0-${common.revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.netflix.eureka</groupId>
-            <artifactId>eureka-client</artifactId>
-            <version>${eureka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-eureka-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -97,14 +62,15 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
+                    <!--  human-readable part of the version number -->
+                    <dateFormat>yyyyMMdd-HHmmss</dateFormat>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
             <!-- a number of stages for generating a README.md with correct versions (iptc. services-manager-VERSION-exec.jar -->
-            <!--  -->
             <plugin>
                 <groupId>com.coderplus.maven.plugins</groupId>
                 <artifactId>copy-rename-maven-plugin</artifactId>
