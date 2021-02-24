@@ -28,11 +28,20 @@ spec:
     metadata:
       name: {{ include "create-kafka-queues.name" . }}
       labels:
-        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
-        app.kubernetes.io/instance: {{ .Release.Name | quote }}
-        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
+        helm.sh/chart: {{ include "create-kafka-queues.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
       restartPolicy: Never
+      initContainers:
+      - name: init-wait-for-services
+        image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
+        command: ["/bin/wait-for-services.sh"]
+        args:
+        {{- range $index, $service := .Values.waitForServices }}
+        - {{ printf "%s:%s:%s" $service.name $service.dest (toString $service.port) }}
+        {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"

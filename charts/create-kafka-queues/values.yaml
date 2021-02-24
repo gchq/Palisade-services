@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-exports: {}
+exports:
   # zookeeper connection url
-  # zookeeper: palisade-zookeeper:2181
+  zookeeper: palisade-zookeeper:2181
 
 replicaCount: 1
 
@@ -47,9 +47,17 @@ kafkaCreateTopics:
     replicationFactor: 1
     partitions: 1
 
+waitForServices:
+  - name: kafka
+    dest: palisade-kafka-headless
+    port: 9092
+  - name: zookeeper
+    dest: palisade-zookeeper-headless
+    port: 2181
+
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-8f6e6e4
+  tag: SNAPSHOT-86f21bc
   pullPolicy: IfNotPresent
 
 resources:

@@ -43,7 +43,7 @@ dependencies:
     condition: global.kafka.install
     import-values:
     - child: exports
-      parent: global.kafka.exports
+      parent: global.create-kafka-queues.exports
   - name: redis
     version: 0.5.0
     repository: file://charts/redis
