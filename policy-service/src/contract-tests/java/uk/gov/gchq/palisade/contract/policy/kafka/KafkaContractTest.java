@@ -157,12 +157,13 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture()
+                .join();
 
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, recordCount)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
+                .mapToObj(i -> probe.requestNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
@@ -275,19 +276,18 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture()
+                .join();
 
 
         // When - results are pulled from the output stream
-        // record count set to 2, as one record will be removed as no policy exists for it
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
-        Probe<ConsumerRecord<String, JsonNode>> errorResultSeq = errorProbe.request(1);
 
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+                .mapToObj(i -> probe.requestNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
         LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
-                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+                .mapToObj(i -> errorProbe.requestNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
@@ -371,9 +371,8 @@ class KafkaContractTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, PolicyRequest>> resultSeq = probe.request(1);
         LinkedList<ConsumerRecord<String, PolicyRequest>> results = LongStream.range(0, 1)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+                .mapToObj(i -> probe.requestNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
@@ -431,14 +430,15 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaContractTest.KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+        .toCompletableFuture()
+        .join();
 
 
         // When - results are pulled from the output stream
         // record count set to 2, as one record will be removed as no policy exists for it
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+                .mapToObj(i -> probe.requestNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected

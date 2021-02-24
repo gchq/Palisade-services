@@ -4,7 +4,6 @@ List of third-party dependencies grouped by their license type
 * jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.11.0](http://github.com/FasterXML/jackson))
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
-* eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
 * akka-actor-testkit-typed ([com.typesafe.akka:akka-actor-testkit-typed_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
@@ -26,7 +25,6 @@ List of third-party dependencies grouped by their license type
 * embedded-redis ([it.ozimov:embedded-redis:0.7.3](https://github.com/ozimov/embedded-redis))
 * Apache Hadoop Common ([org.apache.hadoop:hadoop-common:3.2.1](no url defined))
 * Apache Hadoop Mini-Cluster ([org.apache.hadoop:hadoop-minicluster:3.2.1](no url defined))
-* Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
 * spring-boot-autoconfigure ([org.springframework.boot:spring-boot-autoconfigure:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-configuration-processor ([org.springframework.boot:spring-boot-configuration-processor:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter ([org.springframework.boot:spring-boot-starter:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
@@ -40,8 +38,6 @@ List of third-party dependencies grouped by their license type
 * spring-boot-starter-web ([org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * Spring Cloud Commons ([org.springframework.cloud:spring-cloud-commons:2.2.2.RELEASE](https://projects.spring.io/spring-cloud/spring-cloud-commons/))
 * Spring Cloud Config Client ([org.springframework.cloud:spring-cloud-config-client:2.2.2.RELEASE](https://spring.io))
-* Spring Cloud Netflix Eureka Client ([org.springframework.cloud:spring-cloud-netflix-eureka-client:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-netflix/spring-cloud-netflix-eureka-client))
-* Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Kafka Support ([org.springframework.kafka:spring-kafka:2.5.2.RELEASE](https://github.com/spring-projects/spring-kafka))
 * common ([uk.gov.gchq.palisade:common:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
@@ -55,9 +51,6 @@ List of third-party dependencies grouped by their license type
 * Old JAXB Core ([com.sun.xml.bind:jaxb-core:2.3.0](http://jaxb.java.net/jaxb-bundles/jaxb-core))
 * Old JAXB Runtime ([com.sun.xml.bind:jaxb-impl:2.3.0](http://jaxb.java.net/jaxb-bundles/jaxb-impl))
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
-
-### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
-* JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
 
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router;
+package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
 
 import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.model.HttpResponse;
@@ -33,9 +33,9 @@ import java.util.Optional;
 
 /**
  * Route for "/health[/|/liveliness|/readiness|/{component}]" to the Spring {@link HealthEndpoint}
- * or {@link ApplicationAvailability} objects
+ * or {@link ApplicationAvailability} objects.
  */
-public class SpringHealthRouter implements RouteSupplier {
+public class SpringHealthRouter implements ActuatorSupplier {
     // Map Spring health Statuses to HTTP status codes
     private static final Map<Status, Integer> SPRING_STATUS_LOOKUP = Map.of(
             Status.UP, 200,
@@ -61,7 +61,8 @@ public class SpringHealthRouter implements RouteSupplier {
     private final ApplicationAvailability applicationAvailability;
 
     /**
-     * Default constructor passing some internal Spring objects to use to expose health and availability status similarly to Spring's /actuator/health
+     * Default constructor passing some internal Spring objects used to expose health and availability status similarly
+     * to Spring's /actuator/health
      *
      * @param springHealthEndpoint    backs the /health and /health/{component} endpoints
      * @param applicationAvailability backs the /health/liveness and /health/readiness endpoints
@@ -99,8 +100,8 @@ public class SpringHealthRouter implements RouteSupplier {
     }
 
     /**
-     * Convert between Spring's HealthEndpoint (usually /actuator/health) and an Akka route (just /health),
-     * returning a reasonable status code.
+     * Convert between Spring's HealthEndpoint (usually /actuator/health) and an Akka route, returning a reasonable
+     * status code.
      * There are a couple of 'special' endpoints, liveness and readiness, that are backed by Spring's application
      * availability rather than health.
      *
