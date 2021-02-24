@@ -1,3 +1,4 @@
+#! /bin/bash
 # Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,17 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
 
-ARG NETCAT_VERSION=1.10-41
-RUN apt-get update && apt-get install -y netcat=${NETCAT_VERSION} --no-install-recommends
+wait_for_service() {
+  name=$(echo $1 | cut -f 1 -d :)
+  dest=$(echo $1 | cut -f 2 -d :)
+  port=$(echo $1 | cut -f 3 -d :)
+  until nc -vz $dest $port > /dev/null 2>&1; do
+    >&2 echo "$(date) :: $name at $dest:$port is unavailable - sleeping"
+    sleep 2
+  done
+  >&2 echo "$(date) :: $name at $dest:$port is up"
+}
 
-RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
-   && tar --strip-components=1 -xvzf kafka_2.12-2.2.1.tgz  && rm kafka_2.12-2.2.1.tgz
-
-COPY wait-for-services.sh /bin/wait-for-services.sh
-RUN sed -i 's/\r$//' /bin/wait-for-services.sh
-
-COPY create-topics.sh /bin/create-topics.sh
-RUN sed -i 's/\r$//' /bin/create-topics.sh
+for service in "$@"
+do
+  wait_for_service $service
+done
