@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,10 +42,12 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
     }
 
     /**
-     * Find the first TokenAuditErrorMessageEntity from the repository by the unique token.
+     * Find all TokenAuditErrorMessageEntitys from the repository by the unique token.
      *
      * @param token the unique request token
      * @return an Optional of the {@link TokenAuditErrorMessageEntity} containing the exception and token
      */
+    Optional<List<TokenAuditErrorMessageEntity>> findAllByToken(final String token);
+
     Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
 }

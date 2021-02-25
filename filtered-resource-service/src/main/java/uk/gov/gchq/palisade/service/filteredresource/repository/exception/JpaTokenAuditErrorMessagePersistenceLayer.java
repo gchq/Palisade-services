@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -70,6 +71,11 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
                     LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer pop error is {}", repositoryPopPair.map(entity -> entity.first().toString()).orElse("empty"));
                     return repositoryPopPair;
                 });
+    }
+
+    @Override
+    public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
+        return CompletableFuture.supplyAsync(() -> repository.findAllByToken(token), executor);
     }
 
     /**

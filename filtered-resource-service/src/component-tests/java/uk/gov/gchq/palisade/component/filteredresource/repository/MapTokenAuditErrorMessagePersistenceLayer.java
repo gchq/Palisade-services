@@ -24,10 +24,14 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.CrudRepositoryPop;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Map-based implementation of persistence layer for testing purposes
@@ -39,6 +43,20 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
         var auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(userId).withResourceId(resourceId).withContext(context).withAttributes(attributes).withError(error);
         return CompletableFuture.completedFuture(new TokenAuditErrorMessageEntity(token, tokenAuditErrorMessage.putIfAbsent(token, auditErrorMessage)));
+    }
+
+    @Override
+    public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
+        Map<String, AuditErrorMessage> mapOfMatchingTokensAndAuditErrorMessages = tokenAuditErrorMessage
+                .entrySet()
+                .stream()
+                .filter(map -> token.equals(map.getKey()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        List<TokenAuditErrorMessageEntity> tokenAuditErrorMessageEntities = new ArrayList<>();
+        for (Map.Entry<String, AuditErrorMessage> entry : mapOfMatchingTokensAndAuditErrorMessages.entrySet()) {
+            tokenAuditErrorMessageEntities.add(new TokenAuditErrorMessageEntity(entry.getKey(), entry.getValue()));
+        }
+        return CompletableFuture.completedFuture(Optional.of(tokenAuditErrorMessageEntities));
     }
 
     @Override
