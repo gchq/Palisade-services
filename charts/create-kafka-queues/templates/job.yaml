@@ -24,6 +24,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
+  ttlSecondsAfterFinished: 0
   template:
     metadata:
       name: {{ include "create-kafka-queues.name" . }}
