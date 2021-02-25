@@ -48,7 +48,6 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 

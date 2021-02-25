@@ -19,7 +19,6 @@ package uk.gov.gchq.palisade.service.resource.service;
 import akka.NotUsed;
 import akka.japi.pf.PFBuilder;
 import akka.stream.javadsl.Flow;
-import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +32,11 @@ import uk.gov.gchq.palisade.service.resource.model.ExceptionSource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.stream.util.ConditionalGraph;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * A proxy of (wrapper around) an instance of a {@link ResourceService}.
@@ -98,20 +98,21 @@ public class ResourceServicePersistenceProxy {
                         )
                         // If persistence is empty, a "cache miss"
                         .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
-                                .alsoTo(Flow.<AuditableResourceResponse>create()
-                                        // Add the returned result to the persistence
-                                        // If it wasn't an error, get the leaf resource
-                                        .map(auditableResponse -> Optional.ofNullable(auditableResponse.getResourceResponse())
-                                                .map(ResourceResponse::getResource))
-                                        .filter(Optional::isPresent)
-                                        .map(Optional::get)
-                                        // Persist the leaf resource
-                                        .via(persistence.withPersistenceById(request.resourceId))
-                                        // We don't care about the result as we will return the AuditableResourceResponse
-                                        .to(Sink.ignore()))
+                                .via(ConditionalGraph.map(response -> {
+                                    if (response.getAuditErrorMessage() != null) {
+                                        return 0;
+                                    } else {
+                                        return 1;
+                                    }
+                                }, Map.of(
+                                        0, Flow.create(),
+                                        1, getResourceResponseFlow(request)
+                                )))
                         )
                 )
         ).mapMaterializedValue(ignored -> NotUsed.notUsed());
+
+        /**/
     }
 
     /**
@@ -187,5 +188,19 @@ public class ResourceServicePersistenceProxy {
                 )
         ).mapMaterializedValue(ignored -> NotUsed.notUsed());
 
+    }
+
+    private Flow<AuditableResourceResponse, AuditableResourceResponse, NotUsed> getResourceResponseFlow(final ResourceRequest request) {
+        return Flow
+            .<AuditableResourceResponse>create()
+                // Add the returned result to the persistence
+                // If it wasn't an error, get the leaf resource
+                .map(AuditableResourceResponse::getResourceResponse)
+                .map(ResourceResponse::getResource)
+                // Persist the leaf resource
+                .via(persistence.withPersistenceById(request.resourceId))
+                .map(leafResource -> AuditableResourceResponse.Builder.create()
+                        .withResourceResponse(ResourceResponse.Builder.create(request)
+                                .withResource(leafResource)));
     }
 }

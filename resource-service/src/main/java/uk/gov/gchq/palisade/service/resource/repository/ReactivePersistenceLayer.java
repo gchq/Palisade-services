@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.OrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
@@ -237,6 +236,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      *
      * @param resource         the initial resource to begin operating and recursing up from
      * @param callbackFunction callback function to apply to each parent-child pair, return false to stop recursion
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private static CompletableFuture<Void> traverseParentsByResource(final Resource resource,
                                                                      final BiFunction<ParentResource, ChildResource, CompletableFuture<Boolean>> callbackFunction) {
@@ -344,6 +344,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * This involves just adding to the resource repository but not the completeness repository
      *
      * @param resource the (incomplete) resource to save
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveIncompleteResource(final Resource resource) {
         // Since this is a 'low-quality' set of information, we never want to overwrite a 'high-quality' (complete) entity
@@ -369,6 +370,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * Add it to both the completeness and resource repositories
      *
      * @param resource the (complete) resource to save
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveCompleteResource(final Resource resource) {
         // Since this is a 'high-quality' set of information, we always want to overwrite a 'low-quality' (incomplete) entity
@@ -417,6 +419,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * Save the given resource to persistence, with the initial resource marked as complete, but all further parents marked as incomplete
      *
      * @param resource the resource to save - likely the resource representing the resourceId of a request to the resource-service
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveResourceWithIncompleteParents(final Resource resource) {
         // Higher parents are now a 'low-quality' set of information (as it is incomplete) that the persistence layer cannot report as 'truth'
@@ -437,6 +440,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      *
      * @param type         the type of the {@link LeafResource}
      * @param leafResource the resource with an id that will be saved in the type repository
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveType(final String type, final LeafResource leafResource) {
         return typeRepository.futureExistsByResourceId(leafResource.getId())
@@ -458,6 +462,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      *
      * @param serialisedFormat the serialised format of the {@link LeafResource}
      * @param leafResource     the resource with an id that will be saved in the serialised format repository
+     * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
         return serialisedFormatRepository.futureExistsFindOneByResourceId(leafResource.getId())

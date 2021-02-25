@@ -40,23 +40,22 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
+import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
+import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @DataR2dbcTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
@@ -73,18 +72,8 @@ class ScenarioPersistenceTest {
     private ResourceServicePersistenceProxy proxy;
     @Autowired
     private Materializer materializer;
-
-    private final Method isResourceIdComplete;
-
-    {
-        try {
-            isResourceIdComplete = ReactivePersistenceLayer.class.getDeclaredMethod("isResourceIdComplete", String.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        isResourceIdComplete.setAccessible(true);
-    }
+    @Autowired
+    private CompletenessRepository completenessRepository;
 
     private static final ConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("http://localhost:8082");
     private static final Context CONTEXT = new Context().purpose("purpose");
@@ -178,6 +167,7 @@ class ScenarioPersistenceTest {
         Set<LeafResource> returnedRootDirRequest = new HashSet<>();
 
         // When - Pt 1: Specific resource requested from resource-service
+        LOGGER.info("Part 1 of the Scenario Test (Single file get");
         LOGGER.debug("Getting resources for {}", MULTI_FILE_ONE.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(MULTI_FILE_ONE_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -185,7 +175,7 @@ class ScenarioPersistenceTest {
         returnedAuditable.forEach(response -> returnedMultiFileRequest.add(response.getResourceResponse().resource));
         expectedReturned = Collections.singleton(MULTI_FILE_ONE);
         expectedPersisted = Collections.singleton(MULTI_FILE_ONE);
-        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -199,10 +189,11 @@ class ScenarioPersistenceTest {
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        LOGGER.debug("");
+        LOGGER.info("");
 
 
         // When - Pt 2: Request contains the id of a directory containing multiple files
+        LOGGER.info("Part 2 of the Scenario Test (directory with multiple files get)");
         LOGGER.debug("Getting resources for {}", MULTI_FILE_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(MULTI_FILE_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -210,7 +201,7 @@ class ScenarioPersistenceTest {
         returnedAuditable.forEach(response -> returnedMultiFileDirRequest.add(response.getResourceResponse().resource));
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
-        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -224,10 +215,11 @@ class ScenarioPersistenceTest {
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        LOGGER.debug("");
+        LOGGER.info("");
 
 
         // When - Pt 3: Request contains the id of a directory containing multiple directories with file(s)
+        LOGGER.info("Part 3 of the Scenario Test (top level directory get)");
         LOGGER.debug("Getting resources for {}", TOP_LEVEL_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(TOP_LEVEL_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -236,7 +228,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR,
                 SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
-        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -250,10 +242,11 @@ class ScenarioPersistenceTest {
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        LOGGER.debug("");
+        LOGGER.info("");
 
 
         // When - Pt 4: Request contains the id of an empty directory (no sub-directories or files)
+        LOGGER.info("Part 4 of the Scenario Test (empty directory get)");
         LOGGER.debug("Getting resources for {}", EMPTY_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(EMPTY_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -262,7 +255,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Collections.emptySet();
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR,
                 SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
-        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -276,10 +269,11 @@ class ScenarioPersistenceTest {
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        LOGGER.debug("");
+        LOGGER.info("");
 
 
         // When - Pt 5: Request contains the id of the root directory
+        LOGGER.info("Part 5 of the Scenario Test (root level directory get)");
         LOGGER.debug("Getting resources for {}", ROOT_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(ROOT_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -288,7 +282,7 @@ class ScenarioPersistenceTest {
         expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE,
                 SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);
-        persisted = expectedPersisted.stream().filter(resource -> this.extractResourceCompleteness(resource).join()).collect(Collectors.toSet());
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -305,14 +299,7 @@ class ScenarioPersistenceTest {
         LOGGER.debug("");
     }
 
-    CompletableFuture<Boolean> extractResourceCompleteness(final Resource resource) {
-        try {
-            return (CompletableFuture<Boolean>) isResourceIdComplete.invoke(persistenceLayer, resource.getId());
-        } catch (Exception ex) {
-            LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
-            LOGGER.error("Exception was", ex);
-            fail();
-            return CompletableFuture.completedFuture(null);
-        }
+    Boolean extractResourceCompleteness(final Resource resource) {
+        return completenessRepository.findOneByEntityTypeAndEntityId(EntityType.RESOURCE, resource.getId()).blockOptional().isPresent();
     }
 }
