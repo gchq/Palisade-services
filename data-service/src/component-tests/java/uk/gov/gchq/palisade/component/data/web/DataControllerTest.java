@@ -70,8 +70,9 @@ class DataControllerTest {
     }
 
     /**
-     * Tests that the endpoint is expecting a Json string for a DataRequestModel.
-     * A return will be a OutputStream.
+     * Tests the Data Service endpoint.  It is expecting a Json string to be sent for a DataRequestModel and will return
+     * with an OutputStream for the resources.  There will be two calls method call related to accessing the resource
+     * and an audit message for sending an message to the Audit Service.
      *
      * @throws Exception if the test fails to run
      */
@@ -102,7 +103,8 @@ class DataControllerTest {
     }
 
     /**
-     * Tests that the endpoint is expecting a Json string for a DataRequestModel.  A return will be a OutputStream.
+     * Tests the Data Service endpoint for an invalid request.  The expected response will be an HTTP error status
+     * code of 500 and the body will be empty.  There will also be a call to send an error message to the Audit Service.
      *
      * @throws Exception if the test fails to run
      */
