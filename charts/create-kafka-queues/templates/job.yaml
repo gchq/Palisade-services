@@ -16,7 +16,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "create-kafka-queues.name" . }}
+  # Go date formatting is relative to "01/02 03:04:05PM '06 GMT-07" USA-style
+  name: {{ include "create-kafka-queues.name" . }}-{{ now | date "2006-01-02-15-04-05" }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
     app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
