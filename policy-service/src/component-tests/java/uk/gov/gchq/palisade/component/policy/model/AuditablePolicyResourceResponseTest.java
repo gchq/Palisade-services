@@ -23,23 +23,20 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.component.policy.CommonTestData;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDIT_ERROR_MESSAGE;
-import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.LEAF_RESOURCE;
-import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
-import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_RULES;
 
 /**
  * Unit tests for the {@link AuditablePolicyResourceResponse}
  */
 @JsonTest
 @ContextConfiguration(classes = AuditablePolicyResourceResponseTest.class)
-class AuditablePolicyResourceResponseTest {
+class AuditablePolicyResourceResponseTest extends CommonTestData {
 
     @Autowired
     private JacksonTester<AuditablePolicyResourceResponse> jsonTester;
@@ -50,39 +47,28 @@ class AuditablePolicyResourceResponseTest {
      * no exception and after the {@code Resource} has been modified.  This is the expected state of the object
      * after a query for the rules applicable to the resource then these rules have been applied to the resource.
      * Test involve creating the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserializes and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyResourceResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testAuditablePolicyResourceResponseSerialisingAndDeserialising() throws IOException {
-        AuditablePolicyResourceResponse auditablePolicyResourceResponse = AuditablePolicyResourceResponse.Builder.create()
-                .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors().withModifiedResource(LEAF_RESOURCE);
+    void testAuditablePolicyResourceResponseSerializingAndDeserializing() throws IOException {
 
-        JsonContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseJsonContent = jsonTester.write(auditablePolicyResourceResponse);
+        JsonContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseJsonContent = jsonTester.write(POLICY_RESOURCE_RESPONSE);
         ObjectContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseObjectContent = jsonTester.parse(auditablePolicyResourceResponseJsonContent.getJson());
         AuditablePolicyResourceResponse auditablePolicyResourceResponseObjectContentObject = auditablePolicyResourceResponseObjectContent.getObject();
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isNull()
-                ),
 
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getPolicyRequest()).isEqualTo(auditablePolicyResourceResponse.getPolicyRequest()),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getRules()).isEqualTo(auditablePolicyResourceResponse.getRules()),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getAuditErrorMessage()).isNull(),
-                        () -> assertThat(auditablePolicyResourceResponse.getAuditErrorMessage()).isNull()
+        assertAll("AuditablePolicyResourceResponse serializing and deserializing comparison",
+                //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
+                        .as("The serialized and deserialized object should match the original")
+                        .isEqualTo(POLICY_RESOURCE_RESPONSE),
 
-                ),
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceResponse),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
-
-                )
+                () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
+                        .as("The serialized and deserialized object should have the same values as the original")
+                        .usingRecursiveComparison()
+                        .isEqualTo(POLICY_RESOURCE_RESPONSE)
         );
     }
 
@@ -91,37 +77,28 @@ class AuditablePolicyResourceResponseTest {
      * has and exception and after the {@code Resource} has been modified.  This is the expected state of the object
      * after a query for the rules applicable to the resource then an error occurs when rules have been applied to the resource.
      * Test involve creating the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserializes and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyResourceResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testErrorAuditablePolicyResourceResponseSerialisingAndDeserialising() throws IOException {
-        AuditablePolicyResourceResponse auditablePolicyResourceResponse = AuditablePolicyResourceResponse.Builder.create()
-                .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withAuditErrorMessage(AUDIT_ERROR_MESSAGE).withModifiedResource(LEAF_RESOURCE);
-        JsonContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseJsonContent = jsonTester.write(auditablePolicyResourceResponse);
+    void testErrorAuditablePolicyResourceResponseSerializingAndDeserializing() throws IOException {
+
+        JsonContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseJsonContent = jsonTester.write(POLICY_RESOURCE_RESPONSE_ERROR);
         ObjectContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseObjectContent = jsonTester.parse(auditablePolicyResourceResponseJsonContent.getJson());
         AuditablePolicyResourceResponse auditablePolicyResourceResponseObjectContentObject = auditablePolicyResourceResponseObjectContent.getObject();
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.userId").isEqualTo("test-user-id")
-                ),
 
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getPolicyRequest()).isEqualTo(auditablePolicyResourceResponse.getPolicyRequest()),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getRules()).isEqualTo(auditablePolicyResourceResponse.getRules()),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject.getAuditErrorMessage()).isEqualTo(auditablePolicyResourceResponse.getAuditErrorMessage())
-                ),
+        assertAll("AuditablePolicyResourceResponse with error serializing and deserializing comparison",
+                //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
+                        .as("The serialized and deserialized object should match the original")
+                        .isEqualTo(POLICY_RESOURCE_RESPONSE_ERROR),
 
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceResponse),
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
-                )
+                () -> assertThat(auditablePolicyResourceResponseObjectContentObject)
+                        .as("The serialized and deserialized object should have the same values as the original")
+                        .usingRecursiveComparison()
+                        .isEqualTo(POLICY_RESOURCE_RESPONSE_ERROR)
         );
     }
-
 }

@@ -71,44 +71,17 @@ To complete successfully, a service either halts with success or responds `200 O
 ### Starting Services (`--manager.mode=run` / `--manager.mode=shutdown`)
 Using the built-in profiles, the services-manager can be used to perform a number of common tasks, starting the services in different environments for different use-cases:  
 
-#### `discovery` / `palisade` - Default configuration of discovery service / palisade services
-```bash
-java -jar -Dspring.profiles.active=discovery target/executable.jar
-# or
-java -jar -Dspring.profiles.active=palisade target/executable.jar
-```
- * Will start just the discovery-service / all other palisade services respectively
- * Mostly used as a dependency and common set of configurations by other profiles
-
-
 #### `static` - Simple setup with static 808x port numbers
 ```bash
 java -jar -Dspring.profiles.active=static target/executable.jar
 ```
  * By default, palisade-service will be at `localhost:8084` and data-service will be at `localhost:8082`
- * No eureka dashboard here, but take a look at the /actuator endpoints for some metadata
  
  
-#### `eureka` - Eureka discovery, dynamic ports, 'scalable'
-```bash
-java -jar -Dspring.profiles.active=discovery target/executable.jar # start discovery-service without eureka (it is eureka)
-java -jar -Dspring.profiles.active=eureka target/executable.jar    # start all other services with eureka
-```
- * Once the manager has finished running, check the eureka dashboard at `localhost:8083`
- * These two commands will only exit once all services are ready, so the two `java -jar ...` commands can be chained together as `java .. discovery -jar .. && java .. eureka -jar ...`
-
-
----
-***All further profiles require the discovery service to be running, or require some tweaking to use the static setup.***  
-**The choice here between `eureka` or `static` profiles will be referred to unilaterally as the `environment` profile - make sure to substitute as appropriate.**  
----
-
-
 #### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/develop/example-library))
 ```bash
 java -jar -Dspring.profiles.active=example-libs target/executable.jar
 ```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
 
 
@@ -116,7 +89,6 @@ java -jar -Dspring.profiles.active=example-libs target/executable.jar
 ```bash
 java -jar -Dspring.profiles.active=example-runner target/executable.jar
 ```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
  * The rest-example will run once all services have started
  * Check `rest-example.log` for output data
@@ -128,7 +100,6 @@ The data used in this example comes checked-in to the repo and does not need gen
 ```bash
 java -jar -Dspring.profiles.active=example-perf target/executable.jar
 ```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
  * The performance-test will run once all services have started
  * Check `performance-test.log` for output data
@@ -153,16 +124,15 @@ Or manually generate the data:
 
 #### At Start-Time
 If services are not running, or debug logging is required from startup, using the built-in profiles:  
- * *For the appropriate `environment`*, add the `debug` profile during the manager's run command - `java -jar -Dspring.profiles.active=environment,debug target/executable.jar --manager.mode=run` 
+ * Add the `debug` profile during the manager's run command - `java -jar -Dspring.profiles.active=static,debug target/executable.jar --manager.mode=run` 
  * The `logging.level.uk.gov.gchq.palisade=DEBUG` configuration value will be set for all services at start-time 
    * Services should now log at `DEBUG` level from startup  
 
 #### During Runtime
 If services are already running, using the built-in profiles:  
- * *For the appropriate `environment`*, add the `debug` profile and use the manager's logging command - `java -jar -Dspring.profiles.active=environment,debug target/executable.jar --manager.mode=loggers`
+ * Add the `debug` profile and use the manager's logging command - `java -jar -Dspring.profiles.active=static,debug target/executable.jar --manager.mode=loggers`
  * A POST request will be made to Spring logging actuators 
    * Running services should now begin logging at `DEBUG` level (note that this will not include past debug log content, only debug messages created from now onwards)  
-
 
 
 ### Creating a new Configuration (`--manager.mode=config`)

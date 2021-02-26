@@ -37,7 +37,6 @@ import java.util.function.Supplier;
  * Allows multiple instances of a service to be running and all of them to be effected by shutdown, logging changes, etc.
  */
 public class ManagedService implements Service {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
     private final ManagedClient managedClient;
     private final Supplier<Collection<URI>> uriSupplier;
@@ -74,7 +73,7 @@ public class ManagedService implements Service {
     /**
      * Set the logging level for a given java package
      *
-     * @param packageName the name of the package (eg. uk.gov, root, java.util)
+     * @param packageName     the name of the package (eg. uk.gov, root, java.util)
      * @param configuredLevel the level to log to stdout for the named package (TRACE, DEBUG, INFO, WARN, ERROR)
      * @throws IOException if any service did not report 200-OK after the REST POST request
      */
