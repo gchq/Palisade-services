@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.audit.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,8 +35,6 @@ import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SE
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 class MessageSerialisationTest extends AbstractSerialisationTest {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static class MessageTypeSource implements ArgumentsProvider {
         @Override

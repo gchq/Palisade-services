@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Assertion methods for {@code ResponseEntity}s.
+ *
+ * @param <T> The type of the argument being captured
  */
 public class ArgumentCaptorAssert<T> extends AbstractAssert<ArgumentCaptorAssert<T>, ArgumentCaptor<T>> {
 
