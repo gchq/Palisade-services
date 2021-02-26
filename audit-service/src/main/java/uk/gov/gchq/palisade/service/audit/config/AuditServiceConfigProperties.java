@@ -31,11 +31,12 @@ import java.util.Optional;
 @ConfigurationProperties("audit")
 public final class AuditServiceConfigProperties {
 
-    private Map<String, Object> implementations;
+    private Map<String, Object> implementations = Map.of();
     private String errorDirectory;
 
     /**
-     * Create and return s a new {@code AuditServiceConfigProperties} instance
+     * Constructs and returns a new {@code AuditServiceConfigProperties} instance
+     * providing access to the directory for error files.
      */
     public AuditServiceConfigProperties() {
         // Empty constructor for spring

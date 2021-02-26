@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test data for data Service tests
+ * Test data for Data Service tests
  */
 public final class ApplicationTestData {
 

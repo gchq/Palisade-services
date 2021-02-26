@@ -55,9 +55,10 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     /**
-     * Returns the error node
+     * Returns the error node which contains the tree model of the error
+     * ({@code Throwable}).
      *
-     * @return the error node
+     * @return the error node of the {@code Throwable}
      */
     @JsonIgnore
     @Generated

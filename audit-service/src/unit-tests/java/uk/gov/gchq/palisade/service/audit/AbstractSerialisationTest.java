@@ -61,8 +61,8 @@ public class AbstractSerialisationTest {
      * @return The object being tested
      * @throws Exception if an error occurs
      */
-    protected <O, T extends O> T testInstance(final Class<T> type, final O expectedInstance) throws Exception {
-        return testInstance(type, expectedInstance, null);
+    protected <O, T extends O> T assertSerialisation(final Class<T> type, final O expectedInstance) throws Exception {
+        return assertSerialisation(type, expectedInstance, null);
     }
 
     /**
@@ -89,30 +89,41 @@ public class AbstractSerialisationTest {
      * @return The object being tested
      * @throws Exception if an error occurs
      */
-    protected <O, T extends O> T testInstance(final Class<T> type, final O expectedInstance, final String expectedJson)
+    protected <O, T extends O> T assertSerialisation(final Class<T> type, final O expectedInstance, final String expectedJson)
         throws Exception {
 
         var objectMapper = getObjectMapper();
+        var typeName = type.getSimpleName();
+
+        // WHEN the expected instance is serialised to JSON and then deserialised back
+        //      into an actual instance
 
         var actualJson = objectMapper.writeValueAsString(expectedInstance);
         var actualInstance = objectMapper.readValue(actualJson, type);
 
+        // THEN
+
         assertThat(actualInstance)
-            .as("Using toString(), the original %s is the same as the deserialised version",
-                expectedInstance.getClass().getSimpleName())
+            .as("check %s using toString()", typeName)
             .isEqualTo(expectedInstance);
 
         assertThat(actualInstance)
-            .as("Using recursive toString(), the original %s is the same as the deserialised version",
-                expectedInstance.getClass().getSimpleName())
+            .as("check %s using recursive toString()", typeName)
             .usingRecursiveComparison()
             .isEqualTo(expectedInstance);
+
+        // if an expected JSON string has been provided, then we will check it against
+        // the actual JSON string.
+        // Note that this uses JSONAssert which will check that the actual json tree of
+        // each JSON string.
 
         if (expectedJson != null && !expectedJson.isBlank()) {
             assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT);
         }
 
+        // return the actual instance in case the sub class requires it, e.g. logging.
         return actualInstance;
+
     }
 
     /**

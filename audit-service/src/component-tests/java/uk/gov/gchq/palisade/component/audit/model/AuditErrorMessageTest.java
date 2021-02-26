@@ -39,6 +39,8 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
     @Test
     void testAuditErrorMessageSerialisation() throws Exception {
 
+        // GIVEN the instance to check
+
         var expected = AuditErrorMessage.Builder.create()
             .withUserId("originalUserID")
             .withResourceId("testResourceId")
@@ -47,10 +49,12 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
             .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
             .withServerIp("testServerIP")
             .withServerHostname("testServerHostname")
-            .withAttributes(Map.<String, Object>of("messagesSent", "23"))
+            .withAttributes(Map.of("messagesSent", "23"))
             .withError(new InternalError("Something went wrong!"));
 
-        testInstance(expected.getClass(), expected);
+        // THEN confirm that it can be serialised and then deserialised successfully.
+
+        assertSerialisation(expected.getClass(), expected);
 
     }
 }

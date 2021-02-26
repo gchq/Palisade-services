@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
@@ -49,7 +50,10 @@ import static java.util.Objects.requireNonNull;
 public class StroomAuditService implements AuditService {
 
     /**
-     * The configuration key
+     * The configuration key for property "audit.implementations". This property is
+     * used to decide which service implementation Spring will inject.
+     *
+     * @see ApplicationConfiguration
      */
     public static final String CONFIG_KEY = "stroom";
 
@@ -57,7 +61,7 @@ public class StroomAuditService implements AuditService {
     private static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
     private static final String ERROR_MESSAGE_FROM = "AuditErrorMessage received from {}";
     private static final String EVENT_GENERATOR = "Palisade";
-    private static final String JSON_SERIALISING_ERROR = "An error occurred while deseriaising the {} - Message: {}";
+    private static final String JSON_SERIALISING_ERROR = "An error occurred while deserialising the {} - Message: {}";
     private static final String ORGANISATION = "organisation is {}";
     private static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
     private static final System SYSTEM = new System();

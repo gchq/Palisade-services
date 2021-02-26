@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.audit.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,9 +22,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import uk.gov.gchq.palisade.service.audit.AbstractSerialisationTest;
+
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
@@ -35,7 +35,7 @@ import static uk.gov.gchq.palisade.service.audit.service.ServiceName.POLICY_SERV
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SERVICE;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
-class MessageSerialisationTest {
+class MessageSerialisationTest extends AbstractSerialisationTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -55,20 +55,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    void testSerialiseDeserialiseIsConsistent(final Object expectedMessage) throws JsonProcessingException {
-
-        var type = expectedMessage.getClass();
-        var actualMessage = MAPPER.readValue(MAPPER.writeValueAsString(expectedMessage), type);
-
-        assertThat(actualMessage)
-            .as("check deserialised %s is the same as the original using recursive comparison", type)
-            .usingRecursiveComparison()
-            .ignoringFieldsOfTypes(Throwable.class)
-            .isEqualTo(expectedMessage);
-
-        assertThat(actualMessage)
-            .as("check deserialisaed %s is the same as the original using equals", type)
-            .isEqualTo(expectedMessage);
-
+    void testSerialiseDeserialiseIsConsistent(final Object expectedMessage) throws Exception {
+        assertSerialisation(expectedMessage.getClass(), expectedMessage);
     }
 }

@@ -39,6 +39,8 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
     @Test
     void testAuditSuccessMessageSerialisation() throws Exception {
 
+        // GIVEN the instance to check
+        
         var expected = AuditSuccessMessage.Builder.create()
             .withUserId("originalUserID")
             .withResourceId("testResourceId")
@@ -47,11 +49,12 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
             .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
             .withServerIp("testServerIP")
             .withServerHostname("testServerHostname")
-            .withAttributes(Map.<String, Object>of("messagesSent", "23"))
+            .withAttributes(Map.of("messagesSent", "23"))
             .withLeafResourceId("testLeafResourceId");
 
-        testInstance(expected.getClass(), expected);
+        // THEN confirm that it can be serialised and then deserialised successfully.
 
+        assertSerialisation(expected.getClass(), expected);
 
     }
 

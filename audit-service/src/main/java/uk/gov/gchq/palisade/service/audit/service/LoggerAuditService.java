@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
@@ -44,7 +45,10 @@ import static java.util.Objects.requireNonNull;
 public class LoggerAuditService implements AuditService {
 
     /**
-     * The configuration key
+     * The configuration key for property "audit.implementations". This property is
+     * used to decide which service implementation Spring will inject.
+     *
+     * @see ApplicationConfiguration
      */
     public static final String CONFIG_KEY = "logger";
 

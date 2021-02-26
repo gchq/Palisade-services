@@ -83,7 +83,7 @@ public class HealthAssert extends AbstractAssert<HealthAssert, Health> {
      */
     public HealthAssert hasDetails() {
         isNotNull();
-        assertThat(actual.getDetails()).isNotEmpty();
+        details().isNotEmpty();
         return this;
     }
 

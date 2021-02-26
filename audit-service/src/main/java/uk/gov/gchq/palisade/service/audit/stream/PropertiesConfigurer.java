@@ -164,7 +164,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         return config;
     }
 
-    private static Config toConfig(final Config orig, final String key, final Map<String, String> config) {
+    private static Config toConfig(final Config originalConfig, final String key, final Map<String, String> config) {
         // Map or list?
         Matcher mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
         if (mat.find()) {
@@ -178,11 +178,11 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
             ConfigObject configItem = ConfigValueFactory.fromMap(node);
             ArrayList<ConfigObject> list = new ArrayList<>();
             list.add(configItem);
-            return orig.withValue(key, ConfigValueFactory.fromIterable(list));
+            return originalConfig.withValue(key, ConfigValueFactory.fromIterable(list));
         }
         List<String> node = new ArrayList<>(config.values());
         ConfigList configList = ConfigValueFactory.fromIterable(node);
-        return orig.withValue(key, configList);
+        return originalConfig.withValue(key, configList);
 
     }
 
