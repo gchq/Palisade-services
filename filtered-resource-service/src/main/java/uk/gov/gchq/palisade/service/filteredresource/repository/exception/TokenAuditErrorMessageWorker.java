@@ -107,8 +107,11 @@ final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand>
                         .getAllAuditErrorMessages(getCmd.token)
                         // If present tell self (if not, will be told in the future)
                         .<Behavior<WorkerCommand>>thenApply((Optional<List<TokenAuditErrorMessageEntity>> messageEntities) -> {
-                            messageEntities.ifPresent(entityList -> entityList.forEach(entity -> this.getContext().getSelf()
-                                    .tell(new SetAllExceptions(getCmd.token, entity.getAuditErrorMessage()))));
+                            messageEntities.ifPresent(entityList -> entityList.forEach((TokenAuditErrorMessageEntity entity) -> {
+                                this.getContext().getSelf().tell(new SetAllExceptions(getCmd.token, entity.getAuditErrorMessage()));
+                                //Finally remove the entity from the persistence layer
+                                this.persistenceLayer.popAuditErrorMessage(entity);
+                            }));
                             return this.onSetException(getCmd);
                         })
                         // If an exception is thrown reading from persistence, report the exception

@@ -74,6 +74,18 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     }
 
     @Override
+    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final TokenAuditErrorMessageEntity entity) {
+        // Get the exception from the repository
+        return CompletableFuture.supplyAsync(() -> repository.findByEntity(entity), executor)
+                // Then delete the exception from the repositry
+                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(messageEntity -> Pair.create(messageEntity, new CrudRepositoryPop(this::asyncDelete, messageEntity))))
+                .thenApply((Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>> repositoryPopPair) -> {
+                    LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer pop error is {}", repositoryPopPair.map(tokenEntity -> tokenEntity.first().toString()).orElse("empty"));
+                    return repositoryPopPair;
+                });
+    }
+
+    @Override
     public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
         return CompletableFuture.supplyAsync(() -> repository.findAllByToken(token), executor);
     }

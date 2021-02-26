@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageRepository;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
@@ -92,6 +94,11 @@ public class ApplicationConfiguration {
     @Bean
     ActorRef<TokenOffsetCommand> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
         return TokenOffsetController.create(persistenceLayer);
+    }
+
+    @Bean
+    ActorRef<TokenAuditErrorMessageCommand> tokenOffsetController(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
+        return TokenAuditErrorMessageController.create(persistenceLayer);
     }
 
     @Primary

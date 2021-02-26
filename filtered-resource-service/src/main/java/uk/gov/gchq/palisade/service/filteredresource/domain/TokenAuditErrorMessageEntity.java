@@ -35,7 +35,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.MapKey;
 import javax.persistence.Table;
 
 import java.io.Serializable;
@@ -93,10 +92,11 @@ public class TokenAuditErrorMessageEntity implements Serializable {
 
     /**
      * Constructor taking a token and AuditErrorMessage
-     * @param token the unique request token
+     *
+     * @param token             the unique request token
      * @param auditErrorMessage the {@link AuditErrorMessage} used to populate this class.
      */
-    public TokenAuditErrorMessageEntity(String token, AuditErrorMessage auditErrorMessage){
+    public TokenAuditErrorMessageEntity(String token, AuditErrorMessage auditErrorMessage) {
         this.token = token;
         this.userId = auditErrorMessage.getUserId();
         this.resourceId = auditErrorMessage.getResourceId();
@@ -111,7 +111,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
      * Used for inserting objects into the backing store
      *
      * @param token      the token {@link String} for the client request as a whole, created by the palisade-service
-     * @param userId       the userId of the {@link User} as authorised and returned by the user-service
+     * @param userId     the userId of the {@link User} as authorised and returned by the user-service
      * @param resourceId the id of a resource as discovered and returned by the resource-service
      * @param context    the {@link Context} as originally supplied by the client
      * @param attributes the additional attributes attached to the {@link AuditErrorMessage}
@@ -163,8 +163,8 @@ public class TokenAuditErrorMessageEntity implements Serializable {
         return timeToLive;
     }
 
-    public AuditErrorMessage getAuditErrorMessage(){
-        LOGGER.info("Retrieved token {}, userId {}, resourceId {}, context {}, attributes {}, error", this.token,  getUserId(), getResourceId(), getContext(), getAttributes(), getError());
+    public AuditErrorMessage getAuditErrorMessage() {
+        LOGGER.info("Retrieved token {}, userId {}, resourceId {}, context {}, attributes {}, error", this.token, getUserId(), getResourceId(), getContext(), getAttributes(), getError());
         return AuditErrorMessage.Builder.create()
                 .withUserId(getUserId())
                 .withResourceId(getResourceId())

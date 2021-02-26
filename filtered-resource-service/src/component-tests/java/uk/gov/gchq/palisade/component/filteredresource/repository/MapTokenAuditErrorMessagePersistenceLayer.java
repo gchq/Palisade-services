@@ -65,4 +65,11 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
         this.tokenAuditErrorMessage.remove(token);
         return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError()), null)));
     }
+
+    @Override
+    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final TokenAuditErrorMessageEntity entity) {
+        var auditErrorMessage = this.tokenAuditErrorMessage.get(entity.getToken());
+        this.tokenAuditErrorMessage.remove(entity.getToken(), auditErrorMessage);
+        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(entity.getToken(), auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError()), null)));
+    }
 }

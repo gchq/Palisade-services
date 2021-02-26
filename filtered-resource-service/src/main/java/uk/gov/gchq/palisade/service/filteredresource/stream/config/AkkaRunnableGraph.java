@@ -57,6 +57,8 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
@@ -75,8 +77,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.SERVICE_NAME;
 
 /**
  * Configuration for the Akka Runnable Graph used by the {@link FilteredResourceApplication}.
@@ -365,7 +365,8 @@ public class AkkaRunnableGraph {
     @Bean
     RunnableGraph<Control> tokenAuditErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenAuditErrorMessageSource,
                                                                final Sink<Committable, CompletionStage<Done>> committerSink,
-                                                               final AuditErrorMessageEventService auditErrorMessageEventService) {
+                                                               final AuditErrorMessageEventService auditErrorMessageEventService,
+                                                               final ActorRef<TokenAuditErrorMessageCommand> tokenAuditErrorMessageCtrl) {
         return tokenAuditErrorMessageSource
                 // Extract committable, token and message
                 .map(committableMessage -> Tuple3.create(
@@ -383,6 +384,11 @@ public class AkkaRunnableGraph {
                     return auditErrorMessageEventService.putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
                             .thenApply(ignored -> committableTokenAuditErrorMessage);
                 })
+
+                // Alert actor system of new exception
+                .alsoTo(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()
+                        .map(committableTokenAuditErrorMessage -> Pair.create(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3()))
+                        .to(TokenAuditErrorMessageController.asSetterSink(tokenAuditErrorMessageCtrl)))
 
                 // Commit processed message to kafka
                 .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()

@@ -50,4 +50,6 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
     Optional<List<TokenAuditErrorMessageEntity>> findAllByToken(final String token);
 
     Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
+
+    Optional<TokenAuditErrorMessageEntity> findByEntity(final TokenAuditErrorMessageEntity entity);
 }

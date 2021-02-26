@@ -167,114 +167,114 @@ class KafkaRestWebSocketContractTest {
             return Stream.of(
                     // Test for 'early' client - topic offset message has offset
                     // Expect to receive the three resources and no errors
-//                    Arguments.of(
-//                            "test-token-1",
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
-//                            ),
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
-//                            ),
-//                            List.of(),
-//                            Map.of(),
-//                            List.of(
-//                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-//                            ),
-//                            List.of(
-//                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
-//                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
-//                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
-//                                    completeMsgBuilder.apply("test-token-1")
-//                            ),
-//                            List.of()
-//                    ),
-//                    // Test for 'late' client - persistence has offset
-//                    // Expect to receive the three resources and no errors
-//                    Arguments.of(
-//                            "test-token-2",
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
-//                            ),
-//                            List.of(),
-//                            List.of(),
-//                            Map.of(
-//                                    "test-token-2", 0L
-//                            ),
-//                            List.of(
-//                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-//                            ),
-//                            List.of(
-//                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
-//                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
-//                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
-//                                    completeMsgBuilder.apply("test-token-2")
-//                            ),
-//                            List.of()
-//                    ),
+                    Arguments.of(
+                            "test-token-1",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-1")
+                            ),
+                            List.of()
+                    ),
+                    // Test for 'late' client - persistence has offset
+                    // Expect to receive the three resources and no errors
+                    Arguments.of(
+                            "test-token-2",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
+                            ),
+                            List.of(),
+                            List.of(),
+                            Map.of(
+                                    "test-token-2", 0L
+                            ),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-2")
+                            ),
+                            List.of()
+                    ),
                     // Test no start of stream marker - query is corrupted
                     // Expect to receive no resources, and expect one error on the audit error topic
-//                    Arguments.of(
-//                            "test-token-3",
-//                            List.of(
-//                                    //No Start Marker
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
-//                            ),
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
-//                            ),
-//                            List.of(),
-//                            Map.of(),
-//                            List.of(
-//                                    ctsMsg
-//                            ),
-//                            List.of(
-//                            ),
-//                            List.of(
-//                                    AuditErrorMessage.Builder.create().withUserId("userId")
-//                                            .withResourceId("file:/file/")
-//                                            .withContext(new Context().purpose("purpose"))
-//                                            .withAttributes(Collections.emptyMap())
-//                                            .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))
-//                            )
-//                    ),
-//                    // Test no resources - query was suspicious
-//                    // Expect to receive no resources, and expect one error on the audit error topic
-//                    Arguments.of(
-//                            "test-token-4",
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
-//                            ),
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
-//                            ),
-//                            List.of(),
-//                            Map.of(),
-//                            List.of(
-//                                    ctsMsg
-//                            ),
-//                            List.of(
-//                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
-//                            ),
-//                            List.of(
-//                                    AuditErrorMessage.Builder.create().withUserId("unknown")
-//                                            .withResourceId("unknown")
-//                                            .withContext(new Context().purpose("unknown"))
-//                                            .withAttributes(Collections.emptyMap())
-//                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
-//                            )
-//                    ),
+                    Arguments.of(
+                            "test-token-3",
+                            List.of(
+                                    //No Start Marker
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))
+                            )
+                    ),
+                    // Test no resources - query was suspicious
+                    // Expect to receive no resources, and expect one error on the audit error topic
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    ),
                     Arguments.of(
                             "test-token-5",
                             List.of(

@@ -19,8 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.User;
-
 import javax.persistence.AttributeConverter;
 
 import java.util.Optional;
@@ -34,6 +32,7 @@ public class ErrorConverter implements AttributeConverter<Throwable, String> {
 
     /**
      * Default constructor specifying the object mapper for (de)serializing objects
+     *
      * @param objectMapper the object mapper for reading and writing columns and objects
      */
     public ErrorConverter(final ObjectMapper objectMapper) {
