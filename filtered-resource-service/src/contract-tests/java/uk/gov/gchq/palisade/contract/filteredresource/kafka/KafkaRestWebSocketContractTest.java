@@ -32,6 +32,7 @@ import akka.japi.Pair;
 import akka.kafka.ConsumerSettings;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
+import akka.stream.DelayOverflowStrategy;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
@@ -77,6 +78,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -245,7 +247,7 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-3", "")
+                                    errorBuilder.apply("test-token-3", "No Start Marker was observed for token: " + "test-token-3")
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
@@ -272,7 +274,7 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-4", ""),
+                                    errorBuilder.apply("test-token-4", "No Resources were observed for token: " + "test-token-4"),
                                     WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
                             ),
                             List.of(
@@ -298,7 +300,7 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")),
                                             AuditErrorMessage.Builder.create().withUserId("userId")
-                                                    .withResourceId("file:/file/resource.1")
+                                                    .withResourceId("file:/file/resource.4")
                                                     .withContext(new Context().purpose("purpose"))
                                                     .withAttributes(Collections.emptyMap())
                                                     .withError(new Throwable("No userId matching: " + "userId"))
@@ -309,7 +311,7 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-5", ""),
+                                    errorBuilder.apply("test-token-5", "No userId matching: userId"),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.2").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.3").getResource()),
@@ -317,7 +319,7 @@ class KafkaRestWebSocketContractTest {
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file/")
+                                            .withResourceId("file:/file/resource.4")
                                             .withContext(new Context().purpose("purpose"))
                                             .withAttributes(Collections.emptyMap())
                                             .withError(new Throwable("No userId matching: " + "userId"))
@@ -390,12 +392,16 @@ class KafkaRestWebSocketContractTest {
                 .overwriteOffset(token, offset)
                 .join());
 
-        TimeUnit.SECONDS.sleep(3);
+        TimeUnit.SECONDS.sleep(1);
 
         // When
         // Send each websocketMessage request and receive responses
-        Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
-        Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
+        Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator)
+                .map(this::writeTextMessage)
+                .delay(Duration.ofMillis(500), DelayOverflowStrategy.backpressure());
+        Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create()
+                .map(this::readTextMessage)
+                .toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
         Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
         Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = http.singleWebSocketRequest(
@@ -421,9 +427,12 @@ class KafkaRestWebSocketContractTest {
 
         if (auditErrorMessages.size() > 0) {
             // When you read off the error queue
-            List<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
+            // Read both those posted and those produced
+            LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, errorTopic.size() + auditErrorMessages.size())
                     .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(LinkedList::new));
+            // Drop the messages posted in the setup for the test
+            errorTopic.forEach(postedError -> errorResults.removeFirst());
 
             // Then
             // The messages on the error topic are as expected

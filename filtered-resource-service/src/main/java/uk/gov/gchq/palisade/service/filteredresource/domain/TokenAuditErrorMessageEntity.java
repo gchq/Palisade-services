@@ -78,9 +78,8 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @ElementCollection
     private Map<String, String> attributes;
 
-    @Column(name = "error", columnDefinition = "clob")
-    @Convert(converter = ErrorConverter.class)
-    private Throwable error;
+    @Column(name = "error", columnDefinition = "varchar(255)")
+    private String error;
 
     @TimeToLive
     protected Long timeToLive;
@@ -101,7 +100,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
      * @param error      the error attached to the {@link AuditErrorMessage}
      */
     @PersistenceConstructor
-    public TokenAuditErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
+    public TokenAuditErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final String error) {
         this.token = token;
         this.resourceId = resourceId;
         this.userId = userId;
@@ -137,7 +136,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     }
 
     @Generated
-    public Throwable getError() {
+    public String getError() {
         return error;
     }
 

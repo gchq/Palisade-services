@@ -359,11 +359,9 @@ public class AkkaRunnableGraph {
                 //.filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
 
                 // Write exception to persistence
-                .mapAsync(PARALLELISM, (Tuple3<CommittableOffset, String, AuditErrorMessage> committableTokenAuditErrorMessage) -> {
-                    LOGGER.info("error in AkkaRunnableGraph is {}", committableTokenAuditErrorMessage.t3().getError().getMessage());
-                    return auditErrorMessageEventService.putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
-                            .thenApply(ignored -> committableTokenAuditErrorMessage);
-                })
+                .mapAsync(PARALLELISM, committableTokenAuditErrorMessage -> auditErrorMessageEventService
+                        .putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
+                        .thenApply(ignored -> committableTokenAuditErrorMessage))
 
                 // Commit processed message to kafka
                 .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()

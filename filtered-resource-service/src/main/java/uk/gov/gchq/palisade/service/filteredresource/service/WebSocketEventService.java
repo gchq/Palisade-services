@@ -26,6 +26,7 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.PartialFunction;
 
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
@@ -43,6 +44,7 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.util.ConditionalGrap
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -158,11 +160,12 @@ public class WebSocketEventService {
      * {@link MessageType#COMPLETE} server responses
      */
     private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCts(final String token) {
-        Source<AuditableWebSocketMessage, NotUsed> ctsSource = Source.<AuditableWebSocketMessage>empty()
-                .concat(Source.lazySource(() -> this.createErrorSource(token))) // Handle early error messages
-                .concat(Source.lazySource(() -> this.createResourceSource(token))) // Handle the resources
-                .concat(Source.lazySource(() -> this.createErrorSource(token))) // Handle late error messages
-                .concat(Source.lazySource(() -> this.createCompleteSource(token))); // Finally add the complete message to the Flow
+        Source<AuditableWebSocketMessage, NotUsed> ctsSource = lazyConcat(List.of(
+                () -> this.createErrorSource(token), // Handle early error messages
+                () -> this.createResourceSource(token), // Handle the resources
+                () -> this.createErrorSource(token), // Handle late error messages
+                () -> this.createCompleteSource(token) // Finally add the complete message to the Flow
+        ));
 
         return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
@@ -177,7 +180,6 @@ public class WebSocketEventService {
                 .alsoTo(this.auditSinkFactory.create(token))
 
                 .map(AuditableWebSocketMessage::getWebSocketMessage);
-
     }
 
     /**
@@ -207,6 +209,13 @@ public class WebSocketEventService {
                                                 .withBody(committablePair.first().getResourceNode()))
                                         .withResourceAndCommittable(committablePair))
 
+                                .recover(PartialFunction.fromFunction(exception -> AuditableWebSocketMessage.Builder.create()
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.ERROR)
+                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withBody(exception.getMessage()))
+                                        .withoutAudit()))
+
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
 
@@ -215,7 +224,7 @@ public class WebSocketEventService {
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
                                         .withHeader(Token.HEADER, token).noHeaders()
-                                        .withBody(offsetResponse.getException()))
+                                        .withBody(offsetResponse.getException().getMessage()))
                                 .withoutAudit())));
     }
 
@@ -230,24 +239,23 @@ public class WebSocketEventService {
 
                 .via(TokenAuditErrorMessageController.asGetterFlow(this.tokenAEMCommand))
 
-                .flatMapConcat(aemResponse -> Source.from(Optional.ofNullable(aemResponse.getMessageEntities())
-
-                        .map(errorMessageList -> errorMessageList.stream()
-                                // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
-                                .map(messageEntity -> AuditableWebSocketMessage.Builder.create()
-                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                                .withType(MessageType.ERROR)
-                                                .withHeader(Token.HEADER, token).noHeaders()
-                                                .withBody(messageEntity.getError()))
-                                        .withoutAudit())
-                                .collect(Collectors.toList()))
-
-                        .orElseGet(() -> List.of(AuditableWebSocketMessage.Builder.create()
+                .flatMapConcat(persistenceResponse -> Source.from(Optional.ofNullable(persistenceResponse.getException())
+                        .map(exception -> List.of(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
                                         .withHeader(Token.HEADER, token).noHeaders()
-                                        .withBody(aemResponse.getException()))
-                                .withoutAudit()))));
+                                        .withBody(exception.getMessage()))
+                                .withoutAudit()))
+
+                        .orElseGet(() -> persistenceResponse.getMessageEntities().stream()
+                                // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
+                                .map(errorEntity -> AuditableWebSocketMessage.Builder.create()
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.ERROR)
+                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withBody(errorEntity.getError()))
+                                        .withoutAudit())
+                                .collect(Collectors.toList()))));
     }
 
     /**
@@ -265,5 +273,10 @@ public class WebSocketEventService {
                         .withHeader(Token.HEADER, token).noHeaders()
                         .noBody())
                 .withoutAudit());
+    }
+
+    // Akka's concat is eager by default
+    private static <Out> Source<Out, NotUsed> lazyConcat(List<Supplier<Source<Out, NotUsed>>> sources) {
+        return Source.from(sources).flatMapConcat(Supplier::get);
     }
 }

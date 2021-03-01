@@ -51,12 +51,7 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
 
     @Override
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
-        LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer put error is {}", error.getMessage());
-        return CompletableFuture.supplyAsync(() -> repository.save(token, resourceId, userId, context, attributes, error), executor)
-                .thenApply((TokenAuditErrorMessageEntity entity) -> {
-                    LOGGER.info("entity was: {}", entity);
-                    return entity;
-                });
+        return CompletableFuture.supplyAsync(() -> repository.save(token, resourceId, userId, context, attributes, error), executor);
     }
 
     @Override
