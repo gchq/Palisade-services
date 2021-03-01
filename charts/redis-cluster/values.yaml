@@ -71,11 +71,11 @@ cluster:
   activeDeadlineSeconds: 600
   ## Number of Redis nodes to be deployed
   ##
-  nodes: 6
+  nodes: 2
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created
   ##
-  replicas: 1
+  replicas: 0
   ## The busPort should be obtained adding 10000 to the redisPort. By default: 10000 + 6379 = 16379
   ##
   busPort: 16379
