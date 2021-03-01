@@ -65,7 +65,6 @@ public class CommonTestData {
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(TOKEN)
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
@@ -73,7 +72,6 @@ public class CommonTestData {
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(TOKEN)
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
@@ -82,7 +80,6 @@ public class CommonTestData {
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION = AuditErrorMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(TOKEN)
             .withUserId(null)
             .withResourceId(null)
             .withContext(null)

@@ -86,7 +86,6 @@ public class ContractTestData {
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(REQUEST_TOKEN)
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
@@ -94,7 +93,6 @@ public class ContractTestData {
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(REQUEST_TOKEN)
             .withUserId(null)
             .withResourceId(null)
             .withContext(null)
