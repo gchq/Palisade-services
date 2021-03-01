@@ -57,9 +57,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditErrorMessageEventService;
@@ -184,11 +182,11 @@ public class AkkaRunnableGraph {
     @Bean
     WebSocketEventService websocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
+            final ActorRef<TokenAuditErrorMessageCommand> tokenAEMController,
             final AuditServiceSinkFactory auditSinkFactory,
-            final FilteredResourceSourceFactory resourceSourceFactory,
-            final ErrorSourceFactory errorSourceFactory
+            final FilteredResourceSourceFactory resourceSourceFactory
     ) {
-        return new WebSocketEventService(tokenOffsetController, auditSinkFactory, resourceSourceFactory, errorSourceFactory);
+        return new WebSocketEventService(tokenOffsetController, tokenAEMController, auditSinkFactory, resourceSourceFactory);
     }
 
     @Bean
@@ -316,23 +314,6 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    ErrorSourceFactory errorSourceFactory(final TokenAuditErrorMessagePersistenceLayer persistence) {
-        // Unfold async will produce a stream from a state and a function that will produce elements from this state
-        // The stream completes once the function returns an Optional.empty()
-        return (String token) -> Source.unfoldAsync(persistence, persistenceLayer -> persistenceLayer
-
-                // get a AuditErrorMessage from persistence, along with the committable to delete it from the persistence later
-                .popAuditErrorMessage(token)
-
-                // Use the same state for the next unfoldAsync
-                .thenApply(optionalElement -> optionalElement
-                        .map(element -> Pair.create(persistenceLayer, element))))
-
-                // Extract the AuditErrorMessage from the entity
-                .map(entityCrudPair -> Pair.create(entityCrudPair.first().getAuditErrorMessage(), entityCrudPair.second()));
-    }
-
-    @Bean
     RunnableGraph<Control> tokenOffsetRunnableGraph(
             final Source<CommittableMessage<String, TopicOffsetMessage>, Control> tokenOffsetSource,
             final Sink<Committable, CompletionStage<Done>> committerSink,
@@ -365,8 +346,7 @@ public class AkkaRunnableGraph {
     @Bean
     RunnableGraph<Control> tokenAuditErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenAuditErrorMessageSource,
                                                                final Sink<Committable, CompletionStage<Done>> committerSink,
-                                                               final AuditErrorMessageEventService auditErrorMessageEventService,
-                                                               final ActorRef<TokenAuditErrorMessageCommand> tokenAuditErrorMessageCtrl) {
+                                                               final AuditErrorMessageEventService auditErrorMessageEventService) {
         return tokenAuditErrorMessageSource
                 // Extract committable, token and message
                 .map(committableMessage -> Tuple3.create(
@@ -384,11 +364,6 @@ public class AkkaRunnableGraph {
                     return auditErrorMessageEventService.putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
                             .thenApply(ignored -> committableTokenAuditErrorMessage);
                 })
-
-                // Alert actor system of new exception
-                .alsoTo(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()
-                        .map(committableTokenAuditErrorMessage -> Pair.create(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3()))
-                        .to(TokenAuditErrorMessageController.asSetterSink(tokenAuditErrorMessageCtrl)))
 
                 // Commit processed message to kafka
                 .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()
@@ -428,7 +403,7 @@ public class AkkaRunnableGraph {
          * @param token the client's unique token for their request
          * @return {@link Source} of {@link AuditErrorMessage} for the client's request
          */
-        Source<Pair<AuditErrorMessage, Committable>, NotUsed> create(String token);
+        Source<Pair<AuditErrorMessage, Committable>, NotUsed> create(String token, AuditErrorMessage auditErrorMessage);
     }
 
     /**

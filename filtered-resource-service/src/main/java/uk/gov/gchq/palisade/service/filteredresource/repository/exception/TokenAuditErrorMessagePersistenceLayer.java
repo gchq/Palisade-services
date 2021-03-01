@@ -15,14 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
-import akka.japi.Pair;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -38,15 +35,7 @@ public interface TokenAuditErrorMessagePersistenceLayer {
      */
     CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, String resourceId, String userId, Context context, Map<String, String> attributes, Throwable error);
 
-    /**
-     * Get it, delete from repository and return to client
-     *
-     * @param token the unique request token
-     * @return an optional.empty if there are no TokenAuditErrorMessageEntity left in the repository
-     */
-    CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token);
+    CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token);
 
-    CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final TokenAuditErrorMessageEntity entity);
-
-    CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token);
+    CompletableFuture<Void> deleteAll(List<TokenAuditErrorMessageEntity> listAEM);
 }

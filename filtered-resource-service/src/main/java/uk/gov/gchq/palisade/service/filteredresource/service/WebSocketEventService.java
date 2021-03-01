@@ -32,15 +32,18 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMes
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
-import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.ErrorSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.util.ConditionalGraph;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter}
@@ -57,9 +60,10 @@ public class WebSocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
+    private final ActorRef<TokenAuditErrorMessageCommand> tokenAEMCommand;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
-    private final ErrorSourceFactory errorSourceFactory;
+    private static final String SERVICE_NAME_HEADER_KEY = "service-name";
 
     /**
      * Default constructor for a new WebSocketEventService, supplying the persistence layer for retrieving token offsets.
@@ -67,19 +71,19 @@ public class WebSocketEventService {
      * back to the client as required.
      *
      * @param tokenOffsetController the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
+     * @param tokenAEMCommand
      * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
      * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
-     * @param errorSourceFactory    a factory for creating an akka-streams{@link Source} from the upstream "error" topic queue for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
+            final ActorRef<TokenAuditErrorMessageCommand> tokenAEMCommand,
             final AuditServiceSinkFactory auditSinkFactory,
-            final FilteredResourceSourceFactory resourceSourceFactory,
-            final ErrorSourceFactory errorSourceFactory) {
+            final FilteredResourceSourceFactory resourceSourceFactory) {
         this.tokenOffsetController = tokenOffsetController;
+        this.tokenAEMCommand = tokenAEMCommand;
         this.auditSinkFactory = auditSinkFactory;
         this.resourceSourceFactory = resourceSourceFactory;
-        this.errorSourceFactory = errorSourceFactory;
     }
 
     /**
@@ -201,19 +205,18 @@ public class WebSocketEventService {
                                                 .withType(MessageType.RESOURCE)
                                                 .withHeader(Token.HEADER, token).noHeaders()
                                                 .withBody(committablePair.first().getResourceNode()))
-                                        .withCommittable(committablePair.second())
-                                        .withFilteredResourceRequest(committablePair.first()))
+                                        .withResourceAndCommittable(committablePair))
 
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
 
                         // If an error occurred finding the offset, emit a single ERROR message without a committable
-                        .orElse(Source.single(AuditableWebSocketMessage.Builder.create()
+                        .orElseGet(() -> Source.single(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
                                         .withHeader(Token.HEADER, token).noHeaders()
                                         .withBody(offsetResponse.getException()))
-                                .withoutCommittable())));
+                                .withoutAudit())));
     }
 
     /**
@@ -223,18 +226,28 @@ public class WebSocketEventService {
      * @return a source of {@link WebSocketMessage}s with a {@link MessageType#ERROR} and the {@link AuditErrorMessage#getError()}.getMessage() attached
      */
     private Source<AuditableWebSocketMessage, NotUsed> createErrorSource(final String token) {
-        return this.errorSourceFactory.create(token)
-                // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
-                .map(committablePair -> AuditableWebSocketMessage.Builder.create()
-                        .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                .withType(MessageType.ERROR)
-                                .withHeader(Token.HEADER, token).noHeaders()
-                                .withBody(committablePair.first().getError().getMessage()))
-                        .withCommittable(committablePair.second())
-                        .withAuditErrorMessage(committablePair.first()))
+        return Source.single(token)
 
-                // Ignore this stream's materialization
-                .mapMaterializedValue(ignoredMat -> NotUsed.notUsed());
+                .via(TokenAuditErrorMessageController.asGetterFlow(this.tokenAEMCommand))
+
+                .flatMapConcat(aemResponse -> Source.from(Optional.ofNullable(aemResponse.getMessageEntities())
+
+                        .map(errorMessageList -> errorMessageList.stream()
+                                // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
+                                .map(messageEntity -> AuditableWebSocketMessage.Builder.create()
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.ERROR)
+                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withBody(messageEntity.getError()))
+                                        .withoutAudit())
+                                .collect(Collectors.toList()))
+
+                        .orElseGet(() -> List.of(AuditableWebSocketMessage.Builder.create()
+                                .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                        .withType(MessageType.ERROR)
+                                        .withHeader(Token.HEADER, token).noHeaders()
+                                        .withBody(aemResponse.getException()))
+                                .withoutAudit()))));
     }
 
     /**
@@ -251,6 +264,6 @@ public class WebSocketEventService {
                         .withType(MessageType.COMPLETE)
                         .withHeader(Token.HEADER, token).noHeaders()
                         .noBody())
-                .withoutCommittable());
+                .withoutAudit());
     }
 }

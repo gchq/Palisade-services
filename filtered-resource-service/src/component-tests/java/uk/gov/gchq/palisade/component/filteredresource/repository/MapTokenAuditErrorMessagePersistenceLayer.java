@@ -16,60 +16,36 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
-import akka.japi.Pair;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.CrudRepositoryPop;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * Map-based implementation of persistence layer for testing purposes
  */
 public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {
-    final Map<String, AuditErrorMessage> tokenAuditErrorMessage = new HashMap<>();
+    final Map<String, AuditErrorMessage> errorMessageMap = new HashMap<>();
 
     @Override
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
-        var auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(userId).withResourceId(resourceId).withContext(context).withAttributes(attributes).withError(error);
-        return CompletableFuture.completedFuture(new TokenAuditErrorMessageEntity(token, tokenAuditErrorMessage.putIfAbsent(token, auditErrorMessage)));
+        return null;
     }
 
     @Override
-    public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
-        Map<String, AuditErrorMessage> mapOfMatchingTokensAndAuditErrorMessages = tokenAuditErrorMessage
-                .entrySet()
-                .stream()
-                .filter(map -> token.equals(map.getKey()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        List<TokenAuditErrorMessageEntity> tokenAuditErrorMessageEntities = new ArrayList<>();
-        for (Map.Entry<String, AuditErrorMessage> entry : mapOfMatchingTokensAndAuditErrorMessages.entrySet()) {
-            tokenAuditErrorMessageEntities.add(new TokenAuditErrorMessageEntity(entry.getKey(), entry.getValue()));
-        }
-        return CompletableFuture.completedFuture(Optional.of(tokenAuditErrorMessageEntities));
+    public CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
+        return null;
     }
 
     @Override
-    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
-        var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
-        this.tokenAuditErrorMessage.remove(token);
-        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError()), null)));
-    }
-
-    @Override
-    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final TokenAuditErrorMessageEntity entity) {
-        var auditErrorMessage = this.tokenAuditErrorMessage.get(entity.getToken());
-        this.tokenAuditErrorMessage.remove(entity.getToken(), auditErrorMessage);
-        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(entity.getToken(), auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError()), null)));
+    public CompletableFuture<Void> deleteAll(final List<TokenAuditErrorMessageEntity> listAEM) {
+        return null;
     }
 }

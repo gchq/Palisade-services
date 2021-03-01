@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
-import akka.japi.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,6 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -62,42 +60,13 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     }
 
     @Override
-    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
-        // Get the exception from the repository
-        return CompletableFuture.supplyAsync(() -> repository.findFirstByToken(token), executor)
-                // Then delete the exception from the repositry
-                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(this::asyncDelete, entity))))
-                .thenApply((Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>> repositoryPopPair) -> {
-                    LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer pop error is {}", repositoryPopPair.map(entity -> entity.first().toString()).orElse("empty"));
-                    return repositoryPopPair;
-                });
-    }
-
-    @Override
-    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final TokenAuditErrorMessageEntity entity) {
-        // Get the exception from the repository
-        return CompletableFuture.supplyAsync(() -> repository.findByEntity(entity), executor)
-                // Then delete the exception from the repositry
-                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(messageEntity -> Pair.create(messageEntity, new CrudRepositoryPop(this::asyncDelete, messageEntity))))
-                .thenApply((Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>> repositoryPopPair) -> {
-                    LOGGER.info("JPATokenAuditErrorMessagePersistenceLayer pop error is {}", repositoryPopPair.map(tokenEntity -> tokenEntity.first().toString()).orElse("empty"));
-                    return repositoryPopPair;
-                });
-    }
-
-    @Override
-    public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
+    public CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
         return CompletableFuture.supplyAsync(() -> repository.findAllByToken(token), executor);
     }
 
-    /**
-     * Calls the {@link TokenAuditErrorMessageRepository#delete(Object)} method and deletes the entity from the backing store,
-     * then returns a CompletableFuture when completed
-     *
-     * @param entity the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
-     * @return a CompletableFuture#void after the async call has completed
-     */
-    public CompletableFuture<Void> asyncDelete(final TokenAuditErrorMessageEntity entity) {
-        return CompletableFuture.runAsync(() -> repository.delete(entity), executor);
+    @Override
+    public CompletableFuture<Void> deleteAll(final List<TokenAuditErrorMessageEntity> listAEM) {
+        return CompletableFuture.runAsync(() -> repository.deleteAll(listAEM), executor);
     }
+
 }

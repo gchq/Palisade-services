@@ -55,7 +55,6 @@ import java.util.StringJoiner;
 @RedisHash(value = "TokenAuditErrorMessageEntity", timeToLive = 6000L)
 public class TokenAuditErrorMessageEntity implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenAuditErrorMessageEntity.class);
 
     @Id
     @GeneratedValue
@@ -88,22 +87,6 @@ public class TokenAuditErrorMessageEntity implements Serializable {
 
     public TokenAuditErrorMessageEntity() {
         // no-args constructor
-    }
-
-    /**
-     * Constructor taking a token and AuditErrorMessage
-     *
-     * @param token             the unique request token
-     * @param auditErrorMessage the {@link AuditErrorMessage} used to populate this class.
-     */
-    public TokenAuditErrorMessageEntity(String token, AuditErrorMessage auditErrorMessage) {
-        this.token = token;
-        this.userId = auditErrorMessage.getUserId();
-        this.resourceId = auditErrorMessage.getResourceId();
-        this.context = auditErrorMessage.getContext();
-        this.attributes = auditErrorMessage.getAttributes();
-        this.error = auditErrorMessage.getError();
-        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenAuditErrorMessageEntity");
     }
 
     /**
@@ -161,16 +144,6 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @Generated
     public Long getTimeToLive() {
         return timeToLive;
-    }
-
-    public AuditErrorMessage getAuditErrorMessage() {
-        LOGGER.info("Retrieved token {}, userId {}, resourceId {}, context {}, attributes {}, error", this.token, getUserId(), getResourceId(), getContext(), getAttributes(), getError());
-        return AuditErrorMessage.Builder.create()
-                .withUserId(getUserId())
-                .withResourceId(getResourceId())
-                .withContext(getContext())
-                .withAttributes(getAttributes())
-                .withError(getError());
     }
 
     @Override

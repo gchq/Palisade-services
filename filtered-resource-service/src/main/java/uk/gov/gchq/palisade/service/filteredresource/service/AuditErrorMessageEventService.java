@@ -20,8 +20,6 @@ import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessa
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -53,9 +51,4 @@ public class AuditErrorMessageEventService {
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
         return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError());
     }
-
-    public CompletableFuture<Optional<List<TokenAuditErrorMessageEntity>>> getAllAuditErrorMessages(final String token) {
-        return this.persistenceLayer.getAllAuditErrorMessages(token);
-    }
-
 }

@@ -97,7 +97,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    ActorRef<TokenAuditErrorMessageCommand> tokenOffsetController(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
+    ActorRef<TokenAuditErrorMessageCommand> tokenErrorController(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
         return TokenAuditErrorMessageController.create(persistenceLayer);
     }
 

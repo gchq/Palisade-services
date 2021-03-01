@@ -38,7 +38,7 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
      * @return the newly saved {@link TokenAuditErrorMessageEntity} containing the excpetion and unique token
      */
     default TokenAuditErrorMessageEntity save(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
-        return save(new TokenAuditErrorMessageEntity(token, resourceId, userId, context, attributes, error));
+        return save(new TokenAuditErrorMessageEntity(token, resourceId, userId, context, attributes, error.getMessage()));
     }
 
     /**
@@ -47,9 +47,6 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
      * @param token the unique request token
      * @return an Optional of the {@link TokenAuditErrorMessageEntity} containing the exception and token
      */
-    Optional<List<TokenAuditErrorMessageEntity>> findAllByToken(final String token);
+    List<TokenAuditErrorMessageEntity> findAllByToken(final String token);
 
-    Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
-
-    Optional<TokenAuditErrorMessageEntity> findByEntity(final TokenAuditErrorMessageEntity entity);
 }

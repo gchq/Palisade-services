@@ -31,19 +31,16 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableG
  */
 public class AuditableWebSocketMessage {
     private final WebSocketMessage websocketMessage;
-    private final Committable committable;
     private final FilteredResourceRequest filteredResourceRequest;
-    private final AuditErrorMessage auditErrorMessage;
+    private final Committable committable;
 
     protected AuditableWebSocketMessage(
             final @NonNull WebSocketMessage websocketMessage,
-            final @NonNull Committable committable,
             final @Nullable FilteredResourceRequest filteredResourceRequest,
-            final @Nullable AuditErrorMessage auditErrorMessage) {
+            final @Nullable Committable committable) {
         this.websocketMessage = websocketMessage;
-        this.committable = committable;
         this.filteredResourceRequest = filteredResourceRequest;
-        this.auditErrorMessage = auditErrorMessage;
+        this.committable = committable;
     }
 
     @Generated
@@ -61,11 +58,6 @@ public class AuditableWebSocketMessage {
         return filteredResourceRequest;
     }
 
-    @Generated
-    public AuditErrorMessage getAuditErrorMessage() {
-        return auditErrorMessage;
-    }
-
     /**
      * Builder for {@link AuditableWebSocketMessage} objects, combining an outbound {@link WebSocketMessage} with its inbound {@link FilteredResourceRequest}.
      * This is later used to commit the inbound request to Kafka such that it will not be re-read.
@@ -77,8 +69,8 @@ public class AuditableWebSocketMessage {
          * @return the next step in the builder chain
          */
         public static IWebSocketMessage create() {
-            return websocketMessage -> committable -> auditablePair ->
-                    new AuditableWebSocketMessage(websocketMessage, committable, auditablePair.first(), auditablePair.second());
+            return websocketMessage -> resourceAndComittable ->
+                    new AuditableWebSocketMessage(websocketMessage, resourceAndComittable.first(), resourceAndComittable.second());
         }
 
         /**
@@ -98,54 +90,22 @@ public class AuditableWebSocketMessage {
          * Adds the committable to the message
          */
         public interface ICommittable {
-            /**
-             * Adds a committable to the WebSocketMessage
-             * @param committable the committable object
-             * @return a link to the next step in the builder
-             */
-            IAuditable withCommittable(Committable committable);
+
+            AuditableWebSocketMessage withResourceAndCommittable(@NonNull Pair<FilteredResourceRequest, Committable> resourceAndCommittable);
+
+            default AuditableWebSocketMessage withResourceAndCommittable(@NonNull FilteredResourceRequest request, @NonNull Committable committable) {
+                return withResourceAndCommittable(Pair.create(request, committable));
+            }
 
             /**
              * By default, no committable exists to return nulls for the committable and AuditablePair
              *
              * @return a null comittable and a null auditablePair
              */
-            default AuditableWebSocketMessage withoutCommittable() {
-                return withCommittable(null).withAuditablePair(Pair.create(null, null));
+            default AuditableWebSocketMessage withoutAudit() {
+                return withResourceAndCommittable(Pair.create(null, null));
             }
         }
 
-        /**
-         * Adds the AuditablePair of a {@link FilteredResourceRequest} and {@link AuditErrorMessage} to the message
-         */
-        public interface IAuditable {
-            /**
-             * Adds the Auditable pair to the message
-             *
-             * @param auditablePair the pair containing the {@link FilteredResourceRequest} and {@link AuditErrorMessage}
-             * @return the AuditableWebSocketMessage containing the auditablePair
-             */
-            AuditableWebSocketMessage withAuditablePair(@NonNull Pair<FilteredResourceRequest, AuditErrorMessage> auditablePair);
-
-            /**
-             * Adds the AuditablePair with only a {@link FilteredResourceRequest} and no {@link AuditErrorMessage}
-             *
-             * @param request the {@link FilteredResourceRequest}
-             * @return a auditablePair with only a {@link FilteredResourceRequest}
-             */
-            default AuditableWebSocketMessage withFilteredResourceRequest(final @NonNull FilteredResourceRequest request) {
-                return withAuditablePair(Pair.create(request, null));
-            }
-
-            /**
-             * Adds the AuditablePair with only a {@link AuditErrorMessage} and no {@link FilteredResourceRequest}
-             *
-             * @param auditErrorMessage the {@link AuditErrorMessage}
-             * @return a auditablePair with only a {@link AuditErrorMessage}
-             */
-            default AuditableWebSocketMessage withAuditErrorMessage(final @NonNull AuditErrorMessage auditErrorMessage) {
-                return withAuditablePair(Pair.create(null, auditErrorMessage));
-            }
-        }
     }
 }

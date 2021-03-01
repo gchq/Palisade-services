@@ -155,6 +155,12 @@ class KafkaRestWebSocketContractTest {
                     .withHeader(Token.HEADER, token)
                     .noHeaders()
                     .withBody(leafResource);
+
+            BiFunction<String, String, WebSocketMessage> errorBuilder = (token, errorMessage) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.ERROR)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .withBody(errorMessage);
             // Special instances
             HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
             HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
@@ -239,6 +245,7 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg
                             ),
                             List.of(
+                                    errorBuilder.apply("test-token-3", "")
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
@@ -262,9 +269,10 @@ class KafkaRestWebSocketContractTest {
                             List.of(),
                             Map.of(),
                             List.of(
-                                    ctsMsg
+                                    ctsMsg, ctsMsg
                             ),
                             List.of(
+                                    errorBuilder.apply("test-token-4", ""),
                                     WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
                             ),
                             List.of(
@@ -298,13 +306,13 @@ class KafkaRestWebSocketContractTest {
                             ),
                             Map.of(),
                             List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
+                                    errorBuilder.apply("test-token-5", ""),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.2").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.3").getResource()),
-
                                     completeMsgBuilder.apply("test-token-5")
                             ),
                             List.of(
@@ -381,6 +389,8 @@ class KafkaRestWebSocketContractTest {
         offsetsPersistence.forEach((token, offset) -> persistenceLayer
                 .overwriteOffset(token, offset)
                 .join());
+
+        TimeUnit.SECONDS.sleep(3);
 
         // When
         // Send each websocketMessage request and receive responses
