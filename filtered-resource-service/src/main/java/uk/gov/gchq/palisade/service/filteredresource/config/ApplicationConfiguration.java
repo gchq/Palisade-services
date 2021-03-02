@@ -75,7 +75,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    ErrorMessageEventService auditErrorMessageEventService(final TokenErrorMessagePersistenceLayer persistenceLayer) {
+    ErrorMessageEventService errorMessageEventService(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         return new ErrorMessageEventService(persistenceLayer);
     }
 

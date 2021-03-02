@@ -46,7 +46,7 @@ public class AttributesConverter implements AttributeConverter<Map, String> {
         try {
             return this.objectMapper.writeValueAsString(attributes);
         } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Could not convert rules to json string", e);
+            throw new SerializationFailedException("Could not convert a map of attributes to json string", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class AttributesConverter implements AttributeConverter<Map, String> {
         try {
             return this.objectMapper.readValue(attribute, Map.class);
         } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Could not convert json string to rules", e);
+            throw new SerializationFailedException("Could not convert json string to a Map of attributes", e);
         }
     }
 }

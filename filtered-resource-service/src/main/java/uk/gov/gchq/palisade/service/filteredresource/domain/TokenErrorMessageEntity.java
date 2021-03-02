@@ -102,10 +102,10 @@ public class TokenErrorMessageEntity implements Serializable {
      * @param error       the error attached to the {@link AuditErrorMessage}
      */
     @PersistenceConstructor
-    public TokenErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
+    public TokenErrorMessageEntity(final String token, final String userId, final String resourceId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
         this.token = token;
-        this.resourceId = resourceId;
         this.userId = userId;
+        this.resourceId = resourceId;
         this.context = context;
         this.serviceName = serviceName;
         this.attributes = attributes;

@@ -32,15 +32,15 @@ public interface TokenErrorMessagePersistenceLayer {
      * Save the token and variabled from a {@link AuditErrorMessage} in the persistence
      *
      * @param token       the unique token from the request to the Palisade Service
-     * @param resourceId  the id of the resource associated with the request
      * @param userId      the id of the user associated with the request
+     * @param resourceId  the id of the resource associated with the request
      * @param context     the context associated with the request
      * @param serviceName the name of the service that the error was thrown from
      * @param attributes  any additional attributes about the request
      * @param error       the error thrown in the service
      * @return a {@link CompletableFuture} of a {@link TokenErrorMessageEntity} containing the values just persisted
      */
-    CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, String resourceId, String userId, Context context, String serviceName, Map<String, String> attributes, Throwable error);
+    CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, String userId, String resourceId, Context context, String serviceName, Map<String, String> attributes, Throwable error);
 
     /**
      * Gets all AuditErrorMessages that are linked to the unique request token, and packages them in a List of {@link TokenErrorMessageEntity}(s)

@@ -45,9 +45,9 @@ public class JpaTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     }
 
     @Override
-    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context,
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String userId, final String resourceId, final Context context,
                                                                            final String serviceName, final Map<String, String> attributes, final Throwable error) {
-        return CompletableFuture.supplyAsync(() -> repository.save(token, resourceId, userId, context, serviceName, attributes, error), executor);
+        return CompletableFuture.supplyAsync(() -> repository.save(token, userId, resourceId, context, serviceName, attributes, error), executor);
     }
 
     @Override
