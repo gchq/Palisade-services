@@ -39,14 +39,13 @@ public final class AuditErrorMessage extends AuditMessage {
     @JsonCreator
     private AuditErrorMessage(
             final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("token") String token,
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("error") Throwable error) {
 
-        super(leafResourceId, token, userId, resourceId, context, attributes);
+        super(userId, resourceId, context, attributes, leafResourceId);
 
         this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error" + " cannot be null"));
 
@@ -57,7 +56,6 @@ public final class AuditErrorMessage extends AuditMessage {
         return error;
     }
 
-
     /**
      * Builder class for the creation of instances of the AuditErrorMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
@@ -67,17 +65,16 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditErrorMessage class.
          *
-         * @return interface {@link ILeafResourceId} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
         public static ILeafResourceId create() {
-            return leafResourceId -> token -> userId -> resourceId -> context -> attributes -> error ->
-                    new AuditErrorMessage(leafResourceId, token, userId, resourceId, context, attributes, error);
+            return leafResourceId -> userId -> resourceId -> context -> attributes -> error ->
+                    new AuditErrorMessage(leafResourceId, userId, resourceId, context, attributes, error);
         }
 
         /**
-         * Starter method for the Builder class that uses both the {@link DataRequest} objects for the construction of
-         * the {@code AuditErrorMessage}.  This method expects there to be a {@code DataRequest} to start the build and
-         * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
+         * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
+         * construction and will expect the next to builder method to be for the attribute map
            *
          * @param auditableAuthorisedDataRequest   the client request received by the data-service
          * @return interface {@link IAttributes} for the next step in the build.
@@ -89,17 +86,14 @@ public final class AuditErrorMessage extends AuditMessage {
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
-                    .withToken(dataRequest.getToken())
                     .withUserId(authorisedDataRequest.getUser().getUserId().getId())
                     .withResourceId(authorisedDataRequest.getResource().getId())
                     .withContext(authorisedDataRequest.getContext());
         }
 
         /**
-         * Starter method for the Builder class that uses both the {@link DataRequest} and the {@link DataReaderRequest}
-         * objects for the construction of the {@code AuditErrorMessage}.
-         * This method expects there to be a {@code DataRequest} and a {@code DataReaderRequest} to start the build and
-         * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
+         * Starter method for the Builder class that uses the {@link DataRequest} and will expect the next builder
+         * method to be for the attribue map
          *
          * @param dataRequest the authorised request stored by the attribute-masking-service
          * @return interface {@link IAttributes} for the next step in the build.
@@ -108,10 +102,10 @@ public final class AuditErrorMessage extends AuditMessage {
         public static IAttributes create(final DataRequest dataRequest) {
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
-                    .withToken(dataRequest.getToken())
                     .withUserId(null)
                     .withResourceId(null)
                     .withContext(null);
+
         }
 
         /**
@@ -122,22 +116,9 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the leafResource Id.
              *
              * @param leafResourceId leaf resource id for this  request.
-             * @return interface {@link IToken} for the next step of the build.
+             * @return interface {@link IUserId} for the next step of the build.
              */
-            IToken withLeafResourceId(String leafResourceId);
-        }
-
-        /**
-         * Adds the token information to the message.
-         */
-        public interface IToken {
-            /**
-             * Adds the token.
-             *
-             * @param token token to uniquely identify the request.
-             * @return interface {@link IUserId} for the for the next step in the build.
-             */
-            IUserId withToken(String token);
+            IUserId withLeafResourceId(String leafResourceId);
         }
 
         /**
@@ -187,7 +168,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the attributes for the message.
              *
              * @param attributes timestamp for the request.
-             * @return interface {@link IError} for the next step in the build.
+             * @return interface {@link ILeafResourceId} for the next step in the build.
              */
             IError withAttributes(Map<String, Object> attributes);
         }

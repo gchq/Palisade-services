@@ -39,7 +39,7 @@ import java.util.StringJoiner;
 /**
  * This is the parent class for Audit information.  It represents the common component of the data that is to be
  * sent to Audit Service.  Note this version of {@code AuditMessage} is unique in comparison to the {@code AuditMessage}
- * from the other service in that it will include the {@code leafResourceId} and {@code token} plus the {@code userID},
+ * from the other service in that it will include the {@code leafResourceId}.  In addition the {@code userID},
  * {@code resourceID} and {@code context} can be null.  This can occur when this message represents an error for a
  * request that is not authorised to access the data.
  */
@@ -49,12 +49,6 @@ public class AuditMessage {
     public static final String SERVICE_NAME = "data-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @JsonProperty("leafResourceId")
-    private final String leafResourceId;  //leafResource Id requested
-
-    @JsonProperty("token")
-    private final String token;  //token for this request
 
     @JsonProperty("userId")
     @Nullable
@@ -83,17 +77,17 @@ public class AuditMessage {
     @JsonProperty("attributes")
     protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
 
+    @JsonProperty("leafResourceId")
+    private final String leafResourceId;  //leafResource ID for the resource
+
     @JsonCreator
     protected AuditMessage(
-            final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("token") String token,
             @Nullable final @JsonProperty("userId") String userId,
             @Nullable final @JsonProperty("resourceId") String resourceId,
             @Nullable final @JsonProperty("context") Context context,
-            final @JsonProperty("attributes") Map<String, Object> attributes) {
+            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("leafResourceId") String leafResourceId) {
 
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("leafResourceId" + " cannot be null"));
-        this.token = Optional.ofNullable(token).orElseThrow(() -> new IllegalArgumentException("token" + " cannot be null"));
 
         //these can be null under certain error related conditions
         this.userId = userId;
@@ -101,6 +95,7 @@ public class AuditMessage {
         this.context = context;
 
         this.attributes = Optional.ofNullable(attributes).orElseGet(HashMap::new);
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("leafResourceId" + " cannot be null"));
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
         try {
@@ -110,17 +105,6 @@ public class AuditMessage {
         } catch (UnknownHostException e) {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
-
-    }
-
-    @Generated
-    public String getLeafResourceId() {
-        return leafResourceId;
-    }
-
-    @Generated
-    public String getToken() {
-        return token;
     }
 
     @Generated
@@ -139,6 +123,16 @@ public class AuditMessage {
     @Nullable
     public Context getContext() {
         return context;
+    }
+
+    @Generated
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Generated
+    public String getLeafResourceId() {
+        return leafResourceId;
     }
 
     @Generated
@@ -161,12 +155,6 @@ public class AuditMessage {
         return serverHostname;
     }
 
-    @Generated
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-
     @Override
     @Generated
     public boolean equals(final Object o) {
@@ -177,30 +165,27 @@ public class AuditMessage {
             return false;
         }
         AuditMessage that = (AuditMessage) o;
-        return leafResourceId.equals(that.leafResourceId) &&
-                token.equals(that.token) &&
-                Objects.equals(userId, that.userId) &&
-                Objects.equals(resourceId, that.resourceId) &&
-                Objects.equals(context, that.context) &&
+        return  userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                attributes.equals(that.attributes ) &&
+                leafResourceId.equals(that.leafResourceId) &&
                 serviceName.equals(that.serviceName) &&
                 timestamp.equals(that.timestamp) &&
                 serverIP.equals(that.serverIP) &&
-                serverHostname.equals(that.serverHostname) &&
-                attributes.equals(that.attributes);
+                serverHostname.equals(that.serverHostname);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(leafResourceId, token, userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
+        return Objects.hash(userId, resourceId, context, attributes, leafResourceId, serviceName, timestamp, serverIP, serverHostname);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditMessage.class.getSimpleName() + "[", "]")
-                .add("leafResourceId='" + leafResourceId + "'")
-                .add("token='" + token + "'")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
@@ -209,6 +194,7 @@ public class AuditMessage {
                 .add("serverIP='" + serverIP + "'")
                 .add("serverHostname='" + serverHostname + "'")
                 .add("attributes=" + attributes)
+                .add("leafResourceId='" + leafResourceId + "'")
                 .toString();
     }
 }

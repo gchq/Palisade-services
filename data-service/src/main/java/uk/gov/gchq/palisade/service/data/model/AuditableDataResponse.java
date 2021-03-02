@@ -41,8 +41,7 @@ public final class AuditableDataResponse {
             @Nullable final AuditSuccessMessage auditSuccessMessage,
             @Nullable final AuditErrorMessage auditErrorMessage) {
 
-        this.token = Optional.ofNullable(token)
-                .orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
+        this.token = Optional.ofNullable(token).orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
         this.auditSuccessMessage = auditSuccessMessage;
         this.auditErrorMessage = auditErrorMessage;
     }
