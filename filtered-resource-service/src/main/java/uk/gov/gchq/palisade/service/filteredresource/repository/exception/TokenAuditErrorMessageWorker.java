@@ -23,11 +23,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageWorker.WorkerCommand;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 

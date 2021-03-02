@@ -44,6 +44,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.assertj.core.util.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,13 +62,13 @@ import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.contract.filteredresource.UserServiceAuditErrorMessage;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -158,9 +159,9 @@ class KafkaRestWebSocketContractTest {
                     .noHeaders()
                     .withBody(leafResource);
 
-            BiFunction<String, String, WebSocketMessage> errorBuilder = (token, errorMessage) -> WebSocketMessage.Builder.create()
+            TriFunction<String, String, String, WebSocketMessage> errorBuilder = (token, serviceName, errorMessage) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.ERROR)
-                    .withHeader(Token.HEADER, token)
+                    .withHeader(Token.HEADER, token).withHeader("service-name", serviceName)
                     .noHeaders()
                     .withBody(errorMessage);
             // Special instances
@@ -247,7 +248,8 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-3", "No Start Marker was observed for token: " + "test-token-3")
+                                    errorBuilder.apply("test-token-3", "filtered-resource-service",
+                                            "uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException: No Start Marker was observed for token: " + "test-token-3")
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
@@ -271,10 +273,10 @@ class KafkaRestWebSocketContractTest {
                             List.of(),
                             Map.of(),
                             List.of(
-                                    ctsMsg, ctsMsg
+                                    ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-4", "No Resources were observed for token: " + "test-token-4"),
+                                    // No Error is expected to be returned to the client
                                     WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
                             ),
                             List.of(
@@ -299,30 +301,26 @@ class KafkaRestWebSocketContractTest {
                             ),
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")),
-                                            AuditErrorMessage.Builder.create().withUserId("userId")
+                                            UserServiceAuditErrorMessage.Builder.create().withUserId("userId")
                                                     .withResourceId("file:/file/resource.4")
                                                     .withContext(new Context().purpose("purpose"))
                                                     .withAttributes(Collections.emptyMap())
                                                     .withError(new Throwable("No userId matching: " + "userId"))
-                                            )
+                                    )
                             ),
                             Map.of(),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    errorBuilder.apply("test-token-5", "No userId matching: userId"),
+                                    errorBuilder.apply("test-token-5", "user-service", "No userId matching: userId"),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.2").getResource()),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.3").getResource()),
                                     completeMsgBuilder.apply("test-token-5")
                             ),
                             List.of(
-                                    AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file/resource.4")
-                                            .withContext(new Context().purpose("purpose"))
-                                            .withAttributes(Collections.emptyMap())
-                                            .withError(new Throwable("No userId matching: " + "userId"))
+                                    //Empty as this test doesnt output anything on to the erorr topic
                             )
                     )
             );

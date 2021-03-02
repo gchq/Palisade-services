@@ -49,6 +49,7 @@ public class AuditErrorMessageEventService {
      * @return a {@link CompletableFuture} of a {@link TokenAuditErrorMessageEntity} representing the async completion of the store request
      */
     public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
-        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getAttributes(), auditErrorMessage.getError());
+        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getServiceName(),
+                auditErrorMessage.getAttributes(), auditErrorMessage.getError());
     }
 }

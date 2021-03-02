@@ -47,6 +47,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.SERVICE_NAME;
+
 /**
  * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter}
  * creates an instance of the {@link WebSocketEventService#createFlowGraph(String)} to handle the rest of the request.
@@ -212,7 +214,7 @@ public class WebSocketEventService {
                                 .recover(PartialFunction.fromFunction(exception -> AuditableWebSocketMessage.Builder.create()
                                         .withWebSocketMessage(WebSocketMessage.Builder.create()
                                                 .withType(MessageType.ERROR)
-                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
                                                 .withBody(exception.getMessage()))
                                         .withoutAudit()))
 
@@ -223,7 +225,7 @@ public class WebSocketEventService {
                         .orElseGet(() -> Source.single(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
-                                        .withHeader(Token.HEADER, token).noHeaders()
+                                        .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
                                         .withBody(offsetResponse.getException().getMessage()))
                                 .withoutAudit())));
     }
@@ -240,10 +242,11 @@ public class WebSocketEventService {
                 .via(TokenAuditErrorMessageController.asGetterFlow(this.tokenAEMCommand))
 
                 .flatMapConcat(persistenceResponse -> Source.from(Optional.ofNullable(persistenceResponse.getException())
+                        // If there was an exception when retrieving an entity from the persistence then build a WebSocketMessage with the exception
                         .map(exception -> List.of(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
-                                        .withHeader(Token.HEADER, token).noHeaders()
+                                        .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
                                         .withBody(exception.getMessage()))
                                 .withoutAudit()))
 
@@ -252,7 +255,7 @@ public class WebSocketEventService {
                                 .map(errorEntity -> AuditableWebSocketMessage.Builder.create()
                                         .withWebSocketMessage(WebSocketMessage.Builder.create()
                                                 .withType(MessageType.ERROR)
-                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, errorEntity.getServiceName()).noHeaders()
                                                 .withBody(errorEntity.getError()))
                                         .withoutAudit())
                                 .collect(Collectors.toList()))));
@@ -276,7 +279,7 @@ public class WebSocketEventService {
     }
 
     // Akka's concat is eager by default
-    private static <Out> Source<Out, NotUsed> lazyConcat(List<Supplier<Source<Out, NotUsed>>> sources) {
+    private static <OUT> Source<OUT, NotUsed> lazyConcat(List<Supplier<Source<OUT, NotUsed>>> sources) {
         return Source.from(sources).flatMapConcat(Supplier::get);
     }
 }

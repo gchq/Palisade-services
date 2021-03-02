@@ -33,7 +33,7 @@ public interface TokenAuditErrorMessagePersistenceLayer {
      * @param token the unique token
      * @return a {@link CompletableFuture} of a {@link TokenAuditErrorMessageEntity} containing the value just persisted
      */
-    CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, String resourceId, String userId, Context context, Map<String, String> attributes, Throwable error);
+    CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, String resourceId, String userId, Context context, String serviceName, Map<String, String> attributes, Throwable error);
 
     CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token);
 

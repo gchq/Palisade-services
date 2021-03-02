@@ -15,8 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -74,6 +72,9 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @Convert(converter = ContextConverter.class)
     private Context context;
 
+    @Column(name = "service_name", columnDefinition = "varchar(255)")
+    private String serviceName;
+
     @Convert(attributeName = "key.", converter = AttributesConverter.class)
     @ElementCollection
     private Map<String, String> attributes;
@@ -100,11 +101,12 @@ public class TokenAuditErrorMessageEntity implements Serializable {
      * @param error      the error attached to the {@link AuditErrorMessage}
      */
     @PersistenceConstructor
-    public TokenAuditErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final String error) {
+    public TokenAuditErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
         this.token = token;
         this.resourceId = resourceId;
         this.userId = userId;
         this.context = context;
+        this.serviceName = serviceName;
         this.attributes = attributes;
         this.error = error;
         this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenAuditErrorMessageEntity");
@@ -128,6 +130,11 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @Generated
     public Context getContext() {
         return context;
+    }
+
+    @Generated
+    public String getServiceName() {
+        return serviceName;
     }
 
     @Generated
@@ -159,6 +166,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(resourceId, that.resourceId) &&
                 Objects.equals(context, that.context) &&
+                Objects.equals(serviceName, that.serviceName) &&
                 Objects.equals(attributes, that.attributes) &&
                 Objects.equals(error, that.error);
     }
@@ -166,7 +174,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, userId, resourceId, context, attributes, error);
+        return Objects.hash(token, userId, resourceId, context, serviceName, attributes, error);
     }
 
     @Override
@@ -177,6 +185,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
                 .add("userId=" + userId)
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
+                .add("serviceName=" + serviceName)
                 .add("attributes=" + attributes)
                 .add("error=" + error)
                 .add(super.toString())

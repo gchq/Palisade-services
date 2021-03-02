@@ -37,8 +37,8 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
      * @param token the unique request token
      * @return the newly saved {@link TokenAuditErrorMessageEntity} containing the excpetion and unique token
      */
-    default TokenAuditErrorMessageEntity save(final String token, final String resourceId, final String userId, final Context context, final Map<String, String> attributes, final Throwable error) {
-        return save(new TokenAuditErrorMessageEntity(token, resourceId, userId, context, attributes, error.getMessage()));
+    default TokenAuditErrorMessageEntity save(final String token, final String resourceId, final String userId, final Context context, final String serviceName, final Map<String, String> attributes, final Throwable error) {
+        return save(new TokenAuditErrorMessageEntity(token, resourceId, userId, context, serviceName, attributes, error.getMessage()));
     }
 
     /**

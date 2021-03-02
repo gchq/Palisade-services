@@ -76,6 +76,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.SERVICE_NAME;
+
 /**
  * Configuration for the Akka Runnable Graph used by the {@link FilteredResourceApplication}.
  * Configures the connection between Kafka, Akka and the service
@@ -356,7 +358,7 @@ public class AkkaRunnableGraph {
                 ))
 
                 // Filter out anything from this service
-                //.filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
+                .filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
 
                 // Write exception to persistence
                 .mapAsync(PARALLELISM, committableTokenAuditErrorMessage -> auditErrorMessageEventService
