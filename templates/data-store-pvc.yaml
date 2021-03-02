@@ -38,6 +38,8 @@ metadata:
     "app.kubernetes.io/instance": "{{ $.Release.Name }}"
     "helm.sh/chart": "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
   namespace: {{ $namespace }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - {{ pluck $.Values.global.hosting $value.mode | first | default $value.mode._default }}

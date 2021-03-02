@@ -26,12 +26,13 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * An ApplicationRunner to run through a start-up schedule.
- *
  * A schedule is an ordered collection of tasks
  * A task is an unordered collection of services
  * Every service in a task must complete before the next task is started
@@ -39,11 +40,13 @@ import java.util.function.Supplier;
  */
 public class ScheduleRunner implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleRunner.class);
+    private static final String BAR = "========================";
+    private static final int POLL_SECONDS = 5;
 
     // Autowired through constructor
-    private File rootDir;
-    private List<Map.Entry<String, TaskConfiguration>> schedule;
-    private Function<String, ManagedService> serviceProducer;
+    private final File rootDir;
+    private final List<Map.Entry<String, TaskConfiguration>> schedule;
+    private final Function<String, ManagedService> serviceProducer;
 
     public ScheduleRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.rootDir = managerConfiguration.getRoot();
@@ -51,12 +54,14 @@ public class ScheduleRunner implements Runnable {
         this.serviceProducer = serviceProducer;
     }
 
+    // Suppress System.exit warning
+    @SuppressWarnings("java:S1147")
     public void waitUntilComplete(final Map<String, List<Supplier<Boolean>>> taskCompleteIndicators) {
         try {
             boolean complete = false;
             while (!complete) {
-                Thread.sleep(5000);
-                complete = taskCompleteIndicators.entrySet().stream().allMatch(indicators -> {
+                TimeUnit.SECONDS.sleep(POLL_SECONDS);
+                complete = taskCompleteIndicators.entrySet().stream().allMatch((Entry<String, List<Supplier<Boolean>>> indicators) -> {
                     String serviceName = indicators.getKey();
                     boolean serviceComplete = indicators.getValue().stream().anyMatch(Supplier::get);
                     if (!serviceComplete) {
@@ -65,18 +70,19 @@ public class ScheduleRunner implements Runnable {
                     return serviceComplete;
                 });
             }
-        } catch (Exception ex) {
+        } catch (InterruptedException ex) {
             LOGGER.error("Error while waiting for services: ", ex);
+            Thread.currentThread().interrupt();
             System.exit(1);
         }
     }
 
     public void run() {
-        schedule.forEach(taskEntry -> {
+        schedule.forEach((Entry<String, TaskConfiguration> taskEntry) -> {
             LOGGER.info("");
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.info("STARTING TASK :: {}", taskEntry.getKey());
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.debug("Will be running {}", taskEntry.getValue());
 
             Map<String, List<Supplier<Boolean>>> taskCompleteIndicators = taskEntry.getValue().runTask(rootDir, serviceProducer);
@@ -85,7 +91,7 @@ public class ScheduleRunner implements Runnable {
 
             LOGGER.info("");
             LOGGER.info("Task complete");
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.info("");
         });
     }

@@ -37,7 +37,7 @@ metadata:
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
   namespace: {{ $namespace }}
   annotations:
-    "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.mode | first | default .Values.global.persistence.classpathJars.mode._default }}

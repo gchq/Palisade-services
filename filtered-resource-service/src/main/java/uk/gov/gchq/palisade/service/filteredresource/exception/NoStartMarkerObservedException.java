@@ -22,7 +22,6 @@ package uk.gov.gchq.palisade.service.filteredresource.exception;
 public class NoStartMarkerObservedException extends RuntimeException {
 
 
-
     /**
      * Initializes this exception with the given message.
      *

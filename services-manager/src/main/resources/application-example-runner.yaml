@@ -45,6 +45,6 @@ manager:
       jar: ${example.runner}
       profiles:
         - rest
-        - eureka
+        - static
       log: rest-example.log
       err: rest-example.err
