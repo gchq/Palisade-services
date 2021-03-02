@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router;
+package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
 
 import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.server.Directives;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Route for "/loggers/{classpath}" to the Spring {@link LoggersEndpoint} for setting logging levels
  */
-public class SpringLoggersRouter implements RouteSupplier {
+public class SpringLoggersRouter implements ActuatorSupplier {
     /**
      * Provide Jackson with a zero-args-constructor creator method to call for incoming setLoggerLevel requests (POST LoggerLevels)
      */

@@ -320,7 +320,7 @@ class KafkaRestWebSocketContractTest {
                                     completeMsgBuilder.apply("test-token-5")
                             ),
                             List.of(
-                                    //Empty as this test doesnt output anything on to the erorr topic
+                                    // Empty as this test doesnt output anything on to the erorr topic
                             )
                     )
             );
