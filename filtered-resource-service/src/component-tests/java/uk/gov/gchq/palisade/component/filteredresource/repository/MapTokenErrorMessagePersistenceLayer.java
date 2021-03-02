@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,27 +30,27 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Map-based implementation of persistence layer for testing purposes
  */
-public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {
-    final Map<String, LinkedList<TokenAuditErrorMessageEntity>> errorMessageMap = new HashMap<>();
+public class MapTokenErrorMessagePersistenceLayer implements TokenErrorMessagePersistenceLayer {
+    final Map<String, LinkedList<TokenErrorMessageEntity>> errorMessageMap = new HashMap<>();
 
     @Override
-    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final String serviceName,
-                                                                                final Map<String, String> attributes, final Throwable error) {
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final String serviceName,
+                                                                           final Map<String, String> attributes, final Throwable error) {
         errorMessageMap.computeIfAbsent(token, t -> new LinkedList<>());
-        TokenAuditErrorMessageEntity entity = new TokenAuditErrorMessageEntity(token, userId, resourceId, context, serviceName, attributes, error.getMessage());
+        TokenErrorMessageEntity entity = new TokenErrorMessageEntity(token, userId, resourceId, context, serviceName, attributes, error.getMessage());
         errorMessageMap.get(token).addLast(entity);
 
         return CompletableFuture.completedFuture(entity);
     }
 
     @Override
-    public CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
+    public CompletableFuture<List<TokenErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
         return CompletableFuture.completedFuture(Collections.unmodifiableList(errorMessageMap.getOrDefault(token, new LinkedList<>())));
     }
 
     @Override
-    public CompletableFuture<Void> deleteAll(final List<TokenAuditErrorMessageEntity> listAEM) {
-        errorMessageMap.values().forEach(entityList -> entityList.removeAll(listAEM));
+    public CompletableFuture<Void> deleteAll(final List<TokenErrorMessageEntity> messageEntityList) {
+        errorMessageMap.values().forEach(entityList -> entityList.removeAll(messageEntityList));
         return CompletableFuture.completedFuture(null);
     }
 }

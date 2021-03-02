@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -53,9 +53,9 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMes
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
@@ -105,14 +105,12 @@ class AkkaWebSocketTest {
 
     // WebSocket test objects
     final TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
-    final TokenAuditErrorMessagePersistenceLayer aemPersistenceLayer = new MapTokenAuditErrorMessagePersistenceLayer();
+    final TokenErrorMessagePersistenceLayer amPersistenceLayer = new MapTokenErrorMessagePersistenceLayer();
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
-    final ActorRef<TokenAuditErrorMessageCommand> tokenAEMController = TokenAuditErrorMessageController.create(aemPersistenceLayer);
+    final ActorRef<TokenErrorMessageCommand> tokenErrorMessageCommand = TokenErrorMessageController.create(amPersistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
             .take(N_MESSAGES - 1)
             .mapMaterializedValue(notUsed -> Consumer.createNoopControl());
-    // Create en errorSourceFactory that returns 0 errors
-    final ErrorSourceFactory errorSourceFactory = (token, auditErrorMessage) -> Source.empty();
 
     // This reference is updated by our audit service and wiped clean in the setUp() method before each test
     final AtomicReference<LinkedList<FilteredResourceRequest>> auditedResources = new AtomicReference<>(new LinkedList<>());
@@ -125,7 +123,7 @@ class AkkaWebSocketTest {
             .filter(message -> message.getCommittable() != null) // Similar to the service implementation, only 'audit' things that are committable
             .toMat(listSink, Keep.right());
     // Finally, create the websocketEventService from its parts
-    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, tokenAEMController, sinkFactory, sourceFactory);
+    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, tokenErrorMessageCommand, sinkFactory, sourceFactory);
 
     // WebSocket endpoint to be tested
     final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);

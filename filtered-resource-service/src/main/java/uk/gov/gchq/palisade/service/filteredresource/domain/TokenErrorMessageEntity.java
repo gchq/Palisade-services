@@ -50,8 +50,8 @@ import java.util.StringJoiner;
                 @Index(name = "token", columnList = "token")
         }
 )
-@RedisHash(value = "TokenAuditErrorMessageEntity", timeToLive = 6000L)
-public class TokenAuditErrorMessageEntity implements Serializable {
+@RedisHash(value = "TokenErrorMessageEntity", timeToLive = 6000L)
+public class TokenErrorMessageEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -85,7 +85,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @TimeToLive
     protected Long timeToLive;
 
-    public TokenAuditErrorMessageEntity() {
+    public TokenErrorMessageEntity() {
         // no-args constructor
     }
 
@@ -93,15 +93,16 @@ public class TokenAuditErrorMessageEntity implements Serializable {
      * Constructor used for the Database that takes a {@link String} and Exception
      * Used for inserting objects into the backing store
      *
-     * @param token      the token {@link String} for the client request as a whole, created by the palisade-service
-     * @param userId     the userId of the {@link User} as authorised and returned by the user-service
-     * @param resourceId the id of a resource as discovered and returned by the resource-service
-     * @param context    the {@link Context} as originally supplied by the client
-     * @param attributes the additional attributes attached to the {@link AuditErrorMessage}
-     * @param error      the error attached to the {@link AuditErrorMessage}
+     * @param token       the token {@link String} for the client request as a whole, created by the Palisade-Service
+     * @param userId      the userId of the {@link User} as authorised and returned by the User-Service
+     * @param resourceId  the id of a resource as discovered and returned by the Resource-Service
+     * @param context     the {@link Context} as originally supplied by the client
+     * @param serviceName the name of the service that originally threw the error
+     * @param attributes  the additional attributes attached to the {@link AuditErrorMessage}
+     * @param error       the error attached to the {@link AuditErrorMessage}
      */
     @PersistenceConstructor
-    public TokenAuditErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
+    public TokenErrorMessageEntity(final String token, final String resourceId, final String userId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
         this.token = token;
         this.resourceId = resourceId;
         this.userId = userId;
@@ -109,7 +110,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
         this.serviceName = serviceName;
         this.attributes = attributes;
         this.error = error;
-        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenAuditErrorMessageEntity");
+        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenErrorMessageEntity");
     }
 
     @Generated
@@ -161,7 +162,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final TokenAuditErrorMessageEntity that = (TokenAuditErrorMessageEntity) o;
+        final TokenErrorMessageEntity that = (TokenErrorMessageEntity) o;
         return Objects.equals(token, that.token) &&
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(resourceId, that.resourceId) &&
@@ -180,7 +181,7 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", TokenAuditErrorMessageEntity.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", TokenErrorMessageEntity.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .add("userId=" + userId)
                 .add("resourceId='" + resourceId + "'")

@@ -33,8 +33,8 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMes
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
@@ -64,7 +64,7 @@ public class WebSocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
-    private final ActorRef<TokenAuditErrorMessageCommand> tokenAEMCommand;
+    private final ActorRef<TokenErrorMessageCommand> tokenErrorMessageController;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
     private static final String SERVICE_NAME_HEADER_KEY = "service-name";
@@ -74,18 +74,18 @@ public class WebSocketEventService {
      * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
      * back to the client as required.
      *
-     * @param tokenOffsetController the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
-     * @param tokenAEMCommand
-     * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
-     * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
+     * @param tokenOffsetController       the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
+     * @param tokenErrorMessageController the instance of the {@link TokenErrorMessageController}, which will handle reporting early and late errors for a given token
+     * @param auditSinkFactory            a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
+     * @param resourceSourceFactory       a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
-            final ActorRef<TokenAuditErrorMessageCommand> tokenAEMCommand,
+            final ActorRef<TokenErrorMessageCommand> tokenErrorMessageController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
         this.tokenOffsetController = tokenOffsetController;
-        this.tokenAEMCommand = tokenAEMCommand;
+        this.tokenErrorMessageController = tokenErrorMessageController;
         this.auditSinkFactory = auditSinkFactory;
         this.resourceSourceFactory = resourceSourceFactory;
     }
@@ -232,16 +232,22 @@ public class WebSocketEventService {
 
     /**
      * A stream of {@link WebSocketMessage}s, attaching a {@link MessageType#ERROR} to the stream when errors have been reported against this token
+     * If there was an issue with retrieving the error from persistence, an exception will be generated and sent to the Audit Service
      *
-     * @param token the token for this client
-     * @return a source of {@link WebSocketMessage}s with a {@link MessageType#ERROR} and the {@link AuditErrorMessage#getError()}.getMessage() attached
+     * @param token the unique token for this request
+     * @return a source of {@link WebSocketMessage}s with a {@link MessageType#ERROR} and the {@link AuditErrorMessage#getError()} attached
      */
     private Source<AuditableWebSocketMessage, NotUsed> createErrorSource(final String token) {
         return Source.single(token)
 
-                .via(TokenAuditErrorMessageController.asGetterFlow(this.tokenAEMCommand))
+                // Get the list of TokenErrorMessageEntities for the given token
+                .via(TokenErrorMessageController.asGetterFlow(this.tokenErrorMessageController))
 
+                // Differing behaviour depending on whether the AuditErrorMessage was found:
+                // * many ERROR messages if there were AuditErrorMessages in persistence
+                // * single ERROR message if an exception was thrown retrieving AuditErrorMessages
                 .flatMapConcat(persistenceResponse -> Source.from(Optional.ofNullable(persistenceResponse.getException())
+
                         // If there was an exception when retrieving an entity from the persistence then build a WebSocketMessage with the exception
                         .map(exception -> List.of(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
@@ -279,7 +285,7 @@ public class WebSocketEventService {
     }
 
     // Akka's concat is eager by default
-    private static <OUT> Source<OUT, NotUsed> lazyConcat(List<Supplier<Source<OUT, NotUsed>>> sources) {
+    private static <OUT> Source<OUT, NotUsed> lazyConcat(final List<Supplier<Source<OUT, NotUsed>>> sources) {
         return Source.from(sources).flatMapConcat(Supplier::get);
     }
 }

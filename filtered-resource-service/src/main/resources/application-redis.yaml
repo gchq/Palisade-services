@@ -22,7 +22,7 @@ spring:
         enabled: true
         timeToLive:
         - TokenOffsetEntity: 24h
-        - TokenAuditErrorMessageEntity: 24h
+        - TokenErrorMessageEntity: 24h
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs

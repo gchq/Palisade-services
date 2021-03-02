@@ -16,9 +16,9 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,27 +28,28 @@ import java.util.concurrent.CompletableFuture;
  * When such a message is received, it will be persisted.
  * It will be later sent to the client via websocket.
  */
-public class AuditErrorMessageEventService {
-    private final TokenAuditErrorMessagePersistenceLayer persistenceLayer;
+public class ErrorMessageEventService {
+    private final TokenErrorMessagePersistenceLayer persistenceLayer;
 
     /**
-     * Default constructor for a new AuditErrorMessageEventService, supplying the persistence layer for storing tokens and the releated exception.
+     * Default constructor for a new ErrorMessageEventService, supplying the persistence layer for storing tokens and the releated exception.
      * This will continually listen to kafka for {@link AuditErrorMessage}(s) to communicate the exception to any
      * running {@link WebSocketEventService}s as necessary.
      *
      * @param persistenceLayer the persistence layer for storing token and exceptions
      */
-    public AuditErrorMessageEventService(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
+    public ErrorMessageEventService(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         this.persistenceLayer = persistenceLayer;
     }
 
     /**
-     * Store the {@link TokenAuditErrorMessageEntity} containing the token and the exception from the error kafka queue
+     * Store the {@link TokenErrorMessageEntity} containing the token and the exception from the error kafka queue
      *
-     * @param token the unique request token
-     * @return a {@link CompletableFuture} of a {@link TokenAuditErrorMessageEntity} representing the async completion of the store request
+     * @param token             the unique request token
+     * @param auditErrorMessage a AuditErrorMessage generated from an exception thrown in a different service
+     * @return a {@link CompletableFuture} of a {@link TokenErrorMessageEntity} representing the async completion of the persistence event
      */
-    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
         return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getResourceId(), auditErrorMessage.getUserId(), auditErrorMessage.getContext(), auditErrorMessage.getServiceName(),
                 auditErrorMessage.getAttributes(), auditErrorMessage.getError());
     }

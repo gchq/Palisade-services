@@ -22,12 +22,16 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageWorker.WorkerCommand;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.WorkerCommand;
 
 import java.util.List;
 
-final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
+/**
+ * A worker to carry-out a client request for a list of AuditErrorMessage (from kafka "error" topic or redis persistence)
+ * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
+ */
+final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 
     protected interface WorkerCommand {
         // Marker interface for inputs of the worker
@@ -37,6 +41,10 @@ final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand>
         // Marker interface for outputs of the worker
     }
 
+    /**
+     * A request to get all AuditErrorMessages for a token.
+     * The worker will {@link ActorRef#tell} the replyTo actor the AuditErrorMessages once found.
+     */
     protected static class GetAllExceptions implements WorkerCommand {
         protected final String token;
         protected final ActorRef<WorkerResponse> replyTo;
@@ -47,16 +55,27 @@ final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand>
         }
     }
 
+    /**
+     * A response for this actor to send to its {@code replyTo} actor.
+     * This is received by the worker when appropriate AuditErrorMessages are found.
+     * This is both a possible input to the system {@link WorkerCommand} as well as an output {@link WorkerResponse}
+     */
     protected static class SetAuditErrorMessages implements WorkerCommand, WorkerResponse {
         protected final String token;
-        protected final List<TokenAuditErrorMessageEntity> messageEntities;
+        protected final List<TokenErrorMessageEntity> messageEntities;
 
-        protected SetAuditErrorMessages(final String token, final List<TokenAuditErrorMessageEntity> messageEntities) {
+        protected SetAuditErrorMessages(final String token, final List<TokenErrorMessageEntity> messageEntities) {
             this.token = token;
             this.messageEntities = messageEntities;
         }
     }
 
+    /**
+     * A response for this actor to send to its {@code replyTo} actor.
+     * This indicates an exception was thrown by the worker while processing the request.
+     *
+     * @implNote This is currently only caused by the persistence store throwing an exception.
+     */
     protected static class ReportError implements WorkerResponse {
         protected final String token;
         protected final Throwable exception;
@@ -67,16 +86,16 @@ final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand>
         }
     }
 
-    private final TokenAuditErrorMessagePersistenceLayer persistenceLayer;
+    private final TokenErrorMessagePersistenceLayer persistenceLayer;
 
-    private TokenAuditErrorMessageWorker(final ActorContext<WorkerCommand> context,
-                                         final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
+    private TokenErrorMessageWorker(final ActorContext<WorkerCommand> context,
+                                    final TokenErrorMessagePersistenceLayer persistenceLayer) {
         super(context);
         this.persistenceLayer = persistenceLayer;
     }
 
-    static Behavior<WorkerCommand> create(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
-        return Behaviors.setup(ctx -> new TokenAuditErrorMessageWorker(ctx, persistenceLayer));
+    static Behavior<WorkerCommand> create(final TokenErrorMessagePersistenceLayer persistenceLayer) {
+        return Behaviors.setup(ctx -> new TokenErrorMessageWorker(ctx, persistenceLayer));
     }
 
     @Override
@@ -92,7 +111,7 @@ final class TokenAuditErrorMessageWorker extends AbstractBehavior<WorkerCommand>
                         // Get from persistence
                         .getAllAuditErrorMessages(getCmd.token)
                         // If present tell self (if not, will be told in the future)
-                        .thenApply((List<TokenAuditErrorMessageEntity> listAEM) -> {
+                        .thenApply((List<TokenErrorMessageEntity> listAEM) -> {
                             getCmd.replyTo.tell(new SetAuditErrorMessages(getCmd.token, listAEM));
                             return listAEM;
                         })

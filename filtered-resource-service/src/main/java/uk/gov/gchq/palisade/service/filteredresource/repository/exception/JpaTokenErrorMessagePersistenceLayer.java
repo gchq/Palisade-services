@@ -15,11 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.List;
@@ -28,14 +25,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link TokenAuditErrorMessagePersistenceLayer} for the Filtered-Resource-Service.
+ * Java JPA implementation of a {@link TokenErrorMessagePersistenceLayer} for the Filtered-Resource-Service.
  * Persist and retrieve {@link AuditErrorMessage#getError()} for a given request token.
  */
-public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {
-    private final TokenAuditErrorMessageRepository repository;
+public class JpaTokenErrorMessagePersistenceLayer implements TokenErrorMessagePersistenceLayer {
+    private final TokenErrorMessageRepository repository;
     private final Executor executor;
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTokenAuditErrorMessagePersistenceLayer.class);
-
 
     /**
      * Construct a new Jpa-style persistence layer from a CrudRepository and async executor.
@@ -44,25 +39,25 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
      * @param repository the CrudRepository of tokens and their associated exceptions
      * @param executor   an async executor to run the futures with
      */
-    public JpaTokenAuditErrorMessagePersistenceLayer(final TokenAuditErrorMessageRepository repository, final Executor executor) {
+    public JpaTokenErrorMessagePersistenceLayer(final TokenErrorMessageRepository repository, final Executor executor) {
         this.repository = repository;
         this.executor = executor;
     }
 
     @Override
-    public CompletableFuture<TokenAuditErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context,
-                                                                                final String serviceName, final Map<String, String> attributes, final Throwable error) {
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context,
+                                                                           final String serviceName, final Map<String, String> attributes, final Throwable error) {
         return CompletableFuture.supplyAsync(() -> repository.save(token, resourceId, userId, context, serviceName, attributes, error), executor);
     }
 
     @Override
-    public CompletableFuture<List<TokenAuditErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
+    public CompletableFuture<List<TokenErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
         return CompletableFuture.supplyAsync(() -> repository.findAllByToken(token), executor);
     }
 
     @Override
-    public CompletableFuture<Void> deleteAll(final List<TokenAuditErrorMessageEntity> listAEM) {
-        return CompletableFuture.runAsync(() -> repository.deleteAll(listAEM), executor);
+    public CompletableFuture<Void> deleteAll(final List<TokenErrorMessageEntity> messageEntityList) {
+        return CompletableFuture.runAsync(() -> repository.deleteAll(messageEntityList), executor);
     }
 
 }

@@ -57,10 +57,10 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageController.TokenAuditErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
-import uk.gov.gchq.palisade.service.filteredresource.service.AuditErrorMessageEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorMessageEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
@@ -184,11 +184,11 @@ public class AkkaRunnableGraph {
     @Bean
     WebSocketEventService websocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
-            final ActorRef<TokenAuditErrorMessageCommand> tokenAEMController,
+            final ActorRef<TokenErrorMessageCommand> tokenErrorMessageCommand,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory
     ) {
-        return new WebSocketEventService(tokenOffsetController, tokenAEMController, auditSinkFactory, resourceSourceFactory);
+        return new WebSocketEventService(tokenOffsetController, tokenErrorMessageCommand, auditSinkFactory, resourceSourceFactory);
     }
 
     @Bean
@@ -346,10 +346,10 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    RunnableGraph<Control> tokenAuditErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenAuditErrorMessageSource,
+    RunnableGraph<Control> tokenErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenErrorMessageSource,
                                                                final Sink<Committable, CompletionStage<Done>> committerSink,
-                                                               final AuditErrorMessageEventService auditErrorMessageEventService) {
-        return tokenAuditErrorMessageSource
+                                                               final ErrorMessageEventService errorMessageEventService) {
+        return tokenErrorMessageSource
                 // Extract committable, token and message
                 .map(committableMessage -> Tuple3.create(
                         committableMessage.committableOffset(),
@@ -361,9 +361,9 @@ public class AkkaRunnableGraph {
                 .filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
 
                 // Write exception to persistence
-                .mapAsync(PARALLELISM, committableTokenAuditErrorMessage -> auditErrorMessageEventService
-                        .putAuditErrorMessage(committableTokenAuditErrorMessage.t2(), committableTokenAuditErrorMessage.t3())
-                        .thenApply(ignored -> committableTokenAuditErrorMessage))
+                .mapAsync(PARALLELISM, committableTokenErrorMessage -> errorMessageEventService
+                        .putAuditErrorMessage(committableTokenErrorMessage.t2(), committableTokenErrorMessage.t3())
+                        .thenApply(ignored -> committableTokenErrorMessage))
 
                 // Commit processed message to kafka
                 .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()
@@ -401,6 +401,7 @@ public class AkkaRunnableGraph {
          * Connect to kafka for a unique token and retrieve AuditErrorMessages
          *
          * @param token the client's unique token for their request
+         * @param auditErrorMessage the auditErrorMessages thrown in the other services associated with the request
          * @return {@link Source} of {@link AuditErrorMessage} for the client's request
          */
         Source<Pair<AuditErrorMessage, Committable>, NotUsed> create(String token, AuditErrorMessage auditErrorMessage);
