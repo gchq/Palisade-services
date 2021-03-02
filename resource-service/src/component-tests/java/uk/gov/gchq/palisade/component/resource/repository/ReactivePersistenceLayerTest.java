@@ -93,17 +93,17 @@ class ReactivePersistenceLayerTest {
         // Given the setup
 
         // When getting a non-existent resourceId
-        final Optional<Source<LeafResource, NotUsed>> persistenceIdResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID").join();
+        var persistenceIdResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID").join();
         // Then the list should be empty
         assertThat(persistenceIdResponse).isEmpty();
 
         // When getting a non-existent resource type
-        final Optional<Source<LeafResource, NotUsed>> persistenceTypeResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE").join();
+        var persistenceTypeResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE").join();
         // Then the list should be empty
         assertThat(persistenceTypeResponse).isEmpty();
 
         // When getting a non-existent resource serialised format
-        final Optional<Source<LeafResource, NotUsed>> persistenceFormatResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT").join();
+        var persistenceFormatResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT").join();
         // Then the list should be empty
         assertThat(persistenceFormatResponse).isEmpty();
     }
@@ -122,7 +122,7 @@ class ReactivePersistenceLayerTest {
                 .allSatisfy(leafResource -> assertThat(leafResource.getId()).isEqualTo(resource.getId()));
 
         // When getting a resource from the persistence layer by type
-        final List<LeafResource> typeResult = persistenceLayer.getResourcesByType(resource.getType())
+        var typeResult = persistenceLayer.getResourcesByType(resource.getType())
                 .join().orElseThrow()
                 .toMat(Sink.seq(), Keep.right()).run(materializer)
                 .toCompletableFuture().join();
@@ -131,7 +131,7 @@ class ReactivePersistenceLayerTest {
                 .allSatisfy(leafResource -> assertThat(leafResource.getId()).isEqualTo(resource.getId()));
 
         // When getting a resource from the persistence layer by serialised format
-        final List<LeafResource> formatResult = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
+        var formatResult = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
                 .join().orElseThrow()
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();

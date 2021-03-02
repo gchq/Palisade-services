@@ -167,7 +167,7 @@ class ScenarioPersistenceTest {
         Set<LeafResource> returnedRootDirRequest = new HashSet<>();
 
         // When - Pt 1: Specific resource requested from resource-service
-        LOGGER.info("Part 1 of the Scenario Test (Single file get");
+        LOGGER.info("Part 1 of the Scenario Test: Get a Single File Resource");
         LOGGER.debug("Getting resources for {}", MULTI_FILE_ONE.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(MULTI_FILE_ONE_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -193,7 +193,7 @@ class ScenarioPersistenceTest {
 
 
         // When - Pt 2: Request contains the id of a directory containing multiple files
-        LOGGER.info("Part 2 of the Scenario Test (directory with multiple files get)");
+        LOGGER.info("Part 2 of the Scenario Test: Get a Directory containing Multiple Files");
         LOGGER.debug("Getting resources for {}", MULTI_FILE_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(MULTI_FILE_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -219,7 +219,7 @@ class ScenarioPersistenceTest {
 
 
         // When - Pt 3: Request contains the id of a directory containing multiple directories with file(s)
-        LOGGER.info("Part 3 of the Scenario Test (top level directory get)");
+        LOGGER.info("Part 3 of the Scenario Test: Get a Directory containing Child Directories");
         LOGGER.debug("Getting resources for {}", TOP_LEVEL_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(TOP_LEVEL_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -246,7 +246,7 @@ class ScenarioPersistenceTest {
 
 
         // When - Pt 4: Request contains the id of an empty directory (no sub-directories or files)
-        LOGGER.info("Part 4 of the Scenario Test (empty directory get)");
+        LOGGER.info("Part 4 of the Scenario Test: Get a Directory that does not contain anything (empty)");
         LOGGER.debug("Getting resources for {}", EMPTY_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(EMPTY_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());
@@ -273,7 +273,7 @@ class ScenarioPersistenceTest {
 
 
         // When - Pt 5: Request contains the id of the root directory
-        LOGGER.info("Part 5 of the Scenario Test (root level directory get)");
+        LOGGER.info("Part 5 of the Scenario Test: Get a Top Level (root) Directory");
         LOGGER.debug("Getting resources for {}", ROOT_DIR.getId());
         returnedAuditable = new HashSet<>(proxy.getResourcesByResource(ROOT_DIR_REQUEST)
                 .runWith(Sink.seq(), materializer).toCompletableFuture().join());

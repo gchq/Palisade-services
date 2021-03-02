@@ -500,8 +500,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesById(final String resourceId) {
         LOGGER.info("Getting resources by id '{}'", resourceId);
         // Only return info on complete sets of information
-        return isResourceIdComplete(resourceId).thenApply(isComplete -> {
-            if (isComplete.equals(Boolean.TRUE)) {
+        return isResourceIdComplete(resourceId).thenApply(isIdComplete -> {
+            if (isIdComplete.equals(Boolean.TRUE)) {
                 LOGGER.info("Persistence hit for resourceId '{}'", resourceId);
                 // Get resource entity from db
                 return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
@@ -527,8 +527,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesByType(final String type) {
         LOGGER.info("Getting resources by type '{}'", type);
         // Only return info on complete sets of information
-        return isTypeComplete(type).thenApply(isComplete -> {
-            if (isComplete.equals(Boolean.TRUE)) {
+        return isTypeComplete(type).thenApply(isTypeComplete -> {
+            if (isTypeComplete.equals(Boolean.TRUE)) {
                 LOGGER.info("Persistence hit for type '{}'", type);
                 // Get type entity from db
                 return Optional.of(typeRepository.streamFindAllByType(type)
@@ -554,8 +554,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesBySerialisedFormat(final String serialisedFormat) {
         LOGGER.info("Getting resources by serialisedFormat '{}'", serialisedFormat);
         // Only return info on complete sets of information
-        return isSerialisedFormatComplete(serialisedFormat).thenApply(isComplete -> {
-            if (isComplete.equals(Boolean.TRUE)) {
+        return isSerialisedFormatComplete(serialisedFormat).thenApply(isFormatComplete -> {
+            if (isFormatComplete.equals(Boolean.TRUE)) {
                 LOGGER.info("Persistence hit for serialisedFormat '{}'", serialisedFormat);
                 // Get type entity from db
                 return Optional.of(serialisedFormatRepository.streamFindAllBySerialisedFormat(serialisedFormat)
@@ -584,8 +584,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         final AtomicBoolean persistedRootAndParents = new AtomicBoolean(false);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        CompletableFuture<Void> saveRootId = isResourceIdComplete(rootResourceId).thenCompose((Boolean result) -> {
-            if (result.equals(Boolean.FALSE)) {
+        CompletableFuture<Void> saveRootId = isResourceIdComplete(rootResourceId).thenCompose((Boolean idAlreadyComplete) -> {
+            if (idAlreadyComplete.equals(Boolean.FALSE)) {
                 return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
             } else {
                 return CompletableFuture.completedFuture(null);
@@ -627,8 +627,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         return Flow.lazyCompletionStageFlow(() -> isTypeComplete(type)
-                .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
+                .thenCompose((Boolean typeAlreadyComplete) -> {
+                    if (typeAlreadyComplete.equals(Boolean.FALSE)) {
                         return completenessRepository.futureSave(EntityType.TYPE, type);
                     } else {
                         return CompletableFuture.completedFuture(null);
@@ -651,8 +651,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         return Flow.lazyCompletionStageFlow(() -> isSerialisedFormatComplete(serialisedFormat)
-                .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
+                .thenCompose((Boolean formatAlreadyComplete) -> {
+                    if (formatAlreadyComplete.equals(Boolean.FALSE)) {
                         return completenessRepository.futureSave(EntityType.FORMAT, serialisedFormat);
                     } else {
                         return CompletableFuture.completedFuture(null);
