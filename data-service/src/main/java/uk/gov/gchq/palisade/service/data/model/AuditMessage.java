@@ -165,11 +165,10 @@ public class AuditMessage {
             return false;
         }
         AuditMessage that = (AuditMessage) o;
-        return  userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                attributes.equals(that.attributes) &&
-                leafResourceId.equals(that.leafResourceId) &&
+        return leafResourceId.equals(that.leafResourceId) &&
+                Objects.equals(userId, that.userId) &&
+                Objects.equals(resourceId, that.resourceId) &&
+                Objects.equals(context, that.context) &&
                 serviceName.equals(that.serviceName) &&
                 timestamp.equals(that.timestamp) &&
                 serverIP.equals(that.serverIP) &&
