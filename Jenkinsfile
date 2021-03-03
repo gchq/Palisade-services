@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib@feature/PAL-976-update-smoke-tests-shared-redis-kafka')_
 
 timestamps {
     services()
