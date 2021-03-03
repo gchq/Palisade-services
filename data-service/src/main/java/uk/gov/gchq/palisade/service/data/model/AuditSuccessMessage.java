@@ -155,7 +155,7 @@ public final class AuditSuccessMessage extends AuditMessage {
 
             /**
              * Adds the attributes supplied by the data service that are included in the auditing message:
-             * the number of records processed (total number of records in the resource):and
+             * the number of records processed (total number of records in the resource) and
              * the number of records returned (excludes those which were totally redacted, but
              * includes those that were just masked):
              *
