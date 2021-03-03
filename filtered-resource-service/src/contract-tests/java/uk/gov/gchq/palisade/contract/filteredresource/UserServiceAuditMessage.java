@@ -46,6 +46,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class UserServiceAuditMessage {
 
+    // Hardcode the service as 'user-service' for use in test data
     public static final String SERVICE_NAME = "user-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();

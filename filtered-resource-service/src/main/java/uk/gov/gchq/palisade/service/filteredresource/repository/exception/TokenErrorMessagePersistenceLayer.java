@@ -27,29 +27,29 @@ import java.util.concurrent.CompletableFuture;
 public interface TokenErrorMessagePersistenceLayer {
 
     /**
-     * Save the token and variabled from a {@link AuditErrorMessage} in the persistence
+     * Save the token, error message and service name, extracted from a {@link AuditErrorMessage} in the persistence
      *
      * @param token       the unique token from the request to the Palisade Service
      * @param serviceName the name of the service that the error was thrown from
      * @param error       the error thrown in the service
      * @return a {@link CompletableFuture} of a {@link TokenErrorMessageEntity} containing the values just persisted
      */
-    CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, String serviceName, Throwable error);
+    CompletableFuture<TokenErrorMessageEntity> putErrorMessage(final String token, String serviceName, Throwable error);
 
     /**
-     * Gets all AuditErrorMessages that are linked to the unique request token, and packages them in a List of {@link TokenErrorMessageEntity}(s)
+     * Gets all error messages that are linked to the unique request token, and packages them in a List of {@link TokenErrorMessageEntity}(s)
      *
      * @param token the unique token from the request
-     * @return a list of all errors associated with this token from other services, packaged in a {@link TokenErrorMessageEntity}
+     * @return a list of all errors associated with this token from other services, packafiltered-resource-service/src/main/java/uk/gov/gchq/palisade/service/filteredresource/repository/exception/TokenErrorMessageRepository.javaged in a {@link TokenErrorMessageEntity}
      */
-    CompletableFuture<List<TokenErrorMessageEntity>> getAllAuditErrorMessages(final String token);
+    CompletableFuture<List<TokenErrorMessageEntity>> getAllErrorMessages(final String token);
 
     /**
-     * Deletes the token and AuditErrorMessages that have been previously retrieved from persistence.
-     * It will only delete items that are in the list, for example, late errors that are persisted after you have called {@link #getAllAuditErrorMessages(String)} will not be deleted
+     * Deletes the token and error messages that have been previously retrieved from persistence.
+     * It will only delete items that are in the list, for example, late errors that are persisted after you have called {@link #getAllErrorMessages(String)} will not be deleted
      *
-     * @param messageEntityList a list of previously retrieved AuditErrorMessages and their unique token
-     * @return a future completing once all tokens and relating AuditErrorMessages have been deleted from persistence
+     * @param messageEntityList a list of previously retrieved error messages and their unique token
+     * @return a future completing once all tokens and relating error messages have been deleted from persistence
      */
     CompletableFuture<Void> deleteAll(List<TokenErrorMessageEntity> messageEntityList);
 }

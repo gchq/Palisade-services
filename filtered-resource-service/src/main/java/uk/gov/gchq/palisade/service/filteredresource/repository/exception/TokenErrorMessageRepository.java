@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.List;
 
@@ -28,7 +27,7 @@ import java.util.List;
 public interface TokenErrorMessageRepository extends CrudRepository<TokenErrorMessageEntity, String> {
 
     /**
-     * Put a token and the variables that make up a {@link AuditErrorMessage}, including a serviceName into persistence.
+     * Put a token, the name of the service that threw the exception, and its error message into persistence
      * This is a ease-of-use wrapper around {@link CrudRepository#save}.
      *
      * @param token       the unique request token
@@ -47,5 +46,4 @@ public interface TokenErrorMessageRepository extends CrudRepository<TokenErrorMe
      * @return an Optional of the {@link TokenErrorMessageEntity} containing the exception and token
      */
     List<TokenErrorMessageEntity> findAllByToken(final String token);
-
 }

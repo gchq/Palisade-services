@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A response from the token-AuditErrorMessage persistence system, providing the token and maybe
+ * A response from the tokenErrorMessage persistence system, providing the token and maybe
  * each a {@link List} of {@link TokenErrorMessageEntity}(s) or an exception if there was an issue in persisting.
  * In proper usage, exactly one of the latter two * should be non-null and the other null - the token is always non-null.
  */
@@ -102,7 +102,7 @@ public final class TokenErrorMessagePersistenceResponse {
             /**
              * Supply just a {@link List} of {@link TokenErrorMessageEntity}(s) to the builder.
              *
-             * @param messageEntities a List of Entities that were saved and retrieved from persistence for the token requested
+             * @param messageEntities a List of entities that were saved and retrieved from persistence for the token requested
              * @return a completed {@link TokenErrorMessagePersistenceResponse} object
              */
             default TokenErrorMessagePersistenceResponse withMessageEntities(final @NonNull List<TokenErrorMessageEntity> messageEntities) {
@@ -112,7 +112,7 @@ public final class TokenErrorMessagePersistenceResponse {
             /**
              * Supply just a {@link Throwable} exception to the builder.
              *
-             * @param exception the exception thrown while finding the AuditErrorMessage for the token
+             * @param exception the exception thrown while finding the error message for the token
              * @return a completed {@link TokenErrorMessagePersistenceResponse} object
              */
             default TokenErrorMessagePersistenceResponse withException(final @NonNull Throwable exception) {

@@ -32,7 +32,7 @@ public class MapTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     final Map<String, LinkedList<TokenErrorMessageEntity>> errorMessageMap = new HashMap<>();
 
     @Override
-    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String serviceName, final Throwable error) {
+    public CompletableFuture<TokenErrorMessageEntity> putErrorMessage(final String token, final String serviceName, final Throwable error) {
         errorMessageMap.computeIfAbsent(token, t -> new LinkedList<>());
         TokenErrorMessageEntity entity = new TokenErrorMessageEntity(token, serviceName, error.getMessage());
         errorMessageMap.get(token).addLast(entity);
@@ -41,7 +41,7 @@ public class MapTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     }
 
     @Override
-    public CompletableFuture<List<TokenErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
+    public CompletableFuture<List<TokenErrorMessageEntity>> getAllErrorMessages(final String token) {
         return CompletableFuture.completedFuture(new LinkedList<>(errorMessageMap.getOrDefault(token, new LinkedList<>())));
     }
 

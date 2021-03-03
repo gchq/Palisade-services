@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenE
 import java.util.List;
 
 /**
- * A worker to carry-out a client request for a list of AuditErrorMessage (from kafka "error" topic or redis persistence)
+ * A worker to carry-out a client request for a list of error messages (from kafka "error" topic or redis persistence)
  * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
  */
 final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
@@ -43,8 +43,8 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
     }
 
     /**
-     * A request to get all AuditErrorMessages for a token.
-     * The worker will {@link ActorRef#tell} the replyTo actor the AuditErrorMessages once found.
+     * A request to get all error messages for a unique token.
+     * The worker will {@link ActorRef#tell} the replyTo actor the error messages once found.
      */
     protected static class GetAllExceptions implements WorkerCommand {
         protected final String token;
@@ -58,7 +58,7 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 
     /**
      * A response for this actor to send to its {@code replyTo} actor.
-     * This is received by the worker when appropriate AuditErrorMessages are found.
+     * This is received by the worker when appropriate error messages are found.
      * This is both a possible input to the system {@link WorkerCommand} as well as an output {@link WorkerResponse}
      */
     protected static class SetAuditErrorMessages implements WorkerCommand, WorkerResponse {
@@ -110,7 +110,7 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
                 // Start off in Getting mode
                 .onMessage(GetAllExceptions.class, (GetAllExceptions getCmd) -> this.persistenceLayer
                         // Get from persistence
-                        .getAllAuditErrorMessages(getCmd.token)
+                        .getAllErrorMessages(getCmd.token)
                         // If present tell self (if not, will be told in the future)
                         .thenApply((List<TokenErrorMessageEntity> listOfEntities) -> {
                             getCmd.replyTo.tell(new SetAuditErrorMessages(getCmd.token, listOfEntities));

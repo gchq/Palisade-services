@@ -312,7 +312,7 @@ class AkkaWebSocketTest {
     void testWebSocketRecievesEarlyErrors() throws InterruptedException, ExecutionException, TimeoutException {
         // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, start with 1 ERROR message and end with 1 COMPLETE message)
         int nMessages = 101; // including ERROR
-        errorPersistenceLayer.putAuditErrorMessage(token,
+        errorPersistenceLayer.putErrorMessage(token,
                 "user-service",
                 new Throwable("No userId matching: test-user-1")).join();
 
