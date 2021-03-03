@@ -502,26 +502,27 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesById(final String resourceId) {
         LOGGER.info("Getting resources by id '{}'", resourceId);
         // Only return info on complete sets of information
-        return isResourceIdComplete(resourceId).thenApply(isIdComplete -> {
-            if (isIdComplete.equals(Boolean.TRUE)) {
-                LOGGER.info("Persistence hit for resourceId '{}'", resourceId);
-                // Get resource entity from db
-                return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
-                        // Get resource from db entity
-                        .map(ResourceEntity::getResource)
-                        // Optimisation - resolve this resource's parents as itself is a parent of each leaf
-                        // This means leaves have fewer parents to resolve AND may help with memory usage
-                        // Each resource pulled from the database is unique, even for the same entity
-                        .mapAsync(PARALLELISM, this::resolveParents)
-                        // Get all leaves of this resource with parents resolved up to this resource
-                        // See above, all parents are now resolved
-                        .flatMapConcat(this::collectLeaves));
-            } else {
-                LOGGER.info("Persistence miss for resourceId '{}'", resourceId);
-                // The persistence store has nothing stored for this resource id, or the store is incomplete
-                return Optional.empty();
-            }
-        });
+        return isResourceIdComplete(resourceId)
+                .thenApply((Boolean isIdComplete) -> {
+                    if (isIdComplete.equals(Boolean.TRUE)) {
+                        LOGGER.info("Persistence hit for resourceId '{}'", resourceId);
+                        // Get resource entity from db
+                        return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
+                                // Get resource from db entity
+                                .map(ResourceEntity::getResource)
+                                // Optimisation - resolve this resource's parents as itself is a parent of each leaf
+                                // This means leaves have fewer parents to resolve AND may help with memory usage
+                                // Each resource pulled from the database is unique, even for the same entity
+                                .mapAsync(PARALLELISM, this::resolveParents)
+                                // Get all leaves of this resource with parents resolved up to this resource
+                                // See above, all parents are now resolved
+                                .flatMapConcat(this::collectLeaves));
+                    } else {
+                        LOGGER.info("Persistence miss for resourceId '{}'", resourceId);
+                        // The persistence store has nothing stored for this resource id, or the store is incomplete
+                        return Optional.empty();
+                    }
+                });
     }
 
     // Given a type, return all leaf resources of that type with all parents resolved
@@ -529,26 +530,27 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesByType(final String type) {
         LOGGER.info("Getting resources by type '{}'", type);
         // Only return info on complete sets of information
-        return isTypeComplete(type).thenApply(isTypeComplete -> {
-            if (isTypeComplete.equals(Boolean.TRUE)) {
-                LOGGER.info("Persistence hit for type '{}'", type);
-                // Get type entity from db
-                return Optional.of(typeRepository.streamFindAllByType(type)
-                        // Get the resourceId from the TypeEntity
-                        .map(TypeEntity::getResourceId)
-                        // Get the resource for this id
-                        .flatMapConcat(this::getResourceById)
-                        // Some enforcement of db assumptions
-                        // If we have a type entity, we have a resource entity AND the resource is a leaf
-                        // May throw ClassCastException or NoSuchElementException if database is malformed
-                        .map(LeafResource.class::cast)
-                );
-            } else {
-                LOGGER.info("Persistence miss for type '{}'", type);
-                // The persistence store has nothing stored for this type, or the store is incomplete
-                return Optional.empty();
-            }
-        });
+        return isTypeComplete(type)
+                .thenApply((Boolean isTypeComplete) -> {
+                    if (isTypeComplete.equals(Boolean.TRUE)) {
+                        LOGGER.info("Persistence hit for type '{}'", type);
+                        // Get type entity from db
+                        return Optional.of(typeRepository.streamFindAllByType(type)
+                                // Get the resourceId from the TypeEntity
+                                .map(TypeEntity::getResourceId)
+                                // Get the resource for this id
+                                .flatMapConcat(this::getResourceById)
+                                // Some enforcement of db assumptions
+                                // If we have a type entity, we have a resource entity AND the resource is a leaf
+                                // May throw ClassCastException or NoSuchElementException if database is malformed
+                                .map(LeafResource.class::cast)
+                        );
+                    } else {
+                        LOGGER.info("Persistence miss for type '{}'", type);
+                        // The persistence store has nothing stored for this type, or the store is incomplete
+                        return Optional.empty();
+                    }
+                });
     }
 
     // Given a serialisedFormat, return all leaf resources of that serialisedFormat with all parents resolved
@@ -556,26 +558,27 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     public CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesBySerialisedFormat(final String serialisedFormat) {
         LOGGER.info("Getting resources by serialisedFormat '{}'", serialisedFormat);
         // Only return info on complete sets of information
-        return isSerialisedFormatComplete(serialisedFormat).thenApply(isFormatComplete -> {
-            if (isFormatComplete.equals(Boolean.TRUE)) {
-                LOGGER.info("Persistence hit for serialisedFormat '{}'", serialisedFormat);
-                // Get type entity from db
-                return Optional.of(serialisedFormatRepository.streamFindAllBySerialisedFormat(serialisedFormat)
-                        // Get the resourceId from the TypeEntity
-                        .map(SerialisedFormatEntity::getResourceId)
-                        // Get the resource for this id
-                        .flatMapConcat(this::getResourceById)
-                        // Some enforcement of db assumptions
-                        // If we have a type entity, we have a resource entity AND the resource is a leaf
-                        // May throw ClassCastException or NoSuchElementException if database is malformed
-                        .map(LeafResource.class::cast)
-                );
-            } else {
-                LOGGER.info("Persistence miss for serialisedFormat '{}'", serialisedFormat);
-                // The persistence store has nothing stored for this serialisedFormat, or the store is incomplete
-                return Optional.empty();
-            }
-        });
+        return isSerialisedFormatComplete(serialisedFormat)
+                .thenApply((Boolean isFormatComplete) -> {
+                    if (isFormatComplete.equals(Boolean.TRUE)) {
+                        LOGGER.info("Persistence hit for serialisedFormat '{}'", serialisedFormat);
+                        // Get type entity from db
+                        return Optional.of(serialisedFormatRepository.streamFindAllBySerialisedFormat(serialisedFormat)
+                                // Get the resourceId from the TypeEntity
+                                .map(SerialisedFormatEntity::getResourceId)
+                                // Get the resource for this id
+                                .flatMapConcat(this::getResourceById)
+                                // Some enforcement of db assumptions
+                                // If we have a type entity, we have a resource entity AND the resource is a leaf
+                                // May throw ClassCastException or NoSuchElementException if database is malformed
+                                .map(LeafResource.class::cast)
+                        );
+                    } else {
+                        LOGGER.info("Persistence miss for serialisedFormat '{}'", serialisedFormat);
+                        // The persistence store has nothing stored for this serialisedFormat, or the store is incomplete
+                        return Optional.empty();
+                    }
+                });
     }
 
     // Add a leaf resource and mark it and its parents as complete up to a given root resource id
@@ -586,13 +589,14 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         final AtomicBoolean persistedRootAndParents = new AtomicBoolean(false);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        CompletableFuture<Void> saveRootId = isResourceIdComplete(rootResourceId).thenCompose((Boolean idAlreadyComplete) -> {
-            if (idAlreadyComplete.equals(Boolean.FALSE)) {
-                return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
-            } else {
-                return CompletableFuture.completedFuture(null);
-            }
-        });
+        CompletableFuture<Void> saveRootId = isResourceIdComplete(rootResourceId)
+                .thenCompose((Boolean idAlreadyComplete) -> {
+                    if (idAlreadyComplete.equals(Boolean.FALSE)) {
+                        return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
+                    } else {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                });
 
         Flow<T, T, NotUsed> flow = Flow.<T>create().mapAsync(PARALLELISM, (T leafResource) ->
                 // Persist each leaf resource, with each being complete up-to the root resource id
