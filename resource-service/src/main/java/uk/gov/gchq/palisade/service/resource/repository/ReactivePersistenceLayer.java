@@ -589,15 +589,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         final AtomicBoolean persistedRootAndParents = new AtomicBoolean(false);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        CompletableFuture<Void> saveRootId = isResourceIdComplete(rootResourceId)
-                .thenCompose((Boolean idAlreadyComplete) -> {
-                    if (idAlreadyComplete.equals(Boolean.FALSE)) {
-                        return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
-                    } else {
-                        return CompletableFuture.completedFuture(null);
-                    }
-                });
-
         Flow<T, T, NotUsed> flow = Flow.<T>create().mapAsync(PARALLELISM, (T leafResource) ->
                 // Persist each leaf resource, with each being complete up-to the root resource id
                 saveChildrenOfCompleteResource(rootResourceId, leafResource)
@@ -623,7 +614,16 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         )
                         .thenApply(ignored -> leafResource)
         );
-        return Flow.completionStageFlow(saveRootId.thenApply(ignored -> flow))
+
+        return Flow.completionStageFlow(isResourceIdComplete(rootResourceId)
+                .thenCompose((Boolean idAlreadyComplete) -> {
+                    if (idAlreadyComplete.equals(Boolean.FALSE)) {
+                        return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
+                    } else {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                })
+                .thenApply(ignored -> flow))
                 .mapMaterializedValue(future -> NotUsed.notUsed());
     }
 
