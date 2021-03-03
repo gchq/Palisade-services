@@ -20,7 +20,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

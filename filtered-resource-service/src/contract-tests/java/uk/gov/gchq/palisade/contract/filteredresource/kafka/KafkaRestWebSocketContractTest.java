@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.assertj.core.util.TriFunction;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -140,39 +141,15 @@ class KafkaRestWebSocketContractTest {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
             // Builders
-            Function<String, FilteredResourceRequest> resourceBuilder = resourceId -> FilteredResourceRequest.Builder.create()
-                    .withUserId("userId")
-                    .withResourceId("file:/file/")
-                    .withContext(new Context().purpose("purpose"))
-                    .withResource(new FileResource()
-                            .id("file:/file/" + resourceId)
-                            .serialisedFormat("fmt")
-                            .type("type")
-                            .connectionDetail(new SimpleConnectionDetail()
-                                    .serviceName("data-service"))
-                            .parent(new SystemResource().id("file:/file/")));
-            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
-                    ::withCommitOffset;
-            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
-                    .withType(MessageType.RESOURCE)
-                    .withHeader(Token.HEADER, token)
-                    .noHeaders()
-                    .withBody(leafResource);
-
-            TriFunction<String, String, String, WebSocketMessage> errorBuilder = (token, serviceName, errorMessage) -> WebSocketMessage.Builder.create()
-                    .withType(MessageType.ERROR)
-                    .withHeader(Token.HEADER, token).withHeader("service-name", serviceName)
-                    .noHeaders()
-                    .withBody(errorMessage);
+            Function<String, FilteredResourceRequest> resourceBuilder = getResourceBuilder();
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()::withCommitOffset;
+            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = getResponseBuilder();
+            TriFunction<String, String, String, WebSocketMessage> errorBuilder = getErrorBuilder();
             // Special instances
             HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
             HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
             WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-            Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
-                    .withType(MessageType.COMPLETE)
-                    .withHeader(Token.HEADER, token)
-                    .noHeaders()
-                    .noBody();
+            Function<String, WebSocketMessage> completeMsgBuilder = getCompleteMsgBuilder();
             return Stream.of(
                     // Test for 'early' client - topic offset message has offset
                     // Expect to receive the three resources and no errors
@@ -185,14 +162,10 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
                             ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
-                            ),
+                            List.of(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))),
                             List.of(),
                             Map.of(),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
+                            List.of(ctsMsg, ctsMsg, ctsMsg, ctsMsg),
                             List.of(
                                     responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
@@ -217,9 +190,7 @@ class KafkaRestWebSocketContractTest {
                             Map.of(
                                     "test-token-2", 0L
                             ),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
+                            List.of(ctsMsg, ctsMsg, ctsMsg, ctsMsg),
                             List.of(
                                     responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
@@ -239,14 +210,10 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
                             ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
-                            ),
+                            List.of(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))),
                             List.of(),
                             Map.of(),
-                            List.of(
-                                    ctsMsg
-                            ),
+                            List.of(ctsMsg),
                             List.of(
                                     errorBuilder.apply("test-token-3", "filtered-resource-service",
                                             "uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException: No Start Marker was observed for token: " + "test-token-3")
@@ -267,14 +234,10 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
                             ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
-                            ),
+                            List.of(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))),
                             List.of(),
                             Map.of(),
-                            List.of(
-                                    ctsMsg
-                            ),
+                            List.of(ctsMsg),
                             List.of(
                                     // No Error is expected to be returned to the client
                                     WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
@@ -296,22 +259,17 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5"), endHeader), null)
                             ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), offsetBuilder.apply(0L))
-                            ),
+                            List.of(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")), offsetBuilder.apply(0L))),
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-5")),
                                             UserServiceAuditErrorMessage.Builder.create().withUserId("userId")
                                                     .withResourceId("file:/file/resource.4")
                                                     .withContext(new Context().purpose("purpose"))
                                                     .withAttributes(Collections.emptyMap())
-                                                    .withError(new Throwable("No userId matching: " + "userId"))
-                                    )
+                                                    .withError(new Throwable("No userId matching: " + "userId")))
                             ),
                             Map.of(),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
+                            List.of(ctsMsg, ctsMsg, ctsMsg, ctsMsg, ctsMsg),
                             List.of(
                                     errorBuilder.apply("test-token-5", "user-service", "No userId matching: userId"),
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.1").getResource()),
@@ -319,9 +277,7 @@ class KafkaRestWebSocketContractTest {
                                     responseBuilder.apply("test-token-5", resourceBuilder.apply("resource.3").getResource()),
                                     completeMsgBuilder.apply("test-token-5")
                             ),
-                            List.of(
-                                    // Empty as this test doesnt output anything on to the erorr topic
-                            )
+                            List.of(/* Empty as this test doesnt output anything on to the erorr topic */)
                     )
             );
         }
@@ -458,6 +414,48 @@ class KafkaRestWebSocketContractTest {
                                     .collect(Collectors.toList()))
             );
         }
+    }
+
+    @NotNull
+    private static TriFunction<String, String, String, WebSocketMessage> getErrorBuilder() {
+        return (token, serviceName, errorMessage) -> WebSocketMessage.Builder.create()
+                .withType(MessageType.ERROR)
+                .withHeader(Token.HEADER, token).withHeader("service-name", serviceName)
+                .noHeaders()
+                .withBody(errorMessage);
+    }
+
+    @NotNull
+    private static BiFunction<String, LeafResource, WebSocketMessage> getResponseBuilder() {
+        return (token, leafResource) -> WebSocketMessage.Builder.create()
+                .withType(MessageType.RESOURCE)
+                .withHeader(Token.HEADER, token)
+                .noHeaders()
+                .withBody(leafResource);
+    }
+
+    @NotNull
+    private static Function<String, FilteredResourceRequest> getResourceBuilder() {
+        return resourceId -> FilteredResourceRequest.Builder.create()
+                .withUserId("userId")
+                .withResourceId("file:/file/")
+                .withContext(new Context().purpose("purpose"))
+                .withResource(new FileResource()
+                        .id("file:/file/" + resourceId)
+                        .serialisedFormat("fmt")
+                        .type("type")
+                        .connectionDetail(new SimpleConnectionDetail()
+                                .serviceName("data-service"))
+                        .parent(new SystemResource().id("file:/file/")));
+    }
+
+    @NotNull
+    private static Function<String, WebSocketMessage> getCompleteMsgBuilder() {
+        return (token) -> WebSocketMessage.Builder.create()
+                .withType(MessageType.COMPLETE)
+                .withHeader(Token.HEADER, token)
+                .noHeaders()
+                .noBody();
     }
 
     // Handle deserialising JSON TextMessages to WebSocketMessages

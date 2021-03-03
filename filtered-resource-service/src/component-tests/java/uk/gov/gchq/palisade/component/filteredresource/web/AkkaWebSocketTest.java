@@ -309,7 +309,7 @@ class AkkaWebSocketTest {
 
     @Test
     void testWebSocketRecievesEarlyErrors() throws InterruptedException, ExecutionException, TimeoutException {
-        // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, which will be followed by 1 COMPLETE message)
+        // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, start with 1 ERROR message and end with 1 COMPLETE message)
         int nMessages = 101; // including ERROR
         errorPersistenceLayer.putAuditErrorMessage(token,
                 "test-user1",
@@ -318,6 +318,11 @@ class AkkaWebSocketTest {
                 "user-service",
                 Collections.emptyMap(),
                 new Throwable("No userId matching: test-user-1")).join();
+
+        var expectedErorrWebSocketMessage = WebSocketMessage.Builder.create()
+                .withType(MessageType.ERROR)
+                .withHeader("x-request-token", "test-token").withHeader("service-name", "user-service").noHeaders()
+                .withBody("No userId matching: test-user-1");
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -333,6 +338,12 @@ class AkkaWebSocketTest {
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(nMessages, TimeUnit.SECONDS));
         assertThat(results)
                 .hasSize(nMessages);
+
+        assertThat(results.getFirst())
+                .as("Assert that the first message is an ERROR")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedErorrWebSocketMessage);
+        results.removeFirst();
 
         // Assert CTS -> COMPLETE for last messages
         assertThat(results.getLast())
@@ -356,13 +367,23 @@ class AkkaWebSocketTest {
         // Each request should have been audited
         assertThat(auditedResources.get())
                 .isNotEmpty()
-                .hasSize(nMessages - 1) // excluding COMPLETE
+                .hasSize(nMessages - 2) // excluding COMPLETE and ERROR
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
                         .extracting(FilteredResourceRequest::getResourceNode)
                         .isEqualTo(MAPPER.valueToTree(testResource)));
 
     }
 
+    /**
+     * The main test code used to send requests and retrieve messages from the service via a WebSocket
+     *
+     * @param messageType the type of message to send to the client, could be PING, or CTS
+     * @param nMessages   how many messages to send
+     * @return a CompletableFuture of a List of messages that have been returned from the service
+     * @throws ExecutionException   – if this future completed exceptionally
+     * @throws InterruptedException – if the current thread was interrupted while waiting
+     * @throws TimeoutException     – if the wait timed out
+     */
     private CompletableFuture<List<WebSocketMessage>> webSocketFlow(final MessageType messageType, final int nMessages) throws InterruptedException, ExecutionException, TimeoutException {
         persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test message

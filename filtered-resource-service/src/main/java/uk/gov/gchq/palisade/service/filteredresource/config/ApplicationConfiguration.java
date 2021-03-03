@@ -36,8 +36,8 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffs
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorMessageEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorMessageEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import java.util.Collections;
