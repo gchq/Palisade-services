@@ -44,7 +44,6 @@ class StroomAuditServiceTest {
     @Captor
     ArgumentCaptor<Event> logCaptor;
 
-    private static final EventSerializer EVENT_SERIALIZER = new DefaultEventSerializer();
     private static StroomAuditService auditService;
 
     @BeforeEach
