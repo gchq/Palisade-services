@@ -27,6 +27,7 @@ import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -110,7 +111,8 @@ class KafkaErrorContractTest {
         // Given - we are already listening to the errors
         ConsumerSettings<String, AuditErrorMessage> errorConsumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
                 .atMostOnceSource(errorConsumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
