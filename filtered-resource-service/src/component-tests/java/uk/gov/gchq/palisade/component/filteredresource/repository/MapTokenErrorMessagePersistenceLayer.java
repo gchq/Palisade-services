@@ -45,7 +45,7 @@ public class MapTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
 
     @Override
     public CompletableFuture<List<TokenErrorMessageEntity>> getAllAuditErrorMessages(final String token) {
-        return CompletableFuture.completedFuture(Collections.unmodifiableList(errorMessageMap.getOrDefault(token, new LinkedList<>())));
+        return CompletableFuture.completedFuture(new LinkedList<>(errorMessageMap.getOrDefault(token, new LinkedList<>())));
     }
 
     @Override

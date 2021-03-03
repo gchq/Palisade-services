@@ -61,7 +61,6 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffs
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
-import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.ErrorSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
@@ -104,9 +103,9 @@ class AkkaWebSocketTest {
 
     // WebSocket test objects
     final TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
-    final TokenErrorMessagePersistenceLayer amPersistenceLayer = new MapTokenErrorMessagePersistenceLayer();
+    final TokenErrorMessagePersistenceLayer errorPersistenceLayer = new MapTokenErrorMessagePersistenceLayer();
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
-    final ActorRef<TokenErrorMessageCommand> tokenErrorMessageCommand = TokenErrorMessageController.create(amPersistenceLayer);
+    final ActorRef<TokenErrorMessageCommand> tokenErrorMessageCommand = TokenErrorMessageController.create(errorPersistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
             .take(99)
             .mapMaterializedValue(notUsed -> Consumer.createNoopControl());
@@ -311,14 +310,14 @@ class AkkaWebSocketTest {
     @Test
     void testWebSocketRecievesEarlyErrors() throws InterruptedException, ExecutionException, TimeoutException {
         // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, which will be followed by 1 COMPLETE message)
-        int nMessages = 101;
-        amPersistenceLayer.putAuditErrorMessage("test-token",
+        int nMessages = 101; // including ERROR
+        errorPersistenceLayer.putAuditErrorMessage(token,
                 "test-user1",
                 "/test/file/file1",
                 new Context(),
                 "user-service",
                 Collections.emptyMap(),
-                new Throwable("No userId matching: test-user-1"));
+                new Throwable("No userId matching: test-user-1")).join();
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -385,7 +384,7 @@ class AkkaWebSocketTest {
 
         // Get the (HTTP) response, a websocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
-                .get(nMessages, TimeUnit.SECONDS);
+                .get(1, TimeUnit.SECONDS);
         LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
         // Get the result of the client sink, a list of (WebSocket) responses
