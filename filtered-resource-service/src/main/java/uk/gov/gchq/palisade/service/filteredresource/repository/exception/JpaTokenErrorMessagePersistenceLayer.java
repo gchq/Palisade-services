@@ -15,12 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -45,9 +43,8 @@ public class JpaTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     }
 
     @Override
-    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String userId, final String resourceId, final Context context,
-                                                                           final String serviceName, final Map<String, String> attributes, final Throwable error) {
-        return CompletableFuture.supplyAsync(() -> repository.save(token, userId, resourceId, context, serviceName, attributes, error), executor);
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String serviceName, final Throwable error) {
+        return CompletableFuture.supplyAsync(() -> repository.save(token, serviceName, error), executor);
     }
 
     @Override

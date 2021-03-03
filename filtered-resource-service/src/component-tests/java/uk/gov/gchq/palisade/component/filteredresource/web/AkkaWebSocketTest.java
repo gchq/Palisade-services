@@ -66,7 +66,6 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -312,11 +311,7 @@ class AkkaWebSocketTest {
         // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, start with 1 ERROR message and end with 1 COMPLETE message)
         int nMessages = 101; // including ERROR
         errorPersistenceLayer.putAuditErrorMessage(token,
-                "test-user1",
-                "/test/file/file1",
-                new Context(),
                 "user-service",
-                Collections.emptyMap(),
                 new Throwable("No userId matching: test-user-1")).join();
 
         var expectedErorrWebSocketMessage = WebSocketMessage.Builder.create()

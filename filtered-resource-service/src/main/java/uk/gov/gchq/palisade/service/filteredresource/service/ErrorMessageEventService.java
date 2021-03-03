@@ -50,7 +50,6 @@ public class ErrorMessageEventService {
      * @return a {@link CompletableFuture} of a {@link TokenErrorMessageEntity} representing the async completion of the persistence event
      */
     public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
-        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getUserId(), auditErrorMessage.getResourceId(), auditErrorMessage.getContext(), auditErrorMessage.getServiceName(),
-                auditErrorMessage.getAttributes(), auditErrorMessage.getError());
+        return this.persistenceLayer.putAuditErrorMessage(token, auditErrorMessage.getServiceName(), auditErrorMessage.getError());
     }
 }

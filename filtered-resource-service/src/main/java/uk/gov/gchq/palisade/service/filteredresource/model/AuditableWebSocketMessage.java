@@ -91,8 +91,21 @@ public class AuditableWebSocketMessage {
          */
         public interface ICommittable {
 
+            /**
+             * Supply a pair of {@link FilteredResourceRequest} and {@link Committable} to the builder
+             *
+             * @param resourceAndCommittable the pair, containing the original request information sent to the Filtered Resource Service, and the committable needed to commit upstream
+             * @return a completed {@link AuditableWebSocketMessage} object
+             */
             AuditableWebSocketMessage withResourceAndCommittable(@NonNull Pair<FilteredResourceRequest, Committable> resourceAndCommittable);
 
+            /**
+             * Supply both a {@link FilteredResourceRequest} and a {@link Committable} to the builder, which will join them as a pair.
+             *
+             * @param request     the request message that was sent to the Filtered Resource Service
+             * @param committable needed to commit upstream
+             * @return a completed {@link AuditableWebSocketMessage} object
+             */
             default AuditableWebSocketMessage withResourceAndCommittable(@NonNull FilteredResourceRequest request, @NonNull Committable committable) {
                 return withResourceAndCommittable(Pair.create(request, committable));
             }

@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 
@@ -33,10 +32,9 @@ public class MapTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     final Map<String, LinkedList<TokenErrorMessageEntity>> errorMessageMap = new HashMap<>();
 
     @Override
-    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String resourceId, final String userId, final Context context, final String serviceName,
-                                                                           final Map<String, String> attributes, final Throwable error) {
+    public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final String serviceName, final Throwable error) {
         errorMessageMap.computeIfAbsent(token, t -> new LinkedList<>());
-        TokenErrorMessageEntity entity = new TokenErrorMessageEntity(token, userId, resourceId, context, serviceName, attributes, error.getMessage());
+        TokenErrorMessageEntity entity = new TokenErrorMessageEntity(token, serviceName, error.getMessage());
         errorMessageMap.get(token).addLast(entity);
 
         return CompletableFuture.completedFuture(entity);

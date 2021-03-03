@@ -20,15 +20,11 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -36,7 +32,6 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -62,22 +57,8 @@ public class TokenErrorMessageEntity implements Serializable {
     @Indexed
     protected String token;
 
-    @Column(name = "userId", columnDefinition = "varchar(255)")
-    private String userId;
-
-    @Column(name = "resource_id", columnDefinition = "varchar(255)")
-    private String resourceId;
-
-    @Column(name = "context", columnDefinition = "clob")
-    @Convert(converter = ContextConverter.class)
-    private Context context;
-
     @Column(name = "service_name", columnDefinition = "varchar(255)")
     private String serviceName;
-
-    @Convert(attributeName = "key.", converter = AttributesConverter.class)
-    @ElementCollection
-    private Map<String, String> attributes;
 
     @Column(name = "error", columnDefinition = "varchar(255)")
     private String error;
@@ -94,21 +75,13 @@ public class TokenErrorMessageEntity implements Serializable {
      * Used for inserting objects into the backing store
      *
      * @param token       the token {@link String} for the client request as a whole, created by the Palisade-Service
-     * @param userId      the userId of the {@link User} as authorised and returned by the User-Service
-     * @param resourceId  the id of a resource as discovered and returned by the Resource-Service
-     * @param context     the {@link Context} as originally supplied by the client
      * @param serviceName the name of the service that originally threw the error
-     * @param attributes  the additional attributes attached to the {@link AuditErrorMessage}
      * @param error       the error attached to the {@link AuditErrorMessage}
      */
     @PersistenceConstructor
-    public TokenErrorMessageEntity(final String token, final String userId, final String resourceId, final Context context, final String serviceName, final Map<String, String> attributes, final String error) {
+    public TokenErrorMessageEntity(final String token, final String serviceName, final String error) {
         this.token = token;
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
         this.serviceName = serviceName;
-        this.attributes = attributes;
         this.error = error;
         this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenErrorMessageEntity");
     }
@@ -119,28 +92,8 @@ public class TokenErrorMessageEntity implements Serializable {
     }
 
     @Generated
-    public String getUserId() {
-        return userId;
-    }
-
-    @Generated
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    @Generated
-    public Context getContext() {
-        return context;
-    }
-
-    @Generated
     public String getServiceName() {
         return serviceName;
-    }
-
-    @Generated
-    public Map<String, String> getAttributes() {
-        return attributes;
     }
 
     @Generated
@@ -164,18 +117,14 @@ public class TokenErrorMessageEntity implements Serializable {
         }
         final TokenErrorMessageEntity that = (TokenErrorMessageEntity) o;
         return Objects.equals(token, that.token) &&
-                Objects.equals(userId, that.userId) &&
-                Objects.equals(resourceId, that.resourceId) &&
-                Objects.equals(context, that.context) &&
                 Objects.equals(serviceName, that.serviceName) &&
-                Objects.equals(attributes, that.attributes) &&
                 Objects.equals(error, that.error);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, userId, resourceId, context, serviceName, attributes, error);
+        return Objects.hash(token, serviceName, error);
     }
 
     @Override
@@ -183,11 +132,7 @@ public class TokenErrorMessageEntity implements Serializable {
     public String toString() {
         return new StringJoiner(", ", TokenErrorMessageEntity.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
-                .add("userId=" + userId)
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
                 .add("serviceName=" + serviceName)
-                .add("attributes=" + attributes)
                 .add("error=" + error)
                 .add(super.toString())
                 .toString();

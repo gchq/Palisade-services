@@ -17,12 +17,10 @@ package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
 import org.springframework.data.repository.CrudRepository;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Persists and retrieves {@link TokenErrorMessageEntity}(s) for a given request token.
@@ -34,17 +32,12 @@ public interface TokenErrorMessageRepository extends CrudRepository<TokenErrorMe
      * This is a ease-of-use wrapper around {@link CrudRepository#save}.
      *
      * @param token       the unique request token
-     * @param userId      the id of the user associated with the request
-     * @param resourceId  the id of the resource associated with the request
-     * @param context     the context associated with the request
      * @param serviceName the name of the service that the error was thrown from
-     * @param attributes  any additional attributes about the request
      * @param error       the error thrown in the service
      * @return a new {@link TokenErrorMessageEntity} containing the object saved to persistence
      */
-    default TokenErrorMessageEntity save(final String token, final String userId, final String resourceId, final Context context,
-                                         final String serviceName, final Map<String, String> attributes, final Throwable error) {
-        return save(new TokenErrorMessageEntity(token, userId, resourceId, context, serviceName, attributes, error.getMessage()));
+    default TokenErrorMessageEntity save(final String token, final String serviceName, final Throwable error) {
+        return save(new TokenErrorMessageEntity(token, serviceName, error.getMessage()));
     }
 
     /**
