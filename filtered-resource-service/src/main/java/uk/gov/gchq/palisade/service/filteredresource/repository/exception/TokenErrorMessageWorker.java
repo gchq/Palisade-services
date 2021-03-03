@@ -21,6 +21,8 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.WorkerCommand;
@@ -32,6 +34,8 @@ import java.util.List;
  * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
  */
 final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenErrorMessageWorker.class);
+
 
     protected interface WorkerCommand {
         // Marker interface for inputs of the worker
@@ -111,9 +115,10 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
                         // Get from persistence
                         .getAllAuditErrorMessages(getCmd.token)
                         // If present tell self (if not, will be told in the future)
-                        .thenApply((List<TokenErrorMessageEntity> listAEM) -> {
-                            getCmd.replyTo.tell(new SetAuditErrorMessages(getCmd.token, listAEM));
-                            return listAEM;
+                        .thenApply((List<TokenErrorMessageEntity> listOfEntities) -> {
+                            LOGGER.info("token {} and listOfEntities {}", getCmd.token, listOfEntities);
+                            getCmd.replyTo.tell(new SetAuditErrorMessages(getCmd.token, listOfEntities));
+                            return listOfEntities;
                         })
                         .thenCompose(this.persistenceLayer::deleteAll)
                         .<Behavior<WorkerCommand>>thenApply(ignored -> Behaviors.stopped())

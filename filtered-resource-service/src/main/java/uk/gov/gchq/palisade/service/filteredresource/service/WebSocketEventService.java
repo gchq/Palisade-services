@@ -211,12 +211,15 @@ public class WebSocketEventService {
                                                 .withBody(committablePair.first().getResourceNode()))
                                         .withResourceAndCommittable(committablePair))
 
-                                .recover(PartialFunction.fromFunction(exception -> AuditableWebSocketMessage.Builder.create()
-                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                                .withType(MessageType.ERROR)
-                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
-                                                .withBody(exception.getMessage()))
-                                        .withoutAudit()))
+                                .recover(PartialFunction.fromFunction(exception -> {
+                                    LOGGER.info("recovered error {}", exception.getMessage());
+                                    return AuditableWebSocketMessage.Builder.create()
+                                            .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                    .withType(MessageType.ERROR)
+                                                    .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
+                                                    .withBody(exception.getMessage()))
+                                            .withoutAudit();
+                                }))
 
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
@@ -258,12 +261,15 @@ public class WebSocketEventService {
 
                         .orElseGet(() -> persistenceResponse.getMessageEntities().stream()
                                 // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
-                                .map(errorEntity -> AuditableWebSocketMessage.Builder.create()
-                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                                .withType(MessageType.ERROR)
-                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, errorEntity.getServiceName()).noHeaders()
-                                                .withBody(errorEntity.getError()))
-                                        .withoutAudit())
+                                .map(errorEntity -> {
+                                    LOGGER.info("errorEntity with token {}, and exception {}", errorEntity.getToken(), errorEntity.getError());
+                                    return AuditableWebSocketMessage.Builder.create()
+                                            .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                    .withType(MessageType.ERROR)
+                                                    .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, errorEntity.getServiceName()).noHeaders()
+                                                    .withBody(errorEntity.getError()))
+                                            .withoutAudit();
+                                })
                                 .collect(Collectors.toList()))));
     }
 
