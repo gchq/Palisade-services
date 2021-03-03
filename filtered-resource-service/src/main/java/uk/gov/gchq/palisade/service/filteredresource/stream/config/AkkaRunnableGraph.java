@@ -390,24 +390,6 @@ public class AkkaRunnableGraph {
     }
 
     /**
-     * Factory for Akka {@link Source} of {@link AuditErrorMessage}.
-     * This automatically connects to kafka to retrieve AuditErrorMessages and committables for the token.
-     * The result is a stream of {@link AuditErrorMessage}s to be returned to the client
-     */
-    public interface ErrorSourceFactory {
-
-        /**
-         * Factory for Akka {@link Source} of {@link AuditErrorMessage}.
-         * Connect to kafka for a unique token and retrieve AuditErrorMessages
-         *
-         * @param token the client's unique token for their request
-         * @param auditErrorMessage the auditErrorMessages thrown in the other services associated with the request
-         * @return {@link Source} of {@link AuditErrorMessage} for the client's request
-         */
-        Source<Pair<AuditErrorMessage, Committable>, NotUsed> create(String token, AuditErrorMessage auditErrorMessage);
-    }
-
-    /**
      * Factory for Akka {@link Sink}s to the audit success queue for all {@link FilteredResourceRequest}s successfully
      * returned to the client. This auditing occurs just before the client is sent the resource, and should also
      * commit the given offset (for the upstream {@link FilteredResourceRequest} to kafka).

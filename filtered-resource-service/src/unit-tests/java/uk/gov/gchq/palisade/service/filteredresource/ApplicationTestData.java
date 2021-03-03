@@ -63,7 +63,6 @@ public final class ApplicationTestData {
             .withResource(LEAF_RESOURCE);
 
     public static final Long OFFSET = 1L;
-    public static final TokenOffsetEntity OFFSET_ENTITY = new TokenOffsetEntity(REQUEST_TOKEN, OFFSET);
     public static final TopicOffsetMessage OFFSET_MESSAGE = TopicOffsetMessage.Builder.create()
             .withCommitOffset(OFFSET);
 

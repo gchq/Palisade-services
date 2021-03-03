@@ -49,23 +49,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 class AkkaHealthTest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String HOST = "localhost";
     private static final int PORT = 18080;
 
     // Health test objects
-    HealthContributorRegistry hcr = new DefaultHealthContributorRegistry(Map.of("valid-health-component", new PingHealthIndicator()));
-    HealthEndpointGroups heg = Mockito.mock(HealthEndpointGroups.class);
-    HealthEndpoint healthEndpoint = Mockito.spy(new HealthEndpoint(hcr, heg));
-    ApplicationAvailability applicationAvailability = Mockito.mock(ApplicationAvailability.class);
+    final HealthContributorRegistry hcr = new DefaultHealthContributorRegistry(Map.of("valid-health-component", new PingHealthIndicator()));
+    final HealthEndpointGroups heg = Mockito.mock(HealthEndpointGroups.class);
+    final HealthEndpoint healthEndpoint = Mockito.spy(new HealthEndpoint(hcr, heg));
+    final ApplicationAvailability applicationAvailability = Mockito.mock(ApplicationAvailability.class);
 
     // Health endpoint to be tested
-    SpringHealthRouter healthRouter = new SpringHealthRouter(healthEndpoint, applicationAvailability);
-    SpringActuatorRouter actuatorRouter = new SpringActuatorRouter(List.of(healthRouter));
+    final SpringHealthRouter healthRouter = new SpringHealthRouter(healthEndpoint, applicationAvailability);
+    final SpringActuatorRouter actuatorRouter = new SpringActuatorRouter(List.of(healthRouter));
     AkkaHttpServer server;
 
     // Akka runtime
-    ActorSystem system = ActorSystem.create("websocket-test");
+    final ActorSystem system = ActorSystem.create("websocket-test");
 
     @BeforeEach
     void setUp() {
