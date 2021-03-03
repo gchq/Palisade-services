@@ -154,6 +154,7 @@ class AkkaWebSocketTest {
         // **
 
         // Add a dummy offset to persistence (it is ignored by the mock ResourceSourceFactory function)
+        persistenceLayer.overwriteOffset(token, 1L);
         CompletableFuture<List<WebSocketMessage>> sinkFuture = webSocketFlow(MessageType.PING, nMessages);
 
         assertThat(sinkFuture.get(nMessages, TimeUnit.SECONDS))
@@ -175,6 +176,7 @@ class AkkaWebSocketTest {
         // **
 
         // Add a dummy offset to persistence (it is ignored by the mock ResourceSourceFactory function)
+        persistenceLayer.overwriteOffset(token, 1L);
         CompletableFuture<List<WebSocketMessage>> sinkFuture = webSocketFlow(MessageType.CTS, nMessages);
 
         // **
@@ -323,6 +325,7 @@ class AkkaWebSocketTest {
         // **
 
         // Add a dummy offset to persistence (it is ignored by the mock ResourceSourceFactory function)
+        persistenceLayer.overwriteOffset(token, 1L);
         CompletableFuture<List<WebSocketMessage>> sinkFuture = webSocketFlow(MessageType.CTS, nMessages);
 
         // **
@@ -380,7 +383,6 @@ class AkkaWebSocketTest {
      * @throws TimeoutException     – if the wait timed out
      */
     private CompletableFuture<List<WebSocketMessage>> webSocketFlow(final MessageType messageType, final int nMessages) throws InterruptedException, ExecutionException, TimeoutException {
-        persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test message
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(messageType).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMessages).map(this::writeTextMessage);
