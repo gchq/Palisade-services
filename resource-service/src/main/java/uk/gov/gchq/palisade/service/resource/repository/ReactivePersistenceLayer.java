@@ -125,13 +125,13 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     private CompletableFuture<Boolean> isResourceIdComplete(final String resourceId) {
         // Check details with completeness db
         return completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.RESOURCE, resourceId)
-                .thenApply((Boolean result) -> {
-                    if (result.equals(Boolean.TRUE)) {
+                .thenApply((Boolean isResourceComplete) -> {
+                    if (isResourceComplete.equals(Boolean.TRUE)) {
                         LOGGER.debug(RESOURCE_IS, resourceId, COMPLETE);
                     } else {
                         LOGGER.debug(RESOURCE_IS, resourceId, NOT_COMPLETE);
                     }
-                    return result;
+                    return isResourceComplete;
                 });
     }
 
@@ -144,13 +144,13 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     private CompletableFuture<Boolean> isTypeComplete(final String type) {
         // Check details with completeness db
         return completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.TYPE, type)
-                .thenApply((Boolean result) -> {
-                    if (result.equals(Boolean.TRUE)) {
+                .thenApply((Boolean isTypeComplete) -> {
+                    if (isTypeComplete.equals(Boolean.TRUE)) {
                         LOGGER.debug(TYPE_IS, type, COMPLETE);
                     } else {
                         LOGGER.debug(TYPE_IS, type, NOT_COMPLETE);
                     }
-                    return result;
+                    return isTypeComplete;
                 });
     }
 
@@ -163,13 +163,13 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     private CompletableFuture<Boolean> isSerialisedFormatComplete(final String serialisedFormat) {
         // Check details with completeness db
         return completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.FORMAT, serialisedFormat)
-                .thenApply((Boolean result) -> {
-                    if (result.equals(Boolean.TRUE)) {
+                .thenApply((Boolean isFormatComplete) -> {
+                    if (isFormatComplete.equals(Boolean.TRUE)) {
                         LOGGER.debug(FORMAT_IS, serialisedFormat, COMPLETE);
                     } else {
                         LOGGER.debug(FORMAT_IS, serialisedFormat, NOT_COMPLETE);
                     }
-                    return result;
+                    return isFormatComplete;
                 });
     }
 
@@ -246,8 +246,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
             ParentResource parentResource = childResource.getParent();
             // Recurse if desired
             return callbackFunction.apply(parentResource, childResource)
-                    .thenCompose((Boolean result) -> {
-                        if (result.equals(Boolean.TRUE)) {
+                    .thenCompose((Boolean shouldRecurse) -> {
+                        if (shouldRecurse.equals(Boolean.TRUE)) {
                             return traverseParentsByResource(parentResource, callbackFunction);
                         } else {
                             return CompletableFuture.completedFuture(null);
@@ -350,18 +350,19 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // Since this is a 'low-quality' set of information, we never want to overwrite a 'high-quality' (complete) entity
         // There is no benefit to overwrite a 'low-quality' (incomplete) entity as it should be equivalent
         // Therefore, if this resource is already persisted, skip
-        return isResourceIdPersisted(resource.getId()).thenCompose((Boolean result) -> {
-            if (result.equals(Boolean.FALSE)) {
-                // Create an entity
-                ResourceEntity entity = new ResourceEntity(resource);
-                // Save to db
-                return resourceRepository.futureSave(entity)
-                        .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
-                // Don't save to completeness db
-            } else {
-                return CompletableFuture.completedFuture(null);
-            }
-        });
+        return isResourceIdPersisted(resource.getId())
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.FALSE)) {
+                        // Create an entity
+                        ResourceEntity entity = new ResourceEntity(resource);
+                        // Save to db
+                        return resourceRepository.futureSave(entity)
+                                .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
+                        // Don't save to completeness db
+                    } else {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                });
     }
 
     /**
@@ -377,15 +378,16 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // There is no benefit to overwrite a 'high-quality' (complete) entity as it should be equivalent
         // Therefore, if this resource is already persisted AND complete, skip
         // Otherwise, overwrite
-        return isResourceIdComplete(resource.getId()).thenCompose((Boolean result) -> {
-            if (result.equals(Boolean.FALSE)) {
-                // Mark resource entity as complete
-                return completenessRepository.futureSave(EntityType.RESOURCE, resource.getId())
-                        .thenRun(() -> LOGGER.debug("Persistence save for complete entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId()));
-            } else {
-                return saveIncompleteResource(resource);
-            }
-        });
+        return isResourceIdComplete(resource.getId())
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.FALSE)) {
+                        // Mark resource entity as complete
+                        return completenessRepository.futureSave(EntityType.RESOURCE, resource.getId())
+                                .thenRun(() -> LOGGER.debug("Persistence save for complete entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId()));
+                    } else {
+                        return saveIncompleteResource(resource);
+                    }
+                });
     }
 
     /**
@@ -444,8 +446,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      */
     private CompletableFuture<Void> saveType(final String type, final LeafResource leafResource) {
         return typeRepository.futureExistsByResourceId(leafResource.getId())
-                .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
+                .thenCompose((Boolean alreadySaved) -> {
+                    if (alreadySaved.equals(Boolean.FALSE)) {
                         TypeEntity entity = new TypeEntity(type, leafResource.getId());
                         return typeRepository.futureSave(entity)
                                 .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType()));
@@ -466,8 +468,8 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      */
     private CompletableFuture<Void> saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
         return serialisedFormatRepository.futureExistsFindOneByResourceId(leafResource.getId())
-                .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
+                .thenCompose((Boolean alreadySaved) -> {
+                    if (alreadySaved.equals(Boolean.FALSE)) {
                         SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
                         return serialisedFormatRepository.futureSave(entity)
                                 .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with serialisedFormat '{}'",
