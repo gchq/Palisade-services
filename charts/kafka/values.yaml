@@ -512,6 +512,10 @@ zookeeper:
   ## ref: https://github.com/kubernetes/charts/tree/master/incubator/zookeeper
   enabled: true
 
+  exports: {}
+  # nameOverride: zookeeper
+  # fullnameOverride: zookeeper
+
   ## Configure Zookeeper resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources: ~

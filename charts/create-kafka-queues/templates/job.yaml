@@ -42,7 +42,7 @@ spec:
         command: ["/bin/wait-for-services.sh"]
         args:
         {{- range $index, $service := .Values.waitForServices }}
-        - {{ printf "%s:%s:%s" $service.name $service.dest (toString $service.port) }}
+        - {{ printf "%s:%s:%s" $service.name (include $service.tpl $) (toString $service.port) }}
         {{- end }}
       containers:
       - name: {{ .Chart.Name }}
@@ -51,7 +51,7 @@ spec:
         command: ["/bin/bash", "/bin/create-topics.sh" ]
         env:
         - name: ZOOKEEPER
-          value: {{ .Values.exports.zookeeper | quote }}
+          value: {{ printf "%s:%d" (include "palisade.zookeeper.fullname" .) 2181 | quote }}
         {{- range $key, $val := .Values.kafkaCreateTopics }}
         - name: {{ printf "KAFKATOPIC%d" $key }}
           value: {{ printf "%s %s %s" $val.name ($val.partitions | toString) ($val.replicationFactor | toString)  }}

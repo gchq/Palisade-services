@@ -168,3 +168,19 @@ Create the service name of kafka
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create the service name of zookeeper
+*/}}
+{{- define "palisade.zookeeper.fullname" -}}
+{{- if .Values.global.zookeeper.exports.fullnameOverride -}}
+{{- .Values.global.zookeeper.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "zookeeper" .Values.global.zookeeper.exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

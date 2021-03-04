@@ -42,6 +42,10 @@ global:
     exports:
       nameOverride: "kafka"
 
+  zookeeper:
+    exports: {}
+    # nameOverride: "zookeeper"
+
   redis:
     # install: install redis persistence and caching data storage platform
     install: true
@@ -61,11 +65,6 @@ global:
       redisPort: 6379
     cluster:
       nodes: 6
-
-  create-kafka-queues:
-    exports:
-      # imported from sub-chart, default values here are overridden by sub-chart values
-      zookeeper: palisade-zookeeper:2181
 
   # hosting: [local | aws | metal] the target environment to deploy to
   hosting: local
