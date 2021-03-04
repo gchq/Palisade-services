@@ -158,13 +158,17 @@ class AkkaWebSocketTest {
         CompletableFuture<List<WebSocketMessage>> sinkFuture = webSocketFlow(MessageType.PING, nMessages);
 
         assertThat(sinkFuture.get(nMessages, TimeUnit.SECONDS))
+                .as("Check that %s messages are returned", nMessages)
                 .hasSize(nMessages)
                 // Assert PING -> PONG
-                .allSatisfy((WebSocketMessage message) -> assertThat(message)
+                .allSatisfy(message -> assertThat(message)
+                        .as("All responses to the client should be PONG")
                         .extracting(WebSocketMessage::getType)
                         .isEqualTo(MessageType.PONG));
-        // Nothing should have been audited
-        assertThat(auditedResources.get()).isEmpty();
+
+        assertThat(auditedResources.get())
+                .as("Nothing should have been audited")
+                .isEmpty();
     }
 
     @Test
@@ -186,6 +190,7 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(nMessages, TimeUnit.SECONDS));
         assertThat(results)
+                .as("Check that %s messages are returned", nMessages)
                 .hasSize(nMessages);
 
         // Assert CTS -> COMPLETE for last messages
@@ -199,16 +204,19 @@ class AkkaWebSocketTest {
                 .allSatisfy(message -> {
                     // Assert CTS -> RESOURCE for not-last messages
                     assertThat(message)
+                            .as("All other responses to client CTS should be RESOURCE")
                             .extracting(WebSocketMessage::getType)
                             .isEqualTo(MessageType.RESOURCE);
                     // Assert the resource returned was the one expected
                     assertThat(message)
+                            .as("The RESOURCE returned should be the one expected")
                             .extracting(msg -> msg.getBodyObject(FileResource.class))
                             .isEqualTo(testResource);
                 });
 
         // Each request should have been audited
         assertThat(auditedResources.get())
+                .as("Check that %s messages are returned, and the RESOURCE returned should be the one expected", nMessages - 1)
                 .isNotEmpty()
                 .hasSize(nMessages - 1) // excluding COMPLETE
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
@@ -264,6 +272,7 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         List<WebSocketMessage> results = sinkFuture.get(nMessages, TimeUnit.SECONDS);
         assertThat(results)
+                .as("Check that %s messages are returned", nMessages * 2)
                 .hasSize(nMessages * 2);
 
         // De-interleave the two lists
@@ -303,20 +312,21 @@ class AkkaWebSocketTest {
         assertThat(auditedResources.get())
                 .as("Each request should have been audited")
                 .hasSize(nMessages - 1) // excluding COMPLETE
+                .as("Check that %s messages are returned, and the RESOURCE returned should be the one expected", nMessages - 1)
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
                         .extracting(FilteredResourceRequest::getResourceNode)
                         .isEqualTo(MAPPER.valueToTree(testResource)));
     }
 
     @Test
-    void testWebSocketRecievesEarlyErrors() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketReceivesEarlyErrors() throws InterruptedException, ExecutionException, TimeoutException {
         // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, start with 1 ERROR message and end with 1 COMPLETE message)
         int nMessages = 101; // including ERROR
         errorPersistenceLayer.putErrorMessage(token,
                 "user-service",
                 new Throwable("No userId matching: test-user-1")).join();
 
-        var expectedErorrWebSocketMessage = WebSocketMessage.Builder.create()
+        var expectedErrorWebSocketMessage = WebSocketMessage.Builder.create()
                 .withType(MessageType.ERROR)
                 .withHeader("x-request-token", "test-token").withHeader("service-name", "user-service").noHeaders()
                 .withBody("No userId matching: test-user-1");
@@ -340,7 +350,7 @@ class AkkaWebSocketTest {
         assertThat(results.getFirst())
                 .as("Assert that the first message is an ERROR")
                 .usingRecursiveComparison()
-                .isEqualTo(expectedErorrWebSocketMessage);
+                .isEqualTo(expectedErrorWebSocketMessage);
         results.removeFirst();
 
         // Assert CTS -> COMPLETE for last messages
@@ -354,16 +364,19 @@ class AkkaWebSocketTest {
                 .allSatisfy(message -> {
                     // Assert CTS -> RESOURCE for not-last messages
                     assertThat(message)
+                            .as("All other responses to client CTS should be RESOURCE")
                             .extracting(WebSocketMessage::getType)
                             .isEqualTo(MessageType.RESOURCE);
                     // Assert the resource returned was the one expected
                     assertThat(message)
+                            .as("The RESOURCE returned should be the one expected")
                             .extracting(msg -> msg.getBodyObject(FileResource.class))
                             .isEqualTo(testResource);
                 });
 
         // Each request should have been audited
         assertThat(auditedResources.get())
+                .as("Check that %s messages are returned, and the RESOURCE returned should be the one expected", nMessages - 2)
                 .isNotEmpty()
                 .hasSize(nMessages - 2) // excluding COMPLETE and ERROR
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)

@@ -47,7 +47,6 @@ import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
@@ -79,7 +78,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.SERVICE_NAME;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link FilteredResourceApplication}.
+ * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication}.
  * Configures the connection between Kafka, Akka and the service
  */
 @Configuration

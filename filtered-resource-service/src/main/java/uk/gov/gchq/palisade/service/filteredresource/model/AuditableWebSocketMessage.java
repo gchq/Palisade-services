@@ -22,12 +22,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 
 /**
  * Collect a {@link WebSocketMessage} prepared to be returned to the client with any other context
  * required to correctly audit the message as a successful request or not (the original {@link Pair}
- * from the {@link FilteredResourceSourceFactory}).
+ * from the {@link uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory}).
  */
 public class AuditableWebSocketMessage {
     private final WebSocketMessage websocketMessage;
