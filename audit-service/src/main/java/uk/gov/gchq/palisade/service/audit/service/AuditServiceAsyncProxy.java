@@ -39,7 +39,7 @@ public class AuditServiceAsyncProxy {
     /**
      * Constructor for the {@link AuditServiceAsyncProxy}
      *
-     * @param services           a {@link Map} of services to use for this proxy
+     * @param services a {@link Map} of services to use for this proxy
      */
     public AuditServiceAsyncProxy(final Map<String, AuditService> services) {
         this.services = services;
@@ -48,8 +48,8 @@ public class AuditServiceAsyncProxy {
     /**
      * Takes the {@link String} token value and an {@link AuditMessage} and audits the information in an {@link AuditService} implementation
      *
-     * @param token    the token for the Palisade request.
-     * @param message  the message received from another service
+     * @param token   the token for the Palisade request.
+     * @param message the message received from another service
      * @return a {@link CompletableFuture} of a {@link Boolean} value.
      */
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {

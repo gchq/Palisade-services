@@ -40,8 +40,6 @@
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <slf4j-test.version>1.1.0</slf4j-test.version>
-        <embedded-redis.version>0.7.3</embedded-redis.version>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
         <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
@@ -50,14 +48,18 @@
     </properties>
 
     <dependencies>
-        <!--~ Palisade-->
+        <!--
+        ~ Palisade
+        -->
         <dependency>
             <!-- Common types (User, Resource, Context) -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>0.5.0-${common.revision}</version>
         </dependency>
-        <!--~ Akka and Alpakka (Kafka)-->
+        <!--
+        ~ Akka and Alpakka (Kafka)
+        -->
         <dependency>
             <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
             <groupId>com.typesafe.akka</groupId>
@@ -82,41 +84,41 @@
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
+        <!--
+        ~ Spring Boot
+        -->
         <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <!-- RestController -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Cacheable annotation -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Caffeine local cache provider -->
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>${caffeine.version}</version>
         </dependency>
         <dependency>
+            <!-- Redis distributed cache provider -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+
+        <!--
+        ~ Test Dependencies
+        -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-        </dependency>
-        <!-- Test Dependencies -->
-        <dependency>
+            <!-- Palisade test rules -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>0.5.0-${common.revision}</version>
@@ -124,20 +126,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>it.ozimov</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>${embedded-redis.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+            <!-- SpringBootTest -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-            <version>${slf4j-test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -46,7 +46,6 @@
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <slf4j-test.version>1.1.0</slf4j-test.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
 

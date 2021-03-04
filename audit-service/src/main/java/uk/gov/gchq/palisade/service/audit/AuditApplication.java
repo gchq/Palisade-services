@@ -52,9 +52,9 @@ public class AuditApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer  the Akka {@link Materializer} configured to be used
-     * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public AuditApplication(final Set<RunnableGraph<?>> runners,
                             final Materializer materializer,

@@ -81,7 +81,7 @@ public class KafkaProducerService {
      * @return a {@link ResponseEntity} once all requests have been written to kafka
      */
     public ResponseEntity<Void> processSuccessRequest(final Map<String, String> headers,
-                                                    final Collection<AuditSuccessMessage> requests) {
+                                                      final Collection<AuditSuccessMessage> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
@@ -118,7 +118,7 @@ public class KafkaProducerService {
      * @return a {@link ResponseEntity} once all requests have been written to kafka
      */
     public ResponseEntity<Void> processErrorRequest(final Map<String, String> headers,
-                                               final Collection<AuditErrorMessage> requests) {
+                                                    final Collection<AuditErrorMessage> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));

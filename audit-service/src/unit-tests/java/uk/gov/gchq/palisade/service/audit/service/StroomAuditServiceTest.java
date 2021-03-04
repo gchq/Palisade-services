@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.audit.service;
 
 import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
-import event.logging.impl.DefaultEventSerializer;
-import event.logging.impl.EventSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

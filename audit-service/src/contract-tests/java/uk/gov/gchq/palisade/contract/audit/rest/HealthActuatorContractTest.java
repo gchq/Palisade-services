@@ -51,15 +51,15 @@ class HealthActuatorContractTest {
     private Map<String, AuditService> serviceMap;
 
     @Test
-     void testContextLoads() {
-       assertThat(serviceMap)
-               .hasSize(3)
-               .containsKeys("simple", "stroom", "logger");
+    void testContextLoads() {
+        assertThat(serviceMap)
+                .hasSize(3)
+                .containsKeys("simple", "stroom", "logger");
         assertThat(restTemplate).isNotNull();
     }
 
     @Test
-     void testIsUp() {
+    void testIsUp() {
         // Given that the service is running (and presumably healthy)
 
         // When we GET the /actuator/health REST endpoint (used by k8s)
