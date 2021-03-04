@@ -19,8 +19,8 @@
 # ------------------------------------------------------------------------------
 
 exports:
-  # nameOverride: "kafka"
-  fullnameOverride:  "kafka"
+  nameOverride: "kafka"
+  # fullnameOverride:  "palisade-kafka"
 
 ## The StatefulSet installs 3 pods by default
 replicas: 1
