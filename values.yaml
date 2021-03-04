@@ -35,6 +35,9 @@ global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
 
+  # If specified is the service name to use typically in a piepline this will be the
+  serviceName:
+
   kafka:
     # install: install kafka streaming platform
     install: true

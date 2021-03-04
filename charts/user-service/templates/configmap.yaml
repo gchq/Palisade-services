@@ -32,7 +32,7 @@ data:
           output-topic.partitions: {{ .Values.replicaCount }}
           error-topic.partitions: {{ .Values.replicaCount }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless
+      - host: {{ include "palisade.kafka.fullname" . }}-headless{{ .Values.global.serviceName }}
         port: 9092
   application-redis.yaml: |
     {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
