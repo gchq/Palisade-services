@@ -44,6 +44,6 @@ data:
     {{- $masterPort := int $.Values.global.redis.master.service.port }}
     spring:
       redis:
-        host: {{ $masterFullname }}
+        host: {{ $masterFullname }}{{ .Values.global.serviceName }}
         port: {{ $masterPort }}
     {{- end }}
