@@ -119,13 +119,15 @@ class AbstractLdapUserServiceTest {
         final User user = service.getUser(request.userId);
 
         // Then
-        assertThat(userId).isEqualTo(user.getUserId());
-        assertThat(auths).isEqualTo(user.getAuths());
-        assertThat(roles).isEqualTo(user.getRoles());
+        assertThat(user)
+                .as("Check that the user has been retrieved successfully")
+                .extracting("userId", "auths", "roles")
+                .containsOnly(userId, auths, roles);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("was not in the cache. Fetching details from LDAP")
         ));
@@ -200,10 +202,14 @@ class AbstractLdapUserServiceTest {
                 new BasicAttributes(attrIdForUserId, userId.getId()),
                 requestAttrs);
         final Set<Object> expectedResults = Sets.newHashSet(search1Attr1, search1Attr2, search2Att1, search2Attr2);
-        assertThat(expectedResults).isEqualTo(results);
+        assertThat(expectedResults)
+                .as("Check that the search on LDAP returned the correct results")
+                .isEqualTo(results);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Performing basic search using")
         ));
@@ -227,9 +233,15 @@ class AbstractLdapUserServiceTest {
         final String expectedResult = "test input: " + Stream.of(AbstractLdapUserService.ESCAPED_CHARS)
                 .map(t -> "\\" + t)
                 .collect(Collectors.joining());
-        assertThat(expectedResult).isEqualTo(result);
+
+        assertThat(expectedResult)
+                .as("Check that the input string has escape characters")
+                .isEqualTo(result);
+
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Formatting input with"),
                 Matchers.containsString("Returning formatted input as")

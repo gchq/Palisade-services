@@ -61,17 +61,18 @@ class CaffeineUserCachingTest {
     @Test
     void testAddedUserIsRetrievable() {
         // Given
-        User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        User user = new User().userId("added-user")
+                .addAuths(Collections.singleton("authorisation"))
+                .addRoles(Collections.singleton("role"));
 
-        // When
-        User addedUser = userService.addUser(user);
-        // Then
-        assertThat(addedUser).isEqualTo(user);
-
-        // When
-        User getUser = userService.getUser(user.getUserId().getId());
-        // Then
-        assertThat(getUser).isEqualTo(user);
+        // Then the user is added to the cache
+        userService.addUser(user);
+        // When we retrieve the user from the cache
+        var addedUser = userService.getUser(user.getUserId().getId());
+        assertThat(addedUser)
+                .as("Check that the retrieved user is the same as the user we created")
+                .usingRecursiveComparison()
+                .isEqualTo(user);
     }
 
     @Test
@@ -79,27 +80,39 @@ class CaffeineUserCachingTest {
         // Given the user is not added to the cache
 
         // When
-        assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException"
-        );
+        var noSuchUserIdException = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException");
+
+        assertThat(noSuchUserIdException)
+                .as("Check that the correct message is added to the Exception")
+                .extracting("Message")
+                .isEqualTo("No userId matching definitely-not-a-real-user found in cache");
     }
 
     @Test
     void testUpdateUser() {
         // Given we create an original user, and then update the users auths and roles
-        User originalUser = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
-        User updatedUser = new User().userId(originalUser.getUserId()).addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
+        User originalUser = new User().userId("updatable-user")
+                .addAuths(Collections.singleton("auth"))
+                .addRoles(Collections.singleton("role"));
+
+        User updatedUser = new User().userId(originalUser.getUserId())
+                .addAuths(Collections.singleton("newAuth"))
+                .addRoles(Collections.singleton("newRole"));
 
         // When we add the original User
         userService.addUser(originalUser);
-        // Then update the original User
+        // Then update the same User
         userService.addUser(updatedUser);
 
         // When we get the updated user
         User returnedUser = userService.getUser(updatedUser.getUserId().getId());
 
         // Then the User has been updated
-        assertThat(returnedUser).isEqualTo(updatedUser);
+        assertThat(returnedUser)
+                .as("Check that the original user has been updated")
+                .usingRecursiveComparison()
+                .isEqualTo(updatedUser);
     }
 
     @Test
@@ -115,9 +128,14 @@ class CaffeineUserCachingTest {
         forceCleanUp();
 
         // Then a NoSuchUserIdException is thrown as the User no longer exists
-        assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(makeUserId.apply(0)), "testMaxSizeTest should throw noSuchIdException"
-        );
+        var noSuchUserIdException = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(makeUserId.apply(0)), "testMaxSizeTest should throw noSuchIdException");
+
+        assertThat(noSuchUserIdException)
+                .as("Check that the correct message is added to the Exception")
+                .extracting("Message")
+                .isEqualTo("No userId matching max-size-0-test-user found in cache");
+
 
     }
 

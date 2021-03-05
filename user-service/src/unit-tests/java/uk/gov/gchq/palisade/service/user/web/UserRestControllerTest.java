@@ -74,8 +74,13 @@ class UserRestControllerTest {
     @Test
     void testAddAndGetUser() {
         // Given
-        User expected = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        UserRequest request = UserRequest.Builder.create().withUserId(expected.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
+        var expected = new User().userId("add-user-request-id")
+                .addAuths(Collections.singleton("authorisation"))
+                .addRoles(Collections.singleton("role"));
+        var request = UserRequest.Builder.create()
+                .withUserId(expected.getUserId().getId())
+                .withResourceId("test/resource")
+                .withContext(new Context().purpose("purpose"));
         when(service.addUser(any(User.class))).thenReturn(expected);
         when(service.getUser(any(String.class))).thenReturn(expected);
 
@@ -87,10 +92,15 @@ class UserRestControllerTest {
         // When
         User user = cacheProxy.getUser(request.getUserId());
         // Then
-        assertThat(user).isEqualTo(expected);
+        assertThat(user)
+                .as("Check that the User is the one we expect and has not been modified")
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check there are logging messages at INFO level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Cache add for userId add-user-request-id")
         ));
