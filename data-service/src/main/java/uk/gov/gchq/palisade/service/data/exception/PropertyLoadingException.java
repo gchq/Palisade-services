@@ -17,27 +17,20 @@
 package uk.gov.gchq.palisade.service.data.exception;
 
 /**
- * Specialised exception thrown by the data-service when an IOException occurred while reading
- * from the data-reader.
+ * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
+ * Should only be thrown by a {@link uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer}
+ * when loading Spring YAML config and converting to Akka HOCON config
  */
-public class ReadException extends RuntimeException {
+public class PropertyLoadingException extends RuntimeException {
 
     /**
-     * Initialises this exception with the given message.
+     * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
      *
-     * @param message message for the exception
+     * @param message message describing what action caused the exception
+     * @param cause   the thrown (non-Runtime) Exception
      */
-    public ReadException(final String message) {
-        super(message);
+    public PropertyLoadingException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
-    /**
-     * Initialises this exception with the given message and cause.
-     *
-     * @param message   message to report
-     * @param throwable the underlying cause of this exception
-     */
-    public ReadException(final String message, final Throwable throwable) {
-        super(message, throwable);
-    }
 }

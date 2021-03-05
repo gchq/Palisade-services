@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.gov.gchq.palisade.service.data.exception;
 
+
 /**
- * Specialised exception thrown by the data-service when an IOException occurred while reading
- * from the data-reader.
+ * Exception for when the request is not allowed or there is no content for the request.
  */
-public class ReadException extends RuntimeException {
+public class ForbiddenException extends RuntimeException {
 
     /**
      * Initialises this exception with the given message.
      *
      * @param message message for the exception
      */
-    public ReadException(final String message) {
+    public ForbiddenException(final String message) {
         super(message);
     }
 
@@ -37,7 +36,7 @@ public class ReadException extends RuntimeException {
      * @param message   message to report
      * @param throwable the underlying cause of this exception
      */
-    public ReadException(final String message, final Throwable throwable) {
+    public ForbiddenException(final String message, final Throwable throwable) {
         super(message, throwable);
     }
 }
