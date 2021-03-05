@@ -49,10 +49,9 @@ public class AuditMessageService {
      * This provides assurances that the audit logs won't go missing due to processing failures.
      * This is probably implemented as blocking until the persistence-write (kafka/redis/etc.) completes and throwing a
      * {@link RuntimeException} if processing fails.
-     * @return A CompletableFuture#void after completion, if there is an exception thrown, it is caught and completes exceptionally
      */
-    public CompletableFuture<Void> auditMessage(final TokenMessagePair tokenMessagePair) {
-        return futureSink.thenAccept(sink -> Source.single(tokenMessagePair).runWith(sink, materializer));
+    public void auditMessage(final TokenMessagePair tokenMessagePair) {
+         futureSink.thenAccept(sink -> Source.single(tokenMessagePair).runWith(sink, materializer)).join();
     }
 
     /**
