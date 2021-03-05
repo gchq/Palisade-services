@@ -24,11 +24,12 @@ import java.util.StringJoiner;
 /**
  * The token message pair used in the sending of audit messages to the Audit Service.
  */
-public class TokenMessagePair {
+public final class TokenMessagePair {
+
 
     private final String token; //unique identifier for the request
-    private final AuditMessage auditMessage; // audit message that is to be forwarded to the Audit Service
 
+    private final AuditMessage auditMessage; //audit success or error message
 
     /**
      * Instantiates a new token and audit message pair.
