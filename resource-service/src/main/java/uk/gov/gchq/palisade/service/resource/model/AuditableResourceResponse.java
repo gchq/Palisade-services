@@ -97,6 +97,7 @@ public final class AuditableResourceResponse {
          * Compose a {@code ResourceResponse}
          */
         public interface IResourceResponse {
+
             /**
              * Create an {@code AuditableResourceResponse} with an {@code AuditErrorMessage} value
              *

@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+---
 
 spring:
+  profiles: default-config
+
   application:
     name: data-service
   output:
@@ -26,15 +34,17 @@ server:
   port: 8082
 
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
+    shutdown:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: "*"
-  endpoint:
-    health:
-      show-details: always
-    shutdown:
-      enabled: true
 
 population:
   serialiserProvder: std
@@ -42,3 +52,8 @@ population:
 async:
   webMvcTimeout: 60000
   corePoolSize: 6
+
+logging:
+  level:
+    org.apache.kafka: WARN
+
