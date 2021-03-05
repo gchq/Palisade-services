@@ -179,13 +179,12 @@ public final class AuditSuccessMessage extends AuditMessage {
         if (this == o) {
             return true;
         }
+
         if (!(o instanceof AuditSuccessMessage)) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
-        return true;
+
+        return super.equals(o);
     }
 
     @Override

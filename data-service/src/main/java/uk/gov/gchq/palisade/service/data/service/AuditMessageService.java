@@ -51,7 +51,7 @@ public class AuditMessageService {
      * {@link RuntimeException} if processing fails.
      */
     public void auditMessage(final TokenMessagePair tokenMessagePair) {
-         futureSink.thenAccept(sink -> Source.single(tokenMessagePair).runWith(sink, materializer)).join();
+        futureSink.thenAccept(sink -> Source.single(tokenMessagePair).runWith(sink, materializer)).join();
     }
 
     /**
