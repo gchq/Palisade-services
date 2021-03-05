@@ -27,12 +27,12 @@ import org.slf4j.Logger;
 
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_TOKEN;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
-import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.DATA_SERVICE;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.FILTERED_RESOURCE_SERVICE;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.POLICY_SERVICE;
@@ -68,7 +68,7 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
 
         // Then
-        assertThat(infoCaptor).containsOnly(auditSuccessMessage(DATA_SERVICE));
+        assertThat(infoCaptor.getAllValues()).containsOnly(auditSuccessMessage(DATA_SERVICE));
     }
 
     @Test
@@ -80,7 +80,7 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor).containsOnly(auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
+        assertThat(infoCaptor.getAllValues()).containsOnly(auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
     }
 
     @Test
@@ -92,8 +92,8 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor).isEmpty();
-        assertThat(errorCaptor).containsOnly(BAD_AUDIT_SUCCESS_MESSAGE, USER_SERVICE.value);
+        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(errorCaptor.getAllValues()).containsOnly(BAD_AUDIT_SUCCESS_MESSAGE, USER_SERVICE.value);
     }
 
     @Test
@@ -106,8 +106,12 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor).isEmpty();
-        assertThat(errorCaptor).containsOnly(auditErrorMessage(USER_SERVICE));
+        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(errorCaptor.getAllValues())
+            .as("check single value")
+            .hasSize(1)
+            .first()
+            .isEqualTo(auditErrorMessage(USER_SERVICE));
     }
 
     @Test
@@ -120,8 +124,12 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor).isEmpty();
-        assertThat(errorCaptor).containsOnly(auditErrorMessage(RESOURCE_SERVICE));
+        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(errorCaptor.getAllValues())
+            .as("check single value")
+            .hasSize(1)
+            .first()
+            .isEqualTo(auditErrorMessage(RESOURCE_SERVICE));
     }
 
     @Test
@@ -133,7 +141,11 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(POLICY_SERVICE));
 
         // Then
-        assertThat(infoCaptor).isEmpty();
-        assertThat(errorCaptor).containsOnly(auditErrorMessage(POLICY_SERVICE));
+        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(errorCaptor.getAllValues())
+            .as("check single value")
+            .hasSize(1)
+            .first()
+            .isEqualTo(auditErrorMessage(POLICY_SERVICE));
     }
 }

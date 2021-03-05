@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
@@ -53,7 +54,6 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_SUCCESS_R
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.ERROR_REQUEST_OBJ;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_REQUEST_OBJ;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.REQUEST_TOKEN;
-import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
 import static uk.gov.gchq.palisade.service.audit.model.Token.HEADER;
 
 /**
@@ -101,7 +101,7 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/error", ERROR_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity).hasStatusCode(ACCEPTED);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         verify(auditService, timeout(3000).times(1)).audit(anyString(), any());
@@ -116,7 +116,7 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/success", GOOD_SUCCESS_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity).hasStatusCode(ACCEPTED);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         Mockito.verify(auditService, Mockito.timeout(3000).times(1)).audit(anyString(), any());
@@ -131,7 +131,7 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/success", BAD_SUCCESS_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity).hasStatusCode(ACCEPTED);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         verify(auditService, timeout(3000).times(0)).audit(anyString(), any());

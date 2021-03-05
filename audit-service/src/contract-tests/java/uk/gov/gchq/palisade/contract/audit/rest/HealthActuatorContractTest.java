@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
 
 /**
  * An external requirement of the service is to keep-alive in k8s.
@@ -57,9 +56,11 @@ class HealthActuatorContractTest {
         var responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
 
         // Then check the response
-        assertThat(responseEntity)
-            .hasStatusCode(HttpStatus.OK)
-            .bodyString()
+        assertThat(responseEntity.getStatusCode())
+            .as("check status")
+            .isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody())
+            .as("check body")
             .contains("\"status\":\"UP\"");
 
     }

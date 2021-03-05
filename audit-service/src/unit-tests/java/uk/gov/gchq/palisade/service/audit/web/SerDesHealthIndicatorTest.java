@@ -19,8 +19,9 @@ package uk.gov.gchq.palisade.service.audit.web;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.actuate.health.Status;
 
-import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SerDesHealthIndicatorTest {
 
@@ -38,18 +39,20 @@ class SerDesHealthIndicatorTest {
 
     @Test
     void testHealthUp() {
-        assertThat(healthIndicator.health())
+        assertThat(healthIndicator.health().getStatus())
             .as("Check health status is UP")
-            .isUp();
+            .isEqualTo(Status.UP);
     }
 
     @Test
     void testHealthDown() {
         // service has encountered at least 1 serialisation exception
         SerDesHealthIndicator.addSerDesExceptions(new Exception("This is a test"));
-        assertThat(healthIndicator.health())
-            .as("Check health status as DOWN and has some details")
-            .isDown()
-            .hasDetails();
+        assertThat(healthIndicator.health().getStatus())
+            .as("Check health status as DOWN")
+            .isEqualTo(Status.DOWN);
+        assertThat(healthIndicator.health().getDetails())
+            .as("Check health status has some details")
+            .isNotEmpty();
     }
 }

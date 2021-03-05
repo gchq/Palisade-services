@@ -41,7 +41,6 @@ import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_TOKEN;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_USER_ID;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
-import static uk.gov.gchq.palisade.service.audit.Assertions.assertThat;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.DATA_SERVICE;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.FILTERED_RESOURCE_SERVICE;
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.POLICY_SERVICE;
@@ -79,7 +78,7 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor).values().hasSize(1);
+        assertThat(logCaptor.getAllValues()).hasSize(1);
 
         var event = logCaptor.getValue();
         var eventChain = event.getEventChain();
@@ -106,7 +105,7 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor).values().hasSize(1);
+        assertThat(logCaptor.getAllValues()).hasSize(1);
 
         var event = logCaptor.getValue();
         var eventChain = event.getEventChain();
@@ -147,7 +146,7 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor).values().hasSize(1);
+        assertThat(logCaptor.getAllValues()).hasSize(1);
 
         var event = logCaptor.getValue();
         var eventChain = event.getEventChain();
@@ -180,7 +179,7 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor).values().hasSize(1);
+        assertThat(logCaptor.getAllValues()).hasSize(1);
 
         var event = logCaptor.getValue();
         var eventChain = event.getEventChain();
@@ -213,7 +212,7 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor).values().hasSize(1);
+        assertThat(logCaptor.getAllValues()).hasSize(1);
 
         var event = logCaptor.getValue();
         var eventChain = event.getEventChain();
