@@ -20,6 +20,7 @@
 
 exports:
   nameOverride: "kafka"
+  port: 9092
   # fullnameOverride:  "palisade-kafka"
 
 ## The StatefulSet installs 3 pods by default

@@ -170,6 +170,15 @@ Create the service name of kafka
 {{- end -}}
 
 {{/*
+Create the service url (including port) of kafka
+*/}}
+{{- define "palisade.kafka.url" -}}
+{{- $serviceName := (include "palisade.kafka.fullname" .) -}}
+{{- $servicePort := default 9092 .Values.global.kafka.exports.port -}}
+{{- printf "%s:%d" $serviceName ($servicePort | int) -}}
+{{- end -}}
+
+{{/*
 Create the service name of zookeeper
 */}}
 {{- define "palisade.zookeeper.fullname" -}}
@@ -183,4 +192,13 @@ Create the service name of zookeeper
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Create the service url (including port) of zookeeper
+*/}}
+{{- define "palisade.zookeeper.url" -}}
+{{- $serviceName := (include "palisade.zookeeper.fullname" .) -}}
+{{- $servicePort := default 2181 .Values.global.zookeeper.exports.port -}}
+{{- printf "%s:%d" $serviceName ($servicePort | int) -}}
 {{- end -}}
