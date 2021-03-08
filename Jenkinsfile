@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib@PAL-1005-create-kafka-queues-delete-job')_
 
 timestamps {
     services()
