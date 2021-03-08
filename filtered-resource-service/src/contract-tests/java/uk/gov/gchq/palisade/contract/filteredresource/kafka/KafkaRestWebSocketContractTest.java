@@ -77,6 +77,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageRepository;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
@@ -122,7 +123,7 @@ class KafkaRestWebSocketContractTest {
     @Autowired
     private TokenOffsetPersistenceLayer persistenceLayer;
     @Autowired
-    private TokenErrorMessageRepository errorMessageRepository;
+    private TokenErrorMessagePersistenceLayer errorMessagePersistenceLayer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -253,17 +254,15 @@ class KafkaRestWebSocketContractTest {
                 .overwriteOffset(token, offset)
                 .join());
 
-        if (auditErrorMessages.size() > 0) {
-            CompletableFuture.runAsync(() -> {
-                while (errorMessageRepository.findAllByToken(requestToken).size() != errorTopic.size()) {
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        CompletableFuture.runAsync(() -> {
+            while (errorMessagePersistenceLayer.getAllErrorMessages(requestToken).join().size() != errorTopic.size()) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }).get(5, TimeUnit.SECONDS);
-        }
+            }
+        }).get(5, TimeUnit.SECONDS);
 
         // When
         // Send each websocketMessage request and receive responses
