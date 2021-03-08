@@ -70,20 +70,20 @@ public class AkkaRunnableGraph {
         return source
                 .alsoTo(Flow.<TokenMessagePair>create()
                         //Send AuditSuccessMessage to the Audit Service via the success Kafka topic
-                        .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditSuccessMessage)
+                        .filter(tokenMessagePair -> tokenMessagePair.getAuditMessage() instanceof AuditSuccessMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
-                            Integer partition = Token.toPartition(tokenMessagePair.first(), successTopic.getPartitions());
-                            Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.first().getBytes(Charset.defaultCharset()))});
-                            return new ProducerRecord<>(successTopic.getName(), partition, (String) null, (AuditSuccessMessage) tokenMessagePair.second(), headers);
+                            Integer partition = Token.toPartition(tokenMessagePair.getToken(), successTopic.getPartitions());
+                            Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.getToken().getBytes(Charset.defaultCharset()))});
+                            return new ProducerRecord<>(successTopic.getName(), partition, (String) null, (AuditSuccessMessage) tokenMessagePair.getAuditMessage(), headers);
                         })
                         .to(successSink))
                 .to(Flow.<TokenMessagePair>create()
                         //Send AuditErrorMessage to the Audit Service via the error Kafka topic
-                        .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditErrorMessage)
+                        .filter(tokenMessagePair -> tokenMessagePair.getAuditMessage() instanceof AuditErrorMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
-                            Integer partition = Token.toPartition(tokenMessagePair.first(), errorTopic.getPartitions());
-                            Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.first().getBytes(Charset.defaultCharset()))});
-                            return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, (AuditErrorMessage) tokenMessagePair.second(), headers);
+                            Integer partition = Token.toPartition(tokenMessagePair.getToken(), errorTopic.getPartitions());
+                            Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.getToken().getBytes(Charset.defaultCharset()))});
+                            return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, (AuditErrorMessage) tokenMessagePair.getAuditMessage(), headers);
                         })
                         .to(errorSink))
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy));

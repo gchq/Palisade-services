@@ -15,22 +15,113 @@
  */
 package uk.gov.gchq.palisade.service.data.model;
 
-import akka.japi.Pair;
+import uk.gov.gchq.palisade.Generated;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
- * The type Token request pair.
+ * The token message pair used in the sending of audit messages to the Audit Service.
  */
-public class TokenMessagePair extends Pair<String, AuditMessage> {
+public final class TokenMessagePair {
 
-    private static final long serialVersionUID = 1L;
+
+    private final String token; //unique identifier for the request
+
+    private final AuditMessage auditMessage; //audit success or error message
 
     /**
-     * Instantiates a new Token request pair.
+     * Instantiates a new token and audit message pair.
      *
-     * @param token        the token
-     * @param auditMessage the original request
+     * @param token        the token.
+     * @param auditMessage the original request.
      */
-    public TokenMessagePair(final String token, final AuditMessage auditMessage) {
-        super(token, auditMessage);
+    private TokenMessagePair(final String token, final AuditMessage auditMessage) {
+
+        this.token = Optional.ofNullable(token).orElseThrow(() -> new IllegalArgumentException("token" + " cannot be null"));
+        this.auditMessage = Optional.ofNullable(auditMessage).orElseThrow(() -> new IllegalArgumentException("auditMessage" + " cannot be null"));
+    }
+
+    @Generated
+    public String getToken() {
+        return token;
+    }
+
+    @Generated
+    public AuditMessage getAuditMessage() {
+        return auditMessage;
+    }
+
+    /**
+     * Builder class for the creation of instances of the TokenMessagePair.  This uses a variant of the Fluent Builder
+     * for the creation of an immutable instance of the object.
+     */
+    public static class Builder {
+
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * TokenMessagePair instance.
+         *
+         * @return interface {@link IToken} for the next step in the build.
+         */
+        public static IToken create() {
+            return token -> auditMessage -> new TokenMessagePair(token, auditMessage);
+        }
+
+        /**
+         * Adds the token to the {@code TokenMessagePair}.
+         */
+        public interface IToken {
+            /**
+             * Adds the token.
+             *
+             * @param token token to uniquely identify the request.
+             * @return interface {@link IAuditMessage} for the for the next step in the build.
+             */
+            IAuditMessage withToken(String token);
+        }
+
+        /**
+         * Adds the audit message to the {@code TokenMessagePair}.
+         */
+        public interface IAuditMessage {
+            /**
+             * Adds the audit message.
+             *
+             * @param auditMessage audit message that is to be sent.
+             * @return class {@link TokenMessagePair} for the final step in the build.
+             */
+            TokenMessagePair withAuditMessage(AuditMessage auditMessage);
+        }
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TokenMessagePair)) {
+            return false;
+        }
+        TokenMessagePair that = (TokenMessagePair) o;
+        return token.equals(that.token) &&
+                auditMessage.equals(that.auditMessage);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(token, auditMessage);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", TokenMessagePair.class.getSimpleName() + "[", "]")
+                .add("token=" + token)
+                .add("auditMessage=" + auditMessage)
+                .toString();
     }
 }
