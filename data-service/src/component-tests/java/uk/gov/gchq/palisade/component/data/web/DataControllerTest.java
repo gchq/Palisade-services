@@ -89,9 +89,6 @@ class DataControllerTest {
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
-        when(auditMessageServiceMock.auditMessage(any()))
-                .thenReturn(CompletableFuture.completedFuture(null));
-
         mockMvc.perform(post("/read/chunked")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .characterEncoding(StandardCharsets.UTF_8.name())
@@ -120,9 +117,6 @@ class DataControllerTest {
 
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
-
-        when(auditMessageServiceMock.auditMessage(any()))
-                .thenReturn(CompletableFuture.completedFuture(null));
 
         mockMvc.perform(post("/read/chunked")
                 .contentType("application/json")
