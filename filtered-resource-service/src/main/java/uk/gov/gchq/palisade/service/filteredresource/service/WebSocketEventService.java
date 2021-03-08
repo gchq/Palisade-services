@@ -64,7 +64,7 @@ public class WebSocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
-    private final ActorRef<TokenErrorMessageCommand> tokenErrorMessageController;
+    private final ActorRef<TokenErrorMessageCommand> errorMessageController;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
     private static final String SERVICE_NAME_HEADER_KEY = "service-name";
@@ -75,17 +75,17 @@ public class WebSocketEventService {
      * back to the client as required.
      *
      * @param tokenOffsetController       the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
-     * @param tokenErrorMessageController the instance of the {@link TokenErrorMessageController}, which will handle reporting early and late errors for a given token
+     * @param errorMessageController the instance of the {@link TokenErrorMessageController}, which will handle reporting early and late errors for a given token
      * @param auditSinkFactory            a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
      * @param resourceSourceFactory       a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
-            final ActorRef<TokenErrorMessageCommand> tokenErrorMessageController,
+            final ActorRef<TokenErrorMessageCommand> errorMessageController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
         this.tokenOffsetController = tokenOffsetController;
-        this.tokenErrorMessageController = tokenErrorMessageController;
+        this.errorMessageController = errorMessageController;
         this.auditSinkFactory = auditSinkFactory;
         this.resourceSourceFactory = resourceSourceFactory;
     }
@@ -241,7 +241,7 @@ public class WebSocketEventService {
         return Source.single(token)
 
                 // Get the list of TokenErrorMessageEntities for the given token
-                .via(TokenErrorMessageController.asGetterFlow(this.tokenErrorMessageController))
+                .via(TokenErrorMessageController.asGetterFlow(this.errorMessageController))
 
                 // Differing behaviour depending on whether the AuditErrorMessage was found:
                 // * many ERROR messages if there were AuditErrorMessages in persistence

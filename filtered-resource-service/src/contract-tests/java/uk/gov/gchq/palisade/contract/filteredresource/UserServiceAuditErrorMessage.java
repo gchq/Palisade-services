@@ -30,9 +30,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
- * Note all of the services can potentially send an error message.
+ * Test Data class used to create an AuditErrorMessage as if it was sent from the User-Service
  */
 public final class UserServiceAuditErrorMessage extends UserServiceAuditMessage {
 

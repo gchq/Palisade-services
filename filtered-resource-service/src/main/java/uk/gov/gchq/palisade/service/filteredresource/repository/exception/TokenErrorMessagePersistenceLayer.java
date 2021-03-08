@@ -40,7 +40,7 @@ public interface TokenErrorMessagePersistenceLayer {
      * Gets all error messages that are linked to the unique request token, and packages them in a List of {@link TokenErrorMessageEntity}(s)
      *
      * @param token the unique token from the request
-     * @return a list of all errors associated with this token from other services, packafiltered-resource-service/src/main/java/uk/gov/gchq/palisade/service/filteredresource/repository/exception/TokenErrorMessageRepository.javaged in a {@link TokenErrorMessageEntity}
+     * @return a list of all errors associated with this token from other services, packaged in a {@link TokenErrorMessageEntity}
      */
     CompletableFuture<List<TokenErrorMessageEntity>> getAllErrorMessages(final String token);
 

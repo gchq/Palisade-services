@@ -57,10 +57,17 @@ public class ApplicationConfiguration {
         return new JpaTokenOffsetPersistenceLayer(repository, executor);
     }
 
+    /**
+     * Bean for the {@link TokenErrorMessagePersistenceLayer}.
+     * Connect the Redis repository to the persistence layer, providing an executor for any async requests
+     *
+     * @param repository an instance of the tokenErrorMessage repository, backed by redis
+     * @param executor   an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
+     * @return a {@link TokenErrorMessagePersistenceLayer} wrapping the repository instance, providing async methods for getting error messages from persistence
+     */
     @Bean
-    TokenErrorMessagePersistenceLayer jpaTokenErrorMessagePersistenceLayer(
-            final TokenErrorMessageRepository repository,
-            final @Qualifier("applicationTaskExecutor") Executor executor) {
+    TokenErrorMessagePersistenceLayer jpaTokenErrorMessagePersistenceLayer(final TokenErrorMessageRepository repository,
+                                                                           final @Qualifier("applicationTaskExecutor") Executor executor) {
         return new JpaTokenErrorMessagePersistenceLayer(repository, executor);
     }
 
@@ -74,6 +81,13 @@ public class ApplicationConfiguration {
         return new OffsetEventService(persistenceLayer);
     }
 
+    /**
+     * A Bean for the handling of AuditErrorMessages from other Palisade Services. Taking a link to the persistence Layer, the service will monitor
+     * kafka to recieve and persist AuditErrorMessages to the backing store
+     *
+     * @param persistenceLayer A link to the backing store technology, for the storage of tokens and exceptions
+     * @return a new ErrorMessageEventService, instansiated with a link to the backing store.
+     */
     @Bean
     ErrorMessageEventService errorMessageEventService(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         return new ErrorMessageEventService(persistenceLayer);
@@ -96,6 +110,14 @@ public class ApplicationConfiguration {
         return TokenOffsetController.create(persistenceLayer);
     }
 
+    /**
+     * Create the TokenErrorMessageController, controlling access to the persistence layer and asynchronously waiting until error messages
+     * are available. That is, a Source of one element "token" through the {@link TokenErrorMessageController#asGetterFlow(ActorRef)}
+     * Flow will only emit an element to downstream once an excption is available from either persistence via the "error" kafka topic.
+     *
+     * @param persistenceLayer an instance of the TokenErrorMessagePersistenceLayer
+     * @return a (running) ActorSystem for {@link TokenErrorMessageCommand}s
+     */
     @Bean
     ActorRef<TokenErrorMessageCommand> tokenErrorController(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         return TokenErrorMessageController.create(persistenceLayer);
