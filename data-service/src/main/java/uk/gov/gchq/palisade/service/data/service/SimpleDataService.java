@@ -18,15 +18,14 @@ package uk.gov.gchq.palisade.service.data.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
@@ -59,43 +58,59 @@ public class SimpleDataService implements DataService {
         this.dataReader = dataReader;
     }
 
-    public CompletableFuture<Optional<DataReaderRequest>> authoriseRequest(final DataRequest dataRequest) {
+    /**
+     * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
+     * data to be returned, a {@link ForbiddenException} is thrown.
+     *
+     * @param dataRequest data provided by the client for requesting the resource
+     * @return reference to the resources that are to be returned to client
+     * @throws ForbiddenException if there is no authorised data for the request
+     */
+    public CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
-        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = this.persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
+        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
         return futureRequestEntity.thenApply(maybeEntity -> maybeEntity.map(
-                entity -> new DataReaderRequest()
-                        .context(entity.getContext())
-                        .user(entity.getUser())
-                        .resource(entity.getLeafResource())
-                        .rules(entity.getRules())
-                )
+                entity -> AuthorisedDataRequest.Builder.create()
+                        .withResource(entity.getLeafResource())
+                        .withUser(entity.getUser())
+                        .withContext(entity.getContext())
+                        .withRules(entity.getRules())
+                ).orElseThrow(() -> new ForbiddenException(String.format("There is no data for the request, with token %s and resource %s", dataRequest.getToken(), dataRequest.getLeafResourceId())))
         );
     }
 
-    public Pair<AtomicLong, AtomicLong> read(final DataReaderRequest readerRequest, final OutputStream out) {
-        final AtomicLong recordsProcessed = new AtomicLong(0);
-        final AtomicLong recordsReturned = new AtomicLong(0);
+    /**
+     * Includes the resources into the OutputStream that is to be provided to the client
+     *
+     * @param authorisedDataRequest the information for the resources in the context of the request
+     * @param out                   an {@link OutputStream} to write the stream of resources to (after applying rules)
+     * @param recordsProcessed      number of records that have been processed
+     * @param recordsReturned       number of records that have been returned
+     * @return true if indicating that the process has been successful
+     * @throws ReadException if there is a failure during reading of the stream
+     */
+    public CompletableFuture<Boolean> read(final AuthorisedDataRequest authorisedDataRequest, final OutputStream out,
+                                           final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
 
-        LOGGER.debug("Reading from reader with request {}", readerRequest);
-        DataReaderResponse readerResponse = this.dataReader.read(readerRequest, recordsProcessed, recordsReturned);
+        return CompletableFuture.supplyAsync(() -> {
+            LOGGER.debug("Reading from reader with request {}", authorisedDataRequest);
+            DataReaderRequest readerRequest = new DataReaderRequest()
+                    .context(authorisedDataRequest.getContext())
+                    .user(authorisedDataRequest.getUser())
+                    .resource(authorisedDataRequest.getResource())
+                    .rules(authorisedDataRequest.getRules());
+            DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
-        LOGGER.debug("Writing reader response {} to output stream", readerResponse);
-        try {
-            readerResponse.getWriter().write(out);
-            out.close();
-        } catch (IOException ex) {
-            throw new ReadException(readerRequest, ex);
-        }
+            LOGGER.debug("Writing reader response {} to output stream", readerResponse);
+            try {
+                readerResponse.getWriter().write(out);
+                out.close();
+            } catch (IOException ex) {
+                throw new ReadException("Failed to write data out to the output stream.", ex);
+            }
 
-        LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
-        return Pair.of(recordsProcessed, recordsReturned);
+            LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
+            return true;
+        });
     }
-
-    @Override
-    public Boolean addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser) {
-        LOGGER.info("Adding serialiser {} for DataFlavour {}", serialiser, flavour);
-        this.dataReader.addSerialiser(flavour, serialiser);
-        return true;
-    }
-
 }

@@ -28,10 +28,8 @@ import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Map;
@@ -134,8 +132,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         recordRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
         // Interpret relative paths and prepend 'file:'
-        URI resourceURI = new File(resourceId).getAbsoluteFile().toURI();
-        String resourceUriId = ResourceBuilder.create(resourceURI).getId();
+        String resourceUriId = ResourceBuilder.create(resourceId).getId();
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 

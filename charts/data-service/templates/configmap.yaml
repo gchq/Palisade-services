@@ -47,3 +47,12 @@ data:
         host: {{ $masterFullname }}{{ .Values.global.serviceName }}
         port: {{ $masterPort }}
     {{- end }}
+  application-akka.yaml: |
+    akka:
+      kafka:
+        producer.topics:
+          error-topic.partitions: {{ .Values.replicaCount }}
+          success-topic.partitions: {{ .Values.replicaCount }}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "palisade.kafka.fullname" . }}-headless
+        port: 9092
