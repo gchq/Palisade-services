@@ -104,7 +104,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         //Then an error is thrown
         assertThat(noSuchPolicy.getMessage())
                 .as("The message of the error should be %s", "No Resource Rules found for the resource")
-                .isEqualTo("No Record Rules found for the resource");
+                .isEqualTo("No Record Rules found for the resource: " + NEW_FILE.getId());
     }
 
     @Test
