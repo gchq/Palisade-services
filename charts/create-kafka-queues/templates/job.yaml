@@ -16,7 +16,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "create-kafka-queues.name" . }}
+  # Go date formatting is relative to "01/02 03:04:05PM '06 GMT-07" USA-style
+  name: {{ include "create-kafka-queues.name" . }}-{{ now | date "2006-01-02-15-04-05" }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
     app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
@@ -24,15 +25,25 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
+  ttlSecondsAfterFinished: 0
   template:
     metadata:
       name: {{ include "create-kafka-queues.name" . }}
       labels:
-        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
-        app.kubernetes.io/instance: {{ .Release.Name | quote }}
-        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
+        helm.sh/chart: {{ include "create-kafka-queues.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
       restartPolicy: Never
+      initContainers:
+      - name: init-wait-for-services
+        image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
+        command: ["/bin/wait-for-services.sh"]
+        args:
+        {{- range $index, $service := .Values.waitForServices }}
+        - {{ printf "%s:%s" $service.name (include $service.tpl $) }}
+        {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
@@ -40,7 +51,7 @@ spec:
         command: ["/bin/bash", "/bin/create-topics.sh" ]
         env:
         - name: ZOOKEEPER
-          value: {{ .Values.exports.zookeeper | quote }}
+          value: {{ include "palisade.zookeeper.url" . | quote }}
         {{- range $key, $val := .Values.kafkaCreateTopics }}
         - name: {{ printf "KAFKATOPIC%d" $key }}
           value: {{ printf "%s %s %s" $val.name ($val.partitions | toString) ($val.replicationFactor | toString)  }}

@@ -23,108 +23,43 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
 import java.io.IOException;
-import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_SUCCESS_MESSAGE;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditSuccessMessageTest.class})
 class AuditSuccessMessageTest {
 
     @Autowired
-    private JacksonTester<AuditSuccessMessage> jsonTester;
+    private JacksonTester<AuditSuccessMessage> jacksonTester;
 
     /**
-     * Grouped assertion test
-     * Create the object with the builder and then convert to the Json equivalent.
+     * Creates the object with the builder and then converts it to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditSuccessMessage} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
+    void testGroupedDependantDataRequestReaderSerialisingAndDeserialising() throws IOException {
+        JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jacksonTester.write(AUDIT_SUCCESS_MESSAGE);
+        ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jacksonTester.parse(auditSuccessMessageJsonContent.getJson());
+        AuditSuccessMessage auditSuccessMessageObjectContentObject = auditSuccessMessageObjectContent.getObject();
 
-        AuditSuccessMessage auditSuccessMessage = AuditSuccessMessage.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("testResourceId")
-                .withContext(context)
-                .withLeafResourceId("testLeafResourceId")
-                .withRecordsProcessedAndReturned(17L, 4L);
+        assertAll("ObjectComparison",
+                () -> assertThat(auditSuccessMessageObjectContentObject)
+                        .as("Comparison assertion using the AuditSuccessMessage's equals")
+                        .isEqualTo(AUDIT_SUCCESS_MESSAGE),
 
-        JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jsonTester.write(auditSuccessMessage);
-        ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(auditSuccessMessageJsonContent.getJson());
-        AuditSuccessMessage auditSuccessMessageObject = auditSuccessMessageObjectContent.getObject();
-
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathStringValue("$.userId")
-                                .isEqualTo("originalUserID"),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathStringValue("$.resourceId")
-                                .isEqualTo("testResourceId"),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathStringValue("$.context.contents.purpose")
-                                .isEqualTo("testContext"),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathStringValue("$.serviceName")
-                                .isEqualTo("data-service"),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathStringValue("$.leafResourceId")
-                                .isEqualTo("testLeafResourceId"),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathNumberValue("$.attributes.RECORDS_PROCESSED")
-                                .extracting(Number::longValue)
-                                .isEqualTo(17L),
-
-                        () -> assertThat(auditSuccessMessageJsonContent)
-                                .extractingJsonPathNumberValue("$.attributes.RECORDS_RETURNED")
-                                .extracting(Number::longValue)
-                                .isEqualTo(4L)
-                ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditSuccessMessageObject.getUserId())
-                                .isEqualTo(auditSuccessMessage.getUserId()),
-
-                        () -> assertThat(auditSuccessMessageObject.getResourceId())
-                                .isEqualTo(auditSuccessMessage.getResourceId()),
-
-                        () -> assertThat(auditSuccessMessageObject.getContext().getPurpose())
-                                .isEqualTo(auditSuccessMessage.getContext().getPurpose()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServiceName())
-                                .isEqualTo(auditSuccessMessage.getServiceName()),
-
-                        () -> assertThat(auditSuccessMessageObject.getTimestamp())
-                                .isEqualTo(auditSuccessMessage.getTimestamp()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServerHostName())
-                                .isEqualTo(auditSuccessMessage.getServerHostName()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServerIP())
-                                .isEqualTo(auditSuccessMessage.getServerIP()),
-
-                        () -> assertThat(auditSuccessMessageObject.getLeafResourceId())
-                                .isEqualTo(auditSuccessMessage.getLeafResourceId())
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessageObject)
-                                .usingRecursiveComparison()
-                                .withComparatorForType(Comparator.comparingLong(Number::longValue), Number.class)
-                                .isEqualTo(auditSuccessMessage)
-                )
+                () -> assertThat(auditSuccessMessageObjectContentObject)
+                        .as("Comparison assertion using all of the AuditSuccessMessage's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUDIT_SUCCESS_MESSAGE)
         );
     }
 }
