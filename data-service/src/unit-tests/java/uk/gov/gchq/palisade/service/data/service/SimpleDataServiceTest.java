@@ -80,13 +80,19 @@ class SimpleDataServiceTest {
 
     public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
     public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
-    public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
+    public static final Rules<Serializable> RULES = new Rules<>()
+            .addRule(RULE_MESSAGE, new PassThroughRule<>());
+
     // Mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
     final DataReader dataReader = Mockito.mock(DataReader.class);
     final SimpleDataService simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
+
     // Test data
-    final DataRequest dataRequest = DataRequest.Builder.create().withToken(REQUEST_TOKEN).withLeafResourceId(RESOURCE_ID);
+    final DataRequest dataRequest = DataRequest.Builder.create()
+            .withToken(REQUEST_TOKEN)
+            .withLeafResourceId(RESOURCE_ID);
+
     final AuthorisedRequestEntity authorisedEntity = new AuthorisedRequestEntity(
             REQUEST_TOKEN,
             USER,
@@ -94,17 +100,21 @@ class SimpleDataServiceTest {
             CONTEXT,
             RULES
     );
+
     final DataReaderRequest readerRequest = new DataReaderRequest()
             .user(USER)
             .resource(LEAF_RESOURCE)
             .context(CONTEXT)
             .rules(RULES);
+
     final AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
             .withRules(RULES);
+
     final String testResponseMessage = "test response for data request";
+
     final ResponseWriter responseWriter = new ResponseWriter() {
         final String testData = testResponseMessage;
 
@@ -120,9 +130,23 @@ class SimpleDataServiceTest {
             return this;
         }
     };
+
     final DataReaderResponse dataReaderResponse = new DataReaderResponse()
             .message("test message")
             .writer(responseWriter);
+
+    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
+        @Override
+        public T apply(final T record, final User user, final Context context) {
+            return record;
+        }
+
+        @Override
+        public boolean isApplicable(final User user, final Context context) {
+            return false; //rules are not applicable
+        }
+
+    }
 
     /**
      * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is found to be
@@ -139,15 +163,19 @@ class SimpleDataServiceTest {
         CompletableFuture<AuthorisedDataRequest> authorisedDataRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
 
         // Then
-        assertThat(authorisedDataRequestCompletableFuture.join())
+        assertThat(authorisedDataRequestCompletableFuture
+                .join())
+                .as("")
                 .usingRecursiveComparison()
                 .isEqualTo(readerRequest);
+
+        //verifies the service calls PersistenceLayer getAsync method once
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
     /**
      * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is not valid/not authorised,
-     * the method will throw an {@code UnauthorisedAccessException}
+     * the method will throw an {@code ForbiddenException}
      */
     @Test
     void testAuthoriseRequestWithAnInvalidRequest() {
@@ -157,6 +185,8 @@ class SimpleDataServiceTest {
 
         // When & Then
         assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequest), "should throw UnauthorisedAccessException");
+
+        //verifies the service calls PersistenceLayer getAsync method once
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
@@ -179,14 +209,9 @@ class SimpleDataServiceTest {
         completed.join();
         String outputString = outputStream.toString();
         assertThat(outputString).isEqualTo(testResponseMessage);
+
+        //verifies the service calls DataReader read method once
         verify(dataReader, times(1)).read(any(), any(), any());
 
-    }
-
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
     }
 }
