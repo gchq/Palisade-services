@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -180,13 +179,12 @@ public final class AuditSuccessMessage extends AuditMessage {
         if (this == o) {
             return true;
         }
+
         if (!(o instanceof AuditSuccessMessage)) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
-        return true;
+
+        return super.equals(o);
     }
 
     @Override

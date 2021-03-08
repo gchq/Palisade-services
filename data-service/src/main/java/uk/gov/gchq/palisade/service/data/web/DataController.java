@@ -82,15 +82,20 @@ public class DataController {
         if (authorisationErrorMessage != null) {
             LOGGER.error("Error occurred processing the authoriseRequest for  {}", authorisationErrorMessage);
             httpStatus = (HttpStatus.INTERNAL_SERVER_ERROR);
-            auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), authorisationErrorMessage)).join();
+            auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                    .withToken(dataRequest.getToken())
+                    .withAuditMessage(authorisationErrorMessage));
         } else {
             // Create a consumer of the REST response's OutputStream, writing resource data to it
             stream = (OutputStream outputStream) -> {
                 AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
-                auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), auditableDataResponse.getAuditSuccessMessage())).join();
+                auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                        .withToken(dataRequest.getToken())
+                        .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
 
                 Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
-                        .ifPresent(errorMessage -> auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), errorMessage)).join());
+                        .ifPresent(errorMessage -> auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                .withToken(dataRequest.getToken()).withAuditMessage(errorMessage)));
             };
         }
         return new ResponseEntity<>(stream, httpStatus);
