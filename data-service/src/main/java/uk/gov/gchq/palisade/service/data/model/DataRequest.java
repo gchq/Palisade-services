@@ -26,10 +26,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The {@link DataRequest} is the input for the data-service where the resource is read.
- * This message is created by the response from the filtered-resource-service to the client.
- * It is then routed via the resource's connectionDetail to the appropriate instance of a data-service.
- * This message is used to retrieve the {@link uk.gov.gchq.palisade.reader.request.DataReaderRequest} from the attribute-masking-service.
+ * The DataRequest represents the client's request for a resource after is has been prepared by the Palisade services.
+ * This message is created with the information provided to the client by the Filtered Resource Service. It is then
+ * routed via the resource's connectionDetail to the appropriate instance of a Data Service.
+ * This message is used to retrieve the {@link AuthorisedDataRequest} which contains the references to the requested resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class DataRequest {
@@ -60,7 +60,8 @@ public final class DataRequest {
 
     /**
      * Builder class for the creation of instances of the DataRequest.
-     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
+     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components
+     * in the build.
      */
     public static class Builder {
         /**
@@ -79,7 +80,7 @@ public final class DataRequest {
          */
         public interface IToken {
             /**
-             * Adds the token to the request
+             * Adds the token to the message
              *
              * @param token the client's unique token
              * @return interface {@link ILeafResourceId} for the next step in the build.
@@ -95,7 +96,7 @@ public final class DataRequest {
              * Adds the leaf resource id to the request
              *
              * @param leafResourceId resource ID for the request.
-             * @return the completed DataRequest object
+             * @return the completed {@code DataRequest} object
              */
             DataRequest withLeafResourceId(String leafResourceId);
         }
