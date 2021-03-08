@@ -56,7 +56,7 @@ class DataControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper;
 
     @MockBean
     private AuditableDataService serviceMock;
