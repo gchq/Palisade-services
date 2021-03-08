@@ -28,7 +28,7 @@ import java.util.Optional;
 /**
  * A response from the tokenErrorMessage persistence system, providing the token and maybe
  * each a {@link List} of {@link TokenErrorMessageEntity}(s) or an exception if there was an issue in persisting.
- * In proper usage, exactly one of the latter two * should be non-null and the other null - the token is always non-null.
+ * In proper usage, exactly one of the latter two should be non-null and the other null - the token is always non-null.
  */
 public final class TokenErrorMessagePersistenceResponse {
     private final String token;

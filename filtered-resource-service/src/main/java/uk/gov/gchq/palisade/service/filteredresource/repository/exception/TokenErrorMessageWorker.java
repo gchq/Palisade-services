@@ -58,10 +58,9 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 
     /**
      * A response for this actor to send to its {@code replyTo} actor.
-     * This is received by the worker when appropriate error messages are found.
-     * This is both a possible input to the system {@link WorkerCommand} as well as an output {@link WorkerResponse}
+     * This is received by the worker when appropriate error messages are found and output from the system using a {@link WorkerResponse}
      */
-    protected static class SetAuditErrorMessages implements WorkerCommand, WorkerResponse {
+    protected static class SetAuditErrorMessages implements WorkerResponse {
         protected final String token;
         protected final List<TokenErrorMessageEntity> messageEntities;
 

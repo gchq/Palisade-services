@@ -40,7 +40,7 @@ import java.util.StringJoiner;
  */
 @Entity
 @Table(
-        name = "token_exception",
+        name = "token_error",
         indexes = {
                 @Index(name = "token", columnList = "token")
         }

@@ -127,7 +127,7 @@ public class AkkaRunnableGraph {
                 .to(auditErrorSink);
     }
 
-    @SuppressWarnings("squid:S00112")
+    @SuppressWarnings("java:S112")
     private static Sink<Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>>, NotUsed> observeStartOfStream(
             final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> auditErrorSink,
             final AtomicBoolean observedStart,
@@ -183,11 +183,11 @@ public class AkkaRunnableGraph {
     @Bean
     WebSocketEventService websocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
-            final ActorRef<TokenErrorMessageCommand> tokenErrorMessageCommand,
+            final ActorRef<TokenErrorMessageCommand> tokenErrorController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory
     ) {
-        return new WebSocketEventService(tokenOffsetController, tokenErrorMessageCommand, auditSinkFactory, resourceSourceFactory);
+        return new WebSocketEventService(tokenOffsetController, tokenErrorController, auditSinkFactory, resourceSourceFactory);
     }
 
     @Bean
@@ -346,8 +346,8 @@ public class AkkaRunnableGraph {
 
     @Bean
     RunnableGraph<Control> tokenErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenErrorMessageSource,
-                                                               final Sink<Committable, CompletionStage<Done>> committerSink,
-                                                               final ErrorMessageEventService errorMessageEventService) {
+                                                          final Sink<Committable, CompletionStage<Done>> committerSink,
+                                                          final ErrorMessageEventService errorMessageEventService) {
         return tokenErrorMessageSource
                 // Extract committable, token and message
                 .map(committableMessage -> Tuple3.create(
@@ -356,18 +356,20 @@ public class AkkaRunnableGraph {
                         committableMessage.record().value()
                 ))
 
-                // Filter out anything from this service
+                /*
+                 Filter out anything from this service.
+                 Used to prevent the feedback loop of an error being reported in the service being added to the error topic
+                 and then added to this services persistence, only to get read here again.
+                */
                 .filter(auditErrorMessage -> !auditErrorMessage.t3().getServiceName().equals(SERVICE_NAME))
 
                 // Write exception to persistence
                 .mapAsync(PARALLELISM, committableTokenErrorMessage -> errorMessageEventService
                         .putAuditErrorMessage(committableTokenErrorMessage.t2(), committableTokenErrorMessage.t3())
-                        .thenApply(ignored -> committableTokenErrorMessage))
+                        .<Committable>thenApply(ignored -> committableTokenErrorMessage.t1()))
 
                 // Commit processed message to kafka
-                .to(Flow.<Tuple3<CommittableOffset, String, AuditErrorMessage>>create()
-                        .map(committableTokenOffset -> (Committable) committableTokenOffset.t1())
-                        .to(committerSink));
+                .to(committerSink);
     }
 
     /**

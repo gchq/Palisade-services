@@ -100,12 +100,12 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
     /**
      * Create a {@link Flow} that will ask the given actor with each of the elements, spawning a worker to retrieve AuditErrorMessages for a token.
      *
-     * @param tokenEMCommand an {@link ActorRef} to the {@link ActorSystem} created by the {@link TokenErrorMessageController#create(TokenErrorMessagePersistenceLayer)} method
+     * @param actorSystem an {@link ActorRef} to the {@link ActorSystem} created by the {@link TokenErrorMessageController#create(TokenErrorMessagePersistenceLayer)} method
      * @return a {@link Flow} from tokens to {@link Pair}s of tokens and their AuditErrorMessages
      * @implNote The {@link Flow} remains strictly ordered, so a long-blocking first element will delay all subsequent elements.
      */
-    public static Flow<String, TokenErrorMessagePersistenceResponse, NotUsed> asGetterFlow(final ActorRef<TokenErrorMessageCommand> tokenEMCommand) {
-        return ActorFlow.ask(tokenEMCommand, TIMEOUT, SpawnWorker::new)
+    public static Flow<String, TokenErrorMessagePersistenceResponse, NotUsed> asGetterFlow(final ActorRef<TokenErrorMessageCommand> actorSystem) {
+        return ActorFlow.ask(actorSystem, TIMEOUT, SpawnWorker::new)
                 .map((WorkerResponse workerResponse) -> {
 
                     //If there are TokenErrorMessageEntities retrieved from persistence for the token
@@ -153,11 +153,11 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
      * @return an unchanged {@link Behavior} (this actor does not 'become' any other behaviour)
      */
     private Behavior<TokenErrorMessageCommand> onSpawnWorker(final SpawnWorker spawnWorker) {
-        // Spawn a new worker, passing this (its parent) as a 'callback' for Deregister commands
+        // Spawn a new worker, passing it the persistenceLayer to query
         Behavior<WorkerCommand> workerBehavior = TokenErrorMessageWorker.create(this.persistenceLayer);
         ActorRef<WorkerCommand> workerRef = this.getContext()
                 .spawn(workerBehavior, spawnWorker.getAllExceptions.token + "_" + UUID.randomUUID());
-        // Tell our worker to 'start-up' (check persistence and maybe wait to be told a SetOffset)
+        // Tell our worker to 'start-up' (check persistence)
         workerRef.tell(new GetAllExceptions(spawnWorker.getAllExceptions.token, spawnWorker.getAllExceptions.replyTo));
         return this;
     }

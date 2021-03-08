@@ -82,13 +82,13 @@ public class AuditableWebSocketMessage {
              * @param websocketMessage the outbound websocket message
              * @return the next step in the builder
              */
-            ICommittable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
+            IAuditable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
         }
 
         /**
          * Adds the committable to the message
          */
-        public interface ICommittable {
+        public interface IAuditable {
 
             /**
              * Supply a pair of {@link FilteredResourceRequest} and {@link Committable} to the builder
