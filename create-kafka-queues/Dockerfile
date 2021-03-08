@@ -14,8 +14,17 @@
 #
 FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
 
-RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
-   && tar --strip-components=1 -xvzf kafka_2.12-2.2.1.tgz  && rm kafka_2.12-2.2.1.tgz
+ARG NETCAT_VERSION=1.10-41
+RUN apt-get update \
+   && apt-get install -y netcat=${NETCAT_VERSION} --no-install-recommends \
+   && apt-get clean \
+   && rm -rf /var/lib/apt/lists/*
 
-COPY create-topics.sh /bin/create-topics.sh
-RUN sed -i 's/\r$//' /bin/create-topics.sh
+ARG KAFKA_VERSION=2.2.1
+ARG SCALA_VERSION=2.12
+RUN curl -LO  https://archive.apache.org/dist/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz \
+   && tar --strip-components=1 -xvzf kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz \
+   && rm kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz
+
+COPY wait-for-services.sh create-topics.sh /bin/
+RUN sed -i 's/\r$//' /bin/wait-for-services.sh /bin/create-topics.sh
