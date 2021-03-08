@@ -40,14 +40,15 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles({"redis"})
@@ -57,19 +58,19 @@ class RedisPersistenceContractTest {
     private static final int REDIS_PORT = 6379;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
+        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
                 .withReuse(true);
 
         @Override
         public void initialize(@NonNull final ConfigurableApplicationContext context) {
             // Start container
-            redis.start();
+            REDIS.start();
 
             // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
+            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
             // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
+            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
         }
@@ -90,6 +91,7 @@ class RedisPersistenceContractTest {
     void testAuthorisedRequestsAreRetrievedFromRedis() {
         // Given
         String token = "token";
+
         DataReaderRequest readerRequest = new DataReaderRequest()
                 .user(new User().userId("test-user"))
                 .resource(new FileResource().id("/resource/id")
@@ -99,6 +101,15 @@ class RedisPersistenceContractTest {
                         .parent(new SystemResource().id("/")))
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
+
+        AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
+                .serialisedFormat("avro")
+                .type(Employee.class.getTypeName())
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
+                .parent(new SystemResource().id("/")))
+                .withUser(new User().userId("test-user"))
+                .withContext(new Context().purpose("test-purpose"))
+                .withRules(new Rules<>());
         repository.save(new AuthorisedRequestEntity(
                 token,
                 readerRequest.getUser(),
@@ -111,12 +122,18 @@ class RedisPersistenceContractTest {
         DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
                 .withLeafResourceId(readerRequest.getResource().getId());
-        CompletableFuture<Optional<DataReaderRequest>> isRequestAuthorised = service.authoriseRequest(dataRequest);
-
+        CompletableFuture<AuthorisedDataRequest> futureDataResponse = service.authoriseRequest(dataRequest);
+        AuthorisedDataRequest authorisedDataFromResource = futureDataResponse.join();
         // Then
-        assertThat(isRequestAuthorised.join())
-                .isPresent()
-                .get()
-                .isEqualTo(readerRequest);
+        assertAll("ObjectComparison",
+                () -> assertThat(authorisedDataFromResource)
+                        .as("Comparison using the DataResponse's equals method")
+                        .isEqualTo(authorisedDataRequest),
+
+                () -> assertThat(authorisedDataFromResource)
+                        .as("Comparison of content using all of the DataResponse's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(authorisedDataRequest)
+        );
     }
 }
