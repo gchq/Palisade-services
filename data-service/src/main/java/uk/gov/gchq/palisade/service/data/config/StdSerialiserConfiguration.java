@@ -28,8 +28,9 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of policies from a yaml file
- * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s
- * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
+ * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating
+ * {@link uk.gov.gchq.palisade.data.serialise.Serialiser}.  These serialisers will be used for prepopulating the
+ * {@link uk.gov.gchq.palisade.service.data.service.DataService}
  */
 public class StdSerialiserConfiguration {
 

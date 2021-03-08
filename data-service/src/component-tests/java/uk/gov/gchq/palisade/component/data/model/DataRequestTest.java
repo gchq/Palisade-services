@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
 
 @JsonTest
 @ContextConfiguration(classes = {DataRequestTest.class})
@@ -38,48 +39,27 @@ class DataRequestTest {
     private JacksonTester<DataRequest> jacksonTester;
 
     /**
-     * Grouped assertion test
-     * Create the object with the builder and then convert to the Json equivalent.
+     * Creates the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link DataRequest} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
-        String token = "test-request-token";
-        String leafResourceId = "/resource/id";
-
-        DataRequest dataRequest = DataRequest.Builder.create()
-                .withToken(token)
-                .withLeafResourceId(leafResourceId);
-
-        JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(dataRequest);
+    void testDataRequestSerialisingAndDeserialising() throws IOException {
+        JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(DATA_REQUEST);
         ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
         DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
-        assertAll("DataRequestSerialisingDeseralisingAndComparison",
-                () -> assertAll("DataRequestSerialisingComparedToString",
-                        () -> assertThat(dataRequestJsonContent)
-                                .extractingJsonPathStringValue("$.token")
-                                .isEqualTo(token),
+        assertAll("ObjectComparison",
+                () -> assertThat(dataRequestMessageObject)
+                        .as("Comparison assertion using the DataRequest's equals")
+                        .isEqualTo(DATA_REQUEST),
 
-                        () -> assertThat(dataRequestJsonContent)
-                                .extractingJsonPathStringValue("$.leafResourceId")
-                                .isEqualTo(leafResourceId)
-                ),
-                () -> assertAll("DataRequestDeserialisingComparedToObject",
-                        () -> assertThat(dataRequestMessageObject.getToken())
-                                .isEqualTo(token),
-
-                        () -> assertThat(dataRequestMessageObject.getLeafResourceId())
-                                .isEqualTo(leafResourceId)
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataRequestMessageObject)
-                                .usingRecursiveComparison()
-                                .isEqualTo(dataRequest)
-                )
+                () -> assertThat(dataRequestMessageObject)
+                        .as("Comparison assertion using all of the DataRequest's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(DATA_REQUEST)
         );
     }
 }
