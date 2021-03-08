@@ -18,24 +18,22 @@ package uk.gov.gchq.palisade.service.data.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
+ * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
+ * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
+ * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the Data Service.
+ * The version produced by the Data Service is unique in that it includes the leafResourceId and the
+ * two resource counters: records processed; and records returned; which are included in the attributes map.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditSuccessMessage extends AuditMessage {
@@ -43,59 +41,64 @@ public final class AuditSuccessMessage extends AuditMessage {
     public static final String RECORDS_PROCESSED = "RECORDS_PROCESSED";
     public static final String RECORDS_RETURNED = "RECORDS_RETURNED";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @JsonProperty("leafResourceId")
-    private final String leafResourceId;  //leafResource ID for the resource
-
     @JsonCreator
     private AuditSuccessMessage(
+            final @JsonProperty("leafResourceId") String leafResourceId,
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("leafResourceId") String leafResourceId,
+            final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes) {
 
-        super(userId, resourceId, context, attributes);
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Resource ID cannot be null"));
-    }
-
-    @Generated
-    public String getLeafResourceId() {
-        return leafResourceId;
+        super(userId, resourceId, context, attributes, leafResourceId);
     }
 
     /**
      * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
-     * which will use Java Objects or JsonNodes equivalents for the components in the build.
+     * which will use Java Objects for the components in the build.
      */
     public static class Builder {
+
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IUserId create() {
-            return userId -> resourceId -> context -> leafResource -> attributes ->
-                    new AuditSuccessMessage(userId, resourceId, context, leafResource, attributes);
+        public static ILeafResourceId create() {
+            return leafResourceId ->  userId -> resourceId -> context -> attributes ->
+                    new AuditSuccessMessage(leafResourceId,  userId, resourceId, context, attributes);
         }
 
         /**
          * Starter method for the Builder class that uses a DataRequest for the request specific part of the Audit message.
-         * This method is called followed by the call to add resource with the IResource interface to create the
-         * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
+         * It is followed by the call to add resource with the {@code IAttributes} interface to create the
+         * AuditSuccessMessage class.
          *
-         * @param dataRequest   the client request received by the data-service
-         * @param readerRequest the authorised request stored by the attribute-masking-service
+         * @param auditableAuthorisedDataRequest the authorised request stored by the attribute-masking-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
-        public static IAttributes create(final DataRequest dataRequest, final DataReaderRequest readerRequest) {
+        public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
+            DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
+            AuthorisedDataRequest readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
+
             return create()
-                    .withUserId(readerRequest.getUser().getUserId().getId())
-                    .withResourceId(readerRequest.getResource().getId())
-                    .withContext(readerRequest.getContext())
-                    .withLeafResourceId(dataRequest.getLeafResourceId());
+                    .withLeafResourceId(dataRequest.getLeafResourceId())
+                    .withUserId(readerRequestModel.getUser().getUserId().getId())
+                    .withResourceId(readerRequestModel.getResource().getId())
+                    .withContext(readerRequestModel.getContext());
+        }
+
+        /**
+         * Adds the leaf resource ID for the message.
+         */
+        public interface ILeafResourceId {
+            /**
+             * Adds the leaf resource ID for the message.
+             *
+             * @param leafResource leaf resource ID.
+             * @return interface {@link IUserId} for the next step in the build.
+             */
+            IUserId withLeafResourceId(String leafResource);
         }
 
         /**
@@ -132,32 +135,9 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link AuditSuccessMessage.Builder.ILeafResourceId} for the next step in the build.
+             * @return interface {@link IAttributes} for the next step in the build.
              */
-            default ILeafResourceId withContext(Context context) {
-                return withContextNode(MAPPER.valueToTree(context));
-            }
-
-            /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
-             *
-             * @param context user context for the request.
-             * @return interface {@link AuditSuccessMessage.Builder.ILeafResourceId} for the next step in the build.
-             */
-            ILeafResourceId withContextNode(JsonNode context);
-        }
-
-        /**
-         * Adds the leaf resource ID for the message.
-         */
-        public interface ILeafResourceId {
-            /**
-             * Adds the leaf resource ID for the message.
-             *
-             * @param leafResource leaf resource ID.
-             * @return interface {@link AuditSuccessMessage.Builder.IAttributes} for the next step in the build.
-             */
-            IAttributes withLeafResourceId(String leafResource);
+            IAttributes withContext(Context context);
         }
 
         /**
@@ -173,7 +153,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             AuditSuccessMessage withAttributes(Map<String, Object> attributes);
 
             /**
-             * Add the expected attributes supplied by the data service that require auditing,
+             * Adds the attributes supplied by the data service that are included in the auditing message:
              * the number of records processed (total number of records in the resource) and
              * the number of records returned (excludes those which were totally redacted, but
              * includes those that were just masked)
@@ -184,13 +164,13 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return completed {@link AuditSuccessMessage} object.
              */
             default AuditSuccessMessage withRecordsProcessedAndReturned(final Long recordsProcessed, final Long recordsReturned) {
-                return withAttributes(Map.of(
-                        RECORDS_PROCESSED, recordsProcessed,
-                        RECORDS_RETURNED, recordsReturned
-                ));
+                return withAttributes(
+                        Map.of(
+                                RECORDS_PROCESSED, recordsProcessed,
+                                RECORDS_RETURNED, recordsReturned
+                        ));
             }
         }
-
     }
 
     @Override
@@ -199,27 +179,24 @@ public final class AuditSuccessMessage extends AuditMessage {
         if (this == o) {
             return true;
         }
+
         if (!(o instanceof AuditSuccessMessage)) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
-        AuditSuccessMessage that = (AuditSuccessMessage) o;
-        return leafResourceId.equals(that.leafResourceId);
+
+        return super.equals(o);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), leafResourceId);
+        return Objects.hash(super.hashCode());
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditSuccessMessage.class.getSimpleName() + "[", "]")
-                .add("leafResourceId='" + leafResourceId + "'")
                 .add(super.toString())
                 .toString();
     }
