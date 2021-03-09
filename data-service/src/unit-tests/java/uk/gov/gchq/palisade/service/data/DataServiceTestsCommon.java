@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DataServiceTestsCommon {
-    public static final String REQUEST_TOKEN = "test-request-token";
 
+    public static final String REQUEST_TOKEN = "test-request-token";
     public static final UserId USER_ID = new UserId().id("test-user-id");
     public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "/test/resourceId";
@@ -46,12 +46,14 @@ public class DataServiceTestsCommon {
     public static final Rules<Serializable> RULES = new Rules<>()
             .addRule(RULE_MESSAGE, new PassThroughRule<>());
 
-    // Test data
+    public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
+    public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
+
     public static final DataRequest DATA_REQUEST = DataRequest.Builder.create()
             .withToken(REQUEST_TOKEN)
             .withLeafResourceId(RESOURCE_ID);
 
-    public static final AuthorisedRequestEntity AUTHORISED_REQUEST_ENTITY  = new AuthorisedRequestEntity(
+    public static final AuthorisedRequestEntity AUTHORISED_REQUEST_ENTITY = new AuthorisedRequestEntity(
             REQUEST_TOKEN,
             USER,
             LEAF_RESOURCE,
@@ -94,7 +96,6 @@ public class DataServiceTestsCommon {
             .message("test message")
             .writer(RESPONSE_WRITER);
 
-
     public static class PassThroughRule<T extends Serializable> implements Rule<T> {
         @Override
         public T apply(final T record, final User user, final Context context) {
@@ -105,6 +106,5 @@ public class DataServiceTestsCommon {
         public boolean isApplicable(final User user, final Context context) {
             return false; //rules are not applicable
         }
-
     }
 }
