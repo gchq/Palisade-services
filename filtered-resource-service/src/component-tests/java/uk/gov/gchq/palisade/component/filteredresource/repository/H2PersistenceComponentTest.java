@@ -31,8 +31,8 @@ import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import static org.assertj.core.api.Assertions.assertThat;

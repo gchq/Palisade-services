@@ -30,25 +30,27 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageRepository;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class, AsyncConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, AsyncConfiguration.class, JpaTokenErrorMessagePersistenceLayer.class})
 @EnableAutoConfiguration
 @EntityScan(basePackages = "uk.gov.gchq.palisade.service.filteredresource.domain")
 @EnableJpaRepositories(basePackages = "uk.gov.gchq.palisade.service.filteredresource.repository")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("dbtest")
-class JpaTokenOffsetPersistenceLayerTest {
+class JpaTokenErrorMessagePersistenceLayerTest {
 
     @Autowired
-    private JpaTokenOffsetPersistenceLayer persistenceLayer;
+    private JpaTokenErrorMessagePersistenceLayer persistenceLayer;
     @Autowired
-    private TokenOffsetRepository offsetsRepository;
+    private TokenErrorMessageRepository errorMessageRepository;
 
     @Test
     void testContextLoads() {
@@ -56,7 +58,7 @@ class JpaTokenOffsetPersistenceLayerTest {
                 .as("Check the persistenceLayer has been launched successfully ")
                 .isNotNull();
 
-        assertThat(offsetsRepository)
+        assertThat(errorMessageRepository)
                 .as("Check the repository has been started successfully")
                 .isNotNull();
     }
@@ -64,19 +66,21 @@ class JpaTokenOffsetPersistenceLayerTest {
     @Test
     void testPutAndGetReturnsExpectedEntity() {
         // given the persistence layer has something stored in it
-        persistenceLayer.overwriteOffset(
+        persistenceLayer.putErrorMessage(
                 ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.OFFSET
+                "user-service",
+                new Throwable("No userId matching: test-user-1")
         ).join();
 
         // when all entities are retrieved from the repository
-        Iterable<TokenOffsetEntity> authorisedRequests = offsetsRepository.findAll();
+        List<TokenErrorMessageEntity> entities = errorMessageRepository.findAllByToken(ApplicationTestData.REQUEST_TOKEN);
 
         // then the persistence layer has persisted the entity in the repository
-        assertThat(authorisedRequests)
-                .as("Check that the returned request contains only the correct information")
+        assertThat(entities)
+                .as("Check that the returned error message contains only the correct information")
                 .hasSize(1)
                 .allMatch(requestEntity -> requestEntity.getToken().equals(ApplicationTestData.REQUEST_TOKEN))
-                .allMatch(requestEntity -> requestEntity.getOffset().equals(ApplicationTestData.OFFSET));
+                .allMatch(requestEntity -> requestEntity.getServiceName().equals("user-service"))
+                .allMatch(requestEntity -> requestEntity.getError().equals("No userId matching: test-user-1"));
     }
 }
