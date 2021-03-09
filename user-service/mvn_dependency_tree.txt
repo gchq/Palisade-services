@@ -1,8 +1,7 @@
 uk.gov.gchq.palisade:user-service:jar:0.5.0-SNAPSHOT
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
-|  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile
@@ -111,7 +110,8 @@ uk.gov.gchq.palisade:user-service:jar:0.5.0-SNAPSHOT
 +- org.springframework.cloud:spring-cloud-config-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-commons:jar:2.2.2.RELEASE:compile
 |  |  \- org.springframework.security:spring-security-crypto:jar:5.3.3.RELEASE:compile
-|  \- org.springframework.cloud:spring-cloud-context:jar:2.2.2.RELEASE:compile
+|  +- org.springframework.cloud:spring-cloud-context:jar:2.2.2.RELEASE:compile
+|  \- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 +- org.springframework.boot:spring-boot-starter-test:jar:2.3.1.RELEASE:test
 |  +- org.springframework.boot:spring-boot-test:jar:2.3.1.RELEASE:test
 |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:2.3.1.RELEASE:test
