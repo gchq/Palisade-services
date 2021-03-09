@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 
 class OffsetEventServiceTest {
 
