@@ -48,7 +48,6 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -103,14 +102,14 @@ class ResourceServicePersistenceProxyTest {
     }
 
     @Test
-    void testGetResourcesByIdSuccess() throws ExecutionException, InterruptedException {
+    void testGetResourcesByIdSuccess() {
         // Given a user request
         final ResourceRequest resourceRequest = requestFactoryObj.apply(1);
 
         // Then retrieving a resource from the cache
         final Source<AuditableResourceResponse, NotUsed> subject = this.resourceServiceAsyncProxy.getResourcesById(resourceRequest);
         final CompletionStage<List<AuditableResourceResponse>> future = subject.runWith(Sink.seq(), materializer);
-        final List<AuditableResourceResponse> result = future.toCompletableFuture().get();
+        final List<AuditableResourceResponse> result = future.toCompletableFuture().join();
 
         // Then check there is no error and check the returned resource ID
         assertAll(
