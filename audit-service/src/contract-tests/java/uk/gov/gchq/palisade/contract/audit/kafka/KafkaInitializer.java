@@ -42,20 +42,20 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
 
-    private static KafkaContainer kafka = new KafkaContainer("5.5.1").withReuse(true);
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1").withReuse(true);
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
 
         configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test");
 
-        kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-        kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-        kafka.start();
+        KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+        KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        KAFKA_CONTAINER.start();
 
         // test kafka config
         String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
+        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + KAFKA_CONTAINER.getFirstMappedPort();
 
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
 
@@ -75,8 +75,8 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
             var topics = List.of(
                 new NewTopic("success", 1, (short) 1),
                 new NewTopic("error", 1, (short) 1));
-            createTopics(topics, kafka);
-            return kafka;
+            createTopics(topics, KAFKA_CONTAINER);
+            return KAFKA_CONTAINER;
         }
 
         @Bean

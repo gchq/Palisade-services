@@ -85,7 +85,7 @@ public class LoggerAuditService implements AuditService {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
         } else {
-            logger.warn("An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}",
+            logger.warn("An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
                     request.getServiceName());
         }
     }

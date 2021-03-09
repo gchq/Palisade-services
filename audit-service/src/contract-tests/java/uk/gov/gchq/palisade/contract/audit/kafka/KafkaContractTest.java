@@ -75,7 +75,7 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class })
+@ContextConfiguration(initializers = {KafkaInitializer.class})
 @ActiveProfiles({"akka-test"})
 class KafkaContractTest {
 
@@ -121,7 +121,7 @@ class KafkaContractTest {
         // GIVEN
         // Add some messages on the error topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the
-        // akkatest yaml connects the consumer to only partition 0
+        // akka-test yaml connects the consumer to only partition 0
         var requests = ERROR_RECORD_NODE_FACTORY.get().limit(3L);
 
         // WHEN - we write to the input
@@ -136,8 +136,8 @@ class KafkaContractTest {
     void testGoodSuccessRequestSet() throws InterruptedException {
 
         // GIVEN
-        //   Add some messages on the success topic
-        //   The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        // Add some messages on the success topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         var requests = GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(3L);
 
         // WHEN - we write to the input
@@ -152,8 +152,8 @@ class KafkaContractTest {
     void testGoodAndBadSuccessRequestSet() throws InterruptedException {
 
         // GIVEN
-        //   Add 2 `Good` and 2 `Bad` success messages to the success topic
-        //   The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        // Add 2 `Good` and 2 `Bad` success messages to the success topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         var requests = Stream.of(
                 GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L),
                 BAD_SUCCESS_RECORD_NODE_FACTORY.get().limit(2L),
@@ -172,8 +172,8 @@ class KafkaContractTest {
     void testFailedErrorDeserialization() throws InterruptedException {
 
         // GIVEN
-        //   Add a message to the 'error' topic
-        //   The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        // Add a message to the 'error' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
 
         var requests = BAD_ERROR_MESSAGE_NODE_FACTORY.get().limit(1L);
         var expectedErrorCount = currentErrorCount.get() + 1;
@@ -193,8 +193,8 @@ class KafkaContractTest {
     void testFailedSuccessDeserialization() throws InterruptedException {
 
         // GIVEN
-        //   Add a message to the 'success' topic
-        //   The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        // Add a message to the 'success' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         var requests = ContractTestData.BAD_SUCCESS_MESSAGE_NODE_FACTORY.get().limit(1L);
         var expectedSuccessCount = currentSuccessCount.get() + 1;
 

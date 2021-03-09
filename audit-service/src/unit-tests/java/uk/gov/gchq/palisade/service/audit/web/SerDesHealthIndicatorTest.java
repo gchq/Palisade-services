@@ -21,6 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Status;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SerDesHealthIndicatorTest {
@@ -46,7 +48,7 @@ class SerDesHealthIndicatorTest {
 
     @Test
     void testHealthDown() {
-        // service has encountered at least 1 serialisation exception
+        // Given the service has encountered at least 1 serialisation exception
         SerDesHealthIndicator.addSerDesExceptions(new Exception("This is a test"));
         assertThat(healthIndicator.health().getStatus())
             .as("Check health status as DOWN")
