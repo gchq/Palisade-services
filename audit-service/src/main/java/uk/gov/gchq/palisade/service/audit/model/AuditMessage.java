@@ -39,7 +39,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    @SuppressWarnings("java:S2039")
+    @SuppressWarnings("java:S2039") // Suppress the 'Member variable visibility' warning
     static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String userId; // Unique identifier for the user.

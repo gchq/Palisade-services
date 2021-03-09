@@ -85,7 +85,7 @@ public class LoggerAuditService implements AuditService {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
         } else {
-            logger.warn("An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
+            logger.warn("An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
                     request.getServiceName());
         }
     }
@@ -107,7 +107,7 @@ public class LoggerAuditService implements AuditService {
                 return true;
             }
             auditLogger.warn(
-                "An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
+                "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
                 message.getServiceName());
             return false;
 

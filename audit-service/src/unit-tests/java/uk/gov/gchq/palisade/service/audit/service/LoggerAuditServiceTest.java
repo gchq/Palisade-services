@@ -42,7 +42,7 @@ import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVIC
 @ExtendWith(MockitoExtension.class)
 class LoggerAuditServiceTest {
 
-    private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}";
+    private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}";
 
     @Mock
     Logger logger;

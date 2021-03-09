@@ -21,8 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Status;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SerDesHealthIndicatorTest {

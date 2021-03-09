@@ -26,14 +26,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -45,10 +42,8 @@ import java.util.stream.Collectors;
  */
 @SpringBootApplication
 @EnableConfigurationProperties({ConsumerTopicConfiguration.class, AuditServiceConfigProperties.class})
-public class AuditApplication implements Closeable {
+public class AuditApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditApplication.class);
-
-    private static ConfigurableApplicationContext run;
 
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
@@ -76,7 +71,8 @@ public class AuditApplication implements Closeable {
      */
     public static void main(final String[] args) {
         LOGGER.debug("AuditApplication started with: {}", (Object) args);
-        run = new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET).run(args);
+        new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)
+                .run(args);
     }
 
     /**
@@ -90,11 +86,6 @@ public class AuditApplication implements Closeable {
                 .collect(Collectors.toSet());
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
-    }
-
-    @Override
-    public void close() throws IOException {
-        run.close();
     }
 
 }
