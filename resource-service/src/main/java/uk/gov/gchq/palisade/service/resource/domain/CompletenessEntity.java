@@ -53,9 +53,10 @@ public class CompletenessEntity implements Serializable, Persistable<Integer> {
     /**
      * Constructor used for the Database that takes a {@link EntityType} and EntityId
      * Used for inserting objects into the backing store
+     * A primary key is created by hashing the entityType and Id into a unique ID
      *
-     * @param entityType The Entity type enum object.
-     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     * @param entityType The type of entity, see {@link EntityType}.
+     * @param entityId   The Id of the entity.
      */
     public CompletenessEntity(final EntityType entityType, final String entityId) {
         this(entityType, entityId, idFor(entityType, entityId));
@@ -101,14 +102,15 @@ public class CompletenessEntity implements Serializable, Persistable<Integer> {
     }
 
     /**
-     * Creates a hash value for the passed parameters
+     * Creates a unique value for the passed in parameters
      *
      * @param entityType the Entity type enum object
-     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
-     * @return the hash value used for the id, made up of the entity type and entity id values
+     * @param entityId   The Id of the entity, which eventually becomes a hashCode
+     * @return the hash value used for the id, made up of the length of EntityType enum,
+     * times the hashCode of entityId and the ordinal value of the passed in type
      */
     public static Integer idFor(final EntityType entityType, final String entityId) {
-        return Objects.hash(entityType, entityId);
+        return EntityType.values().length * entityId.hashCode() + entityType.ordinal();
     }
 
     @Override
