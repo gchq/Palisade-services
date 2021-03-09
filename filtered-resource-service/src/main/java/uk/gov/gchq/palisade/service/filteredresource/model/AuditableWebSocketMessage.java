@@ -17,13 +17,11 @@
 package uk.gov.gchq.palisade.service.filteredresource.model;
 
 import akka.japi.Pair;
-import akka.kafka.ConsumerMessage.CommittableOffset;
+import akka.kafka.ConsumerMessage.Committable;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Generated;
-
-import java.util.Optional;
 
 /**
  * Collect a {@link WebSocketMessage} prepared to be returned to the client with any other context
@@ -32,14 +30,16 @@ import java.util.Optional;
  */
 public class AuditableWebSocketMessage {
     private final WebSocketMessage websocketMessage;
-    private final Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair;
+    private final FilteredResourceRequest filteredResourceRequest;
+    private final Committable committable;
 
     protected AuditableWebSocketMessage(
             final @NonNull WebSocketMessage websocketMessage,
-            final @Nullable Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair
-    ) {
+            final @Nullable FilteredResourceRequest filteredResourceRequest,
+            final @Nullable Committable committable) {
         this.websocketMessage = websocketMessage;
-        this.auditSuccessPair = auditSuccessPair;
+        this.filteredResourceRequest = filteredResourceRequest;
+        this.committable = committable;
     }
 
     @Generated
@@ -48,8 +48,13 @@ public class AuditableWebSocketMessage {
     }
 
     @Generated
-    public Optional<Pair<FilteredResourceRequest, CommittableOffset>> getAuditSuccessPair() {
-        return Optional.ofNullable(auditSuccessPair);
+    public Committable getCommittable() {
+        return committable;
+    }
+
+    @Generated
+    public FilteredResourceRequest getFilteredResourceRequest() {
+        return filteredResourceRequest;
     }
 
     /**
@@ -63,7 +68,8 @@ public class AuditableWebSocketMessage {
          * @return the next step in the builder chain
          */
         public static IWebSocketMessage create() {
-            return websocketMessage -> auditableRequest -> new AuditableWebSocketMessage(websocketMessage, auditableRequest);
+            return websocketMessage -> resourceAndComittable ->
+                    new AuditableWebSocketMessage(websocketMessage, resourceAndComittable.first(), resourceAndComittable.second());
         }
 
         /**
@@ -80,36 +86,38 @@ public class AuditableWebSocketMessage {
         }
 
         /**
-         * Compose inbound request data
+         * Adds the committable to the message
          */
         public interface IAuditable {
-            /**
-             * Compose inbound request data
-             *
-             * @param auditableRequest a pair of the inbound request and its offset
-             * @return a completed AuditableWebSocketMessage
-             */
-            AuditableWebSocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
 
             /**
-             * Compose inbound request data
+             * Supply a pair of {@link FilteredResourceRequest} and {@link Committable} to the builder
              *
-             * @param request           the inbound request
-             * @param committableOffset the inbound request's kafka offset to be committed back to kafka once done
-             * @return a completed AuditableWebSocketMessage
+             * @param resourceAndCommittable the pair, containing the original request information sent to the Filtered Resource Service, and the committable needed to commit upstream
+             * @return a completed {@link AuditableWebSocketMessage} object
              */
-            default AuditableWebSocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
-                return withAuditablePair(Pair.create(request, committableOffset));
+            AuditableWebSocketMessage withResourceAndCommittable(@NonNull Pair<FilteredResourceRequest, Committable> resourceAndCommittable);
+
+            /**
+             * Supply both a {@link FilteredResourceRequest} and a {@link Committable} to the builder, which will join them as a pair.
+             *
+             * @param request     the request message that was sent to the Filtered Resource Service
+             * @param committable needed to commit upstream
+             * @return a completed {@link AuditableWebSocketMessage} object
+             */
+            default AuditableWebSocketMessage withResourceAndCommittable(@NonNull FilteredResourceRequest request, @NonNull Committable committable) {
+                return withResourceAndCommittable(Pair.create(request, committable));
             }
 
             /**
-             * Don't add any audit information (e.g. an {@link AuditableWebSocketMessage} for a {@link MessageType#PING})
+             * By default, no committable exists to return nulls for the committable and AuditablePair
              *
-             * @return a completed AuditableWebSocketMessage
+             * @return a null comittable and a null auditablePair
              */
-            default AuditableWebSocketMessage withoutAuditable() {
-                return withAuditablePair(null);
+            default AuditableWebSocketMessage withoutAudit() {
+                return withResourceAndCommittable(Pair.create(null, null));
             }
         }
+
     }
 }

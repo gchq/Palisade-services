@@ -67,6 +67,7 @@ public final class AuthorisedDataRequest {
         return context;
     }
 
+    @SuppressWarnings("java:S1452")
     @Generated
     public Rules<?> getRules() {
         return rules;
