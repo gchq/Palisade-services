@@ -22,7 +22,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
@@ -63,7 +62,6 @@ public final class ApplicationTestData {
             .withResource(LEAF_RESOURCE);
 
     public static final Long OFFSET = 1L;
-    public static final TokenOffsetEntity OFFSET_ENTITY = new TokenOffsetEntity(REQUEST_TOKEN, OFFSET);
     public static final TopicOffsetMessage OFFSET_MESSAGE = TopicOffsetMessage.Builder.create()
             .withCommitOffset(OFFSET);
 

@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 
 import java.util.concurrent.CompletableFuture;
 

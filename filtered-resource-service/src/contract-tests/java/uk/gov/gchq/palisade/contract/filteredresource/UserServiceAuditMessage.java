@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.model;
+
+package uk.gov.gchq.palisade.contract.filteredresource;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -43,9 +44,10 @@ import java.util.StringJoiner;
  * sent to audit service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public class UserServiceAuditMessage {
 
-    public static final String SERVICE_NAME = "filtered-resource-service";
+    // Hardcode the service as 'user-service' for use in test data
+    public static final String SERVICE_NAME = "user-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -74,7 +76,7 @@ public class AuditMessage {
     protected final Map<String, String> attributes;  //Map<String, Object> holding optional extra information
 
     @JsonCreator
-    protected AuditMessage(
+    protected UserServiceAuditMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
@@ -147,10 +149,10 @@ public class AuditMessage {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditMessage)) {
+        if (!(o instanceof UserServiceAuditMessage)) {
             return false;
         }
-        AuditMessage that = (AuditMessage) o;
+        UserServiceAuditMessage that = (UserServiceAuditMessage) o;
         return serviceName.equals(that.serviceName) &&
                 userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
@@ -170,7 +172,7 @@ public class AuditMessage {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditMessage.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", UserServiceAuditMessage.class.getSimpleName() + "[", "]")
                 .add("serviceName='" + serviceName + "'")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
