@@ -68,7 +68,9 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).containsOnly(auditSuccessMessage(DATA_SERVICE));
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that an AuditSuccessMessage from the 'Data Service' is logged")
+                .containsOnly(auditSuccessMessage(DATA_SERVICE));
     }
 
     @Test
@@ -80,7 +82,9 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).containsOnly(auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that an AuditSuccessMessage from the 'Filtered Resource Service' is logged")
+                .containsOnly(auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
     }
 
     @Test
@@ -92,8 +96,12 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).isEmpty();
-        assertThat(errorCaptor.getAllValues()).containsOnly(BAD_AUDIT_SUCCESS_MESSAGE, USER_SERVICE.value);
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that no AuditSuccessMessage object has been logged")
+                .isEmpty();
+        assertThat(errorCaptor.getAllValues())
+                .as("Check that a warning message has been logged when an AuditSuccessMessage has been sent by an incorrect service")
+                .containsOnly(BAD_AUDIT_SUCCESS_MESSAGE, USER_SERVICE.value);
     }
 
     @Test
@@ -108,7 +116,7 @@ class LoggerAuditServiceTest {
         // Then
         assertThat(infoCaptor.getAllValues()).isEmpty();
         assertThat(errorCaptor.getAllValues())
-            .as("check single value")
+            .as("Check the logged AuditErrorMessage is from the 'User Service'")
             .hasSize(1)
             .first()
             .isEqualTo(auditErrorMessage(USER_SERVICE));
@@ -126,7 +134,7 @@ class LoggerAuditServiceTest {
         // Then
         assertThat(infoCaptor.getAllValues()).isEmpty();
         assertThat(errorCaptor.getAllValues())
-            .as("check single value")
+            .as("Check the logged AuditErrorMessage is from the 'Resource Service'")
             .hasSize(1)
             .first()
             .isEqualTo(auditErrorMessage(RESOURCE_SERVICE));
@@ -143,7 +151,7 @@ class LoggerAuditServiceTest {
         // Then
         assertThat(infoCaptor.getAllValues()).isEmpty();
         assertThat(errorCaptor.getAllValues())
-            .as("check single value")
+            .as("Check the logged AuditErrorMessage is from the 'Policy Service'")
             .hasSize(1)
             .first()
             .isEqualTo(auditErrorMessage(POLICY_SERVICE));
