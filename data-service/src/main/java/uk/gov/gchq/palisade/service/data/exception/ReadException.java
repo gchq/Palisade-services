@@ -16,34 +16,28 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-
-import java.io.IOException;
-
 /**
  * Specialised exception thrown by the data-service when an IOException occurred while reading
- * from the data-reader, bundling the data-reader request that caused the exception.
- * This provides enough context for the thrown exception to be caught and audited appropriately.
+ * from the data-reader.
  */
 public class ReadException extends RuntimeException {
-    @SuppressWarnings("java:S1948")
-    private final DataReaderRequest readerRequest;
 
     /**
-     * Specialised exception thrown by the data-service when an IOException occurred while reading
-     * from the data-reader, bundling the data-reader request that caused the exception.
+     * Initialises this exception with the given message.
      *
-     * @param readerRequest the authorised request to the data-reader that was being processed
-     * @param cause         the {@link IOException} that caused the error
+     * @param message message for the exception
      */
-    public ReadException(final DataReaderRequest readerRequest, final IOException cause) {
-        super("An exception was thrown while reading from data-reader", cause);
-        this.readerRequest = readerRequest;
+    public ReadException(final String message) {
+        super(message);
     }
 
-    @Generated
-    public DataReaderRequest getReaderRequest() {
-        return readerRequest;
+    /**
+     * Initialises this exception with the given message and cause.
+     *
+     * @param message   message to report
+     * @param throwable the underlying cause of this exception
+     */
+    public ReadException(final String message, final Throwable throwable) {
+        super(message, throwable);
     }
 }

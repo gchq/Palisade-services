@@ -340,7 +340,7 @@ class KafkaContractTest {
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .as("The error message within the result on the error queue should be %s",
                                 "No Resource Rules found for the resource")
-                        .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
+                        .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource: file:/test/noRulesResource")
         );
     }
 

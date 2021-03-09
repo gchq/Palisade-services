@@ -39,6 +39,7 @@ import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -127,7 +128,7 @@ public class ApplicationConfiguration {
     public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final ClientConfiguration clientConfig) {
         return (String serviceName) -> {
             Supplier<Collection<URI>> uriSupplier = () -> {
-                Collection<URI> clientUris = clientConfig.getClient().get(serviceName);
+                Collection<URI> clientUris = clientConfig.getClient().getOrDefault(serviceName, Collections.emptyList());
                 LOGGER.debug("Service {} has client uris {}", serviceName, clientUris);
                 return clientUris;
             };
