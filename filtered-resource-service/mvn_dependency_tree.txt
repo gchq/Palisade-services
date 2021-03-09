@@ -23,6 +23,8 @@ uk.gov.gchq.palisade:filtered-resource-service:jar:0.5.0-SNAPSHOT
 |     \- com.typesafe.akka:akka-parsing_2.13:jar:10.2.1:compile
 +- com.typesafe.akka:akka-http-jackson_2.13:jar:10.2.1:compile
 |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|     +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
+|     \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 +- com.typesafe.akka:akka-discovery_2.13:jar:2.6.10:compile
 +- com.h2database:h2:jar:1.4.200:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
@@ -86,8 +88,6 @@ uk.gov.gchq.palisade:filtered-resource-service:jar:0.5.0-SNAPSHOT
 |     +- io.netty:netty-transport:jar:4.1.50.Final:compile
 |     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
-|  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile

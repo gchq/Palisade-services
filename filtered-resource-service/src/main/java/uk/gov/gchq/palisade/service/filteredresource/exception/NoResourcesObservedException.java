@@ -21,7 +21,6 @@ package uk.gov.gchq.palisade.service.filteredresource.exception;
  */
 public class NoResourcesObservedException extends RuntimeException {
 
-
     /**
      * Initializes this exception with the given message.
      *
@@ -29,15 +28,5 @@ public class NoResourcesObservedException extends RuntimeException {
      */
     public NoResourcesObservedException(final String message) {
         super(message);
-    }
-
-    /**
-     * Initializes this exception with the given message and cause.
-     *
-     * @param message   message to report
-     * @param throwable the underlying cause of this exception
-     */
-    public NoResourcesObservedException(final String message, final Throwable throwable) {
-        super(message, throwable);
     }
 }

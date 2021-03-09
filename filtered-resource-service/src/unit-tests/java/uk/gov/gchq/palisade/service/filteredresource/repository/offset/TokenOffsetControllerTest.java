@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.filteredresource.repository;
+package uk.gov.gchq.palisade.service.filteredresource.repository.offset;
 
 import akka.actor.ActorRef;
 import akka.actor.testkit.typed.javadsl.TestInbox;
@@ -25,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand.AckTellWorker;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand.SpawnWorker;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.SetOffset;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerResponse;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand.AckTellWorker;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand.SpawnWorker;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.SetOffset;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.WorkerResponse;
 
 import java.time.Duration;
 import java.util.Optional;
