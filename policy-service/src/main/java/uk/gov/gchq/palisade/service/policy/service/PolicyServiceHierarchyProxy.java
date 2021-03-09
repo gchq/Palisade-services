@@ -172,7 +172,7 @@ public class PolicyServiceHierarchyProxy {
 
         return optionalRules
                 .filter(rules -> !rules.getRules().isEmpty())
-                .orElseThrow(() -> new NoSuchPolicyException("No Record Rules found for the resource"));
+                .orElseThrow(() -> new NoSuchPolicyException("No Record Rules found for the resource: " + resource.getId()));
     }
 
     /**
@@ -188,7 +188,7 @@ public class PolicyServiceHierarchyProxy {
 
         return optionalRules
                 .filter(rules -> !rules.getRules().isEmpty())
-                .orElseThrow(() -> new NoSuchPolicyException("No Resource Rules found for the resource"));
+                .orElseThrow(() -> new NoSuchPolicyException("No Resource Rules found for the resource: " + resource.getId()));
     }
 
     /**

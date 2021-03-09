@@ -41,4 +41,4 @@ akka:
 # Connection detail for SimpleResourceService resources
 web:
   client:
-    data-service: http://localhost:8082
+    data-service: localhost:8082
