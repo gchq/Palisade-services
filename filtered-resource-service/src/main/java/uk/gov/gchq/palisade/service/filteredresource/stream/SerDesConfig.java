@@ -192,4 +192,28 @@ public final class SerDesConfig {
             }
         };
     }
+
+    /**
+     * Kafka key deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate key deserialiser for the topic's AuditErrorMessage content
+     */
+    public static Deserializer<String> errorKeyDeserializer() {
+        return new StringDeserializer();
+    }
+
+    /**
+     * Kafka value deserialiser for upstream AuditErrorMessages coming in as input
+     *
+     * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
+     */
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+        return (String ignored, byte[] auditErrorMessage) -> {
+            try {
+                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditErrorMessage, Charset.defaultCharset()), e);
+            }
+        };
+    }
 }
