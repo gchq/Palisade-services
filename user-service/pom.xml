@@ -103,7 +103,7 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
-            <!-- Caffeine local caching -->
+            <!-- Caffeine local cache provider -->
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>${caffeine.version}</version>
