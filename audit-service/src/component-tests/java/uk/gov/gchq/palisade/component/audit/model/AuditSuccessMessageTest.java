@@ -16,90 +16,44 @@
 package uk.gov.gchq.palisade.component.audit.model;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.audit.AbstractSerialisationTest;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
-import java.io.IOException;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
-@JsonTest
-@ContextConfiguration(classes = {AuditSuccessMessageTest.class})
-class AuditSuccessMessageTest {
-
-    @Autowired
-    private JacksonTester<AuditSuccessMessage> jsonTester;
+class AuditSuccessMessageTest extends AbstractSerialisationTest {
 
     /**
-     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserializes and tests against the original Object
      *
-     * @throws IOException throws if the {@link AuditSuccessMessage} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     * @see AbstractSerialisationTest#assertSerialisation(Class, Object)
+     * @throws Exception if any error occurs during (de)serialization
      */
     @Test
-    void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
-        String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("messagesSent", "23");
+    void testAuditSuccessMessageSerialisation() throws Exception {
 
-        AuditSuccessMessage auditSuccessMessage = AuditSuccessMessage.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("testResourceId")
-                .withContext(context)
-                .withServiceName("testServicename")
-                .withTimestamp(now)
-                .withServerIp("testServerIP")
-                .withServerHostname("testServerHostname")
-                .withAttributes(attributes)
-                .withLeafResourceId("testLeafResourceId");
+        // GIVEN the instance to check
+        var expected = AuditSuccessMessage.Builder.create()
+            .withUserId("originalUserID")
+            .withResourceId("testResourceId")
+            .withContext(new Context().purpose("testContext"))
+            .withServiceName("testServicename")
+            .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
+            .withServerIp("testServerIP")
+            .withServerHostname("testServerHostname")
+            .withAttributes(Map.of("messagesSent", "23"))
+            .withLeafResourceId("testLeafResourceId");
 
-        JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jsonTester.write(auditSuccessMessage);
-        ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(auditSuccessMessageJsonContent.getJson());
-        AuditSuccessMessage auditSuccessMessageObject = auditSuccessMessageObjectContent.getObject();
+        // THEN confirm that it can be serialised and then deserialized successfully.
+        assertSerialisation(expected.getClass(), expected);
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("testServicename"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.timestamp").isEqualTo(now),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serverIP").isEqualTo("testServerIP"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serverHostname").isEqualTo("testServerHostname"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.leafResourceId").isEqualTo("testLeafResourceId"),
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23")
-                ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditSuccessMessageObject.getUserId()).isEqualTo(auditSuccessMessage.getUserId()),
-                        () -> assertThat(auditSuccessMessageObject.getResourceId()).isEqualTo(auditSuccessMessage.getResourceId()),
-                        () -> assertThat(auditSuccessMessageObject.getContext().getPurpose()).isEqualTo(auditSuccessMessage.getContext().getPurpose()),
-                        () -> assertThat(auditSuccessMessageObject.getServiceName()).isEqualTo(auditSuccessMessage.getServiceName()),
-                        () -> assertThat(auditSuccessMessageObject.getServerIP()).isEqualTo(auditSuccessMessage.getServerIP()),
-                        () -> assertThat(auditSuccessMessageObject.getServerHostname()).isEqualTo(auditSuccessMessage.getServerHostname()),
-                        () -> assertThat(auditSuccessMessageObject.getTimestamp()).isEqualTo(auditSuccessMessage.getTimestamp()),
-                        () -> assertThat(auditSuccessMessageObject.getAttributes()).isEqualTo(auditSuccessMessage.getAttributes()),
-                        () -> assertThat(auditSuccessMessageObject.getLeafResourceId()).isEqualTo(auditSuccessMessage.getLeafResourceId())
-                ),
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditSuccessMessageObject).usingRecursiveComparison().isEqualTo(auditSuccessMessage)
-                )
-        );
     }
+
 }

@@ -28,21 +28,41 @@ public class AsyncConfigProperties {
     private int webMvcTimeout;
     private int corePoolSize;
 
+    /**
+     * Returns the web mvc timeout
+     *
+     * @return the web mvc timeout
+     */
     @Generated
     public int getWebMvcTimeout() {
         return webMvcTimeout;
     }
 
+    /**
+     * Sets the web mvc timeout
+     *
+     * @param webMvcTimeout The new value to set
+     */
     @Generated
     public void setWebMvcTimeout(final int webMvcTimeout) {
         this.webMvcTimeout = webMvcTimeout;
     }
 
+    /**
+     * Returns the core pool size
+     *
+     * @return the core pool size
+     */
     @Generated
     public int getCorePoolSize() {
         return corePoolSize;
     }
 
+    /**
+     * Sets the new core pool size
+     *
+     * @param corePoolSize the new core pool size
+     */
     @Generated
     public void setCorePoolSize(final int corePoolSize) {
         this.corePoolSize = corePoolSize;

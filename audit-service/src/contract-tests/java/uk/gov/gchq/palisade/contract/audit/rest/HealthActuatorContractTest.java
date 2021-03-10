@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
@@ -45,31 +44,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({"akka-test"})
 class HealthActuatorContractTest {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
-    @Autowired
-    private Map<String, AuditService> serviceMap;
-
     @Test
-     void testContextLoads() {
-       assertThat(serviceMap)
-               .hasSize(3)
-               .containsKeys("simple", "stroom", "logger");
-        assertThat(restTemplate).isNotNull();
+    void testContextLoads(@Autowired final Map<String, AuditService> serviceMap) {
+        assertThat(serviceMap)
+                .as("Check the Audit Service loads three different implementations of the Audit Service")
+                .containsOnlyKeys("simple", "stroom", "logger");
     }
 
     @Test
-     void testIsUp() {
-        // Given that the service is running (and presumably healthy)
+    void testIsUp(@Autowired final TestRestTemplate restTemplate) {
 
         // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
+        var responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
 
-        // Then check the returned code is 200(OK)
-        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // Then check the response
+        assertThat(responseEntity.getStatusCode())
+            .as("check status")
+            .isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody())
+            .as("check body")
+            .contains("\"status\":\"UP\"");
 
-        // Then check the message body
-        String body = health.getBody();
-        assertThat(body).contains("\"status\":\"UP\"");
     }
 }

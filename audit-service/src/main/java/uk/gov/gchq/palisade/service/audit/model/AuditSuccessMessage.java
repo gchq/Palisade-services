@@ -55,6 +55,11 @@ public final class AuditSuccessMessage extends AuditMessage {
         this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID cannot be null"));
     }
 
+    /**
+     * Returns leaf resource ID
+     *
+     * @return leaf resource ID
+     */
     @Generated
     public String getLeafResourceId() {
         return leafResourceId;
@@ -112,7 +117,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param context user context for the request.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
-            default IServiceName withContext(Context context) {
+            default IServiceName withContext(final Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -191,7 +196,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param attributes timestamp for the request.
              * @return public interface {@link ILeafResourceId} for the next step in the build.
              */
-            default ILeafResourceId withAttributes(Map<String, Object> attributes) {
+            default ILeafResourceId withAttributes(final Map<String, Object> attributes) {
                 return withAttributesNode(MAPPER.valueToTree(attributes));
             }
 
