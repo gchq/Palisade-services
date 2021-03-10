@@ -78,7 +78,7 @@ class SimpleDataServiceTest {
         // When & Then
         assertThat(simpleDataService.authoriseRequest(DATA_REQUEST)
                 .join())
-                .as("authoriseRequest should return a DataReaderRequest")
+                .as("Check authoriseRequest returns a DataReaderRequest")
                 .usingRecursiveComparison()
                 .isEqualTo(DATA_READER_REQUEST);
 
@@ -105,6 +105,7 @@ class SimpleDataServiceTest {
 
         //Then
         assertThat(thrown)
+                .as("Check that invalid request to authoriseRequest will throw a ForbiddenException")
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(ForbiddenException.class)
                 .hasMessageContaining(errorMessage, DATA_REQUEST.getToken(), DATA_REQUEST.getLeafResourceId());
@@ -132,7 +133,9 @@ class SimpleDataServiceTest {
 
         //Then
         String outputString = outputStream.toString();
-        assertThat(outputString).isEqualTo(TEST_RESPONSE_MESSAGE);
+        assertThat(outputString)
+                .as("Check that read will provide data in the output stream")
+                .isEqualTo(TEST_RESPONSE_MESSAGE);
 
         //verifies the service calls the DataReader read method once
         verify(dataReader, times(1)).read(any(), any(), any());
