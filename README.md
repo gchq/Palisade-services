@@ -166,4 +166,5 @@ All instances of the palisade-service pod contain a script that will identify al
 ```
 kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-service/log-level -t
 ```
+
 Use the `-h` flag to see usage instructions.

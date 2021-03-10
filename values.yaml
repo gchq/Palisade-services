@@ -35,7 +35,7 @@ global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
 
-  # If specified is the service name to use typically in a piepline this will be the
+  # If specified is the service name to use. Typically in the pipeline this will be the name of the shared namespace
   serviceName:
 
   kafka:
