@@ -17,8 +17,7 @@
 package uk.gov.gchq.palisade.component.data.repository;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -27,10 +26,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
@@ -47,6 +42,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY1;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY2;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY3;
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
@@ -55,36 +53,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
 @ActiveProfiles({"h2test"})
 class JpaPersistenceLayerTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayerTest.class);
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
     @Autowired
     private AuthorisedRequestsRepository requestsRepository;
-
-    private static final String TOKEN = "test-request-token";
-    private static final String RESOURCE_ID = "/resource/id";
-
-    private final AuthorisedRequestEntity entity1 = new AuthorisedRequestEntity(
-            TOKEN + "1",
-            new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
-            new Context(),
-            new Rules<>()
-    );
-    private final AuthorisedRequestEntity entity2 = new AuthorisedRequestEntity(
-            TOKEN + "2",
-            new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
-            new Context(),
-            new Rules<>()
-    );
-    private final AuthorisedRequestEntity entity3 = new AuthorisedRequestEntity(
-            TOKEN + "1",
-            new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "3"),
-            new Context(),
-            new Rules<>()
-    );
 
     @Test
     void testSpringDiscoversJpaPersistenceLayer() {
@@ -98,12 +70,13 @@ class JpaPersistenceLayerTest {
     @Transactional(TxType.NEVER)
     void testEmptyGetReturnsEmpty() {
         // When
-        LOGGER.info("get");
-        Optional<AuthorisedRequestEntity> missingEntity = persistenceLayer.getAsync("not-a-token", "not-a-leafresource").join();
+        Optional<AuthorisedRequestEntity> missingEntity = persistenceLayer
+                .getAsync("not-a-token", "not-a-leafresource")
+                .join();
 
         // Then
-        LOGGER.info("assert");
         assertThat(missingEntity)
+                .as("Checking that an invalid request returns an empty response")
                 .isEmpty();
     }
 
@@ -118,7 +91,7 @@ class JpaPersistenceLayerTest {
     @Test
     void testGetReturnsAuthorisedRequest() {
         // Given
-        List<AuthorisedRequestEntity> entities = List.of(entity1, entity2, entity3);
+        List<AuthorisedRequestEntity> entities = List.of(ENTITY1, ENTITY2, ENTITY3);
         requestsRepository.saveAll(entities);
 
         // When
@@ -129,6 +102,7 @@ class JpaPersistenceLayerTest {
         // Then
         persistedEntities.forEach((entity, persisted) ->
                 assertThat(persisted)
+                        .as("Checking that the entity %s is present and persisted %s is set to true", entity, persisted)
                         .isPresent()
                         .get()
                         .isEqualTo(entity));

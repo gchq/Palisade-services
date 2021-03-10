@@ -53,6 +53,7 @@ class DomainObjectConverterTest {
         String databaseColumn = converter.convertToDatabaseColumn(object);
         // then if converted to a column again, the result is identical
         assertThat(converter.convertToDatabaseColumn(object))
+                .as("")
                 .isEqualTo(databaseColumn);
 
         // when the database column is converted back to a Context object
