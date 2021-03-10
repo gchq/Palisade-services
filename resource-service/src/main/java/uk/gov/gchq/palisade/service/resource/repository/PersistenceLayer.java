@@ -22,6 +22,7 @@ import akka.stream.javadsl.Source;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface for a persistence store to be used as a cache by the resource-service
@@ -38,7 +39,7 @@ public interface PersistenceLayer {
      * @param resourceId the resource id to query
      * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Source<LeafResource, NotUsed>> getResourcesById(String resourceId);
+    CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesById(String resourceId);
 
     /**
      * Given a type, return all leaf resources of that type
@@ -46,7 +47,7 @@ public interface PersistenceLayer {
      * @param type the type to query
      * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Source<LeafResource, NotUsed>> getResourcesByType(String type);
+    CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesByType(String type);
 
     /**
      * Given a serialised format, return all leaf resources of that serialised format
@@ -54,7 +55,7 @@ public interface PersistenceLayer {
      * @param serialisedFormat the serialised format to query
      * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Source<LeafResource, NotUsed>> getResourcesBySerialisedFormat(String serialisedFormat);
+    CompletableFuture<Optional<Source<LeafResource, NotUsed>>> getResourcesBySerialisedFormat(String serialisedFormat);
 
     /**
      * Add a {@link LeafResource} to persistence for a given resourceId
@@ -85,17 +86,5 @@ public interface PersistenceLayer {
      * @return a {@link Flow} of {@link LeafResource}s added to the persistence
      */
     <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceBySerialisedFormat(String serialisedFormat);
-
-
-    /**
-     * Add a new resource that has been created during runtime to the persistence store.
-     * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method).
-     * Used for updating the persistence store when the source of 'truth' has changed.
-     * As long as this is called for every new resource created and added to the resource-service,
-     * this should guarantee consistency between persistence and resource-service
-     *
-     * @param leafResource the new {@link LeafResource} that has been created
-     */
-    void addResource(LeafResource leafResource);
 
 }

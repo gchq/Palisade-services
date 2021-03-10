@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 
 import java.util.HashMap;
 import java.util.Map;
