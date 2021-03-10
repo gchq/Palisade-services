@@ -79,7 +79,7 @@ public class AkkaComponentsConfig {
          * @param token  the client's token for this request, which is used for the consumer group-id and partition selection
          * @param offset the offset to start with for the given token
          * @return a new Kafka source
-         * @implNote the offset should come from the {@link uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController}
+         * @implNote the offset should come from the {@link uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController}
          * to ensure it is accurate (i.e. it points to the start-of-stream message)
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
@@ -117,6 +117,20 @@ public class AkkaComponentsConfig {
                 .orElse(Subscriptions.topics(topic.getName()));
 
         return OFFSET_COMPONENTS.committableConsumer(consumerSettings, subscription);
+    }
+
+    @Bean
+    Source<CommittableMessage<String, AuditErrorMessage>, Control> committableAuditErrorMessageSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+        Topic topic = configuration.getTopics().get("error-topic");
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ERROR_COMPONENTS.consumerSettings(
+                actorSystem,
+                SerDesConfig.errorKeyDeserializer(),
+                SerDesConfig.errorValueDeserializer());
+        Subscription subscription = Optional.ofNullable(topic.getAssignment())
+                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
+                .orElse(Subscriptions.topics(topic.getName()));
+
+        return ERROR_COMPONENTS.committableConsumer(consumerSettings, subscription);
     }
 
     @Bean

@@ -1,8 +1,8 @@
 uk.gov.gchq.palisade:attribute-masking-service:jar:0.5.0-SNAPSHOT
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
-|  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
+|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile

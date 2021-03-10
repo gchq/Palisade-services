@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.filteredresource.repository;
+package uk.gov.gchq.palisade.service.filteredresource.repository.offset;
 
 import akka.NotUsed;
 import akka.actor.typed.ActorRef;
@@ -30,12 +29,12 @@ import akka.stream.javadsl.Sink;
 import akka.stream.typed.javadsl.ActorFlow;
 
 import uk.gov.gchq.palisade.service.filteredresource.model.TokenOffsetPersistenceResponse;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.GetOffset;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.ReportError;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.SetOffset;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerResponse;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.GetOffset;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.ReportError;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.SetOffset;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.WorkerCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.WorkerResponse;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

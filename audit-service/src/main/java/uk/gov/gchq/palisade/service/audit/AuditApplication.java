@@ -87,4 +87,5 @@ public class AuditApplication {
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
     }
+
 }

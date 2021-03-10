@@ -31,8 +31,8 @@ import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,9 +51,14 @@ class JpaTokenOffsetPersistenceLayerTest {
     private TokenOffsetRepository offsetsRepository;
 
     @Test
-    void contextLoads() {
-        assertThat(persistenceLayer).isNotNull();
-        assertThat(offsetsRepository).isNotNull();
+    void testContextLoads() {
+        assertThat(persistenceLayer)
+                .as("Check the persistenceLayer has been launched successfully ")
+                .isNotNull();
+
+        assertThat(offsetsRepository)
+                .as("Check the repository has been started successfully")
+                .isNotNull();
     }
 
     @Test
@@ -69,6 +74,7 @@ class JpaTokenOffsetPersistenceLayerTest {
 
         // then the persistence layer has persisted the entity in the repository
         assertThat(authorisedRequests)
+                .as("Check that the returned request contains only the correct information")
                 .hasSize(1)
                 .allMatch(requestEntity -> requestEntity.getToken().equals(ApplicationTestData.REQUEST_TOKEN))
                 .allMatch(requestEntity -> requestEntity.getOffset().equals(ApplicationTestData.OFFSET));

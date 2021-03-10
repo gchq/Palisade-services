@@ -1,8 +1,7 @@
 uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
-|  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile
@@ -102,6 +101,7 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 +- uk.gov.gchq.palisade:hadoop-reader:jar:0.5.0-SNAPSHOT:compile
 |  +- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
+|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- uk.gov.gchq.palisade:readers-common:jar:0.5.0-SNAPSHOT:compile
 |  +- uk.gov.gchq.palisade:shade-hadoop-client:jar:0.5.0-SNAPSHOT:compile
 |  \- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
