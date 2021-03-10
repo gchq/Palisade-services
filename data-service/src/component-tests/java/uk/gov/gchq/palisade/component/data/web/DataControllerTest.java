@@ -66,9 +66,17 @@ class DataControllerTest {
 
     @Test
     void testContextLoads() {
-        assertThat(mockMvc).isNotNull();
-        assertThat(serviceMock).isNotNull();
-        assertThat(auditMessageServiceMock).isNotNull();
+        assertThat(mockMvc)
+                .as("Check MockMvc has been autowired")
+                .isNotNull();
+
+        assertThat(serviceMock)
+                .as("Check AuditableDataService has been autowired")
+                .isNotNull();
+
+        assertThat(auditMessageServiceMock)
+                .as("Check AuditMessageService has been autowired")
+                .isNotNull();
     }
 
     /**
