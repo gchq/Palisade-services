@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,14 +98,22 @@ class KafkaContractTest {
     @SpyBean
     private AuditService auditService;
 
-    private final Function<String, Integer> fileCount = (final String prefix) -> Arrays
-        .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-        .filter(file -> file.getName().startsWith(prefix))
-        .collect(Collectors.toSet())
-        .size();
+    private Function<String, Integer> fileCount;
 
-    private final Supplier<Integer> currentErrorCount = () -> fileCount.apply("Error");
-    private final Supplier<Integer> currentSuccessCount = () -> fileCount.apply("Success");
+    private Supplier<Integer> currentErrorCount;
+    private Supplier<Integer> currentSuccessCount;
+
+    @BeforeEach
+    void setup() {
+        fileCount = (final String prefix) -> Arrays
+                .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith(prefix))
+                .collect(Collectors.toSet())
+                .size();
+
+        currentErrorCount = () -> fileCount.apply("Error");
+        currentSuccessCount = () -> fileCount.apply("Success");
+    }
 
     @AfterEach
     void tearDown() {
@@ -116,7 +125,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testErrorRequestSet() throws InterruptedException {
+    void testErrorRequestSet() throws Exception {
 
         // GIVEN
         // Add some messages on the error topic
@@ -133,7 +142,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testGoodSuccessRequestSet() throws InterruptedException {
+    void testGoodSuccessRequestSet() throws Exception {
 
         // GIVEN
         // Add some messages on the success topic
@@ -149,7 +158,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testGoodAndBadSuccessRequestSet() throws InterruptedException {
+    void testGoodAndBadSuccessRequestSet() throws Exception {
 
         // GIVEN
         // Add 2 `Good` and 2 `Bad` success messages to the success topic
@@ -169,7 +178,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedErrorDeserialization() throws InterruptedException {
+    void testFailedErrorDeserialization() throws Exception {
 
         // GIVEN
         // Add a message to the 'error' topic
@@ -190,7 +199,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedSuccessDeserialization() throws InterruptedException {
+    void testFailedSuccessDeserialization() throws Exception {
 
         // GIVEN
         // Add a message to the 'success' topic
