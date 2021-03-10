@@ -54,6 +54,8 @@ import java.util.stream.StreamSupport;
  * Parse and convert Spring maps and lists to Akka configs
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
+
+    @SuppressWarnings("java:S5998")
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final int PROPERTY_PATH = 1;
     private static final int PROPERTY_INDEX = 2;
@@ -87,7 +89,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     @Override
     public void afterPropertiesSet() {
         MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
-        envPropSources.forEach((PropertySource<?> propertySource) -> {
+        envPropSources.forEach((final PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
                 locations = ((String) propertySource.getProperty("application.properties.locations"))
                         .split(LIST_ITEM_SEPERATOR);
@@ -104,7 +106,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
             final Resource[] possiblePropertiesResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(filename);
             return Arrays.stream(possiblePropertiesResources)
                     .filter(Resource::exists)
-                    .map((Resource resource) -> {
+                    .map((final Resource resource) -> {
                         try {
                             return loader.load(resource.getFilename(), resource);
                         } catch (IOException e) {
@@ -119,9 +121,14 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         }
     }
 
+    /**
+     * Returns a map of active properties
+     *
+     * @return a map of active properties
+     */
     public Map<String, String> getAllActiveProperties() {
         return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
-                .filter(ps -> ps instanceof EnumerablePropertySource).map(ps -> (EnumerablePropertySource<?>) ps)
+                .filter(ps -> ps instanceof EnumerablePropertySource).map(EnumerablePropertySource.class::cast)
                 .map(EnumerablePropertySource::getPropertyNames)
                 .flatMap(Arrays::stream)
                 .distinct()
@@ -157,12 +164,12 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         return config;
     }
 
-    private static Config toConfig(final Config orig, final String key, final Map<String, String> config) {
+    private static Config toConfig(final Config originalConfig, final String key, final Map<String, String> config) {
         // Map or list?
         Matcher mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
         if (mat.find()) {
             Map<String, String> node = new HashMap<>();
-            config.forEach((String mapKey, String value) -> {
+            config.forEach((final String mapKey, final String value) -> {
                 Matcher fieldNameKeyMatcher = FIELD_NAME_PATTERN.matcher(mapKey);
                 if (fieldNameKeyMatcher.matches()) {
                     node.put(fieldNameKeyMatcher.group(1), value);
@@ -171,12 +178,12 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
             ConfigObject configItem = ConfigValueFactory.fromMap(node);
             ArrayList<ConfigObject> list = new ArrayList<>();
             list.add(configItem);
-            return orig.withValue(key, ConfigValueFactory.fromIterable(list));
-        } else {
-            List<String> node = new ArrayList<>(config.values());
-            ConfigList configList = ConfigValueFactory.fromIterable(node);
-            return orig.withValue(key, configList);
+            return originalConfig.withValue(key, ConfigValueFactory.fromIterable(list));
         }
+        List<String> node = new ArrayList<>(config.values());
+        ConfigList configList = ConfigValueFactory.fromIterable(node);
+        return originalConfig.withValue(key, configList);
+
     }
 
     private static String reductionKey(final String key) {
@@ -198,11 +205,10 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
             if (mat.matches()) {
                 if (mat.group(PROPERTY_PATH).isEmpty()) {
                     return root;
-                } else {
-                    // Re-insert the previous index into the root string
-                    root = String.format("%s[%s].%s", root, prevIndex, mat.group(PROPERTY_PATH));
-                    mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_PATH));
                 }
+                // Re-insert the previous index into the root string
+                root = String.format("%s[%s].%s", root, prevIndex, mat.group(PROPERTY_PATH));
+                mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_PATH));
             }
         }
         return root;
