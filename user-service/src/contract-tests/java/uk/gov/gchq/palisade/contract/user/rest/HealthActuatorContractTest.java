@@ -58,6 +58,7 @@ class HealthActuatorContractTest {
         // When we GET the /actuator/health REST endpoint (used by k8s)
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
+        // Then check the service reports itself to be healthy
         assertAll("Assert the Health Actuator",
                 () -> assertThat(health.getStatusCode())
                         .as("The actuator should report as Up")

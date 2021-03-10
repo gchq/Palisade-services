@@ -56,6 +56,7 @@ class NullUserServiceTest {
         // When we add the user to the Service, and the added user is returned
         User actual = nullUserService.addUser(user);
 
+        // Then check the returned user has not been modified
         assertThat(user)
                 .as("Check that the user returned is the correct user and the contents has not been modified")
                 .usingRecursiveComparison()
