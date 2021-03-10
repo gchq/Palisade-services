@@ -40,7 +40,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_DATA_REQUEST;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_REQUEST_ENTITY;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_READER_REQUEST;
