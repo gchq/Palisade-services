@@ -98,7 +98,7 @@ public class ResourceServicePersistenceProxy {
                         )
                         // If persistence is empty, a "cache miss"
                         .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
-                                .via(ConditionalGraph.map(response -> {
+                                .via(ConditionalGraph.map((AuditableResourceResponse response) -> {
                                     if (response.getAuditErrorMessage() != null) {
                                         return 0;
                                     } else {

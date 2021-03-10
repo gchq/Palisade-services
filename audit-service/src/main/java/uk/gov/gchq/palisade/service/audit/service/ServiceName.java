@@ -22,13 +22,45 @@ package uk.gov.gchq.palisade.service.audit.service;
  * @since 0.5.0
  */
 public enum ServiceName {
+
+    /**
+     * Name of the Attribute Masking Service
+     */
     ATTRIBUTE_MASKING_SERVICE("attribute-masking-service"),
+
+    /**
+     * Name of the Data Service
+     */
     DATA_SERVICE("data-service"),
+
+    /**
+     * Name of the Filtered Resource Service
+     */
     FILTERED_RESOURCE_SERVICE("filtered-resource-service"),
+
+    /**
+     * Name of the Palisade Service
+     */
     PALISADE_SERVICE("palisade-service"),
+
+    /**
+     * Name of the Policy Service
+     */
     POLICY_SERVICE("policy-service"),
+
+    /**
+     * Name of the Resource Service
+     */
     RESOURCE_SERVICE("resource-service"),
+
+    /**
+     * name of the Topic Offset Service
+     */
     TOPIC_OFFSET_SERVICE("topic-offset-service"),
+
+    /**
+     * Name of the User Service
+     */
     USER_SERVICE("user-service");
 
     /**
@@ -39,4 +71,5 @@ public enum ServiceName {
     ServiceName(final String value) {
         this.value = value;
     }
+
 }
