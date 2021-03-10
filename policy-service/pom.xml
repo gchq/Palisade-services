@@ -26,10 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>policy-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/policy-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->

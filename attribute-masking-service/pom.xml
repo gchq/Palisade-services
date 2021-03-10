@@ -25,10 +25,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>attribute-masking-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/attribute-masking-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->

@@ -33,10 +33,10 @@
         </repository>
     </repositories>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>audit-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->

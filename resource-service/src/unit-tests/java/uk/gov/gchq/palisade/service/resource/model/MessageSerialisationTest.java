@@ -49,7 +49,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void serialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
+    <T> void testSeralisingAndDeseralising(final T message) throws JsonProcessingException {
         // Given some test data
 
         // When a Request is serialised and deserialised
@@ -57,6 +57,19 @@ class MessageSerialisationTest {
         Object deserialisedRequest = MAPPER.readValue(serialisedRequest, message.getClass());
 
         // Then the deserialised object is unchanged (equal)
-        assertThat(deserialisedRequest).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(message);
+        assertThat(deserialisedRequest)
+                .as("Check that the request has been deseralised correctly")
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(message);
+
+        if (deserialisedRequest instanceof AuditErrorMessage) {
+            assertThat(deserialisedRequest)
+                    .as("Check that the AuditErrorMessage contains all the correct information after deseralising")
+                    .extracting("Error")
+                    .isInstanceOf(Throwable.class)
+                    .extracting("Message")
+                    .isEqualTo("test exception");
+        }
     }
 }
