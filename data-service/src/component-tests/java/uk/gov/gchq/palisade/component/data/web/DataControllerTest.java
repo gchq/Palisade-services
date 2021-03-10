@@ -93,7 +93,7 @@ class DataControllerTest {
 
         mockMvc.perform(asyncDispatch(result))
                 .andDo(print())
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verify(serviceMock, times(1)).authoriseRequest(any());
         verify(auditMessageServiceMock, times(1)).auditMessage(any());
