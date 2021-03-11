@@ -30,27 +30,29 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
-import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.AVRO_FORMAT;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_AVRO_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_TYPE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_REQUEST;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_JSON_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_TYPE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.JSON_FORMAT;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY_REQUEST;
 
 @DataR2dbcTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
@@ -78,41 +80,8 @@ class H2ComponentTest {
      * </pre>
      */
 
-    private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
-    private static final Context CONTEXT = new Context().purpose("purpose");
-    private static final User USER = new User().userId("test-user");
-    private static final String EMPLOYEE_TYPE = "employee";
-    private static final String CLIENT_TYPE = "client";
-    private static final String AVRO_FORMAT = "avro";
-    private static final String JSON_FORMAT = "json";
-    private static final SystemResource SYSTEM_ROOT = (SystemResource) ResourceBuilder.create("file:/");
-    private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
-    private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource EMPLOYEE_JSON_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.json"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(JSON_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource CLIENT_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/client.avro"))
-            .type(CLIENT_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-
-    public static final ResourceRequest TEST_DIRECTORY_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(TEST_DIRECTORY.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
-    public static final ResourceRequest EMPLOYEE_AVRO_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(EMPLOYEE_AVRO_FILE.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
-
     @BeforeEach
-    void setup() throws InterruptedException {
+    void setup() {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Source.single(file)
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
@@ -140,8 +109,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(resourceResult).containsAll(expected);
+        assertThat(resourceResult)
+                .as("Check that when getting a Resource by its directory, the correct resources are returned")
+                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resource for a specific file
         resourceResult = proxy.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
@@ -156,8 +126,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(resourceResult).isEqualTo(expected);
+        assertThat(resourceResult)
+                .as("Check that when we get a Resource by itself, the correct resource is returned")
+                .containsOnly(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -176,8 +147,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we get resources by the Id of the repository, the correct resources are returned")
+                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resourceId for a specific file
         idResult = proxy.getResourcesById(EMPLOYEE_AVRO_REQUEST)
@@ -191,8 +163,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we request one resource by its ID, only the correct resource is returned")
+                .containsOnly(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -211,8 +184,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
-        assertThat(typeResult).containsAll(expected);
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resources are returned")
+                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE);
 
         // When making a get request to the resource service by type
         typeResult = proxy.getResourcesByType(TEST_DIRECTORY_REQUEST, CLIENT_TYPE)
@@ -226,8 +200,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(CLIENT_AVRO_FILE);
-        assertThat(typeResult).containsAll(expected);
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resource is returned")
+                .containsOnly(CLIENT_AVRO_FILE);
     }
 
     @Test
@@ -246,8 +221,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request resource by their format and directory, the correct resources are returned")
+                .containsExactly(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by serialisedFormat
         formatResult = proxy.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, JSON_FORMAT)
@@ -261,7 +237,8 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
+                .containsOnly(EMPLOYEE_JSON_FILE);
     }
 }

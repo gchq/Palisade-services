@@ -47,25 +47,16 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import reactor.core.publisher.Flux;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
-import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,15 +66,26 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.AVRO_FORMAT;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_AVRO_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_TYPE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_REQUEST;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_JSON_FILE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_TYPE;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.JSON_FORMAT;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY;
+import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY_REQUEST;
+import static uk.gov.gchq.palisade.component.resource.repository.redis.RedisPersistenceTest.KafkaInitializer.Config;
 
 @SpringBootTest(
         classes = {RedisPersistenceTest.class, ResourceApplication.class},
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({RedisPersistenceTest.KafkaInitializer.Config.class})
+@Import({Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceTest.RedisInitializer.class, RedisPersistenceTest.KafkaInitializer.class})
-@ActiveProfiles({"redis", "akkatest"})
+@ActiveProfiles({"redis", "akka-test"})
 class RedisPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceTest.class);
 
@@ -107,41 +109,9 @@ class RedisPersistenceTest {
      * </pre>
      */
 
-    private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
-    private static final Context CONTEXT = new Context().purpose("purpose");
-    private static final User USER = new User().userId("test-user");
-    private static final String EMPLOYEE_TYPE = "employee";
-    private static final String CLIENT_TYPE = "client";
-    private static final String AVRO_FORMAT = "avro";
-    private static final String JSON_FORMAT = "json";
-    private static final SystemResource SYSTEM_ROOT = (SystemResource) ResourceBuilder.create("file:/");
-    private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
-    private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource EMPLOYEE_JSON_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.json"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(JSON_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource CLIENT_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/client.avro"))
-            .type(CLIENT_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-
-    public static final ResourceRequest TEST_DIRECTORY_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(TEST_DIRECTORY.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
-    public static final ResourceRequest EMPLOYEE_AVRO_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(EMPLOYEE_AVRO_FILE.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
 
     @BeforeEach
-    void setup() throws InterruptedException {
+    void setup() {
         // Wipe all keys from Redis
         redisTemplate.execute(conn -> conn.keyCommands()
                 .keys(ByteBuffer.wrap("*".getBytes()))
@@ -173,8 +143,9 @@ class RedisPersistenceTest {
         resourceAuditable.forEach(response -> resourceResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(resourceResult).containsAll(expected);
+        assertThat(resourceResult)
+                .as("Check that when getting a Resource by its directory, the correct resources are returned")
+                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resource for a specific file
         resourceAuditable = service.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
@@ -183,8 +154,9 @@ class RedisPersistenceTest {
         resourceAuditable.forEach(response -> resourceResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(resourceResult).containsAll(expected);
+        assertThat(resourceResult)
+                .as("Check that when we get a Resource by itself, the correct resource is returned")
+                .contains(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -199,8 +171,9 @@ class RedisPersistenceTest {
         idAuditable.forEach(response -> idResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we get resources by the Id of the repository, the correct resources are returned")
+                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
         idResult.clear();
 
         // When making a get request to the resource service by resourceId for a specific file
@@ -210,8 +183,9 @@ class RedisPersistenceTest {
         idAuditable.forEach(response -> idResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we request one resource by its ID, only the correct resource is returned")
+                .containsOnly(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -226,8 +200,9 @@ class RedisPersistenceTest {
         typeAuditable.forEach(response -> typeResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
-        assertThat(typeResult).containsAll(expected);
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resources are returned")
+                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE);
         typeResult.clear();
 
         // When making a get request to the resource service by type
@@ -237,9 +212,9 @@ class RedisPersistenceTest {
         typeAuditable.forEach(response -> typeResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(CLIENT_AVRO_FILE);
-        assertThat(typeResult).containsAll(expected);
-
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resource is returned")
+                .containsOnly(CLIENT_AVRO_FILE);
     }
 
     @Test
@@ -254,8 +229,9 @@ class RedisPersistenceTest {
         formatAuditable.forEach(response -> formatResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request resource by their format and directory, the correct resources are returned")
+                .containsExactly(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
         formatResult.clear();
 
         // When making a get request to the resource service by serialisedFormat
@@ -265,8 +241,9 @@ class RedisPersistenceTest {
         formatAuditable.forEach(response -> formatResult.add(response.getResourceResponse().resource));
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
+                .containsOnly(EMPLOYEE_JSON_FILE);
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -294,24 +271,24 @@ class RedisPersistenceTest {
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static KafkaContainer kafka = new KafkaContainer("5.5.1")
+        static final KafkaContainer KAFKA = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
             configurableApplicationContext.getEnvironment().setActiveProfiles("redis", "akkatest");
-            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-            kafka.start();
+            KAFKA.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+            KAFKA.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+            KAFKA.start();
 
             // test kafka config
             String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
+            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + KAFKA.getFirstMappedPort();
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
         }
 
-        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
+        static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KAFKA.getFirstMappedPort())))) {
                 admin.createTopics(newTopics);
                 LOGGER.info("created topics: " + admin.listTopics().names().get());
             }
@@ -321,14 +298,14 @@ class RedisPersistenceTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("resource", 3, (short) 1),
-                    new NewTopic("user", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("resource", 1, (short) 1),
+                    new NewTopic("user", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, kafka);
-                return kafka;
+                createTopics(this.topics);
+                return KAFKA;
             }
 
             @Bean
@@ -339,7 +316,7 @@ class RedisPersistenceTest {
 
             @Bean
             @Primary
-            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
                 RedisPersistenceTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
                 return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                         props.getAllActiveProperties().entrySet().stream()

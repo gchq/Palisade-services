@@ -68,7 +68,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest", "testresource");
+        configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "dbtest", "testresource");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         KAFKA_CONTAINER.start();

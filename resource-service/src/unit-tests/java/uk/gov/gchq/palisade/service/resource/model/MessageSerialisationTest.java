@@ -49,7 +49,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void testSeralisingAndDeseralising(final T message) throws JsonProcessingException {
+    <T> void testSeralisingAnddeseralizing(final T message) throws JsonProcessingException {
         // Given some test data
 
         // When a Request is serialised and deserialised
@@ -58,14 +58,14 @@ class MessageSerialisationTest {
 
         // Then the deserialised object is unchanged (equal)
         assertThat(deserialisedRequest)
-                .as("Check that the request has been deseralised correctly")
+                .as("Check that the request has been deseralized correctly")
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(message);
 
         if (deserialisedRequest instanceof AuditErrorMessage) {
             assertThat(deserialisedRequest)
-                    .as("Check that the AuditErrorMessage contains all the correct information after deseralising")
+                    .as("Check that the AuditErrorMessage contains all the correct information after deseralizing")
                     .extracting("Error")
                     .isInstanceOf(Throwable.class)
                     .extracting("Message")

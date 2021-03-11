@@ -15,78 +15,57 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditErrorMessageTest.class})
 class AuditErrorMessageTest {
 
     @Autowired
-    private JacksonTester<AuditErrorMessage> jsonTester;
+    private ObjectMapper mapper;
 
     /**
      * Tests the creation of the message type, AuditErrorMessage using the builder
-     * plus tests the serialising to a Json string and deserialising to an object.
+     * plus tests the Serializing to a Json string and Deseralizing to an object.
      *
      * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
-    void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("messagesSent", "23");
-
+    void testAuditErrorMessageSerializingAndDeseralizing() throws IOException {
         AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("testResourceId")
-                .withContext(context)
-                .withAttributes(attributes)
-                .withError(new InternalError("Something went wrong!"));
+                .withContext(new Context().purpose("testContext"))
+                .withAttributes(Map.of("messagesSent", "23"))
+                .withError(new Throwable("Something went wrong!"));
 
-        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
-        ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
-        AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(auditErrorMessage);
+        var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("resource-service"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message").isEqualTo("Something went wrong!")
-                ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditErrorMessageObject.getUserId()).isEqualTo(auditErrorMessage.getUserId()),
-                        () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(auditErrorMessage.getResourceId()),
-                        () -> assertThat(auditErrorMessageObject.getContext()).isEqualTo(auditErrorMessage.getContext()),
-                        () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
-                        () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostname()).isEqualTo(auditErrorMessage.getServerHostname()),
-                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
-                        // Note Throwable equals does not override Object's equal so two Throwables are only equal if they are the same instance of an object.
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo((auditErrorMessage))
-                )
-        );
+        assertThat(actualInstance)
+                .as("Ignoring the error, check using recursion that %s has been deseralized successfully", auditErrorMessage.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(auditErrorMessage);
+
+        assertThat(actualInstance)
+                .as("Extracting the exception, check it has been deserialized successfully")
+                .extracting(AuditErrorMessage::getError)
+                .isExactlyInstanceOf(Throwable.class)
+                .extracting("Message")
+                .isEqualTo("Something went wrong!");
     }
 }
