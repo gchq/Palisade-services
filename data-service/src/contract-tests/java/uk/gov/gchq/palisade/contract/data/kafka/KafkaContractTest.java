@@ -213,7 +213,7 @@ public class KafkaContractTest {
 
         // Then - the REST request was accepted
         assertThat(response.getStatusCode())
-                .isEqualTo(HttpStatus.ACCEPTED);
+                .isEqualTo(HttpStatus.OK);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
 
