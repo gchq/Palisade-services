@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib@feature/PAL-1011-builds-can-fail-due-to-pv-for-the-namespace-not-getting-removed')_
 
 timestamps {
     services()
