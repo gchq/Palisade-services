@@ -72,7 +72,7 @@ public class DataController {
             @RequestBody final DataRequest dataRequest) {
         LOGGER.info("Invoking read (chunked): {}", dataRequest);
 
-        HttpStatus httpStatus = HttpStatus.ACCEPTED;
+        HttpStatus httpStatus = HttpStatus.OK;
         StreamingResponseBody stream = null;
 
         //first with the client information about the request, retrieve the authorised resource information

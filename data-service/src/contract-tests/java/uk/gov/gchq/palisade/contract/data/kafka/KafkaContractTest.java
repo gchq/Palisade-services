@@ -213,7 +213,6 @@ public class KafkaContractTest {
 
         // Then - the REST request was accepted
         assertThat(response.getStatusCode())
-                .as("Check the response status is the request was accepted")
                 .isEqualTo(HttpStatus.ACCEPTED);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
@@ -227,7 +226,7 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
-                            .as("Recursively check the result against the AuditSuccessMessage")
+                            .as("Recursivley check the result against the AuditSuccessMessage")
                             .usingRecursiveComparison()
                             .isEqualTo(ContractTestData.AUDIT_SUCCESS_MESSAGE);
 
