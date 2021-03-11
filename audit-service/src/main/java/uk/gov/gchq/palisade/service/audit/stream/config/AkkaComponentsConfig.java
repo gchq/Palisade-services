@@ -58,6 +58,7 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 @Configuration
 @EnableConfigurationProperties(AuditServiceConfigProperties.class)
 public class AkkaComponentsConfig {
+
     private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<Committable, CompletionStage<Done>> OUTPUT_COMPONENTS = new StreamComponents<>();
@@ -73,6 +74,7 @@ public class AkkaComponentsConfig {
         this.configProperties = configProperties;
     }
 
+    @SuppressWarnings("resource")
     @Bean
     Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> successRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_INPUT_COMPONENTS.producerSettings(
@@ -84,6 +86,7 @@ public class AkkaComponentsConfig {
         return SUCCESS_INPUT_COMPONENTS.plainProducer(producerSettings);
     }
 
+    @SuppressWarnings("resource")
     @Bean
     Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem,
                                                                                                      final ConsumerTopicConfiguration configuration) {
@@ -105,6 +108,7 @@ public class AkkaComponentsConfig {
         return SUCCESS_INPUT_COMPONENTS.committerSettings(actorSystem);
     }
 
+    @SuppressWarnings("resource")
     @Bean
     Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_INPUT_COMPONENTS.producerSettings(
@@ -116,6 +120,7 @@ public class AkkaComponentsConfig {
         return ERROR_INPUT_COMPONENTS.plainProducer(producerSettings);
     }
 
+    @SuppressWarnings("resource")
     @Bean
     Source<CommittableMessage<String, AuditErrorMessage>, Control> errorCommittableRequestSource(final ActorSystem actorSystem,
                                                                                                  final ConsumerTopicConfiguration configuration) {

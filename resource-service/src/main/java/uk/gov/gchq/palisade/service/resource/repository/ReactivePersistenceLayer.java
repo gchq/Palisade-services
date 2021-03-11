@@ -89,7 +89,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @param rootReference  an {@link AtomicReference} to set to the root resource if found by this method
      * @return a {@link BiFunction} that returns false if either argument matches the rootResourceId
      */
-    private BiFunction<ParentResource, ChildResource, CompletableFuture<Boolean>> recurseToRootId(final String rootResourceId, final AtomicReference<Resource> rootReference) {
+    private static BiFunction<ParentResource, ChildResource, CompletableFuture<Boolean>> recurseToRootId(final String rootResourceId, final AtomicReference<Resource> rootReference) {
         // Return a predicate with the method arguments bound to the lambda
         return (ParentResource parent, ChildResource child) -> {
             LOGGER.debug("Looking for root '{}'", rootResourceId);

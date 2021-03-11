@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
@@ -42,10 +43,17 @@ import static java.util.Objects.requireNonNull;
  * </pre>
  */
 public class LoggerAuditService implements AuditService {
+
+    /**
+     * The configuration key for property "audit.implementations". This property is
+     * used to decide which service implementation Spring will inject.
+     *
+     * @see ApplicationConfiguration
+     */
     public static final String CONFIG_KEY = "logger";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
-    private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
+    private static final Map<Class<?>, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
     private static final String AUDIT_MESSAGE = "AuditMessage: {}";
     private static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
     private static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
@@ -58,6 +66,7 @@ public class LoggerAuditService implements AuditService {
         DISPATCHER.put(AuditErrorMessage.class, LoggerAuditService::auditErrorMessage);
     }
 
+    @SuppressWarnings("java:S1312") // Suppress the 'Naming convention for loggers' warning
     private final Logger auditLogger;
 
     /**
@@ -76,7 +85,7 @@ public class LoggerAuditService implements AuditService {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
         } else {
-            logger.warn("An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}",
+            logger.warn("An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
                     request.getServiceName());
         }
     }
@@ -96,11 +105,12 @@ public class LoggerAuditService implements AuditService {
             if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                 auditSuccessMessage(auditLogger, successMessage);
                 return true;
-            } else {
-                auditLogger.warn("An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
-                        message.getServiceName());
-                return false;
             }
+            auditLogger.warn(
+                "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
+                message.getServiceName());
+            return false;
+
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;
             auditErrorMessage(auditLogger, errorMessage);
