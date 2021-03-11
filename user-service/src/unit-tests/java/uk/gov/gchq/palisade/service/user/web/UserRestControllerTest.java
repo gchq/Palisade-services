@@ -97,11 +97,11 @@ class UserRestControllerTest {
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
 
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
-        assertThat(debugMessages)
+        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
+        assertThat(infoMessages)
                 .as("Check there are logging messages at INFO level")
                 .isNotEmpty();
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
                 Matchers.containsString("Cache add for userId add-user-request-id")
         ));
     }

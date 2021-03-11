@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @EnableCaching
 @ActiveProfiles({"caffeine"})
-class UserServiceAsyncProxyErrorTest {
+class UserServiceAsyncProxyTest {
 
     private static final Context CONTEXT = new Context().purpose("purpose");
     private static final UserRequest USER_REQUEST = UserRequest.Builder.create().withUserId("test-user-id").withResourceId("/test/resourceId").withContext(CONTEXT);
