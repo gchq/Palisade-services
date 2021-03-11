@@ -65,9 +65,9 @@ class CaffeineUserCachingTest {
                 .addAuths(Collections.singleton("authorisation"))
                 .addRoles(Collections.singleton("role"));
 
-        // Then the user is added to the cache
+        // When the user is added to the cache
         userService.addUser(user);
-        // When we retrieve the user from the cache
+        // Then retrieve the user from the cache
         var addedUser = userService.getUser(user.getUserId().getId());
         assertThat(addedUser)
                 .as("Check that the retrieved user is the same as the user we created")
@@ -83,6 +83,7 @@ class CaffeineUserCachingTest {
         var noSuchUserIdException = assertThrows(NoSuchUserIdException.class,
                 () -> userService.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException");
 
+        // Then check the returned exception
         assertThat(noSuchUserIdException)
                 .as("Check that the correct message is added to the Exception")
                 .extracting("Message")
@@ -128,9 +129,11 @@ class CaffeineUserCachingTest {
         forceCleanUp();
 
         // Then a NoSuchUserIdException is thrown as the User no longer exists
+        // When we get the user from the cache
         var noSuchUserIdException = assertThrows(NoSuchUserIdException.class,
                 () -> userService.getUser(makeUserId.apply(0)), "testMaxSizeTest should throw noSuchIdException");
 
+        // Then check the returned exception
         assertThat(noSuchUserIdException)
                 .as("Check that the correct message is added to the Exception")
                 .extracting("Message")

@@ -27,9 +27,7 @@ import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,28 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 class ApplicationConfigurationTest {
 
-    private static final Set<Class<? extends AuditService>> EXPECTED_AUDITS = new HashSet<>();
-
-    static {
-        EXPECTED_AUDITS.add(LoggerAuditService.class);
-        EXPECTED_AUDITS.add(StroomAuditService.class);
-        EXPECTED_AUDITS.add(SimpleAuditService.class);
-    }
-
-    @Autowired
-    private Map<String, AuditService> auditServices;
-
+    @SuppressWarnings("rawtypes")
     @Test
-    void testAuditServicesLoads() {
-        assertThat(auditServices).isNotNull();
-    }
-
-    @Test
-    void testConfigurationDefinesLoadedServices() {
-        // Given - expectedAudits
-        // Then
-        for (AuditService auditService : auditServices.values()) {
-            assertThat(auditService.getClass()).isIn(EXPECTED_AUDITS);
-        }
+    void testConfigurationDefinesLoadedServices(@Autowired final Map<String, AuditService> auditServices) {
+        assertThat(auditServices.values())
+            .extracting(as -> (Class) as.getClass())
+            .containsExactlyInAnyOrder(
+                LoggerAuditService.class,
+                StroomAuditService.class,
+                SimpleAuditService.class);
     }
 }

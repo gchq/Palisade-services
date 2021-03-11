@@ -22,6 +22,10 @@ package uk.gov.gchq.palisade.service.audit.model;
  * If desired, this could extend eg. UUID if more meaningful Token processing was desired
  */
 public final class Token {
+
+    /**
+     * The key for the token in HTTP or message headers
+     */
     public static final String HEADER = "x-request-token";
 
     private Token() {
