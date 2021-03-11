@@ -22,7 +22,7 @@ service:
 image:
   name: audit-service
   base: jre
-  tag: SNAPSHOT-8f6e6e4
+  tag: SNAPSHOT-d278fe6
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

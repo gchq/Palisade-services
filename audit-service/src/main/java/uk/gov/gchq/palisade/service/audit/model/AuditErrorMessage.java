@@ -54,6 +54,12 @@ public final class AuditErrorMessage extends AuditMessage {
         this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
     }
 
+    /**
+     * Returns the error node which contains the tree model of the error
+     * ({@code Throwable}).
+     *
+     * @return the error node of the {@code Throwable}
+     */
     @JsonIgnore
     @Generated
     public JsonNode getErrorNode() {
@@ -112,7 +118,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param context user context for the request.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
-            default IServiceName withContext(Context context) {
+            default IServiceName withContext(final Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -190,7 +196,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param attributes timestamp for the request.
              * @return public interface {@link IError} for the next step in the build.
              */
-            default IError withAttributes(Map<String, Object> attributes) {
+            default IError withAttributes(final Map<String, Object> attributes) {
                 return withAttributesNode(MAPPER.valueToTree(attributes));
             }
 
@@ -213,7 +219,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param error that occurred.
              * @return class  {@link AuditErrorMessage} for the completed class from the builder.
              */
-            default AuditErrorMessage withError(Throwable error) {
+            default AuditErrorMessage withError(final Throwable error) {
                 return withErrorNode(MAPPER.valueToTree(error));
             }
 
