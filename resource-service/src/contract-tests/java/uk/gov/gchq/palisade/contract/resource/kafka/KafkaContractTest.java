@@ -26,6 +26,7 @@ import akka.stream.Materializer;
 import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -52,6 +53,7 @@ import uk.gov.gchq.palisade.contract.resource.ContractTestData;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
+import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.resource.model.Token;
@@ -72,6 +74,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.auditErrorMessageDeserializer;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
@@ -143,9 +146,11 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check that the correct amount of messages are returned")
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
+                        .as("Check the message contains the correct headers")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
@@ -154,17 +159,19 @@ class KafkaContractTest {
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the start header contains all the correct information")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the end header contains all the correct information")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-
         assertThat(results)
+                .as("Check that the response has all the correct Resource information")
                 .extracting(ConsumerRecord::value)
                 .extracting(result -> result.get("resource"))
                 .allSatisfy(resource -> {
@@ -177,7 +184,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testNoSuchResourceExceptionIsThrown() {
+    void testNoSuchResourceExceptionIsThrown() throws JsonProcessingException {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
@@ -218,7 +225,7 @@ class KafkaContractTest {
         // Then - the results are as expected
         assertAll(
                 () -> assertThat(results)
-                        .as("The 'output' topic has 2 messages")
+                        .as("The correct number of messages are returned")
                         .hasSize(2),
 
                 () -> assertThat(results)
@@ -251,12 +258,13 @@ class KafkaContractTest {
         LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
                 .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
+        var auditErrorMessage = auditErrorMessageDeserializer(errorResults.getFirst().value());
 
         // Then - the results are as expected
         assertAll("Asserting on the error topic",
                 // One error is produced
                 () -> assertThat(errorResults)
-                        .as("The 'error' topic has 1 message")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 // The error has the relevant headers, including the token
@@ -267,9 +275,12 @@ class KafkaContractTest {
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 // The error has a message that contains the throwable exception, and the message
-                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .as("Check the exception message")
-                        .startsWith("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
+                () -> assertThat(auditErrorMessage)
+                        .as("Assert that after extracting the AuditErrorMessage, it is as expected")
+                        .extracting(AuditErrorMessage::getError)
+                        .isInstanceOf(Throwable.class)
+                        .extracting("Message")
+                        .isEqualTo("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
         );
     }
 
@@ -305,14 +316,17 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .as("Check that the token is in the header")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
-
                             assertThat(result.value())
+                                    .as("Check the request returned is correct")
+                                    .usingRecursiveComparison()
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );

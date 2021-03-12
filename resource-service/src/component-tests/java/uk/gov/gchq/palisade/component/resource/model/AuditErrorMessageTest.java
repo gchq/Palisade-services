@@ -56,7 +56,7 @@ class AuditErrorMessageTest {
         var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
 
         assertThat(actualInstance)
-                .as("Ignoring the error, check using recursion that %s has been deseralized successfully", auditErrorMessage.getClass().getSimpleName())
+                .as("Ignoring the error, check using recursion that %s has been deserialized successfully", auditErrorMessage.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessage);

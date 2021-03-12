@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to keep-alive in k8s.
@@ -47,7 +48,9 @@ class HealthActuatorContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
+        assertThat(restTemplate)
+                .as("Check that the restTemplate is autowired successfully")
+                .isNotNull();
     }
 
     @Test
@@ -55,9 +58,15 @@ class HealthActuatorContractTest {
         // Given that the service is running (and presumably healthy)
 
         // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
 
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
 }
