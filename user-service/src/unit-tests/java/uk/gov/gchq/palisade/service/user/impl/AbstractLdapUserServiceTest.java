@@ -21,7 +21,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Sets;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -95,8 +94,8 @@ class AbstractLdapUserServiceTest {
         final LdapContext context = mock(LdapContext.class);
 
         final String[] attrNames = {"roles", "auths"};
-        final Set<String> auths = Sets.newHashSet("auth1", "auth2");
-        final Set<String> roles = Sets.newHashSet("role1", "role2");
+        final Set<String> auths = Set.of("auth1", "auth2");
+        final Set<String> roles = Set.of("role1", "role2");
 
         final Attributes requestAttrs = new BasicAttributes();
         requestAttrs.put("auths", auths);
@@ -146,7 +145,7 @@ class AbstractLdapUserServiceTest {
         service.setMock(mock);
 
         final Attributes searchResult1Attrs = new BasicAttributes();
-        final Set<String> search1Attr1 = Sets.newHashSet("auth1", "auth2");
+        final Set<String> search1Attr1 = Set.of("auth1", "auth2");
         final int search1Attr2 = 10;
         searchResult1Attrs.put("search1Attr1", search1Attr1);
         searchResult1Attrs.put("search1Attr2", search1Attr2);
@@ -199,7 +198,7 @@ class AbstractLdapUserServiceTest {
         verify(context, times(1)).search(searchBase,
                 new BasicAttributes(attrIdForUserId, userId.getId()),
                 requestAttrs);
-        final Set<Object> expectedResults = Sets.newHashSet(search1Attr1, search1Attr2, search2Att1, search2Attr2);
+        final Set<Object> expectedResults = Set.of(search1Attr1, search1Attr2, search2Att1, search2Attr2);
         assertThat(expectedResults).isEqualTo(results);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
