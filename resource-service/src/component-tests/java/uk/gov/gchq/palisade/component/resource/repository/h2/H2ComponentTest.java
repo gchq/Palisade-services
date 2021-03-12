@@ -30,29 +30,27 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
+import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.AVRO_FORMAT;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_AVRO_FILE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.CLIENT_TYPE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_FILE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_AVRO_REQUEST;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_JSON_FILE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPLOYEE_TYPE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.JSON_FORMAT;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.TEST_DIRECTORY_REQUEST;
 
 @DataR2dbcTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
@@ -79,6 +77,38 @@ class H2ComponentTest {
      * F  F  F
      * </pre>
      */
+
+    private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
+    private static final Context CONTEXT = new Context().purpose("purpose");
+    private static final User USER = new User().userId("test-user");
+    private static final String EMPLOYEE_TYPE = "employee";
+    private static final String CLIENT_TYPE = "client";
+    private static final String AVRO_FORMAT = "avro";
+    private static final String JSON_FORMAT = "json";
+    private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
+    private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
+            .type(EMPLOYEE_TYPE)
+            .serialisedFormat(AVRO_FORMAT)
+            .connectionDetail(DETAIL);
+    private static final FileResource EMPLOYEE_JSON_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.json"))
+            .type(EMPLOYEE_TYPE)
+            .serialisedFormat(JSON_FORMAT)
+            .connectionDetail(DETAIL);
+    private static final FileResource CLIENT_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/client.avro"))
+            .type(CLIENT_TYPE)
+            .serialisedFormat(AVRO_FORMAT)
+            .connectionDetail(DETAIL);
+
+    public static final ResourceRequest TEST_DIRECTORY_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(TEST_DIRECTORY.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
+    public static final ResourceRequest EMPLOYEE_AVRO_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(EMPLOYEE_AVRO_FILE.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
 
     @BeforeEach
     void setup() {

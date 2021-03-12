@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
-import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
@@ -56,20 +55,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPTY_DIR;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.EMPTY_DIR_REQUEST;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.MULTI_FILE_DIR;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.MULTI_FILE_DIR_REQUEST;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.MULTI_FILE_ONE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.MULTI_FILE_ONE_REQUEST;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.MULTI_FILE_TWO;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.ROOT_DIR;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.ROOT_DIR_REQUEST;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.ROOT_PATH;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.SINGLE_FILE;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.SINGLE_FILE_DIR;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.TOP_LEVEL_DIR;
-import static uk.gov.gchq.palisade.component.resource.CommonTestData.TOP_LEVEL_DIR_REQUEST;
 
 @DataR2dbcTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
@@ -87,6 +72,12 @@ class ScenarioPersistenceTest {
     @Autowired
     private CompletenessRepository completenessRepository;
 
+    private static final ConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("http://localhost:8082");
+    private static final Context CONTEXT = new Context().purpose("purpose");
+    private static final User USER = new User().userId("test-user");
+
+    private static final String ROOT_PATH = System.getProperty("user.dir") + "/src/contract-tests/resources/root/";
+
     static {
         new File(ROOT_PATH + "empty-dir/").mkdir();
     }
@@ -103,6 +94,54 @@ class ScenarioPersistenceTest {
      * 1 -> F   F   F
      * </pre>
      */
+
+    private static final DirectoryResource ROOT_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH).toURI());
+
+    private static final DirectoryResource TOP_LEVEL_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/").toURI());
+    private static final DirectoryResource EMPTY_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "empty-dir/").toURI());
+
+    private static final DirectoryResource MULTI_FILE_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/").toURI());
+    private static final DirectoryResource SINGLE_FILE_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/").toURI());
+
+    private static final FileResource MULTI_FILE_ONE = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileOne.txt").toURI()))
+            .type("java.lang.String")
+            .serialisedFormat("txt")
+            .connectionDetail(DETAIL);
+    private static final FileResource MULTI_FILE_TWO = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileTwo.txt").toURI()))
+            .type("java.lang.String")
+            .serialisedFormat("txt")
+            .connectionDetail(DETAIL);
+
+    private static final FileResource SINGLE_FILE = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/singleFile.txt").toURI()))
+            .type("java.lang.String")
+            .serialisedFormat("txt")
+            .connectionDetail(DETAIL);
+
+    private static final ResourceRequest MULTI_FILE_ONE_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(MULTI_FILE_ONE.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
+    private static final ResourceRequest MULTI_FILE_DIR_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(MULTI_FILE_DIR.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
+    private static final ResourceRequest TOP_LEVEL_DIR_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(TOP_LEVEL_DIR.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
+    private static final ResourceRequest EMPTY_DIR_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(EMPTY_DIR.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
+    private static final ResourceRequest ROOT_DIR_REQUEST = ResourceRequest.Builder.create()
+            .withUserId(USER.getUserId().getId())
+            .withResourceId(ROOT_DIR.getId())
+            .withContext(CONTEXT)
+            .withUser(USER);
 
     // We want to test the StreamingResourceServiceProxy class, but consuming using a Supplier<OutputStream> is complicated
     // Instead, send everything through the REST interface
