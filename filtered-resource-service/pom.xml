@@ -48,7 +48,16 @@
 
     <dependencies>
         <!--
-        ~ Dependencies
+        ~ Palisade
+        -->
+        <dependency>
+            <!-- Common User, Resource, Context -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
+        </dependency>
+        <!--
+        ~ Akka
         -->
         <dependency>
             <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
@@ -86,11 +95,9 @@
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
-        <dependency>
-            <!-- H2 local persistence store -->
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
+        <!--
+        ~ Spring Boot
+        -->
         <dependency>
             <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
@@ -107,11 +114,11 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
-            <!-- Common User, Resource, Context -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
+            <!-- H2 local persistence store -->
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
+
         <!--
         ~ Test Dependencies
         -->
