@@ -113,13 +113,13 @@ public class AkkaRunnableGraph {
                             // Produce Audit Message
                             ProducerMessage.single(
                                     new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                            SerDesConfig.errorValueSerialiser().serialize(null, audit), requestRecord.headers()),
                                     (Committable) messageAndResponse.first().committableOffset()))
                             .orElseGet(() ->
                                     // Produce Response
                                     ProducerMessage.single(
                                             new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                                    SerDesConfig.userValueSerializer().serialize(null, auditableUserResponse.map(AuditableUserResponse::getUserResponse).orElse(null)), requestRecord.headers()),
+                                                    SerDesConfig.userValueSerialiser().serialize(null, auditableUserResponse.map(AuditableUserResponse::getUserResponse).orElse(null)), requestRecord.headers()),
                                             messageAndResponse.first().committableOffset()));
                 })
 

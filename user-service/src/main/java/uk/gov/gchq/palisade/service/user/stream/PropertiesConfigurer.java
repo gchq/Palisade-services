@@ -119,9 +119,15 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         }
     }
 
+    /**
+     * Get all the active properties from the environment
+     *
+     * @return a {@link Map} of String values
+     */
     public Map<String, String> getAllActiveProperties() {
         return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
-                .filter(ps -> ps instanceof EnumerablePropertySource).map(ps -> (EnumerablePropertySource<?>) ps)
+                .filter(ps -> ps instanceof EnumerablePropertySource)
+                .map(ps -> (EnumerablePropertySource<?>) ps)
                 .map(EnumerablePropertySource::getPropertyNames)
                 .flatMap(Arrays::stream)
                 .distinct()
