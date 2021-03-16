@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Represents information for a successful processing of a request which is forwarded to the audit-service.
+ * Represents information for a successful processing of a request which is forwarded to the Audit Service.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
  * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
@@ -74,7 +74,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          * It is followed by the call to add resource with the {@code IAttributes} interface to create the
          * AuditSuccessMessage class.
          *
-         * @param auditableAuthorisedDataRequest the authorised request stored by the attribute-masking-service
+         * @param auditableAuthorisedDataRequest the authorised request stored by the Attribute Masking Service
          * @return interface {@link IAttributes} for the next step in the build.
          */
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {

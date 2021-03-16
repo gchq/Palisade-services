@@ -37,9 +37,9 @@ import java.io.OutputStream;
 import java.util.Optional;
 
 /**
- * Controller for Data Service.  Provides the front end RESTFul web service for resources that have already been
- * registered with the Palisade Service.  The request is in the form of information that will uniquely identify the
- * resource request and will return a data stream of the response data.
+ * Controller for Data Service.  Provides the front end RESTFul web service to the client for retrieving resources that
+ * have been registered with the Palisade Service.  The request is in the form of information that will uniquely
+ * identify the resource request and will return a data stream of the filtered response data.
  */
 @RestController
 @RequestMapping(path = "/")
@@ -53,8 +53,8 @@ public class DataController {
     /**
      * Constructor for the DataController
      *
-     * @param auditableDataService service for providing auditable data for the request
-     * @param auditMessageService  service for sending audit messages
+     * @param auditableDataService service for providing data retrieval service for the request
+     * @param auditMessageService  service for sending audit success and error messages to the Audit Service
      */
     public DataController(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
         this.auditableDataService = auditableDataService;
@@ -62,10 +62,10 @@ public class DataController {
     }
 
     /**
-     * REST endpoint to read a resource and return a streaming response.
+     * REST endpoint to read a resource request and return a streaming response.
      *
-     * @param dataRequest the request to read the data from a leafResource
-     * @return a stream of bytes representing the contents of the resource
+     * @param dataRequest the requested data
+     * @return a stream of holding the contents of the response
      */
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(
@@ -80,7 +80,7 @@ public class DataController {
         AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
         if (authorisationErrorMessage != null) {
-            LOGGER.error("Error occurred processing the authoriseRequest for  {}", authorisationErrorMessage);
+            LOGGER.error("Error occurred processing the authoriseRequest error message was {}", authorisationErrorMessage);
             httpStatus = (HttpStatus.INTERNAL_SERVER_ERROR);
             auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                     .withToken(dataRequest.getToken())
@@ -91,11 +91,16 @@ public class DataController {
                 AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
                 auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                         .withToken(dataRequest.getToken())
+                        //send a message to the audit service of successfully processed request
                         .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
 
                 Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
-                        .ifPresent(errorMessage -> auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                                .withToken(dataRequest.getToken()).withAuditMessage(errorMessage)));
+                        .ifPresent(errorMessage -> {
+                            //send a message to the audit service of an error occurred in processing a request
+                            LOGGER.error("Error occurred processing the read  error message was {}", errorMessage);
+                            auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                    .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
+                        });
             };
         }
         return new ResponseEntity<>(stream, httpStatus);

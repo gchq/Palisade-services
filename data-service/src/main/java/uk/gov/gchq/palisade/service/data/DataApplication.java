@@ -36,7 +36,7 @@ import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 
 /**
- * Starter for the Data Service.  Will start the service and initalise all of the components needed to run the service.
+ * Starter for the Data Service.  Will start the service and initialise all of the components needed to run the service.
  */
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class})
@@ -48,30 +48,29 @@ public class DataApplication {
 
     private final StdSerialiserConfiguration serialiserConfiguration;
     private final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner;
-    private final Materializer materializer;
+    private final Materializer materialiser;
 
     /**
-     * Autowires Akka objects and the seraliser for the data reader.  These are initalised after the application has
-     * been started.
+     * Constructor for {@code DataApplication}.
      *
      * @param dataReader              a reader for retrieving the request resources.
-     * @param auditMessageService     service for sending audit success and error messages
+     * @param auditMessageService     service for sending audit success and error messages to the Audit Service
      * @param serialiserConfiguration a configuration and initialising the {@link DataReader}
      * @param runner                  runnable graphs for sending messages on the Kafka stream
-     * @param materializer            the Akka {@link Materializer} configured to be used
+     * @param materialiser            the Akka {@link Materializer} configured to be used
      */
     public DataApplication(
             final DataReader dataReader,
             final AuditMessageService auditMessageService,
             final StdSerialiserConfiguration serialiserConfiguration,
             final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner,
-            final Materializer materializer) {
+            final Materializer materialiser) {
 
         this.dataReader = dataReader;
         this.auditMessageService = auditMessageService;
         this.serialiserConfiguration = serialiserConfiguration;
         this.runner = runner;
-        this.materializer = materializer;
+        this.materialiser = materialiser;
     }
 
     /**
@@ -87,17 +86,18 @@ public class DataApplication {
     }
 
     /**
-     * Performs the tasks that need to be done after Spring initialisation.  This includes the configuration of the
-     * serialiser and the starting of the Kafka consumer needed for sending audit messages to the Audit Service.
+     * Performs the tasks that need to be done after Spring initialisation and before running the service.  This
+     * includes the configuration of the serialiser and the starting of the Kafka consumer used for sending audit
+     * messages to the Audit Service.
      */
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
 
-        //start the Kafka consumer for sending success and error messages to audit-service
-        auditMessageService.registerRequestSink(runner.run(materializer));
+        //start the Kafka consumer for sending success and error messages to Audit Service
+        auditMessageService.registerRequestSink(runner.run(materialiser));
 
-        // Add serialiser to the data-service
-        LOGGER.debug("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
+        // Add serialiser to the Data Service
+        LOGGER.debug("Pre-populating using serialiser config: {}", serialiserConfiguration.getClass());
         serialiserConfiguration.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
                 .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));

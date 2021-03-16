@@ -47,7 +47,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> successKeySerializer() {
+    public static Serializer<String> successKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -56,7 +56,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditSuccessMessage> successValueSerializer() {
+    public static Serializer<AuditSuccessMessage> successValueSerialiser() {
         return (String ignored, AuditSuccessMessage auditSuccessMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditSuccessMessage);
@@ -71,7 +71,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> errorKeySerializer() {
+    public static Serializer<String> errorKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -80,7 +80,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage auditErrorMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);

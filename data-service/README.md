@@ -15,9 +15,11 @@ limitations under the License.
 --->
 # Data Service
 
-The core API for the Data Service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.  
-
-The client request will contain the token and resource id that is used to uniquely identify this resource request.
+The Data Service accepts client requests to retrieve resources that have been registered on their behalf.  These will be 
+the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly 
+redacted in conformance to the defined rules and to the context of the request.  The client is expected to send a 
+request containing the token and resource id that is used to uniquely identify the  resource request.  The response will 
+be an output stream holding the data resources. 
 
 ## Message Model and Database Domain
 
@@ -32,7 +34,8 @@ The client request will contain the token and resource id that is used to unique
 |                 |                        | serverMetadata       | error             |
 |                 |                        |                      | serverMetadata    |
   
-*token comes in the body of the request from the client (DataRequest) and is stored in the header metadata for the audit messages
+*token comes in the body of the request from the client (DataRequest) and is stored in the header metadata for the 
+audit messages
 
 **attributes will include the numbers for records processed and records returned
 
@@ -43,7 +46,7 @@ The client request will contain the token and resource id that is used to unique
 The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
 been requested and prepared in the initial request to Palisade services. 
 * `POST data/read/chunked`
-    - returns a `202 ACCEPTED` and a streamed HTTP response body which will provides the resource.
+    - returns a `200 OK` and a streamed HTTP response body which will provides the resource.
 
 ## Example JSON Request
 ```
@@ -54,7 +57,8 @@ curl -X POST data-service/read/chunked  -H "content-type: application/json" --da
  }'
 ```
 ## Octet-Stream Response
-The response body will be an octet-stream of data from the requested resource with policy rules applied, no matter the file type, for example, a user.json resource might be:
+The response body will be an octet-stream of data from the requested resource with policy rules applied, no matter the 
+file type, for example, a user.json resource might be:
 ```
 {
   usernamne: "alice",

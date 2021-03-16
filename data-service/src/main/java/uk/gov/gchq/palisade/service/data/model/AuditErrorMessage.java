@@ -29,7 +29,7 @@ import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
+ * forwarded to the Audit Service.
  */
 public final class AuditErrorMessage extends AuditMessage {
 
@@ -75,7 +75,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
            *
-         * @param auditableAuthorisedDataRequest   the client request received by the data-service
+         * @param auditableAuthorisedDataRequest   the client request received by the Data Service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
@@ -94,7 +94,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class that uses the {@link DataRequest} and will expect the next builder
          * method to be for the attribue map
          *
-         * @param dataRequest the authorised request stored by the attribute-masking-service
+         * @param dataRequest the authorised request stored by the Attribute Masking Service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 

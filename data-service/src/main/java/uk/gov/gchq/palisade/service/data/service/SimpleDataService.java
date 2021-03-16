@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Simple implementation of a data-service, which reads using a data-reader and audits the
+ * Simple implementation of a Data Service, which reads using a data-reader and audits the
  * number of records processed and returned.
  */
 public class SimpleDataService implements DataService {
