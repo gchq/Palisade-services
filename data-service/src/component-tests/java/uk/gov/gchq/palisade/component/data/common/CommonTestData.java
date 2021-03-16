@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
@@ -104,4 +105,29 @@ public class CommonTestData {
             .withToken(TOKEN)
             .withSuccessMessage(AUDIT_SUCCESS_MESSAGE)
             .withAuditErrorMessage(null);
+
+    public static final AuthorisedRequestEntity ENTITY1 = new AuthorisedRequestEntity(
+            TOKEN + "1",
+            new User().userId("user-id"),
+            new FileResource().id(RESOURCE_ID + "1"),
+            new Context(),
+            new Rules<>()
+    );
+
+    public static  final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
+            TOKEN + "2",
+            new User().userId("user-id"),
+            new FileResource().id(RESOURCE_ID + "1"),
+            new Context(),
+            new Rules<>()
+    );
+
+    public static final AuthorisedRequestEntity ENTITY3 = new AuthorisedRequestEntity(
+            TOKEN + "1",
+            new User().userId("user-id"),
+            new FileResource().id(RESOURCE_ID + "3"),
+            new Context(),
+            new Rules<>()
+    );
+
 }
