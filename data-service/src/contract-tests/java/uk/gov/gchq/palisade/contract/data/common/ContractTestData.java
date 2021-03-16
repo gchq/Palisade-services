@@ -91,11 +91,7 @@ public class ContractTestData {
             .withContext(CONTEXT)
             .withAttributes(ATTRIBUTES);
 
-    public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
-            .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withUserId(null)
-            .withResourceId(null)
-            .withContext(null)
+    public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create(DATA_REQUEST)
             .withAttributes(null)
             .withError(new ForbiddenException("Something went wrong!"));
 

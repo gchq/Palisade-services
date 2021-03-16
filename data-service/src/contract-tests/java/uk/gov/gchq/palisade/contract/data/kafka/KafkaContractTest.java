@@ -166,7 +166,7 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
-                            .as("Recursivley check the result against the AuditErrorMessage, ignoring the error")
+                            .as("Recursively check the result against the AuditErrorMessage, ignoring the error")
                             .usingRecursiveComparison()
                             .ignoringFieldsOfTypes(Throwable.class)
                             .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
