@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.component.data.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -50,6 +51,7 @@ import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQ
  */
 @WebMvcTest(DataController.class)
 @ContextConfiguration(classes = {DataController.class})
+@Disabled
 class DataControllerTest {
 
     @Autowired
