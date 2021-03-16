@@ -20,6 +20,7 @@
 
 exports:
   nameOverride: "kafka"
+  port: 9092
   # fullnameOverride:  "palisade-kafka"
 
 ## The StatefulSet installs 3 pods by default
@@ -501,7 +502,7 @@ testsEnabled: true
 ## Determine if the kafka test client is enabled, this test client can be used
 ## to interrogate the kafka infrastructure
 ## It should not be deployed in production
-testClientEnabled: true
+testClientEnabled: false
 
 # ------------------------------------------------------------------------------
 # Zookeeper:
@@ -511,6 +512,10 @@ zookeeper:
   ## If true, install the Zookeeper chart alongside Kafka
   ## ref: https://github.com/kubernetes/charts/tree/master/incubator/zookeeper
   enabled: true
+
+  exports: {}
+  # nameOverride: zookeeper
+  # fullnameOverride: zookeeper
 
   ## Configure Zookeeper resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/

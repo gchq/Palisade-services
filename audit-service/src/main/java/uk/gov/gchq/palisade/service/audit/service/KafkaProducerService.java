@@ -117,6 +117,7 @@ public class KafkaProducerService {
      * @param requests a list of requests
      * @return a {@link ResponseEntity} once all requests have been written to kafka
      */
+    @SuppressWarnings("unused")
     public ResponseEntity<Void> processErrorRequest(final Map<String, String> headers,
                                                final Collection<AuditErrorMessage> requests) {
         // Get token from headers

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.filteredresource.repository;
+package uk.gov.gchq.palisade.service.filteredresource.repository.offset;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -26,8 +25,8 @@ import akka.actor.typed.javadsl.Receive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.DeregisterWorker;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.DeregisterWorker;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetWorker.WorkerCommand;
 
 import java.util.Optional;
 

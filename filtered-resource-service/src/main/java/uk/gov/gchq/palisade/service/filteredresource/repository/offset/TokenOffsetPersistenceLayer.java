@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.repository;
+package uk.gov.gchq.palisade.service.filteredresource.repository.offset;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

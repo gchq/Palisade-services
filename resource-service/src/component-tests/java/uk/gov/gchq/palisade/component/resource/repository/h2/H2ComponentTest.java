@@ -48,7 +48,6 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -119,10 +118,9 @@ class H2ComponentTest {
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
                     .via(persistenceLayer.withPersistenceByType(file.getType()))
                     .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
-                    .runWith(Sink.ignore(), materializer);
+                    .runWith(Sink.ignore(), materializer)
+                    .toCompletableFuture().join();
         }
-
-        TimeUnit.SECONDS.sleep(1);
     }
 
     @Test
