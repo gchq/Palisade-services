@@ -104,7 +104,14 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
 
 It may be that some example users needs to be added to the backing store before a test run of the Palisade system is performed, for example. This is resolved by using Spring to upload the user(s) to the service from a yaml file. 
 An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds the user information to the backing store when the service starts up.
-The user class can be extended to allow more information to be added, however, the `UserPrepopulationFactory` class will also need to be extended to allow these users to be added to the backing store.
+
+How to override the uploaded users:
+1. Create a new `User` class
+1. Create a new `UserConfiguration` class
+1. Create a new `UserPrepopulationFactory` class
+1. Create a new `ApplicationConfiguration` class that includes a bean for the new `UserConfiguration` and `UserPrepopulationFactory` classes. 
+   They should be conditional on the property `userProvider` from within a yaml file.
+1. Create a new application yaml file that defines the `userProvider` value and includes a list of users, with all their fields and respective values (if required), that are to be added to the backing store
 
 ### Notes
 
