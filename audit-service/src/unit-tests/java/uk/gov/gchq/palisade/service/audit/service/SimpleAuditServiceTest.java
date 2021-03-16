@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
@@ -33,6 +32,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_TOKEN;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditErrorMessage;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.auditSuccessMessage;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.DATA_SERVICE;
+import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 class SimpleAuditServiceTest {
 
@@ -44,7 +48,6 @@ class SimpleAuditServiceTest {
     @BeforeEach
     public void setUp() {
         auditService = new SimpleAuditService();
-
         logger = (Logger) LoggerFactory.getLogger(SimpleAuditService.class);
         appender = new ListAppender<>();
         appender.start();
@@ -67,22 +70,16 @@ class SimpleAuditServiceTest {
     @Test
     void testAuditErrorMessage() {
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("USER_SERVICE"));
-
+        auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
         // Then
-        List<String> logMessages = getMessages(event -> true);
-
-        assertThat(logMessages.get(0)).contains(AuditErrorMessage.class.getSimpleName());
+        assertThat(getMessages(event -> true).get(0)).contains(AuditErrorMessage.class.getSimpleName());
     }
 
     @Test
     void testAuditSuccessMessage() {
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
-
+        auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
         // Then
-        List<String> logMessages = getMessages(event -> true);
-
-        assertThat(logMessages.get(0)).contains(AuditSuccessMessage.class.getSimpleName());
+        assertThat(getMessages(event -> true).get(0)).contains(AuditSuccessMessage.class.getSimpleName());
     }
 }

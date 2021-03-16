@@ -31,29 +31,53 @@ import java.util.Optional;
 @ConfigurationProperties("audit")
 public final class AuditServiceConfigProperties {
 
-    private Map<String, Object> implementations;
+    private Map<String, Object> implementations = Map.of();
     private String errorDirectory;
 
+    /**
+     * Constructs and returns a new {@code AuditServiceConfigProperties} instance
+     * providing access to the directory for error files.
+     */
     public AuditServiceConfigProperties() {
         // Empty constructor for spring
     }
 
+    /**
+     * Returns the error directory
+     *
+     * @return the error directory
+     */
     @Generated
     public String getErrorDirectory() {
         return errorDirectory;
     }
 
+    /**
+     * Sets the new error directory
+     *
+     * @param errorDirectory the new error directory to set
+     */
     @Generated
     public void setErrorDirectory(final String errorDirectory) {
         this.errorDirectory = Optional.ofNullable(errorDirectory)
                 .orElseThrow(() -> new IllegalArgumentException("errorDirectory cannot be null"));
     }
 
+    /**
+     * Returns the implementations
+     *
+     * @return the implementations
+     */
     @Generated
     public List<String> getImplementations() {
         return new ArrayList<>(implementations.keySet());
     }
 
+    /**
+     * Sets the new implementations
+     *
+     * @param implementations the new implementations to set
+     */
     @Generated
     public void setImplementations(final Map<String, Object> implementations) {
         this.implementations = Optional.ofNullable(implementations)

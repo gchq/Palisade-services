@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static org.springframework.boot.actuate.health.Health.down;
+import static org.springframework.boot.actuate.health.Health.up;
 
 /**
  * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
@@ -64,21 +68,23 @@ public class KafkaHealthIndicator implements HealthIndicator {
      */
     @Override
     public Health health() {
+        Builder builder;
         if (performCheck()) {
-            return Health.up().withDetail("group", this.groupId).build();
+            builder = up();
         } else {
-            return Health.down().withDetail("group", this.groupId).build();
+            builder = down();
         }
+        return builder.withDetail("group", getGroupId()).build();
     }
 
     private boolean performCheck() {
         try {
-            Map<String, ConsumerGroupDescription> groupDescriptionMap = this.adminClient.describeConsumerGroups(Collections.singletonList(this.groupId))
+            Map<String, ConsumerGroupDescription> groupDescriptionMap = this.getAdminClient().describeConsumerGroups(Collections.singletonList(this.getGroupId()))
                     .all()
                     .get(1, TimeUnit.SECONDS);
 
-            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-            LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
+            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.getGroupId());
+            LOGGER.debug("Kafka consumer group ({}) state: {}", getGroupId(), consumerGroupDescription.state());
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
@@ -96,5 +102,13 @@ public class KafkaHealthIndicator implements HealthIndicator {
             LOGGER.warn("Timeout connecting to kafka", e);
         }
         return false;
+    }
+
+    private String getGroupId() {
+        return groupId;
+    }
+
+    private AdminClient getAdminClient() {
+        return adminClient;
     }
 }
