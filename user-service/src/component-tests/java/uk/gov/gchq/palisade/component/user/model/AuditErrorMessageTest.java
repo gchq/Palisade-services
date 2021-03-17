@@ -47,10 +47,10 @@ class AuditErrorMessageTest {
 
     /**
      * Tests the creation of the message type, AuditErrorMessage using the builder
-     * plus tests the serializing to a Json string and deserializing to an object.
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
      * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialize or de-serialize the string.
+     *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
     void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
