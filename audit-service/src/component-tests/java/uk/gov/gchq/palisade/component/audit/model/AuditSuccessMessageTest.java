@@ -31,10 +31,10 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserializes and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @see AbstractSerialisationTest#assertSerialisation(Class, Object)
-     * @throws Exception if any error occurs during (de)serialization
+     * @throws Exception if any error occurs during (de)serialisation
      */
     @Test
     void testAuditSuccessMessageSerialisation() throws Exception {
@@ -51,7 +51,7 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
             .withAttributes(Map.of("messagesSent", "23"))
             .withLeafResourceId("testLeafResourceId");
 
-        // THEN confirm that it can be serialised and then deserialized successfully.
+        // THEN confirm that it can be serialised and then deserialised successfully.
         assertSerialisation(expected.getClass(), expected);
 
     }
