@@ -32,5 +32,5 @@ data:
           error-topic.partitions: {{ .Values.replicaCount }}
           {{ if .Values.global.topicPrefix }}error-topic.name: {{ .Values.global.topicPrefix }}error {{ end }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless{{ .Values.global.serviceName }}
+      - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092

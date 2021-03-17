@@ -35,9 +35,6 @@ global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
 
-  # If specified is the service name to use. Typically in the pipeline this will be the name of the shared namespace
-  serviceName:
-
   kafka:
     # install: install kafka streaming platform
     install: true
@@ -54,7 +51,8 @@ global:
     install: true
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
-      nameOverride: "redis"
+      # By default always use the redis-proxy kubernetes service to resolve the redis endpoint
+      nameOverride: "redis-proxy"
     master:
       service:
         port: 6379

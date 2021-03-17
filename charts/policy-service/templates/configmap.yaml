@@ -35,7 +35,7 @@ data:
           error-topic.partitions: {{ .Values.replicaCount }}
           {{ if .Values.global.topicPrefix }}error-topic.name: {{ .Values.global.topicPrefix }}error {{ end }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless{{ .Values.global.serviceName }}
+      - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092
   application-redis.yaml: |
     {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
@@ -58,6 +58,6 @@ data:
     {{- $masterPort := int $.Values.global.redis.master.service.port }}
     spring:
       redis:
-        host: {{ $masterFullname }}{{ .Values.global.serviceName }}
+        host: {{ $masterFullname }}
         port: {{ $masterPort }}
     {{- end }}

@@ -186,7 +186,9 @@ external:
 podAnnotations: {}
 
 # Labels to be added to Kafka pods
-podLabels: {}
+podLabels:
+  # Add label to advertise this POD as providing palisade-kafka services
+  service: palisade-kafka
   # service: broker
   # team: developers
 

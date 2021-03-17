@@ -44,7 +44,7 @@ data:
     {{- $masterPort := int $.Values.global.redis.master.service.port }}
     spring:
       redis:
-        host: {{ $masterFullname }}{{ .Values.global.serviceName }}
+        host: {{ $masterFullname }}
         port: {{ $masterPort }}
     {{- end }}
   application-akka.yaml: |
@@ -56,5 +56,5 @@ data:
           success-topic.partitions: {{ .Values.replicaCount }}
           {{ if .Values.global.topicPrefix }}success-topic.name: {{ .Values.global.topicPrefix }}success {{ end }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless{{ .Values.global.serviceName }}
+      - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092
