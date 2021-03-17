@@ -60,8 +60,7 @@ public final class DataRequest {
 
     /**
      * Builder class for the creation of instances of the DataRequest.
-     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components
-     * in the build.
+     * This is a variant of the Fluent Builder which will use Java Objects for the components in the build.
      */
     public static class Builder {
         /**
