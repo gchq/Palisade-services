@@ -95,7 +95,7 @@ public class DataController {
                         .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
 
                 Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
-                        .ifPresent(errorMessage -> {
+                        .ifPresent((AuditErrorMessage errorMessage) -> {
                             //send a message to the audit service of an error occurred in processing a request
                             LOGGER.error("Error occurred processing the read  error message was {}", errorMessage);
                             auditMessageService.auditMessage(TokenMessagePair.Builder.create()
