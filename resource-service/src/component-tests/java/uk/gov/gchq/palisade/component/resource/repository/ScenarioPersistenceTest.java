@@ -60,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class ScenarioPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceTest.class);
@@ -148,6 +148,7 @@ class ScenarioPersistenceTest {
     // Test is still marked as transactional as we poke and prod the persistence layer directly to see what is persisted and what isn't
     // For spring reasons, we can't just mark the extractResourceCompleteness method as transactional
     @Test
+    @SuppressWarnings("checkstyle:methodlength")
     void testRunThroughTestScenario() {
         // Given -
         // Variables used to store returned results from the resource-service

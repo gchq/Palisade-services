@@ -39,7 +39,6 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
 
 import java.io.IOException;
@@ -69,7 +68,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "dbtest", "testresource");
+        configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "db-test", "test-resource");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         KAFKA_CONTAINER.start();
@@ -140,16 +139,5 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
                 throw new SerializationFailedException("Failed to deserialize " + new String(resourceResponse), e);
             }
         }
-    }
-
-    /**
-     * Kafka value deserializer for the error message
-     *
-     * @param auditErrorMessage the JsonNode to be deserialized
-     * @return an appropriate value deserializer for the topic's message content
-     * @throws JsonProcessingException if there was an issue deserializing
-     */
-    public static AuditErrorMessage auditErrorMessageDeserializer(final JsonNode auditErrorMessage) throws JsonProcessingException {
-        return MAPPER.treeToValue(auditErrorMessage, AuditErrorMessage.class);
     }
 }

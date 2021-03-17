@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"management.health.kafka.enabled=false", "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"}
 )
-@ActiveProfiles({"dbtest", "akka-test"})
+@ActiveProfiles({"db-test", "akka-test"})
 class HealthActuatorContractTest {
 
     @Autowired

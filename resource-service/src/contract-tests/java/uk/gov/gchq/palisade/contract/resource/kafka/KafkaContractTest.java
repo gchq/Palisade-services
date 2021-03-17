@@ -26,7 +26,6 @@ import akka.stream.Materializer;
 import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -53,7 +52,6 @@ import uk.gov.gchq.palisade.contract.resource.ContractTestData;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
-import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.resource.model.Token;
@@ -74,7 +72,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.auditErrorMessageDeserializer;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
@@ -89,7 +86,7 @@ import static uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.audi
 )
 @Import(KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaInitializer.class})
-@ActiveProfiles({"dbtest", "akka-test", "testresource"})
+@ActiveProfiles({"db-test", "akka-test", "test-resource"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class KafkaContractTest {
     @Autowired
@@ -184,7 +181,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testNoSuchResourceExceptionIsThrown() throws JsonProcessingException {
+    void testNoSuchResourceExceptionIsThrown() {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
@@ -258,7 +255,6 @@ class KafkaContractTest {
         LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
                 .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
-        var auditErrorMessage = auditErrorMessageDeserializer(errorResults.getFirst().value());
 
         // Then - the results are as expected
         assertAll("Asserting on the error topic",
@@ -274,13 +270,10 @@ class KafkaContractTest {
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                // The error has a message that contains the throwable exception, and the message
-                () -> assertThat(auditErrorMessage)
-                        .as("Assert that after extracting the AuditErrorMessage, it is as expected")
-                        .extracting(AuditErrorMessage::getError)
-                        .isInstanceOf(Throwable.class)
-                        .extracting("Message")
-                        .isEqualTo("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
+                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .as("Check the exception message")
+                        .startsWith("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
+
         );
     }
 

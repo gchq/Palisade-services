@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class ReactivePersistenceLayerTest {
 

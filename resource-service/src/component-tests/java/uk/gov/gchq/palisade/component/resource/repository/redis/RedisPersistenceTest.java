@@ -258,7 +258,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request resource by their format and directory, the correct resources are returned")
-                .containsExactly(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .containsExactly(CLIENT_AVRO_FILE, EMPLOYEE_AVRO_FILE);
         formatResult.clear();
 
         // When making a get request to the resource service by serialisedFormat
