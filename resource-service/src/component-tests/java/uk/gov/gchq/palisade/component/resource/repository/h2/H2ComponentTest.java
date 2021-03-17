@@ -139,7 +139,7 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when getting a Resource by its directory, the correct resources are returned")
-                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resource for a specific file
         resourceResult = proxy.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
@@ -176,8 +176,8 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
-                .as("Check that when we get resources by the Id of the repository, the correct resources are returned")
-                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .as("Check that when we get resources by the Id of the directory, the correct resources are returned")
+                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resourceId for a specific file
         idResult = proxy.getResourcesById(EMPLOYEE_AVRO_REQUEST)
