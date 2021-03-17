@@ -37,7 +37,7 @@
         <scala.version>2.13</scala.version>
         <akka.version>2.6.8</akka.version>
         <alpakka.version>2.0.4</alpakka.version>
-        
+
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
 
@@ -48,13 +48,14 @@
     </properties>
 
     <dependencies>
+        <!--
+        ~ Palisade
+        -->
         <dependency>
-            <!-- Spring automatically picks up either gson or jackson
-               ~ Hadoop already bundles gson, but an out-of-date version
-               ~ Import something that will work with spring -->
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
+            <!-- Common types (User, Resource, Context) -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
         </dependency>
         <!--
         ~ Akka and Alpakka (Kafka)
@@ -83,6 +84,9 @@
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
+        <!--
+        ~ Spring Boot
+        -->
         <dependency>
             <!-- Health endpoints etc. -->
             <groupId>org.springframework.boot</groupId>
@@ -108,11 +112,28 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        <!--
+        ~ Palisade Readers
+        ~
+        ~ Because of the overlapping imports for gson vs jackson serialisers, dependency order matters
+        ~ Order must be Jackson (Spring) > GSON > Hadoop-Reader
+        -->
         <dependency>
+            <!-- Spring automatically picks up either gson or jackson
+               ~ Hadoop (shade-hadoop-client) already bundles gson, but an out-of-date version
+               ~ Import something that will work with Spring and Hadoop -->
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Data-reader for Hadoop HDFS -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>hadoop-reader</artifactId>
             <version>0.5.0-${readers.revision}</version>
         </dependency>
+
+
         <!--
           Testing dependencies
         -->
@@ -121,13 +142,6 @@
             <!-- Also jupiter/junit5, mockito, etc... -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Redis contract testing -->
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -145,9 +159,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Kafka contract testing -->
             <groupId>org.testcontainers</groupId>
             <artifactId>kafka</artifactId>
             <version>1.14.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Redis contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
