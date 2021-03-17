@@ -19,7 +19,7 @@ The Data Service accepts client requests to retrieve resources that have been re
 the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly 
 redacted in conformance to the defined rules and to the context of the request.  The client is expected to send a 
 request containing the token and resource id that is used to uniquely identify the  resource request.  The response will 
-be an output stream holding the data resources. 
+be an output stream holding the data resources. To see more information on client requests, see the Palisade-clients library.
 
 ## Message Model and Database Domain
 
