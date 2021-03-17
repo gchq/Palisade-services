@@ -33,7 +33,7 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
     private final ObjectMapper objectMapper;
 
     /**
-     * Default constructor specifying the object mapper for (de)serializing objects
+     * Default constructor specifying the object mapper for (de)serialising objects
      *
      * @param objectMapper the object mapper for reading and writing columns and objects
      */

@@ -35,7 +35,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -61,7 +61,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditSuccessMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditSuccessMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditSuccessMessage.toString(), e);
             }
         };
     }
@@ -85,7 +85,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
             }
         };
     }
