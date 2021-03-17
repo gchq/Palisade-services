@@ -56,7 +56,7 @@ spec:
           httpGet:
             path: /actuator/health
             port: {{ .Values.service.internalPort }}
-          initialDelaySeconds: 10
+          initialDelaySeconds: 100
           failureThreshold: 5
           periodSeconds: 20
           timeoutSeconds: 5
@@ -64,7 +64,7 @@ spec:
           httpGet:
             path: /actuator/health
             port: {{ .Values.service.internalPort }}
-          initialDelaySeconds: 10
+          initialDelaySeconds: 100
           failureThreshold: 5
           periodSeconds: 20
           timeoutSeconds: 5
