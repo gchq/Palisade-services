@@ -187,10 +187,7 @@ podAnnotations: {}
 
 # Labels to be added to Kafka pods
 podLabels:
-  # Add label to advertise this POD as providing palisade-kafka services
-  service: palisade-kafka
-  # service: broker
-  # team: developers
+  service: "palisade-kafka"
 
 podDisruptionBudget: {}
   # maxUnavailable: 1  # Limits how many Kafka pods may be unavailable due to voluntary disruptions.

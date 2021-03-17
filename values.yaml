@@ -40,11 +40,11 @@ global:
     install: true
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
-      nameOverride: "kafka"
+      nameOverride: "kafka-proxy"
 
   zookeeper:
     exports: {}
-    # nameOverride: "zookeeper"
+    nameOverride: "zookeeper-proxy"
 
   redis:
     # install: install redis persistence and caching data storage platform
@@ -62,7 +62,7 @@ global:
     install: false
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
-      nameOverride: "redis"
+      nameOverride: "redis-proxy"
       redisPort: 6379
     cluster:
       nodes: 6

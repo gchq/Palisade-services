@@ -13,27 +13,27 @@
 # limitations under the License.
 #
 # Create a service that will uses a pod selector to determine on which pod(s) is to be used
-# for the redis service.
+# for the zookeeper service.
 #
-# The palisade application will point to this service which will find a pod that matches the specified service label.
+# The palisade application will point to this kafka service which will find a pod that matches the specified service label.
 #
 apiVersion: v1
 kind: Service
 metadata:
-  name: palisade-redis-proxy-master
+  name: palisade-zookeeper-proxy
   namespace: {{ include "palisade.namespace" . }}
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   ports:
-  - name: palisade-redis
-    port: 6379
+  - name: palisade-zookeeper
+    port: 2181
 
-  # Select a pod tha matches a service of palisade-redis when redis is local to the node.
+  # Select a pod tha matches a service of palisade-zookeper for local nodes
   # if this is in the pipeline then check for AWS and use the shared service
   selector:
 {{- if eq .Values.global.hosting "aws" }}
-    service: palisade-redis-shared
+    service: palisade-zookeeper-shared
 {{- else }}
-    service: palisade-redis
+    service: palisade-zookeeper
 {{- end }}

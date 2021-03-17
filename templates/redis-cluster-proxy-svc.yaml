@@ -20,20 +20,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: palisade-redis-proxy-master
+  name: palisade-redis-proxy-cluster
   namespace: {{ include "palisade.namespace" . }}
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   ports:
-  - name: palisade-redis
-    port: 6379
+  - name: palisade-redis-cluster
+    port: 16379
 
-  # Select a pod tha matches a service of palisade-redis when redis is local to the node.
+  # Select a pod tha matches a service of palisade-redis when redis is local to the node,
   # if this is in the pipeline then check for AWS and use the shared service
   selector:
 {{- if eq .Values.global.hosting "aws" }}
-    service: palisade-redis-shared
+    service: palisade-redis-cluster-shared
 {{- else }}
-    service: palisade-redis
+    service: palisade-redis-cluster
 {{- end }}

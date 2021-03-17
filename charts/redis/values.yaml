@@ -255,7 +255,7 @@ master:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   podLabels:
     # Add label to advertise this POD as providing palisade-redis services
-    service: palisade-redis
+    service: "palisade-redis"
 
   podAnnotations: {}
 
