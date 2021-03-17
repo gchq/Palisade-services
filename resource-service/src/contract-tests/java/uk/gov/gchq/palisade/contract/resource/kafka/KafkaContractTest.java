@@ -273,7 +273,6 @@ class KafkaContractTest {
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .as("Check the exception message")
                         .startsWith("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
-
         );
     }
 
