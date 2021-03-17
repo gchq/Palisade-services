@@ -99,12 +99,18 @@ class DataControllerTest {
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
-        mockMvc.perform(post("/read/chunked")
+        var response = mockMvc.perform(post("/read/chunked")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .content(mapper.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
+
+        // Read the response body
+        var responseBody = response.getResponse().getContentAsString();
+        assertThat(responseBody)
+                .as("Check that the response body has been returned but is empty")
+                .isEmpty();
 
         //verifies the three service calls the Controller is expected to make
         verify(serviceMock, times(1)).authoriseRequest(any());

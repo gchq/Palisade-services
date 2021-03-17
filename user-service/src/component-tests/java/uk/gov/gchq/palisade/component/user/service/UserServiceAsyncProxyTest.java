@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.component.user.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -29,11 +28,13 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.AuditableUserResponse;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Collections;
+import java.util.concurrent.CompletionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @EnableCaching
 @ActiveProfiles({"caffeine"})
-class UserServiceAsyncProxyErrorTest {
+class UserServiceAsyncProxyTest {
 
     private static final Context CONTEXT = new Context().purpose("purpose");
     private static final UserRequest USER_REQUEST = UserRequest.Builder.create().withUserId("test-user-id").withResourceId("/test/resourceId").withContext(CONTEXT);
@@ -55,64 +56,61 @@ class UserServiceAsyncProxyErrorTest {
 
     @Autowired
     private UserServiceAsyncProxy userServiceAsyncProxy;
-    @Autowired
-    private ObjectMapper mapper;
-
 
     @Test
     void testContextLoads() {
-        assertThat(userServiceAsyncProxy).isNotNull();
+        assertThat(userServiceAsyncProxy)
+                .as("Check that the User Service has started successfully")
+                .isNotNull();
     }
 
     @Test
     void testGetUserSuccess() {
-        // Given a user request
-        final User user = new User().userId("test-user-id");
+        // Given a user
+        var user = new User().userId("test-user-id")
+                .addAuths(Collections.singleton("authorisation"))
+                .addRoles(Collections.singleton("role"));
+
         // When adding to the cache
         this.userServiceAsyncProxy.addUser(user);
 
         // Then retrieving from the cache
-        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(USER_REQUEST);
-
-        // Check the CompletableFuture hasn't finished
-        assertThat(subject.isDone()).isFalse();
-        // Then complete the future
-        AuditableUserResponse auditableUserResponse = subject.join();
-        // Then Check it has been completed
-        assertThat(subject.isDone()).isTrue();
+        var userResponse = this.userServiceAsyncProxy.getUser(USER_REQUEST).join();
 
         // Then the service suppresses exception and populates Audit object
-        assertThat(auditableUserResponse.getAuditErrorMessage())
-                .as("verify that exception is propagated into an auditable object and returned")
+        assertThat(userResponse)
+                .as("Check that no Error was added to the AuditableUserResponse")
+                .extracting(AuditableUserResponse::getAuditErrorMessage)
                 .isNull();
 
         // Then the cached User is the same as the original User
-        assertThat(auditableUserResponse.getUserResponse().getUserId())
-                .isEqualTo(user.getUserId().getId());
+        assertThat(userResponse)
+                .as("Check that the user in the response is the same as the one we added to the cache")
+                .extracting(AuditableUserResponse::getUserResponse)
+                .extracting("user")
+                .isEqualTo(user);
     }
 
     @Test
     void testGetUserFailure() {
-        // When user has been added
+        // When no user has been added
 
         // Then retrieving a different user
-        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(NO_USER_REQUEST);
-
-        // Check the CompletableFuture hasn't finished
-        assertThat(subject.isDone()).isFalse();
-        // Then complete the future
-        AuditableUserResponse auditableUserResponse = subject.join();
-        // Then Check it has been completed
-        assertThat(subject.isDone()).isTrue();
+        var auditableUserResponse = this.userServiceAsyncProxy.getUser(NO_USER_REQUEST).join();
 
         // Then check that there is an error message
-        assertThat(auditableUserResponse.getAuditErrorMessage())
+        assertThat(auditableUserResponse)
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isNotNull();
+                .extracting(AuditableUserResponse::getAuditErrorMessage)
+                .extracting(AuditErrorMessage::getError)
+                .isInstanceOf(CompletionException.class)
+                .extracting("Message")
+                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching not-a-real-user found in cache");
 
-        // Then check the error message contains the correct message
-        assertThat(auditableUserResponse.getAuditErrorMessage().getError().getMessage())
-                .as("verify that exception is propagated into an auditable object and returned")
-                .startsWith(NoSuchUserIdException.class.getName());
+        assertThat(auditableUserResponse)
+                .as("Check that the UserResponse is empty")
+                .extracting(AuditableUserResponse::getUserResponse)
+                .isNull();
+
     }
 }
