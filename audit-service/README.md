@@ -18,8 +18,8 @@ limitations under the License.
 
 # Audit Service
 
-The Audit service accepts incoming messages on the `error` and `success` Kafka topics, these messages contain all the details of the initial request and any other relevant information. This information will be passed to any local audit services that have
-been implemented. This service does not have any output Kafka topics.
+The Audit service accepts incoming messages on the `error` and `success` Kafka topics, these messages contain all the details of the initial request and any other relevant information. 
+This information will be passed to any local audit services that have been implemented. This service does not have any output Kafka topics.
 
 ## Message model
 
@@ -38,11 +38,21 @@ been implemented. This service does not have any output Kafka topics.
 
 *The token value come from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
 
-If an error has occurred during a request/read then an AuditErrorMessage will be consumed from the `error` Kafka topic. This type of message can be sent from any of the Palisade services
-(e.g user-service or policy-service).
+If an error has occurred at any stage during either the request or read phases then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
+This type of message can be sent from any of the Palisade services (e.g User Service or Policy Service).
+This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
 
-If the request/read was successful then an AuditSuccessMessage will be consumed from the `success`
-Kafka topic. This type of message can only be sent from either the `filtered-resource-service` or the `data-service`.
+If the message on the `error` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.
+This value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
+Any files that are created will have the same template for the file name, `Error-Timestamp`.
+
+If the request or read was successful then an AuditSuccessMessage will be added to the `success` Kafka topic by the service that created the success message. 
+This type of message can only be sent from either the Filtered Resource Service (the end of the request phase), or the Data Service (the end of the read phase).
+This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
+
+If the message on the `success` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.
+This value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
+Any files that are created will have the same template for the file name, `Success-Timestamp`.
 
 ## Kafka Interface
 
@@ -58,7 +68,7 @@ The application exposes one REST endpoint for the purpose of debugging:
     - accepts either an `AuditSuccessMessage` or an `AuditErrorMessage` as the request body
     - returns a `ResponseEntity` with the HTTP status.
 
-## Example Error JSON Request
+## Example AuditErrorMessage JSON Request
 
 ```
 curl -X POST api/audit -H "content-type: application/json" --data \
@@ -86,7 +96,7 @@ curl -X POST api/audit -H "content-type: application/json" --data \
 }
 ```
 
-## Example Success JSON Request
+## Example AuditSuccessMessage JSON Request
 
 ```
 curl -X POST api/audit -H "content-type: application/json" --data \
@@ -109,3 +119,7 @@ curl -X POST api/audit -H "content-type: application/json" --data \
    "leafResourceId":"testLeafResourceId"
 }
 ```
+
+## License
+
+Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
