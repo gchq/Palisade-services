@@ -20,7 +20,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.test.PathUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -61,7 +60,7 @@ class HadoopResourceServiceTest {
     private static final String HDFS = "hdfs";
 
     @TempDir
-    public final File tmpDirectory = PathUtils.getTestDir(HadoopResourceServiceTest.class);
+    protected File tmpDirectory;
     private URI id1;
     private URI id2;
     private LeafResource resource1;

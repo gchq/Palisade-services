@@ -46,7 +46,6 @@
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <slf4j-test.version>1.1.0</slf4j-test.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
 
@@ -57,14 +56,18 @@
     </properties>
 
     <dependencies>
-        <!--~ Palisade-->
+        <!--
+        ~ Palisade
+        -->
         <dependency>
             <!-- Common types (User, Resource, Context) -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>0.5.0-${common.revision}</version>
         </dependency>
-        <!--~ Akka and Alpakka (Kafka)-->
+        <!--
+        ~ Akka and Alpakka (Kafka)
+        -->
         <dependency>
             <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
             <groupId>com.typesafe.akka</groupId>
@@ -90,49 +93,31 @@
             <version>${akka.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
+            <!-- Stroom -->
             <groupId>event-logging</groupId>
             <artifactId>event-logging</artifactId>
             <version>${event-logging.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>javax.activation-api</artifactId>
+            <!-- JAXB API implementation for Stroom -->
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${jaxb.version}-b170127.1453</version>
         </dependency>
+        <!--
+        ~ Spring Boot
+        -->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <!-- Rest controller -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
-        </dependency>
+
         <!--
         ~ Test Dependencies
         -->

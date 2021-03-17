@@ -16,113 +16,52 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.common.ResponseWriter;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_DATA_REQUEST;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_REQUEST_ENTITY;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_READER_REQUEST;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_READER_RESPONSE;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_REQUEST;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.RECORDS_PROCESSED;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.RECORDS_RETURNED;
+import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.TEST_RESPONSE_MESSAGE;
 
 class SimpleDataServiceTest {
 
-    public static final String REQUEST_TOKEN = "test-request-token";
 
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final User USER = new User().userId(USER_ID);
-    public static final String RESOURCE_ID = "/test/resourceId";
-    public static final String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
-    public static final String RESOURCE_FORMAT = "avro";
-    public static final String DATA_SERVICE_NAME = "test-data-service";
-    public static final String RESOURCE_PARENT = "/test";
-    public static final LeafResource LEAF_RESOURCE = new FileResource()
-            .id(RESOURCE_ID)
-            .type(RESOURCE_TYPE)
-            .serialisedFormat(RESOURCE_FORMAT)
-            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-            .parent(new SystemResource().id(RESOURCE_PARENT));
-
-    public static final String PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
-
-    public static final String RULE_MESSAGE = "test-rule";
-
-    public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
-    public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
-    public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
-    // Mocks
+    //mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
     final DataReader dataReader = Mockito.mock(DataReader.class);
-    final SimpleDataService simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
-    // Test data
-    final DataRequest dataRequest = DataRequest.Builder.create().withToken(REQUEST_TOKEN).withLeafResourceId(RESOURCE_ID);
-    final AuthorisedRequestEntity authorisedEntity = new AuthorisedRequestEntity(
-            REQUEST_TOKEN,
-            USER,
-            LEAF_RESOURCE,
-            CONTEXT,
-            RULES
-    );
-    final DataReaderRequest readerRequest = new DataReaderRequest()
-            .user(USER)
-            .resource(LEAF_RESOURCE)
-            .context(CONTEXT)
-            .rules(RULES);
-    final AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
-            .withResource(LEAF_RESOURCE)
-            .withUser(USER)
-            .withContext(CONTEXT)
-            .withRules(RULES);
-    final String testResponseMessage = "test response for data request";
-    final ResponseWriter responseWriter = new ResponseWriter() {
-        final String testData = testResponseMessage;
 
-        @Override
-        public void close() {
-        }
+    private SimpleDataService simpleDataService;
 
-        @Override
-        public ResponseWriter write(final OutputStream outputStream) throws IOException {
-            try (var testInputStream = new ByteArrayInputStream(testData.getBytes())) {
-                testInputStream.transferTo(outputStream);
-            }
-            return this;
-        }
-    };
-    final DataReaderResponse dataReaderResponse = new DataReaderResponse()
-            .message("test message")
-            .writer(responseWriter);
+    @BeforeEach
+    void setUp() {
+        simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
+    }
 
     /**
      * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is found to be
@@ -133,60 +72,72 @@ class SimpleDataServiceTest {
     void testAuthoriseRequestWithAValidRequest() {
         // Given
         when(persistenceLayer.getAsync(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(Optional.of(authorisedEntity)));
+                .thenReturn(CompletableFuture.completedFuture(Optional.of(AUTHORISED_REQUEST_ENTITY)));
 
-        // When
-        CompletableFuture<AuthorisedDataRequest> authorisedDataRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
-
-        // Then
-        assertThat(authorisedDataRequestCompletableFuture.join())
+        // When & Then
+        assertThat(simpleDataService.authoriseRequest(DATA_REQUEST)
+                .join())
+                .as("Check authoriseRequest returns a DataReaderRequest")
                 .usingRecursiveComparison()
-                .isEqualTo(readerRequest);
+                .isEqualTo(DATA_READER_REQUEST);
+
+        //verifies the service calls the PersistenceLayer getAsync method once
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
     /**
-     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is not valid/not authorised,
-     * the method will throw an {@code UnauthorisedAccessException}
+     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)} when no data is returned from the persistence
+     * storage.  The expected response will be for the method to throw a {@link ForbiddenException}.
      */
     @Test
     void testAuthoriseRequestWithAnInvalidRequest() {
+
+        //same message as the one provided by the ForbiddenException
+        String errorMessage = "There is no data for the request, with token %s and resource %s";
+
         // Given
         when(persistenceLayer.getAsync(any(), any()))
-                .thenThrow(new ForbiddenException("test exception")); // temp dataRequest
+                .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
-        // When & Then
-        assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequest), "should throw UnauthorisedAccessException");
+        //When
+        Throwable thrown = catchThrowable(() -> simpleDataService.authoriseRequest(DATA_REQUEST).join());
+
+        //Then
+        assertThat(thrown)
+                .as("Check that invalid request to authoriseRequest will throw a ForbiddenException")
+                .isInstanceOf(CompletionException.class)
+                .hasCauseInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(errorMessage, DATA_REQUEST.getToken(), DATA_REQUEST.getLeafResourceId());
+
+        //verifies the service calls the PersistenceLayer getAsync method once
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
     /**
-     * Test for an authorised request,
-     * the method will return the filtered requested data.
-     * Note updating the AtomicLong object occurs in the dataReader which is mocked in this test.  Processing of
-     * the OutputStream is done in the DataService and is used to verify the method is working as expected in this test.
+     * Test for {@link SimpleDataService#read(AuthorisedDataRequest, OutputStream, AtomicLong, AtomicLong)}.
+     * The method will return {@code OutputStream} linked to the input provided by the {@code DataReader} and supply
+     * the requested data.
      */
     @Test
     void testAuthoriseRequestWithARead() {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // Given
-        when(dataReader.read(any(), any(), any())).thenReturn(dataReaderResponse);
+        when(dataReader.read(any(), any(), any())).thenReturn(DATA_READER_RESPONSE);
 
         // When
-        CompletableFuture<Boolean> completed = simpleDataService
-                .read(authorisedDataRequest, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
-        completed.join();
+        simpleDataService
+                .read(AUTHORISED_DATA_REQUEST, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED)
+                .join();
+
+        //Then
         String outputString = outputStream.toString();
-        assertThat(outputString).isEqualTo(testResponseMessage);
+        assertThat(outputString)
+                .as("Check that read will provide data in the output stream")
+                .isEqualTo(TEST_RESPONSE_MESSAGE);
+
+        //verifies the service calls the DataReader read method once
         verify(dataReader, times(1)).read(any(), any(), any());
 
-    }
-
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
     }
 }
