@@ -68,7 +68,7 @@ public class AkkaComponentsConfig {
     /**
      * Public constructor for the {@link AkkaComponentsConfig}
      *
-     * @param configProperties configuration details for the audit-service
+     * @param configProperties configuration details for the Audit Service
      */
     public AkkaComponentsConfig(final AuditServiceConfigProperties configProperties) {
         this.configProperties = configProperties;
