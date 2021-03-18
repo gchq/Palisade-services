@@ -15,12 +15,10 @@
  */
 package uk.gov.gchq.palisade.component.user.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
@@ -30,14 +28,13 @@ import uk.gov.gchq.palisade.service.user.model.UserResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {UserResponseTest.class})
 class UserResponseTest {
 
     @Autowired
-    private JacksonTester<UserResponse> jsonTester;
+    private ObjectMapper mapper;
 
     /**
      * Tests the creation of the message type, UserResponse using the builder
@@ -48,37 +45,18 @@ class UserResponseTest {
      */
     @Test
     void testUserResponseSerialisingAndDeserialising() throws IOException {
-        User user = new User().userId("testUserId");
-
-        Context context = new Context().purpose("testContext");
-        UserResponse userResponse = UserResponse.Builder.create()
+        var userResponse = UserResponse.Builder.create()
                 .withUserId("originalUserId")
                 .withResourceId("testResourceId")
-                .withContext(context)
-                .withUser(user);
+                .withContext(new Context().purpose("testContext"))
+                .withUser(new User().userId("testUserId"));
 
-        JsonContent<UserResponse> userResponseJsonContent = jsonTester.write(userResponse);
-        ObjectContent<UserResponse> userResponseObjectContent = this.jsonTester.parse(userResponseJsonContent.getJson());
-        UserResponse userResponseObject = userResponseObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(userResponse);
+        var actualInstance = mapper.readValue(actualJson, userResponse.getClass());
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserId"),
-                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
-                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId")
-                ),
-
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(userResponseObject.getUserId()).isEqualTo(userResponse.getUserId()),
-                        () -> assertThat(userResponseObject.getResourceId()).isEqualTo(userResponse.getResourceId()),
-                        () -> assertThat(userResponseObject.getContext()).isEqualTo(userResponse.getContext()),
-                        () -> assertThat(userResponseObject.user).isEqualTo(user)
-                ),
-
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(userResponseObject).usingRecursiveComparison().isEqualTo(userResponse)
-                )
-        );
+        assertThat(actualInstance)
+                .as("Check using recursion, that the %s has been deserialized successfully", userResponse.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(userResponse);
     }
 }
