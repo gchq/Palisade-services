@@ -159,6 +159,7 @@ kubectl -n kube-system describe secrets \
   | awk '/token:/ {print $2}'
 ```
 
+
 ### Changing Application Logging Level
 
 All instances of the palisade-service pod contain a script that will identify all application pods in that release and change their log level at runtime:
