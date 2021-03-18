@@ -53,8 +53,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.contract.user.common.StreamMarker;
 import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.Config;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.RequestSerialiser;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.ResponseDeserialiser;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.Token;
@@ -125,7 +125,7 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
@@ -135,7 +135,7 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
@@ -206,7 +206,7 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
@@ -219,7 +219,7 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
@@ -281,7 +281,7 @@ class KafkaContractTest {
     void testRestEndpoint() {
         // Given - we are already listening to the service input
         ConsumerSettings<String, UserRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.requestKeyDeserializer(), SerDesConfig.requestValueDeserializer())
+                .create(akkaActorSystem, SerDesConfig.requestKeyDeserialiser(), SerDesConfig.requestValueDeserialiser())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
