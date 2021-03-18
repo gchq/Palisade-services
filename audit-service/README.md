@@ -39,7 +39,7 @@ This information will be passed to any local audit services that have been imple
 *The token value come from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
 
 If an error has occurred at any stage during either the request or read phases then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
-This type of message can be sent from any of the Palisade services (e.g User Service or Policy Service).
+This type of message can be sent from any of the Palisade services (e.g. User Service or Policy Service).
 This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
 
 If the message on the `error` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.

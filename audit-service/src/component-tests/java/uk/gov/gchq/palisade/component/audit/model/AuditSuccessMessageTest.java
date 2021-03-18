@@ -44,7 +44,7 @@ class AuditSuccessMessageTest extends AbstractSerialisationTest {
             .withUserId("originalUserID")
             .withResourceId("testResourceId")
             .withContext(new Context().purpose("testContext"))
-            .withServiceName("testServicename")
+            .withServiceName("testServiceName")
             .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
             .withServerIp("testServerIP")
             .withServerHostname("testServerHostname")
