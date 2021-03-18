@@ -16,16 +16,15 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+# Resource Service
+
 > :warning:
 Windows users will have problems with Hadoop integration testing. 
 Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries. 
 To 'install' on Windows, copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. 
 This should enable the `HadoopResourceServiceTest` to run correctly. 
 
-
-# Resource Service
-
-It it's core, the Resource Service is an implementation of the `ResourceService` interface:
+At it's core, the Resource Service is an implementation of the `ResourceService` interface:
 ```java
 interface ResourceService {
     Iterator<LeafResource> getResourcesById(final String resourceId);
@@ -47,23 +46,24 @@ These additional layers include:
 
 ## Flow of Control
 
-The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories). 
-The service will then query the 'cache' backing store to see if the requested resourceId has been stored. 
-If this is not the case then the request will be passed onto the local implementation of the Resource service. 
+The Resource Service accepts an incoming message from the `user` Kafka topic as processed by the [User Service](../user-service) which contains the `resourceId` that is being accessed. 
+This `resourceId` could be an actual file, or a directory that could contain many files and/or sub-directories. 
+The service will then query the 'cache' backing store to see if the requested `resourceId` has been stored. 
+If this is not the case then the request will be passed onto the local implementation of the Resource Service. 
 A successful response from this implementation will then be added to the backing store, but errors are ignored.
-All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy service. 
+All the returned resources will be within an Akka stream and each element in the stream is consumed and added to the `resource` Kafka topic to be processed by the [Policy Service](../policy-service). 
 
 
 ## Kafka Message Model
 
 | ResourceRequest | ResourceResponse | AuditErrorMessage | 
-|:----------------|:-----------------|:------------------|
-| userId          | userId           | *token            | 
-| resourceId      | resourceId       | userId            |  
-| context         | context          | resourceId        |
-| user            | user             | context           | 
-|                 | resource         | exception         | 
-|                 |                  | serverMetadata    | 
+|:----------------|:-----------------|:------------------| 
+| *token          | *token           | *token            | 
+|  userId         |  userId          |  userId           | 
+|  resourceId     |  resourceId      |  resourceId       | 
+|  context        |  context         |  context          | 
+|  user           |  user            |  exception        | 
+|                 |  resource        |  serverMetadata   | 
 
 (fields marked with `*` are acquired from headers metadata)
 
@@ -76,6 +76,12 @@ The `ResourceRequest` message then gets consumed by the service and for each res
 This then gets written to the `resource` Kafka topic. 
 Once all the`ResourceResponse`s have been written to the topic, the `END` message gets written to the `resource` topic to mark the end of the resources for this request. 
 If any errors are thrown within the service, the original request, along with the thrown exception are captured in an `AuditErrorMessage` and written to the Kafka `error` topic. 
+
+### Stream Markers
+The use of these `START` and `END` marker messages are because of a combination of the Resource, Policy and Filtered Resource Services. 
+For a given token and resourceId requested, the Resource Service may produce an unknown number of `ResourceResponse`s. 
+The `START` and `END` allow for any number of messages in between to be arbitrarily created, deleted, and delayed as long as the collection starts and ends the same. 
+For this reason, it is important that messages on a given partition remain strictly ordered - as such, most `PARALLELISM` values are set to `1`. 
 
 
 ## REST Interface
