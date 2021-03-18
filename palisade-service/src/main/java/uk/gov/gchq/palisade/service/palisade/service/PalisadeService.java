@@ -39,17 +39,17 @@ public abstract class PalisadeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
 
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final CompletableFuture<Sink<TokenRequestPair, ?>> futureSink;
 
     /**
      * Instantiates a new Palisade service.
      *
-     * @param materializer the materializer
+     * @param materialiser the materialiser
      */
-    PalisadeService(final Materializer materializer) {
+    PalisadeService(final Materializer materialiser) {
         this.futureSink = new CompletableFuture<>();
-        this.materializer = materializer;
+        this.materialiser = materialiser;
     }
 
     /**
@@ -81,7 +81,7 @@ public abstract class PalisadeService {
                     .withPalisadeRequest(request);
             TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
             Source.single(requestPair)
-                    .runWith(sink, materializer);
+                    .runWith(sink, materialiser);
             LOGGER.debug("registerDataRequest returning with token {} for request {}", token, request);
             return token;
         });
@@ -109,7 +109,7 @@ public abstract class PalisadeService {
                 .withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
 
-        return futureSink.thenAccept(sink -> Source.single(requestPair).runWith(sink, materializer));
+        return futureSink.thenAccept(sink -> Source.single(requestPair).runWith(sink, materialiser));
     }
 
     /**

@@ -49,7 +49,7 @@ class PalisadeServiceComponentTest extends CommonTestData {
     LinkedList<TokenRequestPair> sinkCollection;
 
     @Bean
-    Materializer materializer() {
+    Materializer materialiser() {
         return Materializer.createMaterializer(ActorSystem.create("test-actor-system"));
     }
 

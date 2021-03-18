@@ -34,8 +34,8 @@ import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 public class ApplicationConfiguration {
 
     @Bean
-    PalisadeService palisadeService(final Materializer materializer) {
-        return new UUIDPalisadeService(materializer);
+    PalisadeService palisadeService(final Materializer materialiser) {
+        return new UUIDPalisadeService(materialiser);
     }
 
     /**

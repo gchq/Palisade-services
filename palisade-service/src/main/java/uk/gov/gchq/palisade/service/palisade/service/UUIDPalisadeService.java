@@ -29,10 +29,10 @@ public class UUIDPalisadeService extends PalisadeService {
     /**
      * Instantiates a new Palisade service.
      *
-     * @param materializer the materializer
+     * @param materialiser the materialiser
      */
-    public UUIDPalisadeService(final Materializer materializer) {
-        super(materializer);
+    public UUIDPalisadeService(final Materializer materialiser) {
+        super(materialiser);
     }
 
     @Override

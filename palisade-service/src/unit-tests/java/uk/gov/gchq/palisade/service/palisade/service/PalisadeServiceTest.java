@@ -39,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class PalisadeServiceTest extends CommonTestData {
 
     final ActorSystem system = ActorSystem.create();
-    final Materializer materializer = Materializer.createMaterializer(system);
-    final PalisadeService service = new MockedPalisadeService(materializer);
+    final Materializer materialiser = Materializer.createMaterializer(system);
+    final PalisadeService service = new MockedPalisadeService(materialiser);
     final Map<String, Object> attributes = new HashMap<>();
     LinkedList<TokenRequestPair> sinkCollection;
 
@@ -98,10 +98,10 @@ class PalisadeServiceTest extends CommonTestData {
         /**
          * Instantiates a new Palisade service.
          *
-         * @param materializer the materializer
+         * @param materialiser the materialiser
          */
-        MockedPalisadeService(final Materializer materializer) {
-            super(materializer);
+        MockedPalisadeService(final Materializer materialiser) {
+            super(materialiser);
         }
 
         @Override

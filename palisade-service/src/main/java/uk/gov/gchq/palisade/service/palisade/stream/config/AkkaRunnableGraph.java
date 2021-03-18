@@ -85,10 +85,10 @@ public class AkkaRunnableGraph {
                         // Map the auditable request to either a PalisadeClientRequest or AuditErrorMessage
                         return auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getAuditErrorMessage).map(audit ->
                                 new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
-                                        SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
+                                        SerDesConfig.errorValueSerialiser().serialize(null, audit), headers))
                                 .orElseGet(() ->
                                         new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
-                                                SerDesConfig.requestSerializer().serialize(null,
+                                                SerDesConfig.requestSerialiser().serialize(null,
                                                         auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getPalisadeResponse)
                                                                 .orElse(null)), headers)
                                 );

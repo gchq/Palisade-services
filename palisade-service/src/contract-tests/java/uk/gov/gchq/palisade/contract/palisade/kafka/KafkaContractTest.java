@@ -94,8 +94,8 @@ import static org.mockito.ArgumentMatchers.any;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaContractTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
+@Import({KafkaContractTest.KafkaInitialiser.Config.class})
+@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitialiser.class})
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
     public static final String REGISTER_DATA_REQUEST = "/api/registerDataRequest";
@@ -107,7 +107,7 @@ class KafkaContractTest {
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
-    private Materializer akkaMaterializer;
+    private Materializer akkaMaterialiser;
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
@@ -122,15 +122,15 @@ class KafkaContractTest {
 
         // Given - we are already listening to the service input
         ConsumerSettings<String, PalisadeSystemResponse> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserializer(), TestSerDesConfig.requestValueDeserializer())
+                .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserialiser(), TestSerDesConfig.requestValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 3;
 
         Probe<ConsumerRecord<String, PalisadeSystemResponse>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
@@ -195,15 +195,15 @@ class KafkaContractTest {
 
         // Given - we are already listening to the service input
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
+                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserialiser(), TestSerDesConfig.errorValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 
         Probe<ConsumerRecord<String, AuditErrorMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.ERROR_TOKEN));
@@ -237,14 +237,14 @@ class KafkaContractTest {
                 });
     }
 
-    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
+    public static class KafkaInitialiser implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitialiser.class);
 
         static final KafkaContainer KAFKA = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA.getFirstMappedPort())))) {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitialiser.KAFKA.getFirstMappedPort())))) {
                 admin.createTopics(newTopics);
                 LOGGER.info("created topics: " + admin.listTopics().names().get());
             }
@@ -296,7 +296,7 @@ class KafkaContractTest {
 
             @Bean
             @Primary
-            Materializer materializer(final ActorSystem system) {
+            Materializer materialiser(final ActorSystem system) {
                 return Materializer.createMaterializer(system);
             }
         }
