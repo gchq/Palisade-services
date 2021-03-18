@@ -100,7 +100,7 @@ public final class AuditableUserResponse {
          */
         public interface IUserResponse {
             /**
-             * Adds the AuditErrorMessage to the {@link AuditableUserResponse}
+             * Adds the AuditErrorMessage to the {@link AuditableUserResponse} if an error occurred
              *
              * @param audit value or null
              * @return value object
@@ -111,7 +111,7 @@ public final class AuditableUserResponse {
 
 
             /**
-             * Adds the UserResponse to the {@link AuditableUserResponse}
+             * Adds the UserResponse to the {@link AuditableUserResponse} if no error occurred
              *
              * @param response value or null
              * @return value object
@@ -121,7 +121,8 @@ public final class AuditableUserResponse {
             }
 
             /**
-             * Adds the UserResponse and the AuditErrorMessage to the {@link AuditableUserResponse}
+             * Adds the UserResponse and the AuditErrorMessage to the {@link AuditableUserResponse}. Either of these can be null depending how
+             * the request was processed by the service
              *
              * @param response          value or null
              * @param auditErrorMessage value or null

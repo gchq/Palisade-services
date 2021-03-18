@@ -100,10 +100,15 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
 }'
 ```
 
-## Uploading users to the backing store on service start-up
+## User pre-population / Cache Warming
 
-It may be that some example users needs to be added to the backing store before a test run of the Palisade system is performed, for example. This is resolved by using Spring to upload the user(s) to the service from a yaml file. 
-An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds the user information to the backing store when the service starts up.
+This service can be populated with a list of initial users at runtime.
+By specifying all the configuration and pre-population factory values, any user information in the configuration list will be added to the service at runtime.
+This includes being added to the cache, so that the basic `NullUserService` implementation, coupled with the `UserServiceCachingProxy`, acts solely using the cache.
+
+**Note:** This means that after the cache eviction TTL (Time To Live), the User Service will no longer contain any user information.
+ 
+An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds the basic user information to the backing store when the service starts up.
 
 How to override the uploaded users:
 1. Create a new `User` class
