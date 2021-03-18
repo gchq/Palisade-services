@@ -98,7 +98,7 @@ public class AkkaRunnableGraph {
                     /*
                      Return the user as a Pair of CommittableMessage<token,UserRequest>
                      and the auditableUserResponse from the UserServiceAsyncProxy.
-                     If an exception was thrown, return the ComittableMessage with a null AuditableUserResponse
+                     If an exception was thrown, return the CommittableMessage with a null AuditableUserResponse
                     */
                     return userRequest.map(request -> service.getUser(request)
                             .thenApply(auditableUserResponse -> Pair.create(message, auditableUserResponse)))

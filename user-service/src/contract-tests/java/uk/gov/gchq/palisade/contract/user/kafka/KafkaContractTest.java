@@ -95,8 +95,8 @@ import static uk.gov.gchq.palisade.service.user.stream.SerDesConfig.responseValu
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
-@Import({Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(Config.class)
+@ContextConfiguration(initializers = KafkaInitializer.class)
 @ActiveProfiles({"caffeine", "akka-test", "pre-population"})
 class KafkaContractTest {
 
@@ -105,7 +105,7 @@ class KafkaContractTest {
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
-    private Materializer akkaMaterializer;
+    private Materializer akkaMaterialiser;
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
     @Autowired
@@ -131,7 +131,7 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -139,7 +139,7 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser);
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
@@ -212,10 +212,10 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
         Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -223,7 +223,7 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser);
 
 
         // When - results are pulled from the output stream
@@ -288,7 +288,7 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, UserRequest>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(REQUEST_TOKEN));
