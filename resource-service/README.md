@@ -16,15 +16,45 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+> :warning:
+Windows users will have problems with Hadoop integration testing. 
+Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries. 
+To 'install' on Windows, copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. 
+This should enable the `HadoopResourceServiceTest` to run correctly. 
+
+
 # Resource Service
 
-The Resource service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed 
-(this could be an actual file, or a directory that could contain many files and/or sub-directories). The service will then query the backing store to
-see if the requested resourceId has been stored. If this is not the case then the request will be passed onto the local implementation of 
-the Resource service. All the returned resources will be within an Akka stream, each element in the stream is then consumed and
-added to the `resource` Kafka topic to be processed by the Policy service.
+It it's core, the Resource Service is an implementation of the `ResourceService` interface:
+```java
+interface ResourceService {
+    Iterator<LeafResource> getResourcesById(final String resourceId);
 
-## Message Model and Database Domain
+    Iterator<LeafResource> getResourcesByType(final String type);
+
+    Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat);
+
+    Boolean addResource(final LeafResource resource);
+}
+```
+
+This implementation is then wrapped with various service layers to work with the Palisade streaming architecture. 
+These additional layers include:
+* Pulling requests from an upstream kafka topic and writing responses to a downstream topic - see [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/resource/stream/config/AkkaRunnableGraph.java)
+* 'Caching' resources returned by previous `ResourceService` calls - see [ResourceServicePersistenceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/ResourceServicePersistenceProxy.java)
+* Catching all errors and writing to a kafka error topic
+
+
+## Flow of Control
+
+The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories). 
+The service will then query the 'cache' backing store to see if the requested resourceId has been stored. 
+If this is not the case then the request will be passed onto the local implementation of the Resource service. 
+A successful response from this implementation will then be added to the backing store, but errors are ignored.
+All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy service. 
+
+
+## Kafka Message Model
 
 | ResourceRequest | ResourceResponse | AuditErrorMessage | 
 |:----------------|:-----------------|:------------------|
@@ -35,19 +65,18 @@ added to the `resource` Kafka topic to be processed by the Policy service.
 |                 | resource         | exception         | 
 |                 |                  | serverMetadata    | 
 
-(fields marked with * are acquired from headers metadata)
+(fields marked with `*` are acquired from headers metadata)
 
-The service accepts a `ResourceRequest` from the User service, finds all the resources associated with the resourceId as a stream, the stream is 
-then consumed and for each resource a `ResourceResponse` is created and then sent to the Policy service for further processing.
+The service accepts a `ResourceRequest` from the User service and finds all the resources associated with the resourceId as a stream. 
+The stream is then consumed and for each resource a `ResourceResponse` is created and then sent to the Policy service for further processing. 
 
-## Kafka Interface
+The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. 
+The `START` gets consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic. 
+The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. 
+This then gets written to the `resource` Kafka topic. 
+Once all the`ResourceResponse`s have been written to the topic, the `END` message gets written to the `resource` topic to mark the end of the resources for this request. 
+If any errors are thrown within the service, the original request, along with the thrown exception are captured in an `AuditErrorMessage` and written to the Kafka `error` topic. 
 
-The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. The `START` gets
-consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic. 
-The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. This then gets written 
-to the `resource` Kafka topic. Once all the`ResourceResponse`s have been written to the topic, the `END` message gets written to the `resource` topic to 
-mark the end of the resources for this request. If any errors are thrown within the service, the original request, along with the thrown exception are captured in an
-`AuditErrorMessage` and written to the Kafka `error` topic.
 
 ## REST Interface
 
@@ -55,9 +84,9 @@ The application exposes one REST endpoint for the purpose of debugging:
 
 * `POST /api/resource`
     - accepts an `x-request-token` `String` header, any number of extra headers, and a `ResourceRequest` body
-    - returns a `ResourceResponse` for each resource found. This response contains the userId, resourceId, context, user and resource.
+    - returns an ACCEPTED to indicate the request has been written to the upstream 'user' topic
 
-## Example JSON Request
+### Example JSON Request
 
 ```
 curl -X POST api/resource -H "content-type: application/json" --data \
@@ -85,7 +114,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 }
 ```
 
-## Example JSON Response
+### Example JSON Kafka Topic ('resource') Output
 
 ```
 {
@@ -130,20 +159,19 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 }
 ```
 
-## Uploading resources to the backing store on service start-up
 
-It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
-using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
-[testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
+## Resource 'Cache'
 
-## Hadoop and Windows
+### Motivation
 
-Windows users will have problems with Hadoop integration testing. Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries.
+To ease load on an external resource-service provider, a cache-like storage mechanism is used to return data for previously-queried resources. 
+The code for this can be found in the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [ReactivePersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/ReactivePersistenceLayer.java). 
 
-To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
-the `HadoopResourceServiceTest` to run correctly.
+Due to the tree-structure of filesystems, native caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. 
+For example, requesting `/some/directory/with-lots-of-files` may return (and cache) 1000 resources, but requesting `/some/directory` will result in a cache miss, as would `/some/directory/with-lots-of-files/big-subdirectory`. 
+Instead, a persistence store is used to break resource trees apart into their individual nodes and store them separately, reconstructing parents and tree structure when requested again.
 
-## Database Entities and Structuring
+### Database Entities and Structuring
 
 ```
                             === CompletenessEntity ====
@@ -154,34 +182,26 @@ the `HadoopResourceServiceTest` to run correctly.
              V                           V                           V
 === ResourceEntity ======== === TypeEntity ============ === SerialisedFmtEntity ===
 |* resource-id: String    | |* type: String           | |* serialised-fmt: String |
-|* parent-id: String      | | resource-id: String     | |  resource-id: String    |
+|* parent-id: String      | |  resource-id: String    | |  resource-id: String    |
 |  resource: JSON         | --------------------------- ---------------------------
 ---------------------------
 ```
 
-(`*` marks an indexable field)
-
-### Motivation
-
-To ease load on an external resource-service provider, a cache-like storage mechanism is used to return data for previously-queried resources. The code for this can be found in
-the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [JpaPersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/JpaPersistenceLayer.java).
-
-Due to the tree-structure of filesystems, native caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. For example, requesting `/some/directory/with-lots-of-files` may return (and
-cache) 1000 resources, but requesting `/some/directory` will result in a cache miss, as would `/some/directory/with-lots-of-files/big-subdirectory`. Instead, a persistence store is used to break resource trees apart into their individual nodes and store
-them separately, reconstructing parents and tree structure when requested again.
+(fields marked with `*` are indexable)
 
 ### Implementation
 
-The persistence store is split into a number of separate repositories, one for each queryable index on a resource (i.e. resource-id, type, format). These indexable fields are referred to in code through an EntityType enum. These each store only "complete"
-sets of information - directories for which have been queried in their entirety, either by directly requesting it, or requesting one of its parents. A separate repository stores pairs of resource-ids and entity-types.
-
-### Example
+The persistence store is split into a number of separate repositories, one for each queryable index on a resource (i.e. resource-id, type, format). 
+These indexable fields are referred to in code through an EntityType enum. 
+These each store only "complete" sets of information - directories for which have been queried in their entirety, either by directly requesting it, or requesting one of its parents. 
+A separate repository stores pairs of resource-ids and entity-types. 
 
 A request to the resource-service may then look like:
 
 * Get resources by some indexable field (or member of the [`EntityType` enum](src/main/java/uk/gov/gchq/palisade/service/resource/domain/EntityType.java) enum, say `resource-id`)
 * Check the [Completeness Repository](src/main/java/uk/gov/gchq/palisade/service/resource/repository/CompletenessRepository.java) for whether the "cache" can return a "complete" set of information
     * If the `entity-type`-`resource-id` pair is found, continue to return from our "cache", otherwise return from the real resource-service
+    * If returning from the real resource-service, insert these new resources into the "cache"
 * Get by the indexable field in the appropriate repository
     * [Type Repository](src/main/java/uk/gov/gchq/palisade/service/resource/repository/TypeRepository.java) and [Serialised Format Repository](src/main/java/uk/gov/gchq/palisade/service/resource/repository/SerialisedFormatRepository.java) are not tree-like
       and return a collection of leaf-resource-ids to directly get-and-return
@@ -191,7 +211,14 @@ A request to the resource-service may then look like:
     * Query the [Resource Repository](src/main/java/uk/gov/gchq/palisade/service/resource/repository/ResourceRepository.java) for resources matching our node's parent-id
 * Return the completed result
 
-This can all be achieved with a Java Streams pipeline, allowing for reasonable latency and parallelization.
+This is all achieved in non-blocking reactive streams, allowing for large datasets and long IO-blocking service queries with minimal memory and CPU footprint.
+
+### Prepopulating the Resource Cache
+
+It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
+using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
+[testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
+
 
 ## License
 
