@@ -29,11 +29,14 @@ spec:
   - name: palisade-zookeeper
     port: 2181
 
-  # Select a pod tha matches a service of palisade-zookeper for local nodes
-  # if this is in the pipeline then check for AWS and use the shared service
-  selector:
+  type: ExternalName
+  # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
 {{- if eq .Values.global.hosting "aws" }}
-    service: palisade-zookeeper-shared
+  externalName: zookeeper.palisade-shared.svc.cluster.local
+  ports:
+  - port: 2181
 {{- else }}
-    service: palisade-zookeeper
+  externalName: palisade-zookeeper.{{ include "palisade.namespace" . }}.svc.cluster.local
+  ports:
+  - port: 2181
 {{- end }}

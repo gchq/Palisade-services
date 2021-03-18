@@ -29,11 +29,15 @@ spec:
   - name: palisade-kafka
     port: 9092
 
-  # Select a pod tha matches a service of palisade-kafka when kafka is local to the node
-  # if this is in the pipeline then check for AWS and use the shared service
-  selector:
+  type: ExternalName
+  # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
 {{- if eq .Values.global.hosting "aws" }}
-    service: palisade-kafka-shared
+  externalName: kafka.palisade-shared.svc.cluster.local
+  ports:
+  - port: 9092
 {{- else }}
-    service: palisade-kafka
+  externalName: palisade-kafka.{{ include "palisade.namespace" . }}.svc.cluster.local
+  ports:
+  - port: 9092
 {{- end }}
+

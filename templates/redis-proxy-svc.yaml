@@ -29,11 +29,14 @@ spec:
   - name: palisade-redis
     port: 6379
 
-  # Select a pod tha matches a service of palisade-redis when redis is local to the node.
-  # if this is in the pipeline then check for AWS and use the shared service
-  selector:
+  type: ExternalName
+  # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
 {{- if eq .Values.global.hosting "aws" }}
-    service: palisade-redis-shared
+  externalName: redis-master.palisade-shared.svc.cluster.local
+  ports:
+  - port: 6379
 {{- else }}
-    service: palisade-redis
+  externalName: palisade-redis-master.{{ include "palisade.namespace" . }}.svc.cluster.local
+  ports:
+  - port: 6379
 {{- end }}
