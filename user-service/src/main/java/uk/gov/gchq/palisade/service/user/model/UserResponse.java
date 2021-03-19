@@ -35,8 +35,8 @@ import java.util.StringJoiner;
  * This data represents the output for User Service which will include the User identified by the service.
  * This will be forwarded to the Resource Service to identify the Resources associated with this query.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.user.model.UserResponse is the response from the User Service.
- * uk.gov.gchq.palisade.service.resource.model.ResourceRequest is the input for the Resource Service.
+ * uk.gov.gchq.palisade.service.user.model.UserResponse is the response from the User Service, this contains the returned user.
+ * uk.gov.gchq.palisade.service.resource.model.ResourceRequest contains the information from the User Service which is used to find the Resource(s).
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserResponse {

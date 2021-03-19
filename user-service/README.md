@@ -27,6 +27,13 @@ host operating system account or PKI based user authentication.
 The User Service separates this concern from the rest of the system. Other components use this service's API to request user details. 
 Some deployments may also allow Palisade to add users to the system, hence the presence of the `addUser()` method in the `UserService` interface.
 
+## High Level Architecture
+
+<!--- 
+See user-service/doc/user-service.drawio for the source of this diagram
+--->
+![User Service diagram](doc/user-service.png)
+
 ## Message Model and Database Domain
 
 | UserRequest     | UserResponse     | AuditErrorMessage | AuditableUserResponse |
@@ -106,9 +113,9 @@ This service can be populated with a list of initial users at runtime.
 By specifying all the configuration and pre-population factory values, any user information in the configuration list will be added to the service at runtime.
 This includes being added to the cache, so that the basic `NullUserService` implementation, coupled with the `UserServiceCachingProxy`, acts solely using the cache.
 
-**Note:** This means that after the cache eviction TTL (Time To Live), the User Service will no longer contain any user information.
+**Note:** This means that after the cache eviction TTL (Time To Live), found in [application.yaml](src/main/resources/application.yaml), the User Service will no longer contain any user information.
  
-An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds the basic user information to the backing store when the service starts up.
+An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds a basic user to the backing store when the service starts up.
 
 How to override the uploaded users:
 1. Create a new `User` class
