@@ -64,6 +64,8 @@ This should enable the `HadoopResourceServiceTest` to run correctly.
 
 ## Flow of Control
 
+![Resource Service diagram](doc/resource-service.png)
+
 ### [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/resource/stream/config/AkkaRunnableGraph.java)
 The Resource Service accepts an incoming message from the `user` Kafka topic as processed by the [User Service](../user-service) which contains the `resourceId` that is being accessed. 
 This `resourceId` could be an actual file, or a directory that could contain many files and/or sub-directories. 
