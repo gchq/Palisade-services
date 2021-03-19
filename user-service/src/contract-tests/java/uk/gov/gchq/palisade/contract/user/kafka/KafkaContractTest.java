@@ -26,6 +26,7 @@ import akka.stream.Materializer;
 import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -47,8 +48,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.user.common.ContractTestData;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.contract.user.common.StreamMarker;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.Config;
 import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.user.UserApplication;
@@ -71,6 +75,13 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.END_RECORD;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.NO_USER_ID_RECORD_NODE_FACTORY;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.RECORD_NODE_FACTORY;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.REQUEST_OBJ;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.REQUEST_TOKEN;
+import static uk.gov.gchq.palisade.contract.user.common.ContractTestData.START_RECORD;
+import static uk.gov.gchq.palisade.service.user.stream.SerDesConfig.responseValueDeserializer;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
@@ -84,7 +95,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
-@Import({KafkaInitializer.Config.class})
+@Import({Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class})
 @ActiveProfiles({"caffeine", "akka-test", "pre-population"})
 class KafkaContractTest {
@@ -102,13 +113,13 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testRequestSet() {
+    void testRequestSet() throws JsonProcessingException {
         // Only 1 request will be received by the user-service
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
-                Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
-                Stream.of(ContractTestData.END_RECORD))
+                Stream.of(START_RECORD),
+                RECORD_NODE_FACTORY.get().limit(1L),
+                Stream.of(END_RECORD))
                 .flatMap(Function.identity());
         final long recordCount = 3;
 
@@ -146,7 +157,7 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
+                                        .isEqualTo(REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
@@ -161,19 +172,24 @@ class KafkaContractTest {
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
+        var userResponse = responseValueDeserializer(results.getFirst().value());
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
+                        .as("Check that there is one message on the output topic")
                         .hasSize(1),
                 () -> assertThat(results)
+                        .as("Check the message contains the correct headers")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-                () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                        .isEqualTo(ContractTestData.REQUEST_OBJ.getUserId()),
-                () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
-                        .isEqualTo("auth"),
-                () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())
-                        .isEqualTo("role")
+                                        .isEqualTo(REQUEST_TOKEN.getBytes())),
+
+                () -> assertThat(userResponse)
+                        .as("Check the response has all the correct User information")
+                        .extracting("userId", "resourceId", "context", "user")
+                        .containsExactly(REQUEST_OBJ.getUserId(),
+                                "/test/resourceId",
+                                new Context().purpose("purpose"),
+                                new User().userId(new UserId().id(REQUEST_OBJ.getUserId())).roles("role").auths("auth"))
         );
     }
 
@@ -183,9 +199,9 @@ class KafkaContractTest {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
-                Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.NO_USER_ID_RECORD_NODE_FACTORY.get().limit(1L),
-                Stream.of(ContractTestData.END_RECORD))
+                Stream.of(START_RECORD),
+                NO_USER_ID_RECORD_NODE_FACTORY.get().limit(1L),
+                Stream.of(END_RECORD))
                 .flatMap(Function.identity());
 
         // Given - we are already listening to the output
@@ -228,12 +244,14 @@ class KafkaContractTest {
         // check the header contains the token and check that there is no Response message on the topic
         assertAll("Asserting on the output topic",
                 () -> assertThat(results)
+                        .as("Check that there are 2 messages on the output topic")
                         .hasSize(2),
 
                 () -> assertThat(results)
+                        .as("All messages should contain the token header")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
+                                        .isEqualTo(REQUEST_TOKEN.getBytes())),
 
                 () -> assertAll("Start and End of stream markers have the correct headers",
                         () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
@@ -253,7 +271,7 @@ class KafkaContractTest {
         assertThat(errorResults)
                 .hasSize(1)
                 .allSatisfy(result -> assertThat(result.headers().lastHeader(Token.HEADER).value())
-                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
+                        .isEqualTo(REQUEST_TOKEN.getBytes()))
                 .allSatisfy(result -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching invalid-user-id found in cache"));
     }
@@ -273,8 +291,8 @@ class KafkaContractTest {
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we POST to the rest endpoint
-        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<UserRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(REQUEST_TOKEN));
+        HttpEntity<UserRequest> entity = new HttpEntity<>(REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/user", entity, Void.class);
 
         // Then - the REST request was accepted
@@ -290,15 +308,19 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check one message is on the output topic")
                         .hasSize(1),
 
                 () -> assertThat(results)
+                        .as("Check the message has the correct header")
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                    .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
+                                    .isEqualTo(REQUEST_TOKEN.getBytes());
 
                             assertThat(result.value())
-                                    .isEqualTo(ContractTestData.REQUEST_OBJ);
+                                    .as("Check the UserRequest has been processed correctly")
+                                    .usingRecursiveComparison()
+                                    .isEqualTo(REQUEST_OBJ);
                         })
         );
     }
