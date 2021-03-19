@@ -33,7 +33,7 @@ import java.util.StringJoiner;
 /**
  * The UserRequest is the input for User Service, it contains a UserId value to identify the User associated with the request.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse is the object sent from the Palisade Service, if request was accepted.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse is the object sent from the Palisade Service, if the request was accepted.
  * uk.gov.gchq.palisade.service.user.request.UserRequest contains the request information from the Palisade Service which is required to find a valid User.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
