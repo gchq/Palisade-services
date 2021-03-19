@@ -28,11 +28,14 @@ data:
       kafka:
         consumer.topics:
           input-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}input-topic.name: {{ .Values.global.topicPrefix }}resource {{ end }}
         producer.topics:
           output-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}output-topic.name: {{ .Values.global.topicPrefix }}rule {{ end }}
           error-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}error-topic.name: {{ .Values.global.topicPrefix }}error {{ end }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless
+      - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092
   application-redis.yaml: |
     {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
