@@ -28,7 +28,6 @@ spec:
   ports:
   - name: palisade-zookeeper
     port: 2181
-
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
 {{- if eq .Values.global.hosting "aws" }}
