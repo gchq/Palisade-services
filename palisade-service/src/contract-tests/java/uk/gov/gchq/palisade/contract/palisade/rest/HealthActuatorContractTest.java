@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 /**
  * SpringBoot Starter Actuator is a service loaded-up by adding the spring-boot-starter-actuator as a dependency to the
  * project and configured in the application.yaml file.  It is a service which provides information on the application
- * and is being used to monitor the "health" of the palisade service.  If there is an indication that this service has
+ * and is being used to monitor the "health" of the Palisade Service. If there is an indication that this service has
  * fallen over, this information can be used to restore the service.
  */
 @SpringBootTest(

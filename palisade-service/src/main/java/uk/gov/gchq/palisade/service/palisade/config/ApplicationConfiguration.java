@@ -39,7 +39,7 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return a new instance of the ObjectMapper
      */

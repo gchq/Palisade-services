@@ -51,7 +51,7 @@ public class PalisadeApplication {
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runner          the runner
-     * @param materialiser    the Akka {@link Materialiser} configured to be used
+     * @param materialiser    the Akka {@link Materializer} configured to be used
      * @param palisadeService the palisade service
      */
     public PalisadeApplication(

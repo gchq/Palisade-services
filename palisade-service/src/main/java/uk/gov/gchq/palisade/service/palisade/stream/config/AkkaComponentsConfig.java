@@ -56,12 +56,10 @@ public class AkkaComponentsConfig {
     @Bean
     @Primary
     Sink<ProducerRecord<String, byte[]>, CompletionStage<Done>> responseSink(final ActorSystem actorSystem) {
-
         ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
                 SerDesConfig.requestKeySerialiser(),
                 SerDesConfig.passthroughValueSerialiser());
-
         return OUTPUT_COMPONENTS.plainProducer(producerSettings);
     }
 
