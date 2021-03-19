@@ -38,7 +38,6 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;

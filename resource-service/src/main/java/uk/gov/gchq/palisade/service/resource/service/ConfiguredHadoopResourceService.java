@@ -24,13 +24,29 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.io.IOException;
 
+/**
+ * Extend a Hadoop Resource Service by making it aware of all data-services available to it through
+ * the connectionDetail of added leafResources.
+ */
 public class ConfiguredHadoopResourceService extends HadoopResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfiguredHadoopResourceService.class);
 
+    /**
+     * Create a {@link HadoopResourceService} using the supplied hadoop {@link Configuration}
+     *
+     * @param configuration an apache hadoop configuration
+     * @throws IOException if the filesystem specified is unavailable
+     */
     public ConfiguredHadoopResourceService(final Configuration configuration) throws IOException {
         super(configuration);
     }
 
+    /**
+     * Add a {@link LeafResource} to the service, also adding the leaf's connection detail to the service
+     *
+     * @param leafResource the resource that Palisade can manage access to
+     * @return true if the leafResource was added successfully
+     */
     @Override
     public Boolean addResource(final LeafResource leafResource) {
         LOGGER.info("Adding connectionDetail {} for leafResource {}", leafResource.getConnectionDetail(), leafResource);

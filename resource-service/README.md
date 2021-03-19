@@ -18,13 +18,7 @@ limitations under the License.
 
 # Resource Service
 
-> :warning:
-Windows users will have problems with Hadoop integration testing. 
-Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries. 
-To 'install' on Windows, copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. 
-This should enable the `HadoopResourceServiceTest` to run correctly. 
-
-At it's core, the Resource Service is an implementation of the `ResourceService` interface:
+At it's core, the Resource Service is an implementation of the `ResourceService` interface and its associated POJOs:
 ```java
 interface ResourceService {
     Iterator<LeafResource> getResourcesById(final String resourceId);
@@ -35,23 +29,55 @@ interface ResourceService {
 
     Boolean addResource(final LeafResource resource);
 }
+
+interface LeafResource extends Resource {
+    String getType();
+
+    String getSerialisedFormat();
+
+    ConnectionDetail getConnectionDetail();
+}
+
+interface Resource {
+    String getId();
+
+    Resource getParent();
+}
 ```
 
 This implementation is then wrapped with various service layers to work with the Palisade streaming architecture. 
 These additional layers include:
-* Pulling requests from an upstream kafka topic and writing responses to a downstream topic - see [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/resource/stream/config/AkkaRunnableGraph.java)
-* 'Caching' resources returned by previous `ResourceService` calls - see [ResourceServicePersistenceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/ResourceServicePersistenceProxy.java)
-* Catching all errors and writing to a kafka error topic
+* Pulling requests from an upstream kafka topic and writing responses to a downstream topic, or an error topic if an exception was thrown -
+  see [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/resource/stream/config/AkkaRunnableGraph.java)
+* Calling the provided implementation of the `ResourceService` -
+  see [SimpleResourceService](src/main/java/uk/gov/gchq/palisade/service/resource/service/SimpleResourceService.java) or [ConfiguredHadoopResourceService](src/main/java/uk/gov/gchq/palisade/service/resource/service/ConfiguredHadoopResourceService.java)
+* 'Caching' resources returned by previous `ResourceService` calls -
+  see [ResourceServicePersistenceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/ResourceServicePersistenceProxy.java) and [ReactivePersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/ReactivePersistenceLayer.java)
+
+> :warning:
+One provided implementation of this `ResourceService` interface is the [ConfiguredHadoopResourceService](src/main/java/uk/gov/gchq/palisade/service/resource/service/ConfiguredHadoopResourceService.java). 
+Windows users will have problems with Hadoop integration testing. 
+Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries. 
+To 'install' on Windows, copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. 
+This should enable the `HadoopResourceServiceTest` to run correctly. 
 
 
 ## Flow of Control
 
+### [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/resource/stream/config/AkkaRunnableGraph.java)
 The Resource Service accepts an incoming message from the `user` Kafka topic as processed by the [User Service](../user-service) which contains the `resourceId` that is being accessed. 
 This `resourceId` could be an actual file, or a directory that could contain many files and/or sub-directories. 
+The `resourceId` is then used as a query returning all `LeafResource`s under that path (eg. this may be all files in all (sub-)directories).
+All the returned resources will be within an Akka stream and each element in the stream is added to the `resource` Kafka topic to be processed by the [Policy Service](../policy-service). 
+If an exception was thrown, it is written to the `error` Kafka topic, along with suitable identifying metadata. 
+
+### [ResourceServicePersistenceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/ResourceServicePersistenceProxy.java)
 The service will then query the 'cache' backing store to see if the requested `resourceId` has been stored. 
+A successful response from this implementation will then be added to the backing store, but errors are ignored. 
 If this is not the case then the request will be passed onto the local implementation of the Resource Service. 
-A successful response from this implementation will then be added to the backing store, but errors are ignored.
-All the returned resources will be within an Akka stream and each element in the stream is consumed and added to the `resource` Kafka topic to be processed by the [Policy Service](../policy-service). 
+
+### ResourceService implementation, eg. [SimpleResourceService](src/main/java/uk/gov/gchq/palisade/service/resource/service/SimpleResourceService.java)
+The `resourceId` is treated as a file path in this case, and the returned resources come from Java's `Files::walk`. 
 
 
 ## Kafka Message Model
@@ -78,6 +104,7 @@ Once all the`ResourceResponse`s have been written to the topic, the `END` messag
 If any errors are thrown within the service, the original request, along with the thrown exception are captured in an `AuditErrorMessage` and written to the Kafka `error` topic. 
 
 ### Stream Markers
+
 The use of these `START` and `END` marker messages are because of a combination of the Resource, Policy and Filtered Resource Services. 
 For a given token and resourceId requested, the Resource Service may produce an unknown number of `ResourceResponse`s. 
 The `START` and `END` allow for any number of messages in between to be arbitrarily created, deleted, and delayed as long as the collection starts and ends the same. 
@@ -171,9 +198,9 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 ### Motivation
 
 To ease load on an external resource-service provider, a cache-like storage mechanism is used to return data for previously-queried resources. 
-The code for this can be found in the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [ReactivePersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/ReactivePersistenceLayer.java). 
+The code for this is mostly found in the [ReactivePersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/ReactivePersistenceLayer.java). 
 
-Due to the tree-structure of filesystems, native caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. 
+Due to the tree-structure of filesystems, native caching of requests-to-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. 
 For example, requesting `/some/directory/with-lots-of-files` may return (and cache) 1000 resources, but requesting `/some/directory` will result in a cache miss, as would `/some/directory/with-lots-of-files/big-subdirectory`. 
 Instead, a persistence store is used to break resource trees apart into their individual nodes and store them separately, reconstructing parents and tree structure when requested again.
 
@@ -219,14 +246,13 @@ A request to the resource-service may then look like:
 
 This is all achieved in non-blocking reactive streams, allowing for large datasets and long IO-blocking service queries with minimal memory and CPU footprint.
 
-### Prepopulating the Resource Cache
+### Pre-populating the Resource Service and Cache Warming
 
-It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
-using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
-[testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
+It may be that some example resources may need to be added to the backing store before a test run of the Palisade system gets performed.
+This is done by using Spring to add resource(s) to the implementation using data sourced from a yaml profile.
+An example of this can be seen in this [testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
 
 
 ## License
 
-Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered
-by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
+Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).

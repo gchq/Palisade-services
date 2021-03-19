@@ -20,11 +20,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import uk.gov.gchq.palisade.resource.ParentResource;
 
-// Erase parent when storing entity clob, it will be rebuilt
+/**
+ * The ResourceRepository stores indexable fields and a JSON CLOB for all persisted resources.
+ * This includes, for any given persisted resource, its parent id, which will also be persisted.
+ * Erase parent when storing JSON, it will be rebuilt using the repository.
+ */
+// Must be abstract class, not interface, to be used as mixin
+@SuppressWarnings("java:S1610")
 public abstract class OrphanedChildJsonMixin {
+    /**
+     * Ignore the parent field when serialising to JSON.
+     *
+     * @return irrelevant
+     */
     @JsonIgnore
     abstract ParentResource getParent();
 
+    /**
+     * Ignore the parent field when deserialising from JSON.
+     *
+     * @param resource irrelevant
+     */
     @JsonIgnore
     abstract void setParent(ParentResource resource);
 }
