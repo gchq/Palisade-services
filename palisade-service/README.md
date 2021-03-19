@@ -19,14 +19,14 @@ limitations under the License.
 # Palisade Service
 
 The Palisade Service is the entry point into the rest of the Palisade Services, it accepts a request from the client and passes it forwards to the User Service to continue on the processing of the request. 
-The client then receives a token used to connect to the Filtered Resource Service and retrieve the processed request.
+The client then receives a token used to connect to the Filtered Resource Service and retrieve the processed data.
 
 ## High-Level Architecture
 <!--- 
 See palisade-service/doc/palisade-service.drawio for the source of this diagram
 --->
 ![Palisade Service diagram](doc/palisade-service.png)
-THe routing of requests is shown in the diagram above. The yellow boxes indicate the client, and the purple are kafka topics.
+The routing of requests is shown in the diagram above. The yellow boxes indicate the client, and the purple are kafka topics.
 
 ## Message Model and Database Domain
 

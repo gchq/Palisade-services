@@ -27,8 +27,8 @@ import uk.gov.gchq.palisade.service.palisade.CommonTestData;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
-import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -72,7 +72,7 @@ class PalisadeServiceTest extends CommonTestData {
         // When we make a request to the client
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
         // And then force an error to be returned, signifying a rejected request
-        service.errorMessage(PALISADE_REQUEST, token.join(), Collections.singletonMap("messages", "10"), ERROR);
+        service.errorMessage(PALISADE_REQUEST, token.join(), Map.of("messages", "10"), ERROR);
 
         // Then the response is valid and contains all the information we require
         assertAll(
