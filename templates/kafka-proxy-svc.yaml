@@ -28,7 +28,6 @@ spec:
   ports:
   - name: palisade-kafka
     port: 9092
-
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
 {{- if eq .Values.global.hosting "aws" }}
@@ -40,4 +39,3 @@ spec:
   ports:
   - port: 9092
 {{- end }}
-
