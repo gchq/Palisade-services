@@ -115,7 +115,7 @@ This includes being added to the cache, so that the basic `NullUserService` impl
 
 **Note:** This means that after the cache eviction TTL (Time To Live), found in [application.yaml](src/main/resources/application.yaml), the User Service will no longer contain any user information.
  
-An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds a basic user to the backing store when the service starts up.
+An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds a basic user to the cache when the service starts up.
 
 How to override the uploaded users:
 1. Create a new `User` class
