@@ -35,7 +35,8 @@ metadata:
     type: amazonEFS
     {{- end }}
   annotations:
-    "helm.sh/hook": "before-hook-creation, pre-install, pre-upgrade"
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   accessModes:
   - ReadWriteMany
