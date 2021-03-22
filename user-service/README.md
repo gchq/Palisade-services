@@ -36,14 +36,14 @@ See user-service/doc/user-service.drawio for the source of this diagram
 
 ## Message Model and Database Domain
 
-| UserRequest     | UserResponse     | AuditErrorMessage | AuditableUserResponse |
-|:----------------|:-----------------|:------------------|:----------------------|
-| *token          | *token           | *token            | *token                | 
-| userId          | userId           | userId            | UserResponse          |  
-| resourceId      | resourceId       | resourceId        | AuditErrorMessage     |
-| context         | context          | context           |                       |
-|                 | User             | exception         |                       | 
-|                 |                  | serverMetadata    |                       |
+| UserRequest     | UserResponse     | AuditErrorMessage |
+|:----------------|:-----------------|:------------------|
+| *token          | *token           | *token            |
+| userId          | userId           | userId            |
+| resourceId      | resourceId       | resourceId        |
+| context         | context          | context           |
+|                 | User             | exception         |
+|                 |                  | serverMetadata    |
   
 (fields marked with * are acquired from headers metadata)
 
@@ -81,7 +81,7 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
 ```
 
 
-## Example JSON Response
+## Example JSON Kafka Topic ('user') Output
 ```
 '{
   "userId": "test-user-id",
