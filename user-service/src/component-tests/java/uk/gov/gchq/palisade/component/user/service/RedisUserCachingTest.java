@@ -81,25 +81,31 @@ class RedisUserCachingTest {
 
     @Test
     void testContextLoads() {
-        assertThat(cacheProxy).isNotNull();
-        assertThat(redisTemplate).isNotNull();
+        assertThat(cacheProxy)
+                .as("Check that the UserService has loaded the caching layer")
+                .isNotNull();
+
+        assertThat(redisTemplate)
+                .as("Check that Redis is ready")
+                .isNotNull();
     }
 
     @Test
     void testAddedUserIsRetrievable() {
-        // Given
-        User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
+        // Given we create a new User and UserRequest
+        var user = new User().userId("added-user")
+                .addAuths(Collections.singleton("authorisation"))
+                .addRoles(Collections.singleton("role"));
 
-        // When
-        User addedUser = cacheProxy.addUser(user);
-        // Then
-        assertThat(addedUser).isEqualTo(user);
+        // When we add the user to the cache
+        cacheProxy.addUser(user);
+        var addedUser = cacheProxy.getUser(user.getUserId().getId());
 
-        // When
-        User getUser = cacheProxy.getUser(request.userId);
         // Then
-        assertThat(getUser).isEqualTo(user);
+        assertThat(addedUser)
+                .as("Check that the retrieved User is the same as the User we created")
+                .usingRecursiveComparison()
+                .isEqualTo(user);
     }
 
     @Test
@@ -107,50 +113,69 @@ class RedisUserCachingTest {
         // Given the user is not added to the cache
 
         // When we get the user from the cache
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> cacheProxy.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException"
-        );
+        var noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> cacheProxy.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted
-        // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching definitely-not-a-real-user found in cache");
+        assertThat(noSuchUserId)
+                .as("Check that the correct message is added to the Exception")
+                .extracting("Message")
+                .isEqualTo("No userId matching definitely-not-a-real-user found in cache");
     }
 
     @Test
     void testUpdateUser() {
         // Given we create an original user, and then update the users auths and roles
-        User originalUser = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
-        User updatedUser = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
+        User originalUser = new User().userId("updatable-user")
+                .addAuths(Collections.singleton("auth"))
+                .addRoles(Collections.singleton("role"));
+
+        User updatedUser = new User().userId(originalUser.getUserId())
+                .addAuths(Collections.singleton("newAuth"))
+                .addRoles(Collections.singleton("newRole"));
 
         // When we add the original User
         cacheProxy.addUser(originalUser);
-        // Then update the original User
+        // Then update the same User
         cacheProxy.addUser(updatedUser);
 
         // When we get the updated user
         User returnedUser = cacheProxy.getUser(updatedUser.getUserId().getId());
 
         // Then the User has been updated
-        assertThat(returnedUser).isEqualTo(updatedUser);
+        assertThat(returnedUser)
+                .as("Check that the original User has been updated")
+                .usingRecursiveComparison()
+                .isEqualTo(updatedUser);
     }
 
     @Test
     void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
-        User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
+        User user = new User().userId("ttl-test-user")
+                .addAuths(Collections.singleton("authorisation"))
+                .addRoles(Collections.singleton("role"));
+
+        UserRequest request = UserRequest.Builder.create()
+                .withUserId(user.getUserId().getId())
+                .withResourceId("test/resource")
+                .withContext(new Context().purpose("purpose"));
+
+        // When we add the user to the cache
         cacheProxy.addUser(user);
 
+        // Then sleep for longer than the ttl duration
         TimeUnit.SECONDS.sleep(1);
 
         // When - we try to access stale cache data
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> cacheProxy.getUser(request.userId), "testTTL should throw noSuchIdException"
-        );
+        var noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> cacheProxy.getUser(request.userId), "testTTL should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted
-        // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching ttl-test-user found in cache");
+        assertThat(noSuchUserId)
+                .as("Check that the correct message is added to the Exception")
+                .extracting("Message")
+                .isEqualTo("No userId matching ttl-test-user found in cache");
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
