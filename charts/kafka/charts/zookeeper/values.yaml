@@ -100,9 +100,9 @@ podAnnotations: {}  # Arbitrary non-identifying metadata for zookeeper pods.
   # prometheus.io/path: "/metrics"
   # prometheus.io/port: "9141"
 
-podLabels: {}  # Key/value pairs that are attached to zookeeper pods.
+podLabels:  # Key/value pairs that are attached to zookeeper pods.
   # team: "developers"
-  # service: "zookeeper"
+  service: "palisade-zookeeper"
 
 # Zookeeper pod Security Context
 securityContext:
