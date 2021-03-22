@@ -56,13 +56,13 @@ class AuditErrorMessageTest {
         var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
 
         assertThat(actualInstance)
-                .as("Ignoring the error, check using recursion that %s has been deserialized successfully", auditErrorMessage.getClass().getSimpleName())
+                .as("Using recursion, check that the %s object has been deserialised successfully, ignoring the error field", auditErrorMessage.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessage);
 
         assertThat(actualInstance)
-                .as("Extracting the exception, check it has been deserialized successfully")
+                .as("Extracting the exception, check it has been deserialised successfully")
                 .extracting(AuditErrorMessage::getError)
                 .isExactlyInstanceOf(Throwable.class)
                 .extracting("Message")

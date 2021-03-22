@@ -48,7 +48,7 @@ class ResourceRequestTest {
         var actualInstance = mapper.readValue(actualJson, resourceRequest.getClass());
 
         assertThat(actualInstance)
-                .as("Check using recursion that the %s has been deseralized successfully", resourceRequest.getClass().getSimpleName())
+                .as("Using recursion, check that the %s object has been deserialised successfully", resourceRequest.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .isEqualTo(resourceRequest);
     }

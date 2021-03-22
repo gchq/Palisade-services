@@ -222,7 +222,7 @@ class KafkaContractTest {
         // Then - the results are as expected
         assertAll(
                 () -> assertThat(results)
-                        .as("The correct number of messages are returned")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(2),
 
                 () -> assertThat(results)

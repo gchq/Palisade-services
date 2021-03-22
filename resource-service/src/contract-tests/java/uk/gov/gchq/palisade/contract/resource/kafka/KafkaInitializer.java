@@ -124,19 +124,19 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
             try {
                 return MAPPER.writeValueAsBytes(resourceRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + resourceRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + resourceRequest.toString(), e);
             }
         }
     }
 
-    // Deserializer for downstream test output
+    // Deserialiser for downstream test output
     static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] resourceResponse) {
             try {
                 return MAPPER.readTree(resourceResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(resourceResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(resourceResponse), e);
             }
         }
     }
