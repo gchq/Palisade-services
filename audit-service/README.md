@@ -21,6 +21,13 @@ limitations under the License.
 The Audit service accepts incoming messages on the `error` and `success` Kafka topics, these messages contain all the details of the initial request and any other relevant information. 
 This information will be passed to any local audit services that have been implemented. This service does not have any output Kafka topics.
 
+## High level architecture
+
+<!--- 
+See audit-service/doc/audit-service.drawio for the source of this diagram
+--->
+![Audit Service diagram](doc/audit-service.png)
+
 ## Message model
 
 | AuditSuccessMessage | AuditErrorMessage | 
@@ -51,7 +58,7 @@ This type of message can only be sent from either the Filtered Resource Service 
 This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
 
 If the message on the `success` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.
-This value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
+This directory value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
 Any files that are created will have the same template for the file name, `Success-Timestamp`.
 
 ## Kafka Interface
