@@ -339,7 +339,9 @@ metrics:
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9121"
-  # podLabels: {}
+  podLabels:
+    # Add label to advertise this POD as providing palisade-redis-cluster services
+    service: palisade-redis-cluster
 
   # Enable this if you're using https://github.com/coreos/prometheus-operator
   serviceMonitor:
