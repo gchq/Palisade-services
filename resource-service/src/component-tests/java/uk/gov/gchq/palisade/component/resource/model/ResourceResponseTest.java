@@ -42,7 +42,7 @@ class ResourceResponseTest {
     private ObjectMapper mapper;
 
     @Test
-    void testSerializeResourceResponseToJson() throws IOException {
+    void testSerialiseResourceResponseToJson() throws IOException {
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
