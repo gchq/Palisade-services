@@ -81,7 +81,8 @@ then an error is logged in the service logs
 
 The application will not receive any `START` or `END` messages on either the `success` or `error` Kafka topics. The `success` topic will only consist of AuditSuccessMessage objects and the `error` topic will only consist of AuditErrorMessage objects. The
 service will consume these messages and process them accordingly but there is no output from this service, instead it will acknowledge the incoming message so that it does not get processed more than once.
-The processing of
+The messages from each topic are processed by the [RunnableGraph](src/main/java/uk/gov/gchq/palisade/service/audit/stream/config/AkkaRunnableGraph.java). This takes the deserialised message and passes it into the 
+[Audit Service Proxy](src/main/java/uk/gov/gchq/palisade/service/audit/service/AuditServiceAsyncProxy.java) to be checked and then audited by all the service implementations.
 
 ## Rest Interface
 
