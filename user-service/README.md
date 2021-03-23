@@ -34,7 +34,7 @@ See user-service/doc/user-service.drawio for the source of this diagram
 --->
 ![User Service diagram](doc/user-service.png)
 
-## Message Model and Database Domain
+## Message Model
 
 | UserRequest     | UserResponse     | AuditErrorMessage |
 |:----------------|:-----------------|:------------------|
