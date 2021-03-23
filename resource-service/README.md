@@ -18,32 +18,7 @@ limitations under the License.
 
 # Resource Service
 
-At it's core, the Resource Service is an implementation of the `ResourceService` interface and its associated POJOs:
-```java
-interface ResourceService {
-    Iterator<LeafResource> getResourcesById(final String resourceId);
-
-    Iterator<LeafResource> getResourcesByType(final String type);
-
-    Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat);
-
-    Boolean addResource(final LeafResource resource);
-}
-
-interface LeafResource extends Resource {
-    String getType();
-
-    String getSerialisedFormat();
-
-    ConnectionDetail getConnectionDetail();
-}
-
-interface Resource {
-    String getId();
-
-    Resource getParent();
-}
-```
+At it's core, the Resource Service is an implementation of the `ResourceService` interface found [here](https://github.com/gchq/Palisade-common/blob/develop/src/main/java/uk/gov/gchq/palisade/service/ResourceService.java). 
 
 This implementation is then wrapped with various service layers to work with the Palisade streaming architecture. 
 These additional layers include:
