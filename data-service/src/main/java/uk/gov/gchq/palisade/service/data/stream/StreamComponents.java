@@ -30,8 +30,8 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Default boilerplate templates for creating Akka {@link Sink}s
- * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
+ * Default boilerplate templates for creating Akka {@link Sink}s.
+ * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...).
  *
  * @param <K> generic Key type
  * @param <V> generic Value type
@@ -39,7 +39,7 @@ import java.util.concurrent.CompletionStage;
 public class StreamComponents<K, V> {
 
     /**
-     * Construct an Akka Kafka ProducerSettings from the given config and serialisers
+     * Construct an Akka Kafka ProducerSettings from the given config and serialisers.
      *
      * @param system          the application's actor system used to load config values
      * @param keySerialiser   the stream's key serialiser
@@ -53,7 +53,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct a Kafka Plain Sink for Akka streams (no control over Kafka commits)
+     * Construct a Kafka Plain Sink for Akka streams (no control over Kafka commits).
      *
      * @param producerSettings the producer settings for kafka
      * @return a Kafka-connected Sink for Akka streams

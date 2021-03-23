@@ -59,7 +59,7 @@ public class SimpleDataService implements DataService {
     }
 
     /**
-     * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
+     * Query for the references. It will return the information needed to retrieve the resources. If there is no
      * data to be returned, a {@link ForbiddenException} is thrown.
      *
      * @param dataRequest data provided by the client for requesting the resource

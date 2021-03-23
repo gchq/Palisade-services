@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class contains the data available after the request to authorise the access to the data.  This will include the
+ * The class contains the data available after the request to authorise the access to the data. This will include the
  * data request, {@link DataRequest}, the reference to the data that is authorised to be seen,
  * {@link AuthorisedDataRequest}, and {@link AuditErrorMessage} processing if there was an error in requesting the
  * authorisation.

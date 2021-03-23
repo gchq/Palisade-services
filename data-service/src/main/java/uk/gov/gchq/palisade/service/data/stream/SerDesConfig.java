@@ -29,9 +29,9 @@ import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
 
 /**
- * Static configuration for kafka key/value serialisers
- * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * Static configuration for kafka key/value serialisers.
+ * Each output has a pair of key/value serialisers.
+ * In general, the keys are not used so the choice of serialiser is not important.
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -43,7 +43,7 @@ public final class SerDesConfig {
 
 
     /**
-     * Kafka key serialiser for downstream messages going out as success
+     * Kafka key serialiser for downstream messages going out as success.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -52,7 +52,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as success
+     * Kafka value serialiser for downstream messages going out as success.
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
@@ -67,7 +67,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key serialiser for downstream messages going out as errors
+     * Kafka key serialiser for downstream messages going out as errors.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -76,7 +76,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as errors
+     * Kafka value serialiser for downstream messages going out as errors.
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */

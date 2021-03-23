@@ -29,7 +29,7 @@ import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the Audit Service.  Note all of the services can potentially send an {@code AuditErrorMessage}.
+ * forwarded to the Audit Service. Note all of the services can potentially send an {@code AuditErrorMessage}.
  */
 public final class AuditErrorMessage extends AuditMessage {
 
