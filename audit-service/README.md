@@ -18,7 +18,13 @@ limitations under the License.
 
 # Audit Service
 
-The Audit service accepts incoming messages on the `error` and `success` Kafka topics, these messages contain all the details of the initial request and any other relevant information. 
+The Audit service is an implementation of the [AuditService Interface](src/main/java/uk/gov/gchq/palisade/service/audit/service/AuditService.java) which audits any incoming messages.
+
+The service accepts incoming messages on the `error` and `success` Kafka topics. These messages contain information about the original request and, depending on the message type, will contain either of the following:
+
+1. In the case of an error message, all the details of the error. 
+1. In the case of a success message, the id value of the returned resource.
+
 This information will be passed to any local audit services that have been implemented. This service does not have any output Kafka topics.
 
 ## High level architecture
@@ -27,6 +33,16 @@ This information will be passed to any local audit services that have been imple
 See audit-service/doc/audit-service.drawio for the source of this diagram
 --->
 ![Audit Service diagram](doc/audit-service.png)
+
+## Flow of Control
+
+<!--- 
+See audit-service/doc/audit-service-flow.drawio for the source of this diagram
+--->
+![Audit Service Flow diagram](doc/audit-service-flow.png)
+
+* FRS (Filtered Resource Service)
+* DS (Data Service)
 
 ## Message model
 
@@ -45,35 +61,40 @@ See audit-service/doc/audit-service.drawio for the source of this diagram
 
 *The token value come from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
 
-If an error has occurred at any stage during either the request or read phases then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
-This type of message can be sent from any of the Palisade services (e.g. User Service or Policy Service).
-This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
+If an error has occurred while Palisade is processing a client request then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
+This type of message can be sent from all the Palisade services.
+This message will be read by the Audit Service and passed to the service implementation to allow the details of the error message to be logged.
 
-If the message on the `error` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.
-This value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
-Any files that are created will have the same template for the file name, `Error-Timestamp`.
+If the client request was successful then an AuditSuccessMessage will be added to the `success` Kafka topic by the service that created the success message.
+This type of message can only be sent from either the Filtered Resource Service or the Data Service.
+This message will be read by the Audit Service and passed to the service implementation to allow the details of the success message to be logged.
 
-If the request or read was successful then an AuditSuccessMessage will be added to the `success` Kafka topic by the service that created the success message. 
-This type of message can only be sent from either the Filtered Resource Service (the end of the request phase), or the Data Service (the end of the read phase).
-This message will then be read by the Audit Service and passed onto the local Audit Service implementation to allow the details of the error to be logged.
+If an incoming message cannot be deserialised by the Audit Service then the received message will be added to a file that will be stored within a specified
+directory. The directory is configured by adding the value to the [application.yaml](src/main/resources/application.yaml) configuration file under `audit.errorDirectory`.
+This value can be changed depending on the profile that is used when the service is started.
 
-If the message on the `success` topic cannot be deserialised by the Audit Service then a file, containing the message, will be created and added to the local file system.
-This directory value is configured within the application yaml files and can be set to different values depending on the profile that is used when starting the Audit Service.
-Any files that are created will have the same template for the file name, `Success-Timestamp`.
+The name of the file will contain the topic name the message was read from, either "Success" or "Error", and it will also include the timestamp of when the file was created.
+This is done from within the [SerDesConfig](src/main/java/uk/gov/gchq/palisade/service/audit/stream/SerDesConfig.java) and if there are any issues creating or saving the file
+then an error is logged in the service logs
 
 ## Kafka Interface
 
 The application will not receive any `START` or `END` messages on either the `success` or `error` Kafka topics. The `success` topic will only consist of AuditSuccessMessage objects and the `error` topic will only consist of AuditErrorMessage objects. The
 service will consume these messages and process them accordingly but there is no output from this service, instead it will acknowledge the incoming message so that it does not get processed more than once.
+The processing of
 
 ## Rest Interface
 
-The application exposes one REST endpoint for the purpose of debugging:
+The application exposes two REST endpoints for the purpose of debugging:
 
-* `POST /api/audit`
+* `POST /api/error`
     - accepts an `x-request-token` `String` header, any number of extra headers.
-    - accepts either an `AuditSuccessMessage` or an `AuditErrorMessage` as the request body
-    - returns a `ResponseEntity` with the HTTP status.
+    - accepts an `AuditErrorMessage` as the request body
+    - returns a `ResponseEntity` with the HTTP status `202 ACCETPED`.
+* `POST /api/success`
+  - accepts an `x-request-token` `String` header, any number of extra headers.
+  - accepts an `AuditSuccessMessage` as the request body
+  - returns a `ResponseEntity` with the HTTP status `202 ACCETPED`.
 
 ## Example AuditErrorMessage JSON Request
 

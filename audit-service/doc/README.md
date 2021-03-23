@@ -22,3 +22,7 @@ See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image fr
 See [audit-service.drawio](./audit-service.drawio) for the source for this diagram:
 
 ![Audit Service diagram](./audit-service.png)
+
+See [audit-service-flow.drawio](./audit-service-flow.drawio) for the source for this diagram:
+
+![Audit Service Flow diagram](./audit-service-flow.png)
