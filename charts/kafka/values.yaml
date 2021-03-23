@@ -186,9 +186,8 @@ external:
 podAnnotations: {}
 
 # Labels to be added to Kafka pods
-podLabels: {}
-  # service: broker
-  # team: developers
+podLabels:
+  service: "palisade-kafka"
 
 podDisruptionBudget: {}
   # maxUnavailable: 1  # Limits how many Kafka pods may be unavailable due to voluntary disruptions.
