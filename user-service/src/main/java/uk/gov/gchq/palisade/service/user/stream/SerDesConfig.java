@@ -36,7 +36,6 @@ import java.nio.charset.Charset;
  * The static configuration for kafka key/value serialisers/deserialisers
  * - Each input has a pair of key/value deserialisers
  * - Each output has a pair of key/value serialisers
- * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();

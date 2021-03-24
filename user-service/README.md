@@ -109,7 +109,7 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
 
 ## User pre-population / Cache Warming
 
-This service can be populated with a list of initial users at runtime.
+This service can be populated with a list of initial users at start-up.
 By specifying all the configuration and pre-population factory values, any user information in the configuration list will be added to the service at runtime.
 This includes being added to the cache, so that the basic `NullUserService` implementation, coupled with the `UserServiceCachingProxy`, acts solely using the cache.
 
