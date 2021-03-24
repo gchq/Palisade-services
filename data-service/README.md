@@ -15,17 +15,17 @@ limitations under the License.
 --->
 # Data Service
 
-The Data Service accepts client requests to retrieve resources that have been registered on their behalf. These will be 
-the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly 
-redacted in conformance to the defined rules and to the context of the request. The client is expected to send a 
-request containing the token and resource id that is used to uniquely identify the resource request. The response will 
-be an output stream holding the data resources. To see more information on client requests, see the Palisade Client's 
+The Data Service accepts client requests to retrieve resources that have been registered on their behalf. These will be
+the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly
+redacted in conformance to the defined rules and to the context of the request. The client is expected to send a
+request containing the token and resource id that is used to uniquely identify the resource request. The response will
+be an output stream holding the data resources. To see more information on client requests, see the Palisade Client's
 library.
 
-The key components of the service is the implementation of the DataService interface and the supporting services.  This 
-comes in the form of an implementation of DataService interface, SimpleDataService, that uses the Palisade Reader 
-library for the implementation of a solution using a database. This is then wrapped in a class, AuditableDataService, 
-that will provide the data in a form that can be use in constructing the response that is sent back to the client, and 
+The key components of the service is the implementation of the DataService interface and the supporting services.  This
+comes in the form of an implementation of DataService interface, SimpleDataService, that uses the Palisade Reader
+library for the implementation of a solution using a database. This is then wrapped in a class, AuditableDataService,
+that will provide the data in a form that can be use in constructing the response that is sent back to the client, and
 the audit message that is sent to the Audit Service using the AuditMessageService.
 
 
