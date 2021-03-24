@@ -16,6 +16,5 @@
 @Library('jenkinsfile-lib@feature/Pal-822-jvm-example-pipeline')_
 
 timestamps {
-// comment
     services()
 }
