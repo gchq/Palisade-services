@@ -43,12 +43,17 @@ class PalisadeClientRequestTest extends CommonTestData {
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original response Object.
+     *
      * @throws JsonProcessingException if there was an issue serialising or deseralising the object
      */
     @Test
     void testPalisadeRequestSerialisationAndDeserialisation() throws JsonProcessingException {
         var actualJson = mapper.writeValueAsString(PALISADE_REQUEST);
         var actualInstance = mapper.readValue(actualJson, PALISADE_REQUEST.getClass());
+
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(PALISADE_REQUEST);
 
         assertThat(actualInstance)
                 .as("Recursively check that the PalisadeClientRequest object has not been modified during serialisation")

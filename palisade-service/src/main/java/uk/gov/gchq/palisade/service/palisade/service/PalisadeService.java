@@ -62,12 +62,12 @@ public abstract class PalisadeService {
     public abstract String createToken(PalisadeClientRequest palisadeClientRequest);
 
     /**
-     * This method will forward the data to the "request" Kafka topic where it can be retrieved by the User-Service.
+     * This method will forward the data to the "request" Kafka topic where it can be retrieved by the User Service.
      * The incoming request is in the form of a {@link PalisadeClientRequest} which contains all the information provided by the
      * client for registering this data request. The service will include a unique token to identify this data request and
      * the data relevant to the request.
      * If an error is thrown, a {@link uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage} will be created and
-     * forwarded to the "error" topic where it will be processed by the Audit-Service
+     * forwarded to the "error" topic where it will be processed by the Audit Service
      *
      * @param request The request for data sent from the client, containing the resourceId that the attached user wants access to,
      *                and a reason for why they want access to the resource.
@@ -89,7 +89,7 @@ public abstract class PalisadeService {
     }
 
     /**
-     * This method will forward the data to the "error" Kafka topic where it will be retrieved by the Audit-Service.
+     * This method will forward the data to the "error" Kafka topic where it will be retrieved by the Audit Service.
      * The incoming request is in the form of a {@link PalisadeClientRequest} which contains all the information provided by the
      * client for registering this data request. The service will include a unique token to identify this data request and
      * the data relevant to the request and the error details.

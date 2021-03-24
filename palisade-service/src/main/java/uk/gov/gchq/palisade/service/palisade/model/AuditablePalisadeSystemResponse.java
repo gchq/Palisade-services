@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This class is a container for {@code PalisadeClientRequest} and {@code AuditErrorMessage} during stream processing.
+ * This class is a container for {@code PalisadeClientResponse} and {@code AuditErrorMessage} during stream processing.
  * Under normal conditions only one of these will be non-null, if a PalisadeSystemResponse is attached the the request has been successful,
  * otherwise an AuditErrorMessage will be attached
  */

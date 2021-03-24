@@ -55,6 +55,10 @@ class PalisadeClientResponseTest {
         var actualInstance = mapper.readValue(actualJson, palisadeClientResponse.getClass());
 
         assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(palisadeClientResponse);
+
+        assertThat(actualInstance)
                 .as("Recursively check that the PalisadeClientResponse object has not been modified during serialisation")
                 .usingRecursiveComparison()
                 .isEqualTo(palisadeClientResponse);

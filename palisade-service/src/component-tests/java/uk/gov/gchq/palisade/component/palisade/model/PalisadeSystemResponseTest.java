@@ -55,6 +55,10 @@ class PalisadeSystemResponseTest extends CommonTestData {
         var actualInstance = mapper.readValue(actualJson, SYSTEM_RESPONSE.getClass());
 
         assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(SYSTEM_RESPONSE);
+
+        assertThat(actualInstance)
                 .as("Recursively check that the PalisadeSystemResponse object has not been modified during serialisation")
                 .usingRecursiveComparison()
                 .isEqualTo(SYSTEM_RESPONSE);

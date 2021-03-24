@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 
 /**
  * Response message that is returned to the client.
- * This message contains a unique token to link the request from the client to the data, and is used at the Filtered Resource Service to retrieve data.
+ * This message contains a unique token to link the request from the client to the data, and is used at the Filtered Resource Service to retrieve data via the Data Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PalisadeClientResponse {

@@ -44,7 +44,7 @@ public class PalisadeRestController {
     private final PalisadeService palisadeService;
 
     /**
-     * Constructor for the Palisade-Service Controller.
+     * Constructor for the Palisade Service Controller.
      *
      * @param palisadeService service which processes the request
      */

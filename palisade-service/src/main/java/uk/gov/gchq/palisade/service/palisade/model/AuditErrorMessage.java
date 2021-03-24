@@ -28,7 +28,7 @@ import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request.
- * This information is forwarded to the Audit-Service.
+ * This information is forwarded to the Audit Service.
  * Note all the services can potentially send an error message.
  */
 public final class AuditErrorMessage extends AuditMessage {
@@ -73,7 +73,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request    the request message that was sent to the Palisade-Service
+         * @param request    the request message that was sent to the Palisade Service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */

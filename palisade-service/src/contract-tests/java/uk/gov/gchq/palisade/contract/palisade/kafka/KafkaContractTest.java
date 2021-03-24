@@ -87,7 +87,7 @@ import static org.mockito.ArgumentMatchers.any;
 /**
  * An external requirement of the service is to connect to one kafka topic.
  * The input is the requests for data that come from the client via the website
- * The downstream "request" topic is written to by this service and read by the User-Service.
+ * The downstream "request" topic is written to by this service and read by the User Service.
  */
 @SpringBootTest(
         classes = PalisadeApplication.class,
