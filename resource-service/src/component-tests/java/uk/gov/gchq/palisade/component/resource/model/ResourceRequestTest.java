@@ -17,9 +17,6 @@ package uk.gov.gchq.palisade.component.resource.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -29,15 +26,11 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@JsonTest
-@ContextConfiguration(classes = {ResourceRequestTest.class})
 class ResourceRequestTest {
-
-    @Autowired
-    private ObjectMapper mapper;
 
     @Test
     void testResourceRequestSerializingAndDeseralizing() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         ResourceRequest resourceRequest = ResourceRequest.Builder.create()
                 .withUserId("originalUserId")
                 .withResourceId("testResourceId")

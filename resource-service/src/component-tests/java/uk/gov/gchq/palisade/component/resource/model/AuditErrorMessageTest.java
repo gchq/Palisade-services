@@ -17,9 +17,6 @@ package uk.gov.gchq.palisade.component.resource.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
@@ -29,12 +26,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@JsonTest
-@ContextConfiguration(classes = {AuditErrorMessageTest.class})
 class AuditErrorMessageTest {
-
-    @Autowired
-    private ObjectMapper mapper;
 
     /**
      * Tests the creation of the message type, AuditErrorMessage using the builder
@@ -45,6 +37,7 @@ class AuditErrorMessageTest {
      */
     @Test
     void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("testResourceId")
