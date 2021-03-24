@@ -114,7 +114,6 @@ class DataControllerTest {
         verify(serviceMock, times(1)).authoriseRequest(any());
         verify(serviceMock, times(1)).read(any(), any());
         verify(auditMessageServiceMock, times(1)).auditMessage(any());
-
     }
 
     /**
