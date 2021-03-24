@@ -118,7 +118,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode resourceRequest) {
             try {
@@ -130,7 +130,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] resourceResponse) {
             try {
