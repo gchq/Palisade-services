@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Parse and convert Spring maps and lists to Akka configs
+ * Parse and convert Spring maps and lists to Akka configs.
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");

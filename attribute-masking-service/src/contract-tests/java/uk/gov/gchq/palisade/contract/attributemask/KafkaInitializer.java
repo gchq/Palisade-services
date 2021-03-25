@@ -53,7 +53,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
- * Common test file used configure Kafka for use in the KafkaContractTests
+ * Common test file used configure Kafka for use in the KafkaContractTests.
  */
 public class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")

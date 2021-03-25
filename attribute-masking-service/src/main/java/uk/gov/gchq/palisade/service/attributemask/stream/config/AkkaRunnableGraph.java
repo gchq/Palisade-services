@@ -55,8 +55,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication}
- * Configures the connection between Kafka, Akka and the service
+ * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication}.
+ * Configures the connection between Kafka, Akka and the service.
  */
 @Configuration
 public class AkkaRunnableGraph {

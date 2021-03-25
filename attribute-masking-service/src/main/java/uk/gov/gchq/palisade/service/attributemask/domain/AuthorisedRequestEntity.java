@@ -41,7 +41,7 @@ import java.util.StringJoiner;
  * An entity for access to a single leafResource with a set of rules (and user/context to apply)
  * to be persisted in a repository/database. A (unique) key is created from the concatenation of
  * the token and leafResource id, which is used for indexing. This will later be retrieved by the
- * data-service to assert the client's access has been authorised and the rules for such access.
+ * Data Service to assert the client's access has been authorised and the rules for such access.
  */
 @Entity
 @Table(
@@ -94,13 +94,13 @@ public class AuthorisedRequestEntity {
 
     /**
      * Constructor for an AuthorisedRequestEntity to be persisted in a repository/database.
-     * A (unique) key is created from the concatenation of the token and leafResource id, which is used for indexing
+     * A (unique) key is created from the concatenation of the token and leafResource id, which is used for indexing.
      *
-     * @param token        the token {@link String} for the client request as a whole, created by the palisade-service
-     * @param user         the {@link User} as authorised and returned by the user-service
-     * @param leafResource one of many {@link LeafResource} as discovered and returned by the resource-service
+     * @param token        the token {@link String} for the client request as a whole, created by the Palisade Service
+     * @param user         the {@link User} as authorised and returned by the User Service
+     * @param leafResource one of many {@link LeafResource} as discovered and returned by the Resource Rervice
      * @param context      the {@link Context} as originally supplied by the client
-     * @param rules        the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
+     * @param rules        the {@link Rules} that will be applied to the resource and its records as returned by the Policy Service
      */
     @PersistenceConstructor
     public AuthorisedRequestEntity(final String token, final User user, final LeafResource leafResource, final Context context, final Rules<?> rules) {
@@ -189,7 +189,7 @@ public class AuthorisedRequestEntity {
     }
 
     /**
-     * Helper class for mapping tokens and resourceIds to a (unique) product of the two
+     * Helper class for mapping tokens and resourceIds to a (unique) product of the two.
      */
     public static class AuthorisedRequestEntityId {
         private final String token;

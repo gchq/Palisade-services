@@ -31,12 +31,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * AttributeMaskingResponse represents the output for attribute-masking-service which will include redacted data schema that is to be
+ * AttributeMaskingResponse represents the output for Attribute Masking Service which will include redacted data schema that is to be
  * provided to the client.
- * This will be forwarded to the filtered-resource-service in preparation for the client's request for the related Resource.
+ * This will be forwarded to the Filtered Resource Service in preparation for the client's request for the related Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse is the output from the attribute-masking-service.
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the filtered-resource-service.
+ * uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse is the output from the Attribute Masking Service.
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Filtered Resource Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AttributeMaskingResponse {
@@ -108,7 +108,7 @@ public final class AttributeMaskingResponse {
          * This method is called followed by the call to add user with the IUserId interface to create the
          * AttributeMaskingResponse class.
          *
-         * @param request message that was sent to the attribute-masking-service
+         * @param request message that was sent to the Attribute Masking Service
          * @return interface  {@link IResourceId} for the next step in the build.
          */
         public static IResource create(final AttributeMaskingRequest request) {

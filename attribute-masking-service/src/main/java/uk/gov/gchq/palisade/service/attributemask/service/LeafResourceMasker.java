@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
 /**
  * Mask the leafResource, removing any sensitive information - this may later include
  * applying a separate set of attributeRules, distinct from resourceRules and recordRules.
- * For now, it simply extends a  UnaryOperator interface
+ * For now, it simply extends a  UnaryOperator interface.
  */
 public interface LeafResourceMasker extends UnaryOperator<LeafResource> {
 }

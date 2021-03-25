@@ -44,7 +44,7 @@ public class AttributeMaskingAspect {
     private static final String MRA = "maskResourceAttributes";
 
     /**
-     * Pointcut for all public methods of {@link AttributeMaskingService}
+     * Pointcut for all public methods of {@link AttributeMaskingService}.
      */
     @Pointcut("execution(* uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService.*(..))")
     public void serviceMethods() {
@@ -52,7 +52,7 @@ public class AttributeMaskingAspect {
     }
 
     /**
-     * Around aspect for method calls, handle and swallow exceptions
+     * Around aspect for method calls, handle and swallow exceptions.
      * @param pjp method call metadata
      * @return audit object and method return value container
      */

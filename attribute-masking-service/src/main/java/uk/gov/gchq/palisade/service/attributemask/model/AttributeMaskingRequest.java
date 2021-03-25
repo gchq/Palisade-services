@@ -34,12 +34,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The AttributeMaskingRequest is the input for attribute-masking-service for preliminary processing and routing of the data.
+ * The AttributeMaskingRequest is the input for Attribute Masking Service for preliminary processing and routing of the data.
  * AttributeMaskingResponse is the output for this service which will have the redacted data schema that is to be
  * provided to the client.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the attribute-masking-service.
+ * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Policy Service.
+ * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the Attribute Masking Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AttributeMaskingRequest {

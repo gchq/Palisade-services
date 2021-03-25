@@ -38,13 +38,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The attribute-masking-service is the final transformation the palisade system applies
+ * The Attribute Masking Service is the final transformation the palisade system applies
  * to resources before they are returned.
  * The service performs two functions:
  * - Store the full details of the authorised request in a persistence store, to be later
- * retrieved by the data-service
+ * retrieved by the Data Service;
  * - Mask the leafResource, removing any sensitive information - this may later include
- * applying a separate set of attributeRules, distinct from resourceRules and recordRules
+ * applying a separate set of attributeRules, distinct from resourceRules and recordRules.
  */
 public class AttributeMaskingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeMaskingService.class);
@@ -53,7 +53,7 @@ public class AttributeMaskingService {
 
     /**
      * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
-     * as well as the appropriate masking function
+     * as well as the appropriate masking function.
      *
      * @param persistenceLayer the implementation of a PersistenceLayer to use
      * @param resourceMasker   the implementation of a LeafResourceMasker to use
@@ -80,7 +80,7 @@ public class AttributeMaskingService {
     }
 
     /**
-     * Given a nullable request, unwrap and store the request if it is non-null, ignore it if it is null
+     * Given a nullable request, unwrap and store the request if it is non-null, ignore it if it is null.
      *
      * @param token           the token for the client request as a whole
      * @param nullableRequest the request to the service
@@ -119,7 +119,7 @@ public class AttributeMaskingService {
     }
 
     /**
-     * Given a nullable request, unwrap the request and mask the resource if it is non-null, ignore it if it is null
+     * Given a nullable request, unwrap the request and mask the resource if it is non-null, ignore it if it is null.
      *
      * @param nullableRequest the request to the service
      * @return a nullable response, with a masked resource if appropriate

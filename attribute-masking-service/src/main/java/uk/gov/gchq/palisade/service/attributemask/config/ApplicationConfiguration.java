@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.concurrent.Executor;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
 public class ApplicationConfiguration {
