@@ -34,14 +34,14 @@ The routing of requests is shown in the diagram above. The yellow boxes indicate
 
 ## Message Model and Database Domain
 
-| PalisadeRequest | PalisadeClientResponse | PalisadeSystemResponse | AuditErrorMessage | 
-|:----------------|:-----------------------|:-----------------------|:------------------|
-| userId          | *token                 | *token                 | *token            | 
-| resourceId      |                        | userId                 | userId            |  
-| context         |                        | resourceId             | resourceId        |
-|                 |                        | context                | context           | 
-|                 |                        |                        | exception         | 
-|                 |                        |                        | serverMetadata    | 
+| PalisadeClientRequest | PalisadeClientResponse | PalisadeSystemResponse | AuditErrorMessage | 
+|:----------------------|:-----------------------|:-----------------------|:------------------|
+| userId                | *token                 | *token                 | *token            | 
+| resourceId            |                        | userId                 | userId            |  
+| context               |                        | resourceId             | resourceId        |
+|                       |                        | context                | context           | 
+|                       |                        |                        | exception         | 
+|                       |                        |                        | serverMetadata    | 
 
 (fields marked with * are acquired from headers metadata)
 
