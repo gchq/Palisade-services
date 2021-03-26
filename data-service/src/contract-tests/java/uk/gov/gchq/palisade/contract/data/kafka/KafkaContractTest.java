@@ -184,7 +184,7 @@ public class KafkaContractTest {
     }
 
     /**
-     * Tests the handling of the successful messages on the kafka stream for Data Service. The expected results will be an
+     * Tests the handling of the successful messages on the kafka stream for the Data Service. The expected results will be an
      * AuditSuccessMessage on a Kafka stream to the "success-topic" and return HTTP Accepted.
      */
     @Test
