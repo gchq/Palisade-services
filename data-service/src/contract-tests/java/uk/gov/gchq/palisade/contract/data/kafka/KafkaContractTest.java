@@ -127,7 +127,7 @@ public class KafkaContractTest {
     }
 
     /**
-     * Tests the handling of the error messages on the kafka stream for Data Service.  The expected results will be an
+     * Tests the handling of the error messages on the kafka stream for the Data Service.  The expected results will be an
      * AuditErrorMessage on a Kafka stream to the "error-topic" and return HTTP Internal Server Error.
      */
     @Test
