@@ -93,7 +93,7 @@ public class DataApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
 
-        //start the Kafka consumer for sending success and error messages to Audit Service
+        //start the Kafka sink for sending success and error messages to Audit Service
         auditMessageService.registerRequestSink(runner.run(materialiser));
 
         // Add serialiser to the Data Service
