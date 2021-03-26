@@ -18,7 +18,8 @@ limitations under the License.
 
 # Audit Service
 
-The Audit service is an implementation of the [AuditService Interface](src/main/java/uk/gov/gchq/palisade/service/audit/service/AuditService.java) which audits any incoming messages.
+The Audit Service can have multiple implementations, configured in the [application.yaml](src/main/resources/application.yaml), 
+but simply, all implementations receive, and log Audit Messages from the other Palisade services
 
 The service accepts incoming messages on the `error` and `success` Kafka topics. These messages contain information about the original request and, depending on the message type, will contain either of the following:
 
@@ -62,7 +63,7 @@ See audit-service/doc/audit-service-flow.drawio for the source of this diagram
 *The token value come from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
 
 If an error has occurred while Palisade is processing a client request then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
-This type of message can be sent from all the Palisade services.
+This type of message can be sent from any of the Palisade services.
 This message will be read by the Audit Service and passed to the service implementation to allow the details of the error message to be logged.
 
 If the client request was successful then an AuditSuccessMessage will be added to the `success` Kafka topic by the service that created the success message.
@@ -81,12 +82,14 @@ then an error is logged in the service logs
 
 The application will not receive any `START` or `END` messages on either the `success` or `error` Kafka topics. The `success` topic will only consist of AuditSuccessMessage objects and the `error` topic will only consist of AuditErrorMessage objects. The
 service will consume these messages and process them accordingly but there is no output from this service, instead it will acknowledge the incoming message so that it does not get processed more than once.
-The messages from each topic are processed by the [RunnableGraph](src/main/java/uk/gov/gchq/palisade/service/audit/stream/config/AkkaRunnableGraph.java). This takes the deserialised message and passes it into the 
-[Audit Service Proxy](src/main/java/uk/gov/gchq/palisade/service/audit/service/AuditServiceAsyncProxy.java) to be checked and then audited by all the service implementations.
+The messages from each topic are processed by the [RunnableGraph](src/main/java/uk/gov/gchq/palisade/service/audit/stream/config/AkkaRunnableGraph.java). This takes the deserialised message and passes it to the 
+[Audit Service Proxy](src/main/java/uk/gov/gchq/palisade/service/audit/service/AuditServiceAsyncProxy.java). This service proxy will perform some checks on the received message:
+* Check the type of message that was received, AuditErrorMessage or AuditSuccessMessage. A warning will be logged in the service if the message type is neither of these.
+* If the type is an AuditSuccessMessage then the service will check to make sure that this has been sent by either the Filtered Resource Service or the Data Service
 
 ## Rest Interface
 
-The application exposes two REST endpoints for the purpose of debugging:
+The Audit Service exposes two REST endpoints for the purpose of debugging:
 
 * `POST /api/error`
     - accepts an `x-request-token` `String` header, any number of extra headers.

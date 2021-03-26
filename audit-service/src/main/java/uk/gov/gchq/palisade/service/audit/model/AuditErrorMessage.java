@@ -115,7 +115,7 @@ public final class AuditErrorMessage extends AuditMessage {
             /**
              * Adds the context information.
              *
-             * @param context the context for the request.
+             * @param context the reason why the user wants access to the data.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
             default IServiceName withContext(final Context context) {
@@ -125,7 +125,7 @@ public final class AuditErrorMessage extends AuditMessage {
             /**
              * Adds the user context information. Uses a JsonNode string form of the information.
              *
-             * @param context the context for the request.
+             * @param context the reason why the user wants access to the data.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
             IServiceName withContextNode(JsonNode context);
