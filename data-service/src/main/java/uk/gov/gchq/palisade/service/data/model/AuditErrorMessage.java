@@ -75,7 +75,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
            *
-         * @param auditableAuthorisedDataRequest   the client information request received by the Data Service
+         * @param auditableAuthorisedDataRequest   information from the authorising data request
          * @return interface {@link IAttributes} for the next step in the build.
          */
 

@@ -53,7 +53,7 @@ public class DataController {
     /**
      * Constructor for the DataController.
      *
-     * @param auditableDataService service for providing data retrieval service for the request
+     * @param auditableDataService service for retrieving data for the request
      * @param auditMessageService  service for sending audit success and error messages to the Audit Service
      */
     public DataController(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
@@ -64,8 +64,8 @@ public class DataController {
     /**
      * REST endpoint to read a resource request and return a streaming response.
      *
-     * @param dataRequest the requested data
-     * @return a stream of holding the contents of the response
+     * @param dataRequest the resource request
+     * @return a streaming response holding the filtered data
      */
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(
@@ -80,7 +80,7 @@ public class DataController {
         AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
         if (authorisationErrorMessage != null) {
-            LOGGER.error("Error occurred processing the authoriseRequest error message was {}", authorisationErrorMessage);
+            LOGGER.error("Error occurred processing the authoriseRequest : ", authorisationErrorMessage.getError());
             httpStatus = (HttpStatus.INTERNAL_SERVER_ERROR);
             auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                     .withToken(dataRequest.getToken())
@@ -97,7 +97,7 @@ public class DataController {
                 Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
                         .ifPresent((AuditErrorMessage errorMessage) -> {
                             //send a message to the audit service of an error occurred in processing a request
-                            LOGGER.error("Error occurred processing the read  error message was {}", errorMessage);
+                            LOGGER.error("Error occurred processing the read :", errorMessage);
                             auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                                     .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
                         });
