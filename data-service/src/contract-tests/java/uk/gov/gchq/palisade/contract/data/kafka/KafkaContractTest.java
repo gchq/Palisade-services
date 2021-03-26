@@ -196,7 +196,7 @@ public class KafkaContractTest {
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
-        // Given - we are already listening to the service error output
+        // Given - we are already listening to the service success output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.keyDeserialiser(), TestSerDesConfig.valueDeserialiser())
                 .withGroupId("test-group")
