@@ -23,7 +23,7 @@ the resource the user wants access to, and a reason as to why they require acces
 The Palisade Service then creates a token, currently via the UUIDPalisadeService, but this can be extended in the future for specific token requirements. 
 The token is attached to the message in the form of a `PalisadeSystemResponse` to be sent to the User Service on the `user` kafka topic. 
 It is also sent back to the client directly as part of a `PalisadeClientResponse` so that the client can connect to the Filtered Resource Service to retrieve the processed data.
-As the data progresses through the other Palisade services, it is refined and enriched, the Palisade Service is just the entry point for client requests.
+As the data progresses through the other Palisade services, it is refined and enriched, the Palisade Service is the entry point for client requests.
 
 ## High-Level Architecture
 <!--- 

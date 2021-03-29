@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides the front end RESTFul web service for the Palisade Service.
+ * Provides the external application api for the Palisade Service.
  * Incoming requests will be forwarded down a chain of services with each processing and enriching an aspect of the request.
  * The response will be a reference that can be used to view the data when it has been processed via the Filtered Resource Service.
  */
