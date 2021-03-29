@@ -84,7 +84,7 @@ audit messages
 The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
 been requested and prepared in the initial request to the Palisade services. 
 * `POST data/read/chunked`
-    - returns a `200 OK` and a streamed HTTP response body which will provides the resource.
+    - returns a `200 OK` and a streamed HTTP response body which will provide the resource(s).
 
 ## Example JSON Request
 ```
