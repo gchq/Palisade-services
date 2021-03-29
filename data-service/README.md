@@ -53,7 +53,7 @@ the Audit Service indicating a successful transfer of the data. If during the au
 the read request there is a error, the request is stopped, and an error message is sent to the Audit Service.
 
 Kafka streaming is only used for the processing of audit messages. This is exposed in the functionality provided by the
-`AuditMessageService`.  This will take both audit success and error messages and process them using the functionality 
+`AuditMessageService`.  This will take both audit success and audit error messages and process them using the functionality 
 provided in the `AkkaRunnableGraph`'s `runner` method. In this method, the message types are separated into success and 
 error messages where they are then used to construct messages for the respective kafka error and success topics.
 
