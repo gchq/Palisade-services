@@ -46,7 +46,7 @@ interface DataService extends Service { {
 
 
 Data Service is implemented as a RESTFul Request-Response service using a Spring Controller as the service endpoint.  
-The processing of each client request will drive the workflow though the service. This will first start with the 
+The processing of each client request will drive the workflow though the service. This will start with 
 authorising the request (`DataService#authoriseReqeust`). If successful, the next step will be to read the data
 (`DataService#read`) which will return a stream of the data to the client. Upon completion, a audit message is sent to 
 the Audit Service indicating a successful transfer of the data. If during the authorisation request or at any time in 
