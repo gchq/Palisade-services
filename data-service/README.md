@@ -25,7 +25,7 @@ library.
 The key components of the service is the implementation of the DataService interface and the supporting services.  This
 comes in the form of an implementation of DataService interface, SimpleDataService, that uses the Palisade Reader
 library for the implementation of a solution using a database. This is then wrapped in a class, AuditableDataService,
-that will provide the data in a form that can be use in constructing the response that is sent back to the client, and
+that will provide the data in a form that can be used in constructing the response that is sent back to the client, and
 the audit message that is sent to the Audit Service using the AuditMessageService.
 
 
