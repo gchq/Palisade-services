@@ -40,6 +40,7 @@ metadata:
   namespace: {{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   accessModes:
   - {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.mode | first | default .Values.global.persistence.classpathJars.mode._default }}
