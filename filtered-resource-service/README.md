@@ -24,19 +24,27 @@ The Filtered-Resource Service sits at the end of the stream pipeline and has the
 Given a token `$[token]` from the Palisade Service, it is accessed by a Websocket request to `ws://filtered-resource-service/resource/${token}`. 
 The service will return each resource discovered by the Palisade system one-by-one to the client as requested, auditing that the client is now aware of these resources. 
 
+The expectation is that these resources would either be filtered out by the client as not relevant, or requested to download from the Data Service.
+
 ## High-Level Architecture
 
 ![Filtered-Resource Service Mid-Level Diagram](doc/Filtered-Resource-Service-ML.png)
 
 The above diagram shows the decision-making architecture of the Attribute-Masking Service (left), Topic-Offset Service (middle) and Filtered-Resource Service (right). 
-The service connects to three kafka topics as inputs - "masked-resource" from the Attribute-Masking Service, "masked-resource-offset" from the Topic-Offset Service and "error" from all services that may produce errors. 
+The service connects to three kafka topics as inputs:
+
+* "masked-resource" from the Attribute-Masking Service, containing Leaf Resources for the client's request, stripped of sensitive attributes
+* "masked-resource-offset" from the Topic-Offset Service, containing at most one message per token, pointing to the START marker on the "masked-resource" topic for that token
+* "error" from all services that may produce errors, containing the error produced
+
 An additional kafka topic is used for auditing the client's access to each returned resource - this is the "success" topic, which will be read later by the Audit Service.
 
 For a given token, the offset (on the "masked-resource" topic) for this token is received from the "masked-resource-offset" and used to create a consumer starting from this point. 
-This flow of messages is then filtered by their `X-Request-Token` header to match the supplied token. 
+This flow of messages is then filtered by their token (the `X-Request-Token` header on kafka) to match the token supplied by the client. 
 Then, as each resource is requested over the websocket, the successful return of each resource to the client is audited to the Audit Service's "success" topic.
 
-As can be seen in the diagram, the service's functions generally fall into one of four responsibilities: 
+As can be seen in the (above) diagram, the service's functions generally fall into one of four responsibilities: 
+
 * Handling incoming web requests, REST or WS (top-centre of diagram, akka-web-server) 
 * Persisting and retrieving offsets for tokens (top-left of diagram, blue, token-offset-system) 
 * Processing websocket requests and returning resources (bottom of diagram, websocket-event-service) 
@@ -116,7 +124,7 @@ The steps required are as follows:
 ### Auditing within the Filtered Resource Service
 The Filtered Resource Service will send audit messages, specifically an `AuditErrorMessage` to the Audit Service via the error topic for the two following cases:
 1. No start marker was observed before reading the resources. 
-   If resources are processed by the Filtered Resource Service before a start marker is observed, it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of ordered. 
+   If resources are processed by the Filtered Resource Service before a start marker is observed, it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of order. 
    In this case, an Audit Error Message is created, containing a `NoStartMarkerObserved` exception, which is then sent to the Audit Service, and finally, the processing of the request is stopped. 
 2. No Resources were contained in the request. 
    If a start marker is observed, but no resources are contained in the request, the request could be invalid, for resources that aren't known to Paliasde, or for resources that have been redacted. 

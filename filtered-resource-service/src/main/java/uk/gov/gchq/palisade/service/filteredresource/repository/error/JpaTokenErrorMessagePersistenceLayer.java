@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link TokenErrorMessagePersistenceLayer} for the Filtered-Resource-Service.
+ * JPA implementation of a {@link TokenErrorMessagePersistenceLayer} for the Filtered-Resource Service.
  * Persist and retrieve {@link AuditErrorMessage#getError()} for a given request token.
  */
 public class JpaTokenErrorMessagePersistenceLayer implements TokenErrorMessagePersistenceLayer {
@@ -31,8 +31,8 @@ public class JpaTokenErrorMessagePersistenceLayer implements TokenErrorMessagePe
     private final Executor executor;
 
     /**
-     * Construct a new Jpa-style persistence layer from a CrudRepository and async executor.
-     * This simply wraps the repository methods with {@link CompletableFuture}s
+     * Construct a new JPA-style persistence layer from a CrudRepository and async executor.
+     * This simply wraps the repository methods with {@link CompletableFuture}s.
      *
      * @param repository the CrudRepository of tokens and their associated exceptions
      * @param executor   an async executor to run the futures with

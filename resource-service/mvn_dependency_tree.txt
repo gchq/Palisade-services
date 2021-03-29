@@ -94,8 +94,6 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  +- com.fasterxml.woodstox:woodstox-core:jar:5.0.3:compile
 |  \- dnsjava:dnsjava:jar:2.1.7:compile
 +- uk.gov.gchq.palisade:hadoop-resource:jar:0.5.0-SNAPSHOT:compile
-|  +- ch.qos.logback:logback-core:jar:1.2.3:compile
-|  \- ch.qos.logback:logback-classic:jar:1.2.3:compile
 +- com.typesafe.akka:akka-stream_2.13:jar:2.6.10:compile
 |  +- org.scala-lang:scala-library:jar:2.13.3:compile
 |  +- com.typesafe.akka:akka-actor_2.13:jar:2.6.10:compile
@@ -117,6 +115,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  +- org.springframework.boot:spring-boot:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
+|  |  |  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
+|  |  |  |  \- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
 |  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
 |  |  |  \- org.slf4j:jul-to-slf4j:jar:1.7.30:compile
