@@ -42,7 +42,7 @@ interface DataService extends Service { {
 
 # Flow of Control
 
-o![Data Service diagram](doc/data-service.png)
+![Data Service diagram](doc/data-service.png)
 
 
 Data Service is implemented as a RESTFul Request-Response service using a Spring Controller as the service endpoint.  
