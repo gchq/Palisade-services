@@ -110,13 +110,13 @@ global:
       # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
         _default: static
-        local: dynamic
+        local: static
         aws: dynamic
       # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
       mode:
         _default: ReadWriteOnce
         local: ReadWriteMany
-        aws: ReadWriteMany
+        aws: ReadWriteOnce
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
@@ -143,12 +143,12 @@ global:
           aws: ebs-sc
         provisioning:
           _default: static
-          local: dynamic
+          local: static
           aws: dynamic
         mode:
           _default: ReadWriteOnce
           local: ReadWriteMany
-          aws: ReadWriteMany
+          aws: ReadWriteOnce
         mountPath: "/data/local-data-store"
         storage: 4Gi
         local:
