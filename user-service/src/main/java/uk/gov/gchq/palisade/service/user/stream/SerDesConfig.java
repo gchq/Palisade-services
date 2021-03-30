@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.user.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
@@ -94,6 +95,17 @@ public final class SerDesConfig {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(userRequest, Charset.defaultCharset()), e);
             }
         };
+    }
+
+    /**
+     * Kafka value deserializer for the response from the service
+     *
+     * @param userResponse the JsonNode to be deserialized
+     * @return an appropriate value deserializer for the topic's message content
+     * @throws JsonProcessingException if there was an issue deseralizing
+     */
+    public static UserResponse responseValueDeserializer(final JsonNode userResponse) throws JsonProcessingException {
+        return MAPPER.treeToValue(userResponse, UserResponse.class);
     }
 
     /**

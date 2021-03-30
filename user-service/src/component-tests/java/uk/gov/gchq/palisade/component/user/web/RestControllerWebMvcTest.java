@@ -45,8 +45,10 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @MockBean
     KafkaProducerService kafkaProducerService;
+
     @Autowired
     private UserRestController controller;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -63,8 +65,13 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertThat(controller)
+                .as("Check that the controller is loaded correctly")
+                .isNotNull();
+
+        assertThat(mockMvc)
+                .as("Check mockito has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
