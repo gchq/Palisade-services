@@ -18,7 +18,9 @@ limitations under the License.
 
 # Attribute-Masking Service
 
-The Attribute Masking Service will persist authorised requests and forward a 
+[Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
+
+The Attribute-Masking Service will persist authorised requests and forward a 
 redacted version of the resource onto the next service on the pipeline.
 This is an interim service on the Palisade stream pipeline that reads 
 each resource off the "rule" Kafka topic. It will take each of these 
@@ -48,13 +50,12 @@ Audit Service.
 
 *token is in the message header's metadata
 
-The service reads a message in from the Kafka "rule" topic as a 
-`AttributeMaskingRequest`. This request is persisted in a store as an 
-`AuthorisedRequestEntity`. The `LeafResource` attached to the request is then 
-masked, removing any excessive or sensitive metadata which a client may be 
-prohibited from accessing. The resulting masked `LeafResource` is then used 
-to create an`AttributeMaskingResponse` ready to be forwarded.  This will be 
-forwarded along with markers which have the token in the header, but an empty message body. Errors that occur 
+The service reads a message in from the Kafka "rule" topic as a [AttributeMaskingRequest](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingRequest.java).
+This request is persisted in a store as an`AuthorisedRequestEntity`.
+The `LeafResource` attached to the request is then masked, removing any excessive or sensitive metadata which a client may be prohibited from accessing.
+The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditableAttributeMaskingResponse.java) ready to be forwarded.
+This will be forwarded along with markers which have the token in the header, but an empty message body.
+Errors that occur 
 
 ## REST Interface
 
