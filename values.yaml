@@ -106,7 +106,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
         _default: static
@@ -140,7 +140,7 @@ global:
         storageClassName:
           _default: hostpath
           local: hostpath
-          aws: efs-sc
+          aws: ebs-sc
         provisioning:
           _default: static
           local: dynamic
