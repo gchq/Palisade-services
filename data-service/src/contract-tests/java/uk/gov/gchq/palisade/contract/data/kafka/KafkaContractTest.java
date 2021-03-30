@@ -198,7 +198,7 @@ public class KafkaContractTest {
 
         // Given - we are already listening to the service success output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.keyDeserialiser(), TestSerDesConfig.valueDeserialiser())
+                .create(akkaActorSystem, TestSerDesConfig.successKeyDeserialiser(), TestSerDesConfig.successValueDeserialiser())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

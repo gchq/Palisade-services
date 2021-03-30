@@ -45,7 +45,7 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> keyDeserialiser() {
+    public static Deserializer<String> successKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -54,7 +54,7 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<AuditSuccessMessage> valueDeserialiser() {
+    public static Deserializer<AuditSuccessMessage> successValueDeserialiser() {
         return (String ignored, byte[] auditMessage) -> {
             try {
                 return MAPPER.readValue(auditMessage, AuditSuccessMessage.class);
