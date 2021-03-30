@@ -22,15 +22,16 @@ The Attribute Masking Service will persist authorised requests and forward a
 redacted version of the resource onto the next service on the pipeline.
 This is an interim service on the Palisade stream pipeline that reads 
 each resource off the "rule" Kafka topic. It will take each of these 
-resources, ascertain if it is a "start" or "end" marker for the set of records (has a token but the message body is empty of content).
-If it is, no further processing is done. For messages that represent records,
-these are persisted as authorised requests and then a masked version of the
-resource is prepared to be forwarded to the next services. Both types of 
-messages (markers and records) are forwarded using the Kafka topic 
-"masked-resource" which is used in both the Topic-Offset Service and the 
-Filtered-Resource Service. If at any time during the processing of a message,
-an error message is produced and sent to Kafka "error" topic where it is 
-retrieved by the Audit Service.
+resources, ascertain if it is a "start" or "end" marker for the set of records
+(has a token, but the message body is empty of content). If it is, no further 
+processing is done. For messages that represent records, these are persisted
+as authorised requests and then a masked version of the resource is prepared
+to be forwarded to the next services. Both types of messages 
+(markers and records) are forwarded using the Kafka topic"masked-resource" 
+which is used in both the Topic-Offset Service and the Filtered-Resource 
+Service. If at any time during the processing of a message, an error message
+is produced and sent to Kafka "error" topic where it is retrieved by the 
+Audit Service.
 
 
 ## Message Model and Database Domain
@@ -53,15 +54,11 @@ The service reads a message in from the Kafka "rule" topic as a
 masked, removing any excessive or sensitive metadata which a client may be 
 prohibited from accessing. The resulting masked `LeafResource` is then used 
 to create an`AttributeMaskingResponse` ready to be forwarded.  This will be 
-forwarded along with markers which are empty  
-
-### Future Enhancements
-The masking operation may in the future apply attribute-level `Rule`s using the `User` and `Context` for fine-grained control over client metadata access.
-
+forwarded along with markers which have the token in the header, but an empty message body. Errors that occur 
 
 ## REST Interface
 
-The application exposes two REST endpoints:
+The application exposes two REST endpoints for the purpose of testing:
 * `POST /api/mask`
   - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and body to kafka
