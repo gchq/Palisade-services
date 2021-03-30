@@ -21,7 +21,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Sets;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -95,8 +94,8 @@ class AbstractLdapUserServiceTest {
         final LdapContext context = mock(LdapContext.class);
 
         final String[] attrNames = {"roles", "auths"};
-        final Set<String> auths = Sets.newHashSet("auth1", "auth2");
-        final Set<String> roles = Sets.newHashSet("role1", "role2");
+        final Set<String> auths = Set.of("auth1", "auth2");
+        final Set<String> roles = Set.of("role1", "role2");
 
         final Attributes requestAttrs = new BasicAttributes();
         requestAttrs.put("auths", auths);
@@ -119,13 +118,15 @@ class AbstractLdapUserServiceTest {
         final User user = service.getUser(request.userId);
 
         // Then
-        assertThat(userId).isEqualTo(user.getUserId());
-        assertThat(auths).isEqualTo(user.getAuths());
-        assertThat(roles).isEqualTo(user.getRoles());
+        assertThat(user)
+                .as("Check that the user has been retrieved successfully")
+                .extracting("userId", "auths", "roles")
+                .containsOnly(userId, auths, roles);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("was not in the cache. Fetching details from LDAP")
         ));
@@ -146,7 +147,7 @@ class AbstractLdapUserServiceTest {
         service.setMock(mock);
 
         final Attributes searchResult1Attrs = new BasicAttributes();
-        final Set<String> search1Attr1 = Sets.newHashSet("auth1", "auth2");
+        final Set<String> search1Attr1 = Set.of("auth1", "auth2");
         final int search1Attr2 = 10;
         searchResult1Attrs.put("search1Attr1", search1Attr1);
         searchResult1Attrs.put("search1Attr2", search1Attr2);
@@ -199,11 +200,15 @@ class AbstractLdapUserServiceTest {
         verify(context, times(1)).search(searchBase,
                 new BasicAttributes(attrIdForUserId, userId.getId()),
                 requestAttrs);
-        final Set<Object> expectedResults = Sets.newHashSet(search1Attr1, search1Attr2, search2Att1, search2Attr2);
-        assertThat(expectedResults).isEqualTo(results);
+        final Set<Object> expectedResults = Set.of(search1Attr1, search1Attr2, search2Att1, search2Attr2);
+        assertThat(expectedResults)
+                .as("Check that the search on LDAP returned the correct results")
+                .isEqualTo(results);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Performing basic search using")
         ));
@@ -227,9 +232,15 @@ class AbstractLdapUserServiceTest {
         final String expectedResult = "test input: " + Stream.of(AbstractLdapUserService.ESCAPED_CHARS)
                 .map(t -> "\\" + t)
                 .collect(Collectors.joining());
-        assertThat(expectedResult).isEqualTo(result);
+
+        assertThat(expectedResult)
+                .as("Check that the input string has escape characters")
+                .isEqualTo(result);
+
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages)
+                .as("Check that there are logging messages at DEBUG level")
+                .isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Formatting input with"),
                 Matchers.containsString("Returning formatted input as")

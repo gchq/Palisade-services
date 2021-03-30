@@ -97,6 +97,9 @@ Create unified labels for kafka components
 {{- define "kafka.common.matchLabels" -}}
 app.kubernetes.io/name: {{ include "kafka.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- range $key, $value := .Values.podLabels }}
+{{ $key }}: {{ $value }}
+{{- end -}}
 {{- end -}}
 
 {{- define "kafka.common.metaLabels" -}}

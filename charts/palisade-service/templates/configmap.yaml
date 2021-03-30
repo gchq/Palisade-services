@@ -28,7 +28,9 @@ data:
       kafka:
         producer.topics:
           output-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}output-topic.name: {{ .Values.global.topicPrefix }}request {{ end }}
           error-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}error-topic.name: {{ .Values.global.topicPrefix }}error {{ end }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "palisade.kafka.fullname" . }}-headless
+      - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092

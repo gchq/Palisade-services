@@ -53,12 +53,14 @@ class DomainObjectConverterTest {
         String databaseColumn = converter.convertToDatabaseColumn(object);
         // then if converted to a column again, the result is identical
         assertThat(converter.convertToDatabaseColumn(object))
+                .as("Checking database column %s is unchanged by conversion", databaseColumn)
                 .isEqualTo(databaseColumn);
 
         // when the database column is converted back to a Context object
         T convertedObject = converter.convertToEntityAttribute(databaseColumn);
         // then if converted to a Context object again, the result is identical
         assertThat(converter.convertToEntityAttribute(databaseColumn))
+                .as("Checking database entity %s is unchanged by conversion", convertedObject)
                 .isEqualTo(convertedObject);
     }
 
@@ -73,6 +75,7 @@ class DomainObjectConverterTest {
 
         // then the returned Context object is identical to the original
         assertThat(convertedObject)
+                .as("Checking database entity %s is unchanged by conversion", convertedObject)
                 .isEqualTo(object);
     }
 
@@ -87,6 +90,7 @@ class DomainObjectConverterTest {
 
         // then no errors are thrown and the Context object is still null
         assertThat(convertedObject)
+                .as("Checking database entity %s is unchanged as null and not exception is thrown", convertedObject)
                 .isNull();
     }
 

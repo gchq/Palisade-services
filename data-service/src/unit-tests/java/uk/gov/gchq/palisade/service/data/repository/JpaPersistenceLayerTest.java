@@ -43,6 +43,7 @@ class JpaPersistenceLayerTest {
 
         // Then the configured entity is returned
         assertThat(entity.join())
+                .as("Check that response is a AuthorisedRequestEntity")
                 .isNotNull()
                 .isPresent()
                 .get()
