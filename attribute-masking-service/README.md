@@ -55,7 +55,7 @@ This request is persisted in a store as an`AuthorisedRequestEntity`.
 The `LeafResource` attached to the request is then masked, removing any excessive or sensitive metadata which a client may be prohibited from accessing.
 The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditableAttributeMaskingResponse.java) ready to be forwarded.
 This will be forwarded along with markers which have the token in the header, but an empty message body.
-Errors that occur 
+Errors that occur during the process are w
 
 ## REST Interface
 
