@@ -16,12 +16,21 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
-# Palisade Attribute-Masking-Service
+# Attribute-Masking Service
 
-The attribute-masking-service is the final transformation the palisade system applies to resources before they are returned.
-The service performs two functions:
-* Store the full details of the authorised request in a persistence store, to be later retrieved by the data-service
-* Mask the leafResource, removing any sensitive information
+The Attribute Masking Service will persist authorised requests and forward a 
+redacted version of the resource onto the next service on the pipeline.
+This is an interim service on the Palisade stream pipeline that reads 
+each resource off the "rule" Kafka topic. It will take each of these 
+resources, ascertain if it is a "start" or "end" marker for the set of records (has a token but the message body is empty of content).
+If it is, no further processing is done. For messages that represent records,
+these are persisted as authorised requests and then a masked version of the
+resource is prepared to be forwarded to the next services. Both types of 
+messages (markers and records) are forwarded using the Kafka topic 
+"masked-resource" which is used in both the Topic-Offset Service and the 
+Filtered-Resource Service. If at any time during the processing of a message,
+an error message is produced and sent to Kafka "error" topic where it is 
+retrieved by the Audit Service.
 
 
 ## Message Model and Database Domain
@@ -35,12 +44,16 @@ The service performs two functions:
 | user                    | maskedLeafResource       | exception         | user
 | leafResource            |                          | serverMetadata    | leafResource
 | rules                   |                          |                   | rules
-(fields marked with * are acquired from headers metadata)
 
-The service takes in an `AttributeMaskingRequest` and a request `Token`.
-This request is persisted in a store as an `AuthorisedRequestEntity`.
-The `LeafResource` attached to the request is then masked, removing any excessive or sensitive metadata which a client may be prohibited from accessing.
-The resulting masked `LeafResource` is then attached to an `AttributeMaskingResponse` and outputted from the service.
+*token is in the message header's metadata
+
+The service reads a message in from the Kafka "rule" topic as a 
+`AttributeMaskingRequest`. This request is persisted in a store as an 
+`AuthorisedRequestEntity`. The `LeafResource` attached to the request is then 
+masked, removing any excessive or sensitive metadata which a client may be 
+prohibited from accessing. The resulting masked `LeafResource` is then used 
+to create an`AttributeMaskingResponse` ready to be forwarded.  This will be 
+forwarded along with markers which are empty  
 
 ### Future Enhancements
 The masking operation may in the future apply attribute-level `Rule`s using the `User` and `Context` for fine-grained control over client metadata access.
