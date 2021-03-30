@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The Attribute Masking Service is the final transformation the palisade system applies
+ * The Attribute-Masking Service is the final transformation the palisade system applies
  * to resources before they are returned.
  * The service performs two functions:
  * - Store the full details of the authorised request in a persistence store, to be later

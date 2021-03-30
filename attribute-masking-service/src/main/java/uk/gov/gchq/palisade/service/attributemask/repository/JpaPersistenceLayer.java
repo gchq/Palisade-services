@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link PersistenceLayer} for the Attribute Masking Service.
+ * Java JPA implementation of a {@link PersistenceLayer} for the Attribute-Masking Service.
  * Delegates to a CrudRepository save method.
  */
 public class JpaPersistenceLayer implements PersistenceLayer {
