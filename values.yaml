@@ -110,8 +110,8 @@ global:
       # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
         _default: static
-        local: static
-        aws: static
+        local: dynamic
+        aws: dynamic
       # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
       mode:
         _default: ReadWriteOnce
@@ -143,8 +143,8 @@ global:
           aws: efs-sc
         provisioning:
           _default: static
-          local: static
-          aws: static
+          local: dynamic
+          aws: dynamic
         mode:
           _default: ReadWriteOnce
           local: ReadWriteMany

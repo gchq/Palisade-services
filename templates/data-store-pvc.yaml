@@ -42,7 +42,6 @@ metadata:
   namespace: {{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   accessModes:
   - {{ pluck $.Values.global.hosting $value.mode | first | default $value.mode._default }}
