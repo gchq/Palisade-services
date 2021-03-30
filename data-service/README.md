@@ -15,29 +15,17 @@ limitations under the License.
 --->
 # Data Service
 
-The Data Service accepts client requests to retrieve resources that have been registered on their behalf. These will be
-the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly
-redacted in conformance to the defined rules and to the context of the request. The client is expected to send a
-request containing the token and resource id that is used to uniquely identify the resource request. The response will
-be an output stream holding the data resources. To see more information on client requests, see the Palisade Client's
-library.
+The Data Service accepts client requests to retrieve resources that have been registered on their behalf.
+These will be the response to the initial requests sent to the Palisade service that have been collected, filtered and possibly redacted in conformance to the defined rules and to the context of the request.
+The client is expected to send a request containing the token and resource id that is used to uniquely identify the resource request.
+The response will be an output stream holding the data resources. 
+To see more information on client requests, see the Palisade Client's library.
 
-The key components of the service is the implementation of the DataService interface and the supporting services.  This
-comes in the form of an implementation of DataService interface, SimpleDataService, that uses the Palisade Reader
-library for the implementation of a solution using a database. This is then wrapped in a class, AuditableDataService,
-that will provide the data in a form that can be used in constructing the response that is sent back to the client, and
-the audit message that is sent to the Audit Service using the AuditMessageService.
+The key components of the service is the implementation of the [DataService](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java) interface and the supporting services.
+This comes in the form of an implementation of [DataService](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java) interface, [SimpleDataService](src/main/java/uk/gov/gchq/palisade/service/data/service/SimpleDataService.java), that uses the Palisade Reader library for the implementation of a solution using a database. 
+This is then wrapped in a class, [AuditableDataService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditableDataService.java), that will provide the data in a form that can be used in constructing the response that is sent back to the client, and the audit message that is sent to the Audit Service using the [AuditMessageService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditMessageService.java).
 
 
-```java
-interface DataService extends Service { {
-  CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
-
-  CompletableFuture<Boolean> read(final AuthorisedDataRequest request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
-
-
-}
-```
 
 
 # Flow of Control
@@ -53,8 +41,8 @@ the Audit Service indicating a successful transfer of the data. If during the au
 the read request there is a error, the request is stopped, and an error message is sent to the Audit Service.
 
 Kafka streaming is only used for the processing of audit messages. This is exposed in the functionality provided by the
-`AuditMessageService`.  This will take both audit success and audit error messages and process them using the functionality 
-provided in the `AkkaRunnableGraph`'s `runner` method. In this method, the message types are separated into success and 
+[AuditMessageService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditMessageService.java).  This will take both audit success and audit error messages and process them using the functionality 
+provided in the [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/data/stream/config/AkkaRunnableGraph.java)'s `runner` method. In this method, the message types are separated into success and 
 error messages where they are then used to construct messages for the respective kafka error and success topics.
 
 
