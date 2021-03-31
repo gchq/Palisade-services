@@ -17,8 +17,8 @@ package uk.gov.gchq.palisade.component.audit.model;
 
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.audit.AbstractSerialisationTest;
+import uk.gov.gchq.palisade.service.audit.common.Context;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 
 import java.time.ZonedDateTime;
@@ -45,7 +45,7 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
             .withUserId("originalUserID")
             .withResourceId("testResourceId")
             .withContext(new Context().purpose("testContext"))
-            .withServiceName("testServicename")
+            .withServiceName("testServiceName")
             .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
             .withServerIp("testServerIP")
             .withServerHostname("testServerHostname")

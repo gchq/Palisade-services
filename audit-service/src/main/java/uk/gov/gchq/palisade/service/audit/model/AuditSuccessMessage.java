@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.audit.common.Context;
+import uk.gov.gchq.palisade.service.audit.common.Generated;
 
 import java.util.Map;
 import java.util.Objects;
@@ -138,10 +138,10 @@ public final class AuditSuccessMessage extends AuditMessage {
             /**
              * Adds the service name.
              *
-             * @param servicename name of the service that created the message.
+             * @param serviceName name of the service that created the message.
              * @return public interface  {@link ITimeStamp} for the next step in the build.
              */
-            ITimeStamp withServiceName(String servicename);
+            ITimeStamp withServiceName(String serviceName);
         }
 
 

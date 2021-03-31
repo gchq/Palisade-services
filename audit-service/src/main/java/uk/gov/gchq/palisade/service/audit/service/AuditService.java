@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.audit.common.service.Service;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 import java.util.concurrent.CompletableFuture;

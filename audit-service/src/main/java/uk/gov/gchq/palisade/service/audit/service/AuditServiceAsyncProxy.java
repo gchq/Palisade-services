@@ -37,7 +37,7 @@ public class AuditServiceAsyncProxy {
     private final Map<String, AuditService> services;
 
     /**
-     * Constructor for the {@link AuditServiceAsyncProxy}
+     * Constructor for the AuditServiceAsyncProxy
      *
      * @param services a {@link Map} of services to use for this proxy
      */

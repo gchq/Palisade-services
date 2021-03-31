@@ -33,7 +33,8 @@ import event.logging.util.EventLoggingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.audit.common.Context;
+import uk.gov.gchq.palisade.service.audit.common.Generated;
 import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
@@ -92,7 +93,7 @@ public class StroomAuditService implements AuditService {
 
     }
 
-    private static void addPurposeToEvent(final Event event, final uk.gov.gchq.palisade.Context context) {
+    private static void addPurposeToEvent(final Event event, final Context context) {
         Event.EventDetail eventDetail = event.getEventDetail();
         Purpose purpose = new Purpose();
         purpose.setJustification(context.getPurpose());
@@ -217,7 +218,7 @@ public class StroomAuditService implements AuditService {
      * message
      *
      * @param systemName the name of the system
-     * @return {@link StroomAuditService}
+     * @return StroomAuditService
      * @throws NullPointerException if {@code systemName} is null
      */
     @Generated

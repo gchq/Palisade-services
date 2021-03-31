@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.audit.common.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;

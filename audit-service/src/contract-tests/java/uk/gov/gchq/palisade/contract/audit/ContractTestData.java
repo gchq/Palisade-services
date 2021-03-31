@@ -26,9 +26,9 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.audit.common.Token;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.audit.model.Token;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,9 +53,9 @@ public class ContractTestData {
     public static final AuditSuccessMessage GOOD_SUCCESS_REQUEST_OBJ;
     public static final AuditSuccessMessage BAD_SUCCESS_REQUEST_OBJ;
     public static final BadRequest BAD_REQUEST_OBJ;
-    public static final String ERROR_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"exception message\",\"suppressed\":[],\"localizedMessage\":\"exception message\"}}";
-    public static final String GOOD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"data-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
-    public static final String BAD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
+    public static final String ERROR_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"exception message\",\"suppressed\":[],\"localizedMessage\":\"exception message\"}}";
+    public static final String GOOD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"data-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
+    public static final String BAD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
     public static final String BAD_REQUEST_JSON = "{\"message\":\"This is a message that should not be deserialized by the Audit-Service\"}";
 
     static {

@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.audit;
 
-import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.audit.common.Context;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.service.ServiceName;

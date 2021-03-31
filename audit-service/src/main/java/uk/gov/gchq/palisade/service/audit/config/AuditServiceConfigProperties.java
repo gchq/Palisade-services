@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.audit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.audit.common.Generated;
 
 import java.util.ArrayList;
 import java.util.List;

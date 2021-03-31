@@ -33,10 +33,10 @@
         </repository>
     </repositories>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>audit-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -48,6 +48,8 @@
         <testcontainers.version>1.14.3</testcontainers.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
+        <avro.version>1.8.2</avro.version>
+        <commons-lang3.version>3.8.1</commons-lang3.version>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
         <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
@@ -56,15 +58,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common types (User, Resource, Context) -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
         <!--
         ~ Akka and Alpakka (Kafka)
         -->
@@ -103,6 +96,18 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>${jaxb.version}-b170127.1453</version>
+        </dependency>
+        <dependency>
+            <!-- Avro core components -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <!-- A package of utility classes for classes in java.lang's hierarchy -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <!--
         ~ Spring Boot

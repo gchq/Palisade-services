@@ -54,7 +54,7 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_SUCCESS_R
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.ERROR_REQUEST_OBJ;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_REQUEST_OBJ;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.REQUEST_TOKEN;
-import static uk.gov.gchq.palisade.service.audit.model.Token.HEADER;
+import static uk.gov.gchq.palisade.service.audit.common.Token.HEADER;
 
 /**
  * An external requirement of the service is to connect to a pair of upstream kafka topics.

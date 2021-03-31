@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.audit.common.Generated;
 
 import java.util.Objects;
 import java.util.Optional;
