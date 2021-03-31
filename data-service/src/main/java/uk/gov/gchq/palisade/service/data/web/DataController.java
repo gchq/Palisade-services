@@ -39,7 +39,7 @@ import java.util.Optional;
 /**
  * Controller for Data Service. Provides the front end RESTFul web service to the client for retrieving resources that
  * have been registered with the Palisade Service. The request is in the form of information that will uniquely
- * identify the resource request and will return a data stream of the filtered response data.
+ * identify the resource request and will return a data stream of the response data.
  */
 @RestController
 @RequestMapping(path = "/")
