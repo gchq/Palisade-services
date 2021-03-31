@@ -26,10 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>data-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -48,15 +48,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common types (User, Resource, Context) -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
         <!--
         ~ Akka and Alpakka (Kafka)
         -->
@@ -133,6 +124,12 @@
             <version>0.5.0-${readers.revision}</version>
         </dependency>
 
+        <dependency>
+            <!-- Readers Common to contain common data service code -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>readers-common</artifactId>
+            <version>0.5.0-${readers.revision}</version>
+        </dependency>
 
         <!--
           Testing dependencies

@@ -15,8 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.data.model;
 
-
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.Objects;
 import java.util.StringJoiner;

@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.data.exception;
 
-
 /**
  * Exception for when the request is not allowed or there is no content for the request.
  */

@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.data.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.common.Generated;
 
 /**
  * webMVC config properties class used when configuring WebMVC as an executor when launching the service

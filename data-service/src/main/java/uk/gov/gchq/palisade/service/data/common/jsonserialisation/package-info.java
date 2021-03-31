@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
-
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * Classes for handling JSON serialisation and deserialisation.
  */
-public class SerialiserNotFoundException extends RuntimeException {
-    /**
-     * Constructs a new SerialiserNotFoundException with the specified detail message and cause.
-     *
-     * @param message a {@link String} value detailing the error
-     * @param cause   a {@link Throwable} that caused the iss
-     */
-    public SerialiserNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-}
+package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
