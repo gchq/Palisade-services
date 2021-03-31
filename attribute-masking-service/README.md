@@ -16,25 +16,17 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
-# Attribute-Masking Service
+# Flow of Control
 
-[Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
+![Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
 
-The Attribute-Masking Service will persist authorised requests and forward a 
-redacted version of the resource onto the next service on the pipeline.
-This is an interim service on the Palisade stream pipeline that reads 
-each resource off the "rule" Kafka topic. It will take each of these 
-resources, ascertain if it is a "start" or "end" marker for the set of records
-(has a token, but the message body is empty of content). If it is, no further 
-processing is done. For messages that represent records, these are persisted
-as authorised requests and then a masked version of the resource is prepared
-to be forwarded to the next services. Both types of messages 
-(markers and records) are forwarded using the Kafka topic"masked-resource" 
-which is used in both the Topic-Offset Service and the Filtered-Resource 
-Service. If at any time during the processing of a message, an error message
-is produced and sent to Kafka "error" topic where it is retrieved by the 
-Audit Service.
-
+The Attribute-Masking Service will persist authorised requests and forward a redacted version of the resource onto the next service on the pipeline.
+This is an interim service on the Palisade stream pipeline that reads each resource sent from the Policy Service. 
+It will take each of these resources, ascertain if it is a "start" or "end" marker for the set of records (has a token, but the message body is empty of content).
+If it is, no further processing is done.
+For messages that represent records, these are persisted as authorised requests and then a masked version of the resource is prepared to be forwarded to the next services.
+Both types of messages (markers and records) are forwarded to both the Topic-Offset Service and the Filtered-Resource Service.
+If at any time during the processing of a message, an error occurs, an error message is produced and sent to the Audit Service.
 
 ## Message Model and Database Domain
 
@@ -54,12 +46,20 @@ The service reads a message in from the Kafka "rule" topic as a [AttributeMaskin
 This request is persisted in a store as an`AuthorisedRequestEntity`.
 The `LeafResource` attached to the request is then masked, removing any excessive or sensitive metadata which a client may be prohibited from accessing.
 The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditableAttributeMaskingResponse.java) ready to be forwarded.
-This will be forwarded along with markers which have the token in the header, but an empty message body.
-Errors that occur during the process are w
+This will be forwarded onto the Kafka topic "masked-resource".
+Start and end markers are forwarded to the same Kafka topic.
+Like the masked resource messages, the start and end markers will have the token (`x-request-token`) in the header, but will have an empty message body.
+Errors that occur during the process are bundled into an error message, `AuditErrorMessage` and sent to the Kafka topic "error" where they are retrieved by the Audit Service.
+                     
 
 ## REST Interface
 
-The application exposes two REST endpoints for the purpose of testing:
+The application provides two service endpoints in the Controller [AttributeMaskingRestController](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java).
+These are to be used for testing and debugging only.
+They mimic the Kafka API to the service by processing POST requests into a messages that is put on the upstream topic for the service.
+These messages will then later be read by the service.
+
+                                       
 * `POST /api/mask`
   - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and body to kafka
@@ -67,14 +67,6 @@ The application exposes two REST endpoints for the purpose of testing:
 * `POST /api/mask/multi`
   - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
-
-
-## Kafka Interface
-
-The application takes messages from the upstream Kafka `rule` topic and reads them as `AttributeMaskingRequest`s.
-These are then processed into `AttributeMaskingResponse`s and written to the downstream Kafka `masked-resource` topic.
-The `x-request-token` is sent in the Kafka headers.
-In case of errors, the original request and thrown exception are both captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
 
 
 ## Example JSON Request
