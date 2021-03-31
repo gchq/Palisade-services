@@ -58,7 +58,7 @@ In this method, the message types are separated into success and error messages 
 
 **attributes will include the numbers for records processed and records returned
 
-***data types that may not be available depending on when the error occurred
+***data that may not be available depending on when the error occurred
 
 ## REST Interface
 
