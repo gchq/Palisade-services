@@ -59,12 +59,13 @@ These are to be used for testing and debugging only.
 They mimic the Kafka API to the service by processing POST requests into a messages that is put on the upstream topic for the service.
 These messages will then later be read by the service.
 
-                                       
-* `POST /api/mask`
+Single message endpoint [AttributeMaskingRestController.maskAttributes](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java):                              
+`POST /api/mask`
   - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and body to kafka
-  
-* `POST /api/mask/multi`
+      
+List of message endpoints [AttributeMaskingRestController.maskAttributesMulti](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java):     
+`POST /api/mask/multi`
   - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
 
