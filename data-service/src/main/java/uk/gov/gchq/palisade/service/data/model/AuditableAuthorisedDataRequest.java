@@ -24,7 +24,7 @@ import java.util.StringJoiner;
 /**
  * The class contains the information about whether the read request is authorised. This will include the
  * data request, {@link DataRequest}, the reference to the data that is authorised to be seen,
- * {@link AuthorisedDataRequest}, and {@link AuditErrorMessage} processing if there was an error in requesting the
+ * {@link AuthorisedDataRequest}, and {@link AuditErrorMessage} if there was an error in requesting the
  * authorisation.
  */
 public final class AuditableAuthorisedDataRequest {
