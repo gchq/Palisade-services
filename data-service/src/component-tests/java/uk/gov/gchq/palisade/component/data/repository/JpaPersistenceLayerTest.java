@@ -84,7 +84,7 @@ class JpaPersistenceLayerTest {
      * Because of the CompletableFuture, we will be scheduling a job in Spring-managed test within the scope of a Spring transaction.
      * Therefore the transaction will never be committed, and the external scheduler and worker threads won't see the new job record in the database.
      * To fix this, for this specific case (synchronous save, then asynchronous find), we must disable the test transaction.
-     * Similar tests (asynchronous save, then synchronous find) are unaffected by this quirk (eg. the dual to this data store in the Attribute Masking Service).
+     * Similar tests (asynchronous save, then synchronous find) are unaffected by this quirk (eg. the dual to this data store in the Attribute-Masking Service).
      */
     @Transactional(TxType.NEVER)
     @Test
