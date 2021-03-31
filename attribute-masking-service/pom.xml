@@ -25,16 +25,18 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>attribute-masking-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/attribute-masking-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
         <scala.version>2.13</scala.version>
         <akka.version>2.6.8</akka.version>
         <alpakka.version>2.0.4</alpakka.version>
+        <commons-io.version>2.6</commons-io.version>
+        <commons-lang3.version>3.8.1</commons-lang3.version>
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
@@ -46,15 +48,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common types (User, Resource, Context) -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
         <!--
         ~ Akka and Alpakka (Kafka)
         -->
@@ -82,6 +75,22 @@
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
+        <!--
+        ~ Apache Dependencies
+        -->
+        <dependency>
+            <!-- Utility classes used mainly for byte conversions -->
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <!-- A package of utility classes for classes in java.lang's hierarchy -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
         <!--
         ~ Spring Boot
         -->

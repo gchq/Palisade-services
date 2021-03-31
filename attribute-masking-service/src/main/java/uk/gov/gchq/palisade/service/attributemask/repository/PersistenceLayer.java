@@ -15,10 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.repository;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 import java.util.concurrent.CompletableFuture;

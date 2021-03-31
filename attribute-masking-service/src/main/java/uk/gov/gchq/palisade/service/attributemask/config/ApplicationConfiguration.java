@@ -22,9 +22,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;

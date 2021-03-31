@@ -47,7 +47,6 @@ import org.testcontainers.containers.KafkaContainer;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 
@@ -70,9 +69,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @Import({RedisPersistenceContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceContractTest.KafkaInitializer.class, RedisPersistenceContractTest.RedisInitializer.class})
-@ActiveProfiles({"redis", "akkatest"})
+@ActiveProfiles({"redis", "akka-test"})
 class RedisPersistenceContractTest {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 
     @Autowired
@@ -91,25 +89,33 @@ class RedisPersistenceContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(service).isNotNull();
-        assertThat(redisTemplate).isNotNull();
+        assertThat(service)
+                .as("Check that the service has been autowired successfully")
+                .isNotNull();
+
+        assertThat(redisTemplate)
+                .as("Check that the redisTemplate has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
     void testAuthorisedRequestsAreStoredInRedis() {
         // Given we have some request data
-        String token = ContractTestData.REQUEST_TOKEN;
-        AttributeMaskingRequest request = ContractTestData.REQUEST_OBJ;
+        var token = ContractTestData.REQUEST_TOKEN;
+        var request = ContractTestData.REQUEST_OBJ;
 
         // When a request is made to store the request for a given token
         service.storeAuthorisedRequest(token, request).join();
 
         // Then the request is persisted in redis
-        final String redisKey = "AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
-        assertThat(redisTemplate.keys(redisKey)).hasSize(1);
+        var redisKey = "AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
+
+        assertThat(redisTemplate.keys(redisKey))
+                .as("Check that the key is stored in the redisTemplate")
+                .hasSize(1);
 
         // Values for the entity are correct
-        final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
+        var redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
                 .containsEntry("resourceId", ContractTestData.REQUEST_OBJ.getResource().getId());
@@ -118,14 +124,17 @@ class RedisPersistenceContractTest {
     @Test
     void testAuthorisedRequestsAreEvictedAfterTtlExpires() throws InterruptedException {
         // Given we have some request data
-        String token = ContractTestData.REQUEST_TOKEN;
-        AttributeMaskingRequest request = ContractTestData.REQUEST_OBJ;
+        var token = ContractTestData.REQUEST_TOKEN;
+        var request = ContractTestData.REQUEST_OBJ;
 
         // When a request is made to store the request for a given token
         service.storeAuthorisedRequest(token, request).join();
         TimeUnit.SECONDS.sleep(2);
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId())).isEmpty();
+        var redisHash = redisTemplate.keys("AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId());
+        assertThat(redisHash)
+                .as("Check that there is no key stored in the redisTemplate showing that the resource has expired")
+                .isEmpty();
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -138,13 +147,13 @@ class RedisPersistenceContractTest {
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
+            context.getEnvironment().setActiveProfiles("redis", "akka-test");
             // Start container
             redis.start();
 
             // Override Redis configuration
             String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
-            // Configure the testcontainer random port
+            // Configure the test container random port
             String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
             RedisPersistenceContractTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
             // Override the configuration at runtime
@@ -158,7 +167,7 @@ class RedisPersistenceContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "redis");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "redis");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();
@@ -180,9 +189,9 @@ class RedisPersistenceContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("masked-resource", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("rule", 1, (short) 1),
+                    new NewTopic("masked-resource", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {

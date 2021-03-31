@@ -33,14 +33,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.component.attributemask.repository.ExecutorTestConfiguration;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Generated;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
 class AttributeMaskingServiceErrorTest {
 
-    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
+    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
 
     private final Function<Integer, JsonNode> requestFactoryNode = i -> {
         try {
@@ -127,18 +127,18 @@ class AttributeMaskingServiceErrorTest {
     }
 
     @Test
-    public void testJsonFormatFailure() throws JsonProcessingException {
+    void testJsonFormatFailure() throws JsonProcessingException {
         // Given a masking request
-        final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
+        var attributeMaskingRequest = requestFactoryObj.apply(1);
         // With invalid JSON in the context
         JsonNode stub;
         try {
-           stub = this.mapper.readTree("{ \"value\": \"content\" }");
+            stub = this.mapper.readTree("{ \"value\": \"content\" }");
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
 
-        final AttributeMaskingRequest broken = AttributeMaskingRequest.Builder.create()
+        var broken = AttributeMaskingRequest.Builder.create()
                 .withUserId(attributeMaskingRequest.getUserId())
                 .withResourceId(attributeMaskingRequest.getResourceId())
                 .withContextNode(stub)
@@ -146,11 +146,15 @@ class AttributeMaskingServiceErrorTest {
                 .withResource(attributeMaskingRequest.getResource())
                 .withRules(attributeMaskingRequest.getRules());
         // When persisting
-        final CompletableFuture<AuditableAttributeMaskingRequest> subject = this.attributeMaskingService.storeAuthorisedRequest("broken-token", broken);
+        var subject = this.attributeMaskingService.storeAuthorisedRequest("broken-token", broken);
         // hen the service suppresses exception and populates Audit object
-        assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
+        assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()))
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property 'class'\n at [Source: UNKNOWN; line: -1, column: -1]");
+                .extracting(AuditableAttributeMaskingRequest::getAuditErrorMessage)
+                .extracting(AuditErrorMessage::getError)
+                .extracting(Throwable::getMessage)
+                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.service.attributemask.common.Context]: missing type id property 'class'\n" +
+                        " at [Source: UNKNOWN; line: -1, column: -1]");
     }
 
     @Configuration

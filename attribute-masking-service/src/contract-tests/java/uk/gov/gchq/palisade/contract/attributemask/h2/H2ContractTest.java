@@ -25,11 +25,10 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackageClasses = {AuthorisedRequestsRepositoryExternalConnection.class, AuthorisedRequestsRepository.class})
-@ActiveProfiles({"dbtest", "akka"})
+@ActiveProfiles({"db-test", "akka"})
 class H2ContractTest {
 
     @Autowired
@@ -53,8 +52,13 @@ class H2ContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(attributeMaskingService).isNotNull();
-        assertThat(externalRepositoryConnection).isNotNull();
+        assertThat(attributeMaskingService)
+                .as("Check that the attributeMaskingService ahs been autowired successfully")
+                .isNotNull();
+
+        assertThat(externalRepositoryConnection)
+                .as("Check that the externalRepositoryConnection has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
@@ -66,11 +70,13 @@ class H2ContractTest {
         ).join();
 
         // When the "data-service" (this test class) retrieves this stored request
-        Optional<AuthorisedRequestEntity> persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ContractTestData.REQUEST_TOKEN, ContractTestData.RESOURCE_ID);
+        var persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ContractTestData.REQUEST_TOKEN, ContractTestData.RESOURCE_ID);
 
-        // Then an entity is found
-        assertThat(persistedEntity)
-                .isPresent();
+        assertThat(persistedEntity).get()
+                .as("Check after extracting individual fields from the entity, that they have been persisted correctly")
+                .extracting("resourceId", "user", "context")
+                .contains(ContractTestData.RESOURCE_ID, new User().userId(ContractTestData.USER_ID), new Context().purpose(ContractTestData.PURPOSE));
+
     }
 
 }

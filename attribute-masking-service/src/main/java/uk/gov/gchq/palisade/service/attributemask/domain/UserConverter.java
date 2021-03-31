@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
 
 import javax.persistence.AttributeConverter;
 
@@ -34,6 +34,7 @@ public class UserConverter implements AttributeConverter<User, String> {
 
     /**
      * Default constructor specifying the object mapper for (de)serializing objects
+     *
      * @param objectMapper the object mapper for reading and writing columns and objects
      */
     public UserConverter(final ObjectMapper objectMapper) {

@@ -54,9 +54,9 @@ import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
@@ -87,7 +87,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import({KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class})
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"db-test", "akka-test"})
 class KafkaContractTest {
 
     @Autowired

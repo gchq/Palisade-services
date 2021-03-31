@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 
 import java.util.function.UnaryOperator;
 

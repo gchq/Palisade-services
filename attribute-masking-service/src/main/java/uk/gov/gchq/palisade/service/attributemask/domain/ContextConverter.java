@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
 
 import javax.persistence.AttributeConverter;
 

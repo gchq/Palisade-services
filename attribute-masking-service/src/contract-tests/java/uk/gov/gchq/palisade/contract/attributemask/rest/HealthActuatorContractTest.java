@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -28,6 +29,7 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to keep-alive in k8s.
@@ -35,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This should return 200 OK if the service is healthy.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"db-test", "akka-test"})
 @TestPropertySource(properties = "management.health.kafka.enabled=false")
 class HealthActuatorContractTest {
 
@@ -50,12 +52,16 @@ class HealthActuatorContractTest {
     @Test
     void testServiceIsHealthy() {
         // Given that the service is running (and presumably healthy)
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
 
-        // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCodeValue()).isEqualTo(200);
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
 
 }

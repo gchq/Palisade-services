@@ -20,11 +20,11 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Generated;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.config.RedisTtlConfiguration;
 
 import javax.persistence.Column;

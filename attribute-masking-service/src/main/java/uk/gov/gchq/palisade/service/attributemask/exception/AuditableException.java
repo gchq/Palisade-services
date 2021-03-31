@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.attributemask.exception;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.attributemask.common.Generated;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 /**

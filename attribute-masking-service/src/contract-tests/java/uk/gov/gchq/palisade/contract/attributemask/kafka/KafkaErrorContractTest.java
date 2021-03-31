@@ -45,19 +45,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingAspect;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
@@ -88,7 +88,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Import({KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class},
         classes = {KafkaErrorContractTest.Config.class})
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"db-test", "akka-test"})
 class KafkaErrorContractTest {
 
     @Autowired

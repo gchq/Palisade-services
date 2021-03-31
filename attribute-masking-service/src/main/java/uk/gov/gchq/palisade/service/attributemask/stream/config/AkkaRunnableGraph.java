@@ -40,9 +40,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;

@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;

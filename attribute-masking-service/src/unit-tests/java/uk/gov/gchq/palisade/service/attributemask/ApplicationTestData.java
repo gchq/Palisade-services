@@ -18,23 +18,21 @@ package uk.gov.gchq.palisade.service.attributemask;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.UserId;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rule;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 
 import java.io.Serializable;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class ApplicationTestData {
     /**
@@ -62,8 +60,7 @@ public class ApplicationTestData {
             .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
             .parent(new SystemResource().id(RESOURCE_PARENT));
 
-    public static final String PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
+    public static final Context CONTEXT = new Context().purpose("test-purpose");
 
     public static final String RULE_MESSAGE = "test-rule";
 
@@ -74,7 +71,7 @@ public class ApplicationTestData {
         }
     }
 
-    public static final Rules<Serializable> RULES = new Rules<Serializable>().addRule(RULE_MESSAGE, new PassThroughRule<Serializable>());
+    public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
 
     public static final AttributeMaskingRequest REQUEST = AttributeMaskingRequest.Builder.create()
             .withUserId(USER_ID.getId())
@@ -88,9 +85,7 @@ public class ApplicationTestData {
             .withResource(LEAF_RESOURCE);
 
     public static final ProducerRecord<String, AttributeMaskingRequest> START = new ProducerRecord<>("rule", 0, null, null);
-
     public static final ProducerRecord<String, AttributeMaskingRequest> RECORD = new ProducerRecord<>("rule", 0, null, REQUEST);
-
     public static final ProducerRecord<String, AttributeMaskingRequest> END = new ProducerRecord<>("rule", 0, null, null);
 
     static {
@@ -102,25 +97,4 @@ public class ApplicationTestData {
         END.headers().add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
         END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
-
-    // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
-    public static final Supplier<Stream<ProducerRecord<String, AttributeMaskingRequest>>> RECORD_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> AttributeMaskingRequest.Builder.create()
-                    .withUserId(USER_ID.getId())
-                    .withResourceId(RESOURCE_ID)
-                    .withContext(CONTEXT)
-                    .withUser(USER)
-                    .withResource(new FileResource()
-                            .id(RESOURCE_ID + i.toString())
-                            .type(i.toString())
-                            .serialisedFormat(RESOURCE_FORMAT)
-                            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-                            .parent(new SystemResource().id(RESOURCE_PARENT)))
-                    .withRules(RULES))
-            .map(request -> new ProducerRecord<>(
-                    "rule",
-                    0,
-                    (String) null,
-                    request,
-                    RECORD.headers()));
 }

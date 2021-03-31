@@ -26,14 +26,14 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.common.Token;
+import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.UserId;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rule;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.model.Token;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class ContractTestData {
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
 
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"uk.gov.gchq.palisade.test.TestType\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"uk.gov.gchq.palisade.test.TestType\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}";
     public static final JsonNode REQUEST_NODE;
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withUserId(USER_ID.getId())
@@ -88,19 +88,12 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i);
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
-        }
-    };
-    public static final Function<Integer, AttributeMaskingRequest> REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), AttributeMaskingRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     };
 
@@ -115,5 +108,5 @@ public class ContractTestData {
 
     // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("rule", 0, REQUEST_TOKEN, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<>("rule", 0, REQUEST_TOKEN, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }
