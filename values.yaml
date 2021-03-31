@@ -106,17 +106,18 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: ebs-sc
+        # When in AWS, ebs cannot be shared, and efs cannot be dynamically provisioned
+        aws: efs-sc
       # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
         _default: static
         local: static
-        aws: dynamic
+        aws: static
       # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
       mode:
-        _default: ReadWriteOnce
+        _default: ReadWriteMany
         local: ReadWriteMany
-        aws: ReadWriteOnce
+        aws: ReadWriteMany
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
@@ -140,15 +141,15 @@ global:
         storageClassName:
           _default: hostpath
           local: hostpath
-          aws: ebs-sc
+          aws: efs-sc
         provisioning:
           _default: static
           local: static
-          aws: dynamic
+          aws: static
         mode:
-          _default: ReadWriteOnce
+          _default: ReadWriteMany
           local: ReadWriteMany
-          aws: ReadWriteOnce
+          aws: ReadWriteMany
         mountPath: "/data/local-data-store"
         storage: 4Gi
         local:
