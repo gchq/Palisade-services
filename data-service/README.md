@@ -29,7 +29,7 @@ This is then wrapped in a class, [AuditableDataService](src/main/java/uk/gov/gch
 
 ![Data Service diagram](doc/data-service.png)
 
-Data Service is implemented as a RESTFul Request-Response service using a Spring Controller ([DataController](src/main/java/uk/gov/gchq/palisade/service/data/web/DataController.java)) as the service endpoint.
+The Data Service is implemented as a RESTFul service using a Spring Controller ([DataController](src/main/java/uk/gov/gchq/palisade/service/data/web/DataController.java)) as the service endpoint.
 The processing of each client request will drive the workflow though the service.
 This will start with authorising the request ([DataService.authoriseReqeust](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java)).
 If successful, the next step will be to read the data ([DataService.read](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java)) which will return a stream of the data to the client.
