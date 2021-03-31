@@ -17,5 +17,7 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: efs-sc
+  annotations:
+    "helm.sh/hook": "pre-install"
 provisioner: efs.csi.aws.com
 {{- end }}
