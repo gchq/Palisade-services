@@ -44,6 +44,8 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
+    public static final String SERVICE_NAME = "topic-offset-service";
+
     protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected final String userId; //Unique identifier for the user.
     protected final String resourceId;  //Resource Id that is being asked to access.
@@ -53,8 +55,6 @@ public class AuditMessage {
     protected final String serverIP;  //the server IP address for the service
     protected final String serverHostname;  //the hostname of the server hosting the service
     protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
-
-    public static final String SERVICE_NAME = "topic-offset-service";
 
     @JsonCreator
     protected AuditMessage(
