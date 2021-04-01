@@ -31,11 +31,12 @@ spring:
 # example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
 # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
 example:
-  version: '@examples.app.version@'
-  path: ../Palisade-examples
+  version: *
+  libraryPath: ../Palisade-examples
+  sythDataGenPath: ../synthetic-data-generator
   libs: &libraries
-    - ${example.path}/example-library/target/example-library-${example.version}.jar
-    - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
+    - ${example.libraryPath}/example-library/target/example-library-${example.version}.jar
+    - ${example.sythDataGenPath}/target/synthetic-data-generator-${example.version}.jar
   service-profiles: &profiles
     - static
     - example
