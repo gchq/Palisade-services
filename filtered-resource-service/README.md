@@ -87,7 +87,7 @@ The client and server communicate using the following protocol:
 | PING           | PONG                           | Application-level ping-pong liveliness check - note that this is different to [protocol-level PING/PONG frames](https://tools.ietf.org/html/rfc6455#section-5.5.2)
 | CTS            | RESOURCE, ERROR, COMPLETE      | A client's clear-to-send message is met with either a RESOURCE from the server (id, type, format, connection-detail) or an ERROR (message-details). Once all RESOURCEs and ERRORs are exhausted, then a COMPLETE message is returned.
 
-In particular, the filtered-resource-service checks for errors *twice* - once before any resources and once after.
+In particular, the Filtered-Resource Service checks for errors *twice* - once before any resources and once after.
 
 ### Akka Web Server
 
@@ -124,7 +124,7 @@ The steps required are as follows:
 ### Auditing within the Filtered Resource Service
 The Filtered Resource Service will send audit messages, specifically an `AuditErrorMessage` to the Audit Service via the error topic for the two following cases:
 1. No start marker was observed before reading the resources. 
-   If resources are processed by the Filtered Resource Service before a start marker is observed, it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of order. 
+   If resources are processed by the Filtered-Resource Service before a start marker is observed, it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of order. 
    In this case, an Audit Error Message is created, containing a `NoStartMarkerObserved` exception, which is then sent to the Audit Service, and finally, the processing of the request is stopped. 
 2. No Resources were contained in the request. 
    If a start marker is observed, but no resources are contained in the request, the request could be invalid, for resources that aren't known to Paliasde, or for resources that have been redacted. 
