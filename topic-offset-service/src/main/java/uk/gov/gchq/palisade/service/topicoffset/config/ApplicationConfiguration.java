@@ -26,7 +26,8 @@ import uk.gov.gchq.palisade.service.topicoffset.service.SimpleTopicOffsetService
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
 /**
- * Spring configuration of the Topic Offset Service.  Used to define Spring Beans needed in the service.
+ * Spring configuration of the Topic Offset Service.
+ * Used to define Spring Beans needed in the service.
  */
 @Configuration
 public class ApplicationConfiguration {

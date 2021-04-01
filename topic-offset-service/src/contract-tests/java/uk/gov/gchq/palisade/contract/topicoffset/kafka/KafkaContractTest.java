@@ -58,9 +58,9 @@ import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.topicoffset.ContractTestData;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
+import uk.gov.gchq.palisade.service.topicoffset.common.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;

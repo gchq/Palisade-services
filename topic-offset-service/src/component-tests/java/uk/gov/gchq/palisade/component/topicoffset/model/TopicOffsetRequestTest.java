@@ -15,29 +15,26 @@
  */
 package uk.gov.gchq.palisade.component.topicoffset.model;
 
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.topicoffset.common.Context;
+import uk.gov.gchq.palisade.service.topicoffset.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.topicoffset.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.topicoffset.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.topicoffset.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Tests for the evaluating the TopicOffsetRequest and the related seralising to a JSon string
+ * Tests for the evaluating the TopicOffsetRequest and the related serialising to a JSon string
  * and deseralising back to an object.
  */
 @JsonTest
@@ -47,55 +44,47 @@ class TopicOffsetRequestTest {
     @Autowired
     private JacksonTester<TopicOffsetRequest> jsonTester;
 
+    /**
+     * Test context loads.
+     */
     @Test
     void testContextLoads() {
         assertThat(jsonTester).isNotNull();
     }
 
     /**
-     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link TopicOffsetRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testTopicOffsetRequestSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
+    void testTopicOffsetRequestSerialisingAndDeserialising() throws IOException {
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
 
-        TopicOffsetRequest originalTopicOffsetRequest = TopicOffsetRequest.Builder.create()
+        var topicOffsetRequest = TopicOffsetRequest.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
-                .withContext(context)
+                .withContext(new Context().purpose("testContext"))
                 .withResource(resource);
 
-        JsonContent<TopicOffsetRequest> topicOffsetRequestJsonContent = jsonTester.write(originalTopicOffsetRequest);
-        ObjectContent<TopicOffsetRequest> topicOffsetRequestObjectContent = jsonTester.parse(topicOffsetRequestJsonContent.getJson());
-        TopicOffsetRequest topicOffsetRequest = topicOffsetRequestObjectContent.getObject();
+        var topicOffsetRequestJsonContent = jsonTester.write(topicOffsetRequest);
+        var topicOffsetRequestObjectContent = jsonTester.parse(topicOffsetRequestJsonContent.getJson());
+        var topicOffsetRequestObject = topicOffsetRequestObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(topicOffsetRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(topicOffsetRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
-                        () -> assertThat(topicOffsetRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(topicOffsetRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
-                ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(topicOffsetRequest.getUserId()).isEqualTo(originalTopicOffsetRequest.getUserId()),
-                        () -> assertThat(topicOffsetRequest.getContext()).isEqualTo(originalTopicOffsetRequest.getContext()),
-                        () -> assertThat(topicOffsetRequest.getResource()).isEqualTo(originalTopicOffsetRequest.getResource()),
-                        () -> assertThat(topicOffsetRequest.getResourceId()).isEqualTo(originalTopicOffsetRequest.getResourceId())
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(topicOffsetRequest).usingRecursiveComparison().isEqualTo(originalTopicOffsetRequest)
-                )
-        );
+        assertThat(topicOffsetRequest)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(topicOffsetRequestObject);
+
+        assertThat(topicOffsetRequest)
+                .as("Check %s using recursion that the serialised and deseralised objects are the same", topicOffsetRequest.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(topicOffsetRequestObject);
     }
 }
 

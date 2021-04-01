@@ -46,15 +46,6 @@
 
     <dependencies>
         <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common types (User, Resource, Context) -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
-        <!--
             Akka and Alpakka (Kafka)
         -->
         <dependency>

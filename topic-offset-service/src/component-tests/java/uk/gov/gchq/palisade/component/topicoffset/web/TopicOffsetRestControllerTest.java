@@ -28,8 +28,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import uk.gov.gchq.palisade.service.topicoffset.common.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.KafkaProducerService;
@@ -77,8 +77,13 @@ class TopicOffsetRestControllerTest {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertThat(controller)
+                .as("Check that the controller is loaded correctly")
+                .isNotNull();
+
+        assertThat(mockMvc)
+                .as("Check mockito has been autowired successfully")
+                .isNotNull();
     }
 
     /**

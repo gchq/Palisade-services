@@ -21,8 +21,8 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.gchq.palisade.service.topicoffset.common.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
