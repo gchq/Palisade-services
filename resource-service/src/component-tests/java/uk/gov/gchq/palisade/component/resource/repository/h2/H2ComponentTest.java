@@ -30,20 +30,19 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,7 +55,7 @@ import static org.assertj.core.api.Assertions.fail;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class H2ComponentTest {
 
@@ -85,7 +84,6 @@ class H2ComponentTest {
     private static final String CLIENT_TYPE = "client";
     private static final String AVRO_FORMAT = "avro";
     private static final String JSON_FORMAT = "json";
-    private static final SystemResource SYSTEM_ROOT = (SystemResource) ResourceBuilder.create("file:/");
     private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
     private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
             .type(EMPLOYEE_TYPE)
@@ -112,7 +110,7 @@ class H2ComponentTest {
             .withUser(USER);
 
     @BeforeEach
-    void setup() throws InterruptedException {
+    void setup() {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Source.single(file)
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))

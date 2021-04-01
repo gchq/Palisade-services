@@ -31,15 +31,15 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class ReactivePersistenceLayerTest {
     @Autowired

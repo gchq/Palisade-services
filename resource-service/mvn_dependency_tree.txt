@@ -1,19 +1,4 @@
 uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
-+- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
-|  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
-|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
-|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
-|  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
-|  +- commons-io:commons-io:jar:2.6:compile
-|  +- org.apache.commons:commons-lang3:jar:3.10:compile
-|  +- org.slf4j:slf4j-api:jar:1.7.30:compile
-|  \- org.apache.avro:avro:jar:1.8.2:compile
-|     +- org.codehaus.jackson:jackson-core-asl:jar:1.9.13:compile
-|     +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.13:compile
-|     +- com.thoughtworks.paranamer:paranamer:jar:2.7:compile
-|     +- org.xerial.snappy:snappy-java:jar:1.1.1.3:compile
-|     \- org.tukaani:xz:jar:1.5:compile
 +- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
 |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
 |  +- com.google.guava:guava:jar:28.2-android:compile
@@ -27,6 +12,7 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  +- org.apache.httpcomponents:httpclient:jar:4.5.12:compile
 |  |  \- org.apache.httpcomponents:httpcore:jar:4.4.13:compile
 |  +- commons-codec:commons-codec:jar:1.14:compile
+|  +- commons-io:commons-io:jar:2.5:compile
 |  +- commons-net:commons-net:jar:3.6:compile
 |  +- commons-collections:commons-collections:jar:3.2.2:compile
 |  +- javax.servlet:javax.servlet-api:jar:4.0.1:compile
@@ -47,6 +33,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  +- com.sun.xml.bind:jaxb-impl:jar:2.2.3-1:compile
 |  |  |  \- javax.xml.bind:jaxb-api:jar:2.3.1:compile
 |  |  |     \- javax.activation:javax.activation-api:jar:1.2.0:compile
+|  |  +- org.codehaus.jackson:jackson-core-asl:jar:1.9.2:compile
+|  |  +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.2:compile
 |  |  +- org.codehaus.jackson:jackson-jaxrs:jar:1.9.2:compile
 |  |  \- org.codehaus.jackson:jackson-xc:jar:1.9.2:compile
 |  +- com.sun.jersey:jersey-server:jar:1.19:compile
@@ -54,7 +42,12 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  +- log4j:log4j:jar:1.2.17:compile
 |  +- commons-beanutils:commons-beanutils:jar:1.9.3:compile
 |  +- org.apache.commons:commons-configuration2:jar:2.1.1:compile
+|  +- org.apache.commons:commons-lang3:jar:3.10:compile
 |  +- org.apache.commons:commons-text:jar:1.4:compile
+|  +- org.slf4j:slf4j-api:jar:1.7.30:compile
+|  +- org.apache.avro:avro:jar:1.7.7:compile
+|  |  +- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
+|  |  \- org.xerial.snappy:snappy-java:jar:1.0.5:compile
 |  +- com.google.re2j:re2j:jar:1.1:compile
 |  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
 |  +- com.google.code.gson:gson:jar:2.8.6:compile
@@ -90,12 +83,14 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |     +- org.apache.kerby:kerb-server:jar:1.0.1:compile
 |  |     |  \- org.apache.kerby:kerb-identity:jar:1.0.1:compile
 |  |     \- org.apache.kerby:kerby-xdr:jar:1.0.1:compile
+|  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
+|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- org.codehaus.woodstox:stax2-api:jar:3.1.4:compile
 |  +- com.fasterxml.woodstox:woodstox-core:jar:5.0.3:compile
 |  \- dnsjava:dnsjava:jar:2.1.7:compile
 +- uk.gov.gchq.palisade:hadoop-resource:jar:0.5.0-SNAPSHOT:compile
-|  +- ch.qos.logback:logback-core:jar:1.2.3:compile
-|  \- ch.qos.logback:logback-classic:jar:1.2.3:compile
++- uk.gov.gchq.palisade:readers-common:jar:0.5.0-SNAPSHOT:compile
 +- com.typesafe.akka:akka-stream_2.13:jar:2.6.10:compile
 |  +- org.scala-lang:scala-library:jar:2.13.3:compile
 |  +- com.typesafe.akka:akka-actor_2.13:jar:2.6.10:compile
@@ -117,18 +112,22 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  +- org.springframework.boot:spring-boot:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:2.3.1.RELEASE:compile
+|  |  |  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
+|  |  |  |  \- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.13.3:compile
 |  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.13.3:compile
 |  |  |  \- org.slf4j:jul-to-slf4j:jar:1.7.30:compile
 |  |  +- jakarta.annotation:jakarta.annotation-api:jar:1.3.5:compile
 |  |  \- org.yaml:snakeyaml:jar:1.26:compile
 |  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:2.3.1.RELEASE:compile
-|  |  \- org.springframework.boot:spring-boot-actuator:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework.boot:spring-boot-actuator:jar:2.3.1.RELEASE:compile
+|  |  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  \- io.micrometer:micrometer-core:jar:1.5.1:compile
 |     +- org.hdrhistogram:HdrHistogram:jar:2.1.12:compile
 |     \- org.latencyutils:LatencyUtils:jar:2.0.3:runtime
 +- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter-json:jar:2.3.1.RELEASE:compile
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.11.0:compile
 |  +- org.springframework.boot:spring-boot-starter-tomcat:jar:2.3.1.RELEASE:compile
 |  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:9.0.36:compile

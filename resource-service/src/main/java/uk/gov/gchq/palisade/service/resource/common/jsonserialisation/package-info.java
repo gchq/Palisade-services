@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.domain;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
-
-// Erase parent when storing entity clob, it will be rebuilt
-public abstract class OrphanedChildJsonMixin {
-    @JsonIgnore
-    abstract ParentResource getParent();
-
-    @JsonIgnore
-    abstract void setParent(ParentResource resource);
-}
+/**
+ * Classes for handling JSON serialisation and deserialisation.
+ */
+package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;

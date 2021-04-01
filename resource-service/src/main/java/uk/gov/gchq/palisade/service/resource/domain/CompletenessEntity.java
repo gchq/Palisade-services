@@ -25,7 +25,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.resource.common.Generated;
 
 import java.io.Serializable;
 import java.util.Objects;

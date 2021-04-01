@@ -21,10 +21,10 @@ import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.OrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
@@ -61,7 +61,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     private final SerialisedFormatRepository serialisedFormatRepository;
 
     /**
-     * Constructor for {@link ReactivePersistenceLayer}
+     * Constructor for ReactivePersistenceLayer
      *
      * @param completenessRepository     the completeness repository
      * @param resourceRepository         the resource repository

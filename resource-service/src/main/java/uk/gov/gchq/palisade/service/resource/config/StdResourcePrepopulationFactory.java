@@ -16,12 +16,14 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+
+import uk.gov.gchq.palisade.reader.common.ConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
+import uk.gov.gchq.palisade.service.resource.common.Generated;
 
 import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -54,7 +56,7 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
      * Create a StdResourcePrepopulationFactory, passing each member as an argument.
      *
      * @param resourceId       the {@link URI} of a {@link LeafResource} to add as a child of the rootId
-     * @param rootId           the {@link URI} of a {@link uk.gov.gchq.palisade.resource.ParentResource} which is the parent of this
+     * @param rootId           the {@link URI} of a {@link ParentResource} which is the parent of this
      *                         (and potentially other configured) {@link LeafResource} - needed to define what makes up a 'complete' set of resources
      * @param connectionDetail the {@link URI} of a data-service where this resource may be found
      * @param attributes       a @{@link Map} of other attributes this resource may have, in particular a type and serialisedFormat

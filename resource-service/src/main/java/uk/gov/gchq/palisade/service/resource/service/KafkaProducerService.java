@@ -25,8 +25,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 
+import uk.gov.gchq.palisade.service.resource.common.Token;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
-import uk.gov.gchq.palisade.service.resource.model.Token;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration.Topic;
 

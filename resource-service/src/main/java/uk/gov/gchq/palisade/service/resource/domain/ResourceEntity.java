@@ -28,9 +28,9 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.Nullable;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.Generated;
 
 import java.io.Serializable;
 import java.util.StringJoiner;

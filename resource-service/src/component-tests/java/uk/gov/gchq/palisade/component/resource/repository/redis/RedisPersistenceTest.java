@@ -47,20 +47,19 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import reactor.core.publisher.Flux;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
@@ -83,7 +82,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @Import({RedisPersistenceTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceTest.RedisInitializer.class, RedisPersistenceTest.KafkaInitializer.class})
-@ActiveProfiles({"redis", "akkatest"})
+@ActiveProfiles({"redis", "akka-test"})
 class RedisPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceTest.class);
 
@@ -114,7 +113,6 @@ class RedisPersistenceTest {
     private static final String CLIENT_TYPE = "client";
     private static final String AVRO_FORMAT = "avro";
     private static final String JSON_FORMAT = "json";
-    private static final SystemResource SYSTEM_ROOT = (SystemResource) ResourceBuilder.create("file:/");
     private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
     private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
             .type(EMPLOYEE_TYPE)
@@ -141,7 +139,7 @@ class RedisPersistenceTest {
             .withUser(USER);
 
     @BeforeEach
-    void setup() throws InterruptedException {
+    void setup() {
         // Wipe all keys from Redis
         redisTemplate.execute(conn -> conn.keyCommands()
                 .keys(ByteBuffer.wrap("*".getBytes()))
@@ -150,7 +148,7 @@ class RedisPersistenceTest {
                         .flatMap(keyBb -> conn.keyCommands().del(keyBb))))
                 .collectList().block();
 
-        // Prepopulate
+        // Pre-populate
         for (LeafResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Source.single(file)
                     .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
@@ -279,7 +277,7 @@ class RedisPersistenceTest {
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
+            context.getEnvironment().setActiveProfiles("redis", "akka-test");
             // Start container
             REDIS.start();
 
@@ -299,7 +297,7 @@ class RedisPersistenceTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("redis", "akkatest");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("redis", "akka-test");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();
@@ -321,9 +319,9 @@ class RedisPersistenceTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("resource", 3, (short) 1),
-                    new NewTopic("user", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("resource", 1, (short) 1),
+                    new NewTopic("user", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {

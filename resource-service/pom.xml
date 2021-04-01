@@ -26,10 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>resource-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/resource-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -48,15 +48,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common types (User, Resource, Context) -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
         <dependency>
             <!-- Hadoop config classes -->
             <groupId>org.apache.hadoop</groupId>
@@ -76,6 +67,13 @@
             <artifactId>hadoop-resource</artifactId>
             <version>0.5.0-${readers.revision}</version>
         </dependency>
+        <dependency>
+            <!-- Readers Common to contain common data service code -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>readers-common</artifactId>
+            <version>0.5.0-${readers.revision}</version>
+        </dependency>
+
         <!--
         ~ Akka and Alpakka (Kafka)
         -->
@@ -131,7 +129,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
-
         <!--
         ~ Test dependencies
         -->

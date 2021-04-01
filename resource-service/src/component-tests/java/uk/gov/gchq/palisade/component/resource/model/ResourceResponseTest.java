@@ -15,74 +15,49 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
-import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
-@JsonTest
-@ContextConfiguration(classes = {ResourceResponseTest.class, AkkaSystemConfig.class})
 class ResourceResponseTest {
 
-    @Autowired
-    private JacksonTester<ResourceResponse> jsonTester;
-
     @Test
-    void testSerialiseResourceResponseToJson() throws IOException {
-        Context context = new Context().purpose("testContext");
-        User user = new User().userId("testUserId");
-        LeafResource resource = new FileResource().id("/test/file.format")
+    void testSerialiseResourceResponseToJson() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+
+        var resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        ResourceResponse resourceResponse = ResourceResponse.Builder.create()
+
+        var resourceResponse = ResourceResponse.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
-                .withContext(context)
-                .withUser(user)
+                .withContext(new Context().purpose("testContext"))
+                .withUser(new User().userId("testUserId"))
                 .withResource(resource);
 
-        JsonContent<ResourceResponse> resourceResponseJsonContent = jsonTester.write(resourceResponse);
-        ObjectContent<ResourceResponse> resourceResponseObjectContent = jsonTester.parse(resourceResponseJsonContent.getJson());
-        ResourceResponse resourceResponseObject = resourceResponseObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(resourceResponse);
+        var actualInstance = mapper.readValue(actualJson, resourceResponse.getClass());
 
-        assertAll("ResourceResponseSerialisingDeseralisingAndComparison",
-                () -> assertAll("ResourceResponseSerialisingComparedToString",
-                        () -> assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
-                        () -> assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
-                        () -> assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
-                ),
-                () -> assertAll("ResourceResponseDeserialisingComparedToObject",
-                        () -> assertThat(resourceResponse.getUserId()).isEqualTo(resourceResponseObject.getUserId()),
-                        () -> assertThat(resourceResponse.getResourceId()).isEqualTo(resourceResponseObject.getResourceId()),
-                        () -> assertThat(resourceResponse.getContext()).isEqualTo(resourceResponseObject.getContext()),
-                        () -> assertThat(resourceResponse.getUser()).isEqualTo((resourceResponseObject.getUser())),
-                        () -> assertThat(resourceResponse.resource).isEqualTo((resourceResponseObject.resource))
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(resourceResponse).usingRecursiveComparison().isEqualTo(resourceResponseObject)
-                )
-        );
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(resourceResponse);
+
+        assertThat(actualInstance)
+                .as("Ignoring the error, check %s using recursion)", resourceResponse.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(resourceResponse);
     }
 
 }

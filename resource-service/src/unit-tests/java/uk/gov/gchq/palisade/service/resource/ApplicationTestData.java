@@ -18,17 +18,17 @@ package uk.gov.gchq.palisade.service.resource;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.UserId;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.resource.common.Token;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.resource.model.Token;
 
 public class ApplicationTestData {
     /**
@@ -69,9 +69,7 @@ public class ApplicationTestData {
             .withResource(LEAF_RESOURCE);
 
     public static final ProducerRecord<String, ResourceRequest> START = new ProducerRecord<>("user", 0, null, null);
-
     public static final ProducerRecord<String, ResourceRequest> RECORD = new ProducerRecord<>("user", 0, null, REQUEST);
-
     public static final ProducerRecord<String, ResourceRequest> END = new ProducerRecord<>("user", 0, null, null);
 
     static {

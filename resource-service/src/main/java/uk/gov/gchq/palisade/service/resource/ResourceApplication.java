@@ -31,8 +31,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.reader.common.ResourceService;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
@@ -68,7 +70,7 @@ public class ResourceApplication {
      * @param materializer    the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor        an executor for any {@link CompletableFuture}s (preferably the application task executor)
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory},
+     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link ResourcePrepopulationFactory},
      *                        but with a connection detail attached
      */
     public ResourceApplication(final Set<RunnableGraph<?>> runners,
@@ -97,7 +99,7 @@ public class ResourceApplication {
     /**
      * This method perform 2 actions on the {@link ApplicationReadyEvent}
      * <ol>
-     *     <li>Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}</li>
+     *     <li>Adds resource(s) from a configuration file to the persistence of the {@link ResourceService}</li>
      *     <li>Runs all available Akka {@link RunnableGraph}s until completion.</li>
      * </ol>
      * The 'main' threads of the application during runtime are the completable futures spawned here.

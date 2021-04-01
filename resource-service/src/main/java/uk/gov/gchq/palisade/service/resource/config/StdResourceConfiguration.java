@@ -16,9 +16,11 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.reader.common.ResourceConfiguration;
+import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.reader.common.ResourceService;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.Generated;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +31,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link ResourceConfiguration} that uses Spring to configure a list of resources from a yaml file
- * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
- * These resources will be used for prepopulating the {@link uk.gov.gchq.palisade.service.ResourceService}
+ * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link Resource}s
+ * These resources will be used for pre-populating the {@link ResourceService}
  */
 public class StdResourceConfiguration implements ResourceConfiguration {
     private List<StdResourcePrepopulationFactory> resources;

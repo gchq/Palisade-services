@@ -59,8 +59,8 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
             .withReuse(true);
 
-    static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
+    static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
+        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA_CONTAINER.getFirstMappedPort())))) {
             admin.createTopics(newTopics);
             LOGGER.info("created topics: " + admin.listTopics().names().get());
         }
@@ -68,7 +68,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest", "testresource");
+        configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "db-test", "test-resource");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         KAFKA_CONTAINER.start();
@@ -95,7 +95,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
         @Bean
         KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-            createTopics(this.topics, KAFKA_CONTAINER);
+            createTopics(this.topics);
             return KAFKA_CONTAINER;
         }
 

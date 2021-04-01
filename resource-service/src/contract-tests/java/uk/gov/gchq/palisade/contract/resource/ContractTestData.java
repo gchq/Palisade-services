@@ -26,9 +26,9 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.resource.common.Token;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.resource.model.Token;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,8 +45,8 @@ public class ContractTestData {
     }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
-    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.reader.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.reader.common.User\"}}";
+    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.reader.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.reader.common.User\"}}";
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_REQUEST_NODE;
     public static final ResourceRequest REQUEST_OBJ;
@@ -81,20 +81,6 @@ public class ContractTestData {
             return MAPPER.readTree(NO_RESOURCE_REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse error contract test data", e);
-        }
-    };
-    public static final Function<Integer, ResourceRequest> REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
-    public static final Function<Integer, ResourceRequest> NO_USER_ID_REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(NO_RESOURCE_REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert error contract test data to objects", e);
         }
     };
 

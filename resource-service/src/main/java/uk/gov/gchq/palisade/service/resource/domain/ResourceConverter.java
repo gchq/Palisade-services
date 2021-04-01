@@ -25,8 +25,8 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.lang.NonNull;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
 
 import java.io.IOException;
 

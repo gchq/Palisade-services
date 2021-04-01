@@ -24,21 +24,6 @@ package uk.gov.gchq.palisade.service.resource.exception;
 public class ReactiveRepositoryReflectionException extends RuntimeException {
 
     /**
-     * Initialises this exception with no message or cause.
-     */
-    public ReactiveRepositoryReflectionException() {
-    }
-
-    /**
-     * Initialises this exception with the given message.
-     *
-     * @param message message for the exception
-     */
-    public ReactiveRepositoryReflectionException(final String message) {
-        super(message);
-    }
-
-    /**
      * Initialises this exception with the given message and cause.
      *
      * @param message   message to report

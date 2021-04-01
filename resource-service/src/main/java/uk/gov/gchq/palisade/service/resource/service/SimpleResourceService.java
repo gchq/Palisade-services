@@ -19,13 +19,14 @@ package uk.gov.gchq.palisade.service.resource.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.ResourceService;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.ResourceService;
+import uk.gov.gchq.palisade.reader.common.Service;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+ * The Simple implementation of type {@link ResourceService} which extends {@link Service}
  */
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);

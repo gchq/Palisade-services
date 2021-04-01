@@ -24,16 +24,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.ConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.util.HadoopResourceDetails;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -80,7 +80,7 @@ class HadoopResourceServiceTest {
     }
 
     @BeforeEach
-    void setup() throws IOException, URISyntaxException {
+    void setup() throws IOException {
         if (IS_WINDOWS) {
             System.setProperty("hadoop.home.dir", Paths.get("./src/test/resources/hadoop-3.2.1").toAbsolutePath().normalize().toString());
         }
@@ -168,23 +168,23 @@ class HadoopResourceServiceTest {
     @Test
     void testShouldGetResourcesByType() throws Exception {
         // Given a new file with a new type is added
-        List<LeafResource> resultist = new ArrayList<>();
+        var resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
         HadoopResourceDetails.addTypeSupport("not" + TYPE_VALUE, TYPE_CLASSNAME + ".not");
 
         // When making a get request to the resource service by type
         final Iterator<LeafResource> resourcesByType = resourceService.getResourcesByType(TYPE_CLASSNAME);
-        resourcesByType.forEachRemaining(resultist::add);
+        resourcesByType.forEachRemaining(resultList::add);
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resultist.size()).isEqualTo(expected.size());
+        assertThat(resultList.size()).isEqualTo(expected.size());
     }
 
     @Test
     void testShouldGetResourcesByFormat() throws Exception {
         // Given a new file with a new format is added
-        List<LeafResource> resultList = new ArrayList<>();
+        var resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
 
         // When making a get request to the resource service by serialisedFormat
@@ -224,7 +224,8 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent1 = fileResource.getParent();
 
-        assertThat(dir.resolve("folder1/folder2/").toString()).isEqualTo(parent1.getId());
+        assertThat(dir.resolve("folder1/folder2/"))
+                .hasToString(parent1.getId());
         assertAll(
                 () -> assertThat(parent1).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent1).isInstanceOf(DirectoryResource.class)
@@ -234,7 +235,8 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent2 = child.getParent();
 
-        assertThat(dir.resolve("folder1/").toString()).isEqualTo(parent2.getId());
+        assertThat(dir.resolve("folder1/"))
+                .hasToString(parent2.getId());
         assertAll(
                 () -> assertThat(parent2).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent2).isInstanceOf(DirectoryResource.class)
@@ -244,7 +246,8 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent3 = child2.getParent();
 
-        assertThat(dir.toString()).isEqualTo(parent3.getId());
+        assertThat(dir)
+                .hasToString(parent3.getId());
         assertAll(
                 () -> assertThat(parent3).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent3).isInstanceOf(DirectoryResource.class)
@@ -255,7 +258,8 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent4 = child3.getParent();
 
-        assertThat(root.toString()).isEqualTo(parent4.getId());
+        assertThat(root)
+                .hasToString(parent4.getId());
     }
 
     private Configuration createConf(final String fsDefaultName) {

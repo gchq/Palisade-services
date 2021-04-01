@@ -54,7 +54,7 @@ public class RedisConfiguration {
     private final ReactiveRedisConnectionFactory factory;
 
     /**
-     * Public constructor for {@link RedisConfiguration}
+     * Public constructor for RedisConfiguration
      *
      * @param factory the reactive connection factory for redis
      */

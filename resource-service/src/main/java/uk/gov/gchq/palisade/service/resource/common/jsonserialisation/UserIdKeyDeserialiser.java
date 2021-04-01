@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.domain;
+package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 
-import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.UserId;
 
-// Erase parent when storing entity clob, it will be rebuilt
-public abstract class OrphanedChildJsonMixin {
-    @JsonIgnore
-    abstract ParentResource getParent();
+import java.io.IOException;
 
-    @JsonIgnore
-    abstract void setParent(ParentResource resource);
+class UserIdKeyDeserialiser extends KeyDeserializer {
+    @Override
+    public Object deserializeKey(final String key, final DeserializationContext ctxt)
+            throws IOException {
+        return JSONSerialiser.deserialise(key, UserId.class);
+    }
 }

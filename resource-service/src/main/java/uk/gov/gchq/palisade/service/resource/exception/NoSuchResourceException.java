@@ -15,28 +15,16 @@
  */
 package uk.gov.gchq.palisade.service.resource.exception;
 
+import uk.gov.gchq.palisade.reader.common.ResourceService;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+
 /**
  * A {@code NoSuchResourceException} is a {@link RuntimeException} thrown by a
- * {@link uk.gov.gchq.palisade.service.ResourceService} implementation to
- * indicate that the requested {@link uk.gov.gchq.palisade.resource.LeafResource} doesn't exist,
+ * {@link ResourceService} implementation to
+ * indicate that the requested {@link LeafResource} doesn't exist,
  * or is not known to that {@code Service} instance.
  */
 public class NoSuchResourceException extends RuntimeException {
-
-    /**
-     * Initialises this exception with no message or cause.
-     */
-    public NoSuchResourceException() {
-    }
-
-    /**
-     * Initialises this exception with the given message.
-     *
-     * @param message message for the exception
-     */
-    public NoSuchResourceException(final String message) {
-        super(message);
-    }
 
     /**
      * Initialises this exception with the given message and cause.

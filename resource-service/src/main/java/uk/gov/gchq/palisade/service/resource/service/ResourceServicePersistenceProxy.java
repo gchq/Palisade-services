@@ -23,8 +23,9 @@ import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.reader.common.ResourceService;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
@@ -52,7 +53,7 @@ public class ResourceServicePersistenceProxy {
     private final ResourceService delegate;
 
     /**
-     * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
+     * Construct a StreamingResourceServiceProxy, but without any {@link ResourcePrepopulationFactory} prepopulation
      *
      * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate    a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer

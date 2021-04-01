@@ -52,9 +52,9 @@ import uk.gov.gchq.palisade.contract.resource.ContractTestData;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
+import uk.gov.gchq.palisade.service.resource.common.Token;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.resource.model.Token;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.SerDesConfig;
@@ -86,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import(KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaInitializer.class})
-@ActiveProfiles({"dbtest", "akkatest", "testresource"})
+@ActiveProfiles({"db-test", "akka-test", "test-resource"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class KafkaContractTest {
     @Autowired
@@ -104,7 +104,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testRequestSet() {
         // Only 1 request will be received by the resource-service
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),

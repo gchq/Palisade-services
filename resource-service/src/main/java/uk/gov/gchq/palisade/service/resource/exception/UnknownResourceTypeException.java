@@ -16,18 +16,15 @@
 
 package uk.gov.gchq.palisade.service.resource.exception;
 
+
+import uk.gov.gchq.palisade.reader.common.resource.Resource;
+
 /**
  * An {@code UnknownResourceType} is a {@link RuntimeException} thrown by the
- * Resource Service to indicate that a {@link uk.gov.gchq.palisade.resource.Resource}
+ * Resource Service to indicate that a {@link Resource}
  * is neither a parent or a leaf resource.
  */
 public class UnknownResourceTypeException extends RuntimeException {
-
-    /**
-     * Initialises this exception with no message or cause.
-     */
-    public UnknownResourceTypeException() {
-    }
 
     /**
      * Initialises this exception with the given message.

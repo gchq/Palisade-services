@@ -57,6 +57,9 @@ class MessageSerialisationTest {
         Object deserialisedRequest = MAPPER.readValue(serialisedRequest, message.getClass());
 
         // Then the deserialised object is unchanged (equal)
-        assertThat(deserialisedRequest).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(message);
+        assertThat(deserialisedRequest)
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(message);
     }
 }

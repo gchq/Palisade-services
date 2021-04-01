@@ -15,61 +15,38 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.User;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
-@JsonTest
-@ContextConfiguration(classes = {ResourceRequestTest.class})
 class ResourceRequestTest {
 
-    @Autowired
-    private JacksonTester<ResourceRequest> jsonTester;
-
     @Test
-    void testResourceRequestSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
-        User user = new User().userId("testUserId");
-        ResourceRequest resourceRequest = ResourceRequest.Builder.create()
+    void testResourceRequestSerialisingAndDeserialising() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+
+        var resourceRequest = ResourceRequest.Builder.create()
                 .withUserId("originalUserId")
                 .withResourceId("testResourceId")
-                .withContext(context)
-                .withUser(user);
+                .withContext(new Context().purpose("testContext"))
+                .withUser(new User().userId("testUserId"));
 
-        JsonContent<ResourceRequest> resourceRequestJsonContent = jsonTester.write(resourceRequest);
-        ObjectContent<ResourceRequest> resourceRequestObjectContent = jsonTester.parse(resourceRequestJsonContent.getJson());
-        ResourceRequest resourceRequestObject = resourceRequestObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(resourceRequest);
+        var actualInstance = mapper.readValue(actualJson, resourceRequest.getClass());
 
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(resourceRequest);
 
-        assertAll("ResourceRequestSerialisingDeseralisingAndComparison",
-                () -> assertAll("ResourceRequestSerialisingComparedToString",
-                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserId"),
-                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
-                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId")
-                ),
-                () -> assertAll("ResourceRequestDeserialisingComparedToObject",
-                        () -> assertThat(resourceRequest.getUserId()).isEqualTo(resourceRequestObject.getUserId()),
-                        () -> assertThat(resourceRequest.getResourceId()).isEqualTo(resourceRequestObject.getResourceId()),
-                        () -> assertThat(resourceRequest.getContext()).isEqualTo(resourceRequestObject.getContext()),
-                        () -> assertThat(resourceRequest.getUser()).isEqualTo((resourceRequestObject.getUser()))
-                ),
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(resourceRequest).usingRecursiveComparison().isEqualTo(resourceRequestObject)
-                )
-        );
+        assertThat(actualInstance)
+                .as("Ignoring the error, check %s using recursion)", resourceRequest.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(resourceRequest);
     }
 }

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.domain;
+package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.Module;
 
-import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import java.util.List;
 
-// Erase parent when storing entity clob, it will be rebuilt
-public abstract class OrphanedChildJsonMixin {
-    @JsonIgnore
-    abstract ParentResource getParent();
-
-    @JsonIgnore
-    abstract void setParent(ParentResource resource);
+/**
+ * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
+ * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
+ * in {@link JSONSerialiser}.
+ */
+public interface JSONSerialiserModules {
+    List<Module> getModules();
 }
