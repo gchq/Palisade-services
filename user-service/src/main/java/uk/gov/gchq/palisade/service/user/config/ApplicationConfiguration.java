@@ -28,7 +28,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.user.common.User;
+import uk.gov.gchq.palisade.service.user.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.user.common.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.common.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
@@ -46,10 +49,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     /**
-     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link User}s
      * These users will be used for pre-populating the {@link UserService}
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
+     * @return a standard {@link UserConfiguration} containing a list of {@link UserPrepopulationFactory}s
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
@@ -59,9 +62,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A factory for {@link uk.gov.gchq.palisade.User} objects, using a userId, a list of authorizations and a list of roles
+     * A factory for {@link User} objects, using a userId, a list of authorizations and a list of roles
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.User} from configuration
+     * @return a standard {@link UserPrepopulationFactory} capable of building a {@link User} from configuration
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")

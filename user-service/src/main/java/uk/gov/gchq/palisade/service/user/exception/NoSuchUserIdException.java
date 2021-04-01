@@ -18,17 +18,17 @@ package uk.gov.gchq.palisade.service.user.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.user.common.UserId;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 /**
  * A {@code NoSuchUserIdException} is a {@link RuntimeException} thrown by a
  * {@link UserService} implementation to
- * indicate that the requested {@link uk.gov.gchq.palisade.UserId} doesn't exist,
+ * indicate that the requested {@link UserId} doesn't exist,
  * or is not known to that {@code Service} instance.
  */
 public class NoSuchUserIdException extends RuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoSuchUserIdException.class);
-
 
     /**
      * Initializes this exception with no message or cause.

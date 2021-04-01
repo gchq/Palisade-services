@@ -22,14 +22,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.common.Context;
+import uk.gov.gchq.palisade.service.user.common.Generated;
+import uk.gov.gchq.palisade.service.user.common.User;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-
 
 /**
  * This data represents the output for user-service which will include the User identified by the service.

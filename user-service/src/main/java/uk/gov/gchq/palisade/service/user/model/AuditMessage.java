@@ -22,9 +22,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
+import uk.gov.gchq.palisade.service.user.common.Context;
+import uk.gov.gchq.palisade.service.user.common.Generated;
+import uk.gov.gchq.palisade.service.user.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -87,7 +87,6 @@ public class AuditMessage {
         } catch (UnknownHostException e) {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
-
     }
 
     @Generated

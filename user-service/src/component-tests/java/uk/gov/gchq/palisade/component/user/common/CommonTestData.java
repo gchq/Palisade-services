@@ -16,8 +16,8 @@
 
 package uk.gov.gchq.palisade.component.user.common;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.common.Context;
+import uk.gov.gchq.palisade.service.user.common.UserId;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 /**

@@ -15,12 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.user.impl;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.common.User;
+import uk.gov.gchq.palisade.service.user.common.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
@@ -73,7 +72,7 @@ public abstract class AbstractLdapUserService implements UserService {
     private final String ldapConfigPath;
 
     /**
-     * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
+     * Constructs a AbstractLdapUserService with a given {@link LdapContext}.
      * The cache time to live with be set the default or previously set value.
      *
      * @param context the {@link LdapContext} for making calls to LDAP.
@@ -110,7 +109,7 @@ public abstract class AbstractLdapUserService implements UserService {
                     .auths(getAuths(new UserId().id(userId), userAttrs, context))
                     .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
-            LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
+            LOGGER.error("Unable to get user from LDAP ", ex);
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
         }
     }
