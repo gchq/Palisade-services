@@ -62,22 +62,22 @@ import static uk.gov.gchq.palisade.service.filteredresource.model.AuditMessage.S
  */
 public class WebSocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
+    private static final String SERVICE_NAME_HEADER_KEY = "service-name";
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
     private final ActorRef<TokenErrorMessageCommand> errorMessageController;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
-    private static final String SERVICE_NAME_HEADER_KEY = "service-name";
 
     /**
      * Default constructor for a new WebSocketEventService, supplying the persistence layer for retrieving token offsets.
      * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
      * back to the client as required.
      *
-     * @param tokenOffsetController       the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
+     * @param tokenOffsetController  the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
      * @param errorMessageController the instance of the {@link TokenErrorMessageController}, which will handle reporting early and late errors for a given token
-     * @param auditSinkFactory            a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
-     * @param resourceSourceFactory       a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
+     * @param auditSinkFactory       a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
+     * @param resourceSourceFactory  a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
@@ -212,11 +212,11 @@ public class WebSocketEventService {
                                         .withResourceAndCommittable(committablePair))
 
                                 .recover(PartialFunction.fromFunction(exception -> AuditableWebSocketMessage.Builder.create()
-                                            .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                                    .withType(MessageType.ERROR)
-                                                    .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
-                                                    .withBody(exception.getMessage()))
-                                            .withoutAudit()))
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.ERROR)
+                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, SERVICE_NAME).noHeaders()
+                                                .withBody(exception.getMessage()))
+                                        .withoutAudit()))
 
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
@@ -259,11 +259,11 @@ public class WebSocketEventService {
                         .orElseGet(() -> persistenceResponse.getMessageEntities().stream()
                                 // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
                                 .map(errorEntity -> AuditableWebSocketMessage.Builder.create()
-                                            .withWebSocketMessage(WebSocketMessage.Builder.create()
-                                                    .withType(MessageType.ERROR)
-                                                    .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, errorEntity.getServiceName()).noHeaders()
-                                                    .withBody(errorEntity.getError()))
-                                            .withoutAudit())
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.ERROR)
+                                                .withHeader(Token.HEADER, token).withHeader(SERVICE_NAME_HEADER_KEY, errorEntity.getServiceName()).noHeaders()
+                                                .withBody(errorEntity.getError()))
+                                        .withoutAudit())
                                 .collect(Collectors.toList()))));
     }
 
