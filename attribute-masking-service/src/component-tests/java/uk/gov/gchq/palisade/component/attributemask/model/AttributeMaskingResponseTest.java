@@ -37,7 +37,7 @@ class AttributeMaskingResponseTest {
      *                                 object cannot be serialised into JSON, or deseralised back into the object.
      */
     @Test
-    void testGroupedDependantAttributeMaskingResponseSerialisingAndDeserialising() throws JsonProcessingException {
+    void testAttributeMaskingResponseSerialisingAndDeserialising() throws JsonProcessingException {
         var mapper = new ObjectMapper();
 
         var resource = new FileResource().id("/test/file.format")

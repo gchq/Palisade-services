@@ -37,7 +37,7 @@ class AuditErrorMessageTest {
      *                                 object cannot be serialised into JSON, or deseralised back into the object.
      */
     @Test
-    void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
+    void testErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
         var mapper = new ObjectMapper();
 
         var auditErrorMessage = AuditErrorMessage.Builder.create()
