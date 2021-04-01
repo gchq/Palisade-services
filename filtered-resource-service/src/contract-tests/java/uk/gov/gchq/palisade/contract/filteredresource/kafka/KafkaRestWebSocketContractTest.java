@@ -62,19 +62,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.UserServiceAuditErrorMessage;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
+import uk.gov.gchq.palisade.service.filteredresource.common.Context;
+import uk.gov.gchq.palisade.service.filteredresource.common.StreamMarker;
+import uk.gov.gchq.palisade.service.filteredresource.common.Token;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
-import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
@@ -158,8 +158,7 @@ class KafkaRestWebSocketContractTest {
                         .id("file:/file/" + resourceId)
                         .serialisedFormat("fmt")
                         .type("type")
-                        .connectionDetail(new SimpleConnectionDetail()
-                                .serviceName("data-service"))
+                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
                         .parent(new SystemResource().id("file:/file/")));
     }
 

@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+package uk.gov.gchq.palisade.service.filteredresource.common.resource;
 
 /**
- * Spring configuration for async executor properties - core pool size etc.
+ * This interface indicates that a resource has a parent resource provides
+ * getter and setters to get the parent resource.
  */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
+public interface ChildResource extends Resource {
 
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
+    ChildResource parent(ParentResource parent);
 
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
+    ParentResource getParent();
+
+    void setParent(final ParentResource parent);
+
 }

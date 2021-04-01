@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EntityScan(basePackages = "uk.gov.gchq.palisade.service.filteredresource.domain")
 @EnableJpaRepositories(basePackages = "uk.gov.gchq.palisade.service.filteredresource.repository")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@ActiveProfiles("dbtest")
+@ActiveProfiles("db-test")
 class JpaTokenOffsetPersistenceLayerTest {
 
     @Autowired

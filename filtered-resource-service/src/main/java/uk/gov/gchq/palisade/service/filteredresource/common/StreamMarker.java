@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+package uk.gov.gchq.palisade.service.filteredresource.common;
 
 /**
- * Spring configuration for async executor properties - core pool size etc.
+ * Marks the start or end of a stream of messages.
+ * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
+ * Will not be present for all other (content-ful) messages.
  */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
+public enum StreamMarker {
+    START,
+    END;
 
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
-
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
+    public static final String HEADER = "x-stream-marker";
 }

@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
+package uk.gov.gchq.palisade.service.filteredresource.common.jsonserialisation;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.LeafResource;
 
-/**
- * Spring configuration for async executor properties - core pool size etc.
- */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
+import java.io.IOException;
 
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
-
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
+class ResourceKeyDeserialiser extends KeyDeserializer {
+    @Override
+    public Object deserializeKey(final String key, final DeserializationContext ctxt)
+            throws IOException {
+        return JSONSerialiser.deserialise(key, LeafResource.class);
     }
 }

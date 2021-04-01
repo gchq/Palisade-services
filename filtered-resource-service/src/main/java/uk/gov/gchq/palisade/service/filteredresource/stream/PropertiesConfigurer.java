@@ -59,7 +59,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     private static final int PROPERTY_INDEX = 2;
     private static final int PROPERTY_TAIL = 3;
     private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
-    private static final String LIST_ITEM_SEPERATOR = ",";
+    private static final String LIST_ITEM_SEPARATOR = ",";
 
     private String[] locations;
     private final ResourceLoader resourceLoader;
@@ -90,7 +90,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         envPropSources.forEach((PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
                 locations = ((String) propertySource.getProperty("application.properties.locations"))
-                        .split(LIST_ITEM_SEPERATOR);
+                        .split(LIST_ITEM_SEPARATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)
                                 .forEach(envPropSources::addFirst));

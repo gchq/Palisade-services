@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.Context;
+import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 
 import java.util.Map;
 import java.util.Objects;

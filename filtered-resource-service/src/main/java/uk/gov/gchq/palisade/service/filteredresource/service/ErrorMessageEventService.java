@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
- * This queue recieves {@link AuditErrorMessage}(s) for a unique token.
+ * This queue receives {@link AuditErrorMessage}(s) for a unique token.
  * When such a message is received, it will be persisted.
  * It will be later sent to the client via websocket.
  */

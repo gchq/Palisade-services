@@ -23,7 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 
 import java.util.Collections;

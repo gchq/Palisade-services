@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
 
 import org.springframework.lang.NonNull;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 
 import java.util.Collections;

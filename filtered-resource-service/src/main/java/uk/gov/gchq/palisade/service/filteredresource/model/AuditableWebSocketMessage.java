@@ -21,7 +21,7 @@ import akka.kafka.ConsumerMessage.Committable;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 
 /**
  * Collect a {@link WebSocketMessage} prepared to be returned to the client with any other context

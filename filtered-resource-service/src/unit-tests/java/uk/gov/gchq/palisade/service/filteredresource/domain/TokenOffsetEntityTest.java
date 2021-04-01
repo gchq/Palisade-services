@@ -40,9 +40,11 @@ class TokenOffsetEntityTest {
         RedisTtlConfigurationProxy.setTimeToLiveSeconds("TokenOffsetEntity", entityTtl);
 
         // When
-        TokenOffsetEntity entity = new TokenOffsetEntity(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.OFFSET);
+        var entity = new TokenOffsetEntity(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.OFFSET);
 
         // Then
-        assertThat(entity.getTimeToLive()).isEqualTo(entityTtl);
+        assertThat(entity.getTimeToLive())
+                .as("Check that the Redis TTL is acquired")
+                .isEqualTo(entityTtl);
     }
 }

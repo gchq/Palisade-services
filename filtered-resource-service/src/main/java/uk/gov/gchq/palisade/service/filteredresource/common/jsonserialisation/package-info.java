@@ -14,26 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
-
 /**
- * Spring configuration for async executor properties - core pool size etc.
+ * Classes for handling JSON serialisation and deserialisation.
  */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
-
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
-
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
-}
+package uk.gov.gchq.palisade.service.filteredresource.common.jsonserialisation;

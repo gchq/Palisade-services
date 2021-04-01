@@ -43,12 +43,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.filteredresource.common.Context;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -98,7 +98,7 @@ class AkkaWebSocketTest {
     final FilteredResourceRequest testRequest = FilteredResourceRequest.Builder.create()
             .withUserId("test-user")
             .withResourceId("/test")
-            .withContext(new Context())
+            .withContext(new Context().purpose("test-purpose"))
             .withResource(testResource);
     final Committable mockCommittable = Mockito.mock(Committable.class);
 

@@ -46,15 +46,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.filteredresource.common.Context;
+import uk.gov.gchq.palisade.service.filteredresource.common.StreamMarker;
+import uk.gov.gchq.palisade.service.filteredresource.common.Token;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
-import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;

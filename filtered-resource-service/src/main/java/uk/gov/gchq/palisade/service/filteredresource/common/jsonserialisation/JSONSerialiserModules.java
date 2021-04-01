@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
+package uk.gov.gchq.palisade.service.filteredresource.common.jsonserialisation;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.fasterxml.jackson.databind.Module;
 
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import java.util.List;
 
 /**
- * Spring configuration for async executor properties - core pool size etc.
+ * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
+ * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
+ * in {@link JSONSerialiser}.
  */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
-
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
-
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
+public interface JSONSerialiserModules {
+    List<Module> getModules();
 }

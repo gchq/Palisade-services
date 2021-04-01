@@ -25,10 +25,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>filtered-resource-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/filtered-resource-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -36,6 +36,8 @@
         <akka.version>2.6.10</akka.version>
         <akka.http.version>10.2.1</akka.http.version>
         <alpakka.version>2.1.0-M1</alpakka.version>
+        <commons-io.version>2.6</commons-io.version>
+        <commons-lang3.version>3.8.1</commons-lang3.version>
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
@@ -47,15 +49,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        ~ Palisade
-        -->
-        <dependency>
-            <!-- Common User, Resource, Context -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
         <!--
         ~ Akka
         -->
@@ -118,6 +111,31 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <!--
+        ~ Apache Dependencies
+        -->
+        <dependency>
+            <!-- Utility classes used mainly for byte conversions -->
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <!-- A package of utility classes for classes in java.lang's hierarchy -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+
 
         <!--
         ~ Test Dependencies

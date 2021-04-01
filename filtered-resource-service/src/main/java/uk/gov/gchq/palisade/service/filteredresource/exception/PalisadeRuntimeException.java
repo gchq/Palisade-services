@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.filteredresource.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+package uk.gov.gchq.palisade.service.filteredresource.exception;
 
 /**
- * Spring configuration for async executor properties - core pool size etc.
+ * Subtype of {@link RuntimeException} with additional constructors to support the inclusion of a HTTP error message
+ * along with the other exception details.
  */
-@ConfigurationProperties(prefix = "async")
-public class AsyncConfigProperties {
-    private int corePoolSize;
+public class PalisadeRuntimeException extends RuntimeException {
 
-    @Generated
-    public int getCorePoolSize() {
-        return corePoolSize;
+    /**
+     * Initialises this exception with the given message.
+     *
+     * @param message message for the exception
+     * @param cause   the exception stack trace
+     */
+    public PalisadeRuntimeException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
-    @Generated
-    public void setCorePoolSize(final int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
 }
