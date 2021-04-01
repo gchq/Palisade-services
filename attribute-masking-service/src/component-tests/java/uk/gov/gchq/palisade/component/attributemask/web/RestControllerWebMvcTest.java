@@ -68,6 +68,7 @@ class RestControllerWebMvcTest {
     }
 
     @Test
+    @SuppressWarnings("java:S6299")
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/api/mask")

@@ -33,8 +33,8 @@ class AttributeMaskingResponseTest {
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws JsonProcessingException throws if the {@link AttributeMaskingResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     * @throws JsonProcessingException throws if the {@link AttributeMaskingResponse}
+     *                                 object cannot be serialised into JSON, or deseralised back into the object.
      */
     @Test
     void testGroupedDependantAttributeMaskingResponseSerialisingAndDeserialising() throws JsonProcessingException {
