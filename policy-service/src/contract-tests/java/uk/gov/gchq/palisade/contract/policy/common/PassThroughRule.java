@@ -16,10 +16,10 @@
 
 package uk.gov.gchq.palisade.contract.policy.common;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.common.Context;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
 
 import java.io.Serializable;
 

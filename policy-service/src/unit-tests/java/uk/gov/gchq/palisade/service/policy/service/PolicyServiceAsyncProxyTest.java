@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
@@ -107,7 +107,6 @@ class PolicyServiceAsyncProxyTest {
                 .usingRecursiveComparison()
                 .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NULL);
     }
-
 
     /**
      * Test for when there is Rules are not found for the resource.  This should produce a container

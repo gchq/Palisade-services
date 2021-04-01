@@ -20,12 +20,12 @@ population:
 
   - resourceId: /test/resourceId
     resourceRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
+      "1-Pass Through Rule": uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule
     recordRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
+      "1-Pass Through Rule": uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule
 
   - resourceId: /test/resourceRulesResource
     resourceRules:
       "1-Serialised-Format-Rule": uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule
     recordRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
+      "1-Pass Through Rule": uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule

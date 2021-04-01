@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
-import uk.gov.gchq.palisade.service.policy.model.Token;
+import uk.gov.gchq.palisade.service.policy.common.Token;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
 

@@ -16,14 +16,14 @@
 
 package uk.gov.gchq.palisade.component.policy;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.ApplicationTestData.PassThroughRule;
+import uk.gov.gchq.palisade.service.policy.common.Context;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
@@ -46,7 +46,7 @@ public class CommonTestData {
     public static final String RESOURCE_ID = "/test/resourceId";
     public static final Context CONTEXT = new Context().purpose("testContext");
     public static final User USER = new User().userId(USER_ID);
-    public static final LeafResource LEAF_RESOURCE =  new FileResource().id("/test/file.format")
+    public static final LeafResource LEAF_RESOURCE = new FileResource().id("/test/file.format")
             .type("java.lang.String")
             .serialisedFormat("format")
             .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))

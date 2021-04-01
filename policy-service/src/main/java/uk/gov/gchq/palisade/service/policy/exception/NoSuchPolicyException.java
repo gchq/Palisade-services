@@ -15,10 +15,13 @@
  */
 package uk.gov.gchq.palisade.service.policy.exception;
 
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.service.PolicyService;
+
 /**
- * A {@code NoSuchPolicyException} is a {@link RuntimeException} thrown by a
- * {@link uk.gov.gchq.palisade.service.policy.service.PolicyService} implementation to
- * indicate that the requested {@link uk.gov.gchq.palisade.rule.Rule} doesnt exist for the requested {@link uk.gov.gchq.palisade.resource.Resource} doesn't exist,
+ * A {@code NoSuchPolicyException} is a {@link RuntimeException} thrown by a {@link PolicyService} implementation to
+ * indicate that the requested {@link Rule} doesnt exist for the requested {@link Resource} doesn't exist,
  * or is not known to that {@code Service} instance.
  */
 public class NoSuchPolicyException extends RuntimeException {
@@ -32,13 +35,4 @@ public class NoSuchPolicyException extends RuntimeException {
         super(message);
     }
 
-    /**
-     * Initialises this exception with the given message and cause.
-     *
-     * @param message   message to report
-     * @param throwable the underlying cause of this exception
-     */
-    public NoSuchPolicyException(final String message, final Throwable throwable) {
-        super(message, throwable);
-    }
 }

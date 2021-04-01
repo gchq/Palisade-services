@@ -22,8 +22,8 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class PolicyServiceCachingProxy {
      * Using the resourceId as the key, adds the resource, and any resource rules against that resource, to the cache
      *
      * @param resourceId the resourceId the user wants to apply resource rules to
-     * @param rules    the resource rules that apply to this resource
+     * @param rules      the resource rules that apply to this resource
      * @return the resource rules that apply to this LeafResource
      */
     @CachePut(value = "resourceRules", key = "#resourceId")
@@ -91,7 +91,7 @@ public class PolicyServiceCachingProxy {
      * Using the resourceId as the key, adds the resource, and any record rules against that resource, to the cache
      *
      * @param resourceId the resourceId the user wants to apply record rules to
-     * @param rules    the record rules that apply to this resource
+     * @param rules      the record rules that apply to this resource
      * @return the record rules that apply to this LeafResource
      */
     @CachePut(value = "recordRules", key = "#resourceId")

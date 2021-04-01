@@ -24,12 +24,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.Context;
+import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public final class PolicyResponse {
     }
 
     @Generated
-    public Context getContext()  {
+    public Context getContext() {
         try {
             return MAPPER.treeToValue(this.context, Context.class);
         } catch (JsonProcessingException e) {
@@ -97,7 +97,7 @@ public final class PolicyResponse {
     }
 
     @Generated
-    public User getUser()  {
+    public User getUser() {
         try {
             return MAPPER.treeToValue(this.user, User.class);
         } catch (JsonProcessingException e) {

@@ -15,10 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -87,7 +87,8 @@ public final class AuditablePolicyResourceResponse {
         /**
          * Takes the data for the request, rules.  Is a partial constructor and is expecting the modified resources
          * to complete the build of the class.
-         * @param auditablePolicyResourceRules  holds the data from the request and the related rules
+         *
+         * @param auditablePolicyResourceRules holds the data from the request and the related rules
          * @return the composed immutable object
          */
         public static IModifiedResource create(final AuditablePolicyResourceRules auditablePolicyResourceRules) {

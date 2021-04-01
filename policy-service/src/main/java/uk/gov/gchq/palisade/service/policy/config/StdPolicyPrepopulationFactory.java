@@ -19,14 +19,13 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.policy.common.util.ResourceBuilder;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -38,11 +37,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * Implementation of a ResourcePrepopulationFactory that uses Spring to configure a resource from a yaml file
  * A factory for objects, using:
- * - a String reference of a {@link uk.gov.gchq.palisade.resource.Resource} resource
- * - a map of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
- * - a map of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
+ * - a String reference of a {@link Resource} resource
+ * - a map of {@link Rule} resource-level rules operating on a {@link Resource}
+ * - a map of {@link Rule} record-level rules operating on the type of a {@link LeafResource}
  */
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);

@@ -27,13 +27,13 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.StubResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.resource.StubResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 

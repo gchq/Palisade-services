@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
@@ -46,7 +46,7 @@ public class PolicyServiceAsyncProxy {
     private final Executor executor;
 
     /**
-     * Constructor for instantiating the {@link PolicyServiceAsyncProxy}
+     * Constructor for instantiating the PolicyServiceAsyncProxy
      *
      * @param service  the PolicyServiceCachingProxy
      * @param executor an executor for any {@link CompletableFuture}s

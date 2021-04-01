@@ -16,8 +16,8 @@
 
 package uk.gov.gchq.palisade.service.policy.service;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.io.Serializable;
 import java.util.Optional;

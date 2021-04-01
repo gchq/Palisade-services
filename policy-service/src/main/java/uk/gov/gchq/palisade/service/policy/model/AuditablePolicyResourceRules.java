@@ -15,9 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.util.Objects;
 import java.util.StringJoiner;

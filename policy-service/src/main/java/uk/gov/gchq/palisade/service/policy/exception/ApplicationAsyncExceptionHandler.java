@@ -29,7 +29,8 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
 
     @Override
     public void handleUncaughtException(final Throwable throwable, final Method method, final Object... objects) {
-        LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(), Stream.of(objects).map(Object::toString).collect(Collectors.joining(", ", "[", "]")));
+        LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(),
+                Stream.of(objects).map(Object::toString).collect(Collectors.joining(", ", "[", "]")));
     }
 
 }

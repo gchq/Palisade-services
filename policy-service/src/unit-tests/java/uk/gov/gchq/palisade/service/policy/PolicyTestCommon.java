@@ -16,17 +16,17 @@
 
 package uk.gov.gchq.palisade.service.policy;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.policy.HasSensitiveAuthRule;
-import uk.gov.gchq.palisade.policy.IsTextResourceRule;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.PredicateRule;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.Context;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.HasSensitiveAuthRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.PredicateRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -39,12 +39,12 @@ import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.component.policy.service.RedisPolicyCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
-import uk.gov.gchq.palisade.policy.IsTextResourceRule;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
@@ -205,13 +205,13 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
+            context.getEnvironment().setActiveProfiles("redis", "akka-test");
             // Start container
             REDIS.start();
 
             // Override Redis configuration
             String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
+            // Configure the test-container random port
             String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
             RedisPolicyCachingTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
             // Override the configuration at runtime

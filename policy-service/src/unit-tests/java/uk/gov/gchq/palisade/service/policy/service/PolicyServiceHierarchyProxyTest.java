@@ -20,11 +20,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 
 import java.util.Arrays;

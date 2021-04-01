@@ -15,15 +15,15 @@
  */
 package uk.gov.gchq.palisade.service.policy;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.common.Context;
+import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.UserId;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class ApplicationTestData {
-    public static final String REQUEST_TOKEN = "test-request-token";
     public static final UserId USER_ID = new UserId().id("test-user-id");
     public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "/test/resourceId";

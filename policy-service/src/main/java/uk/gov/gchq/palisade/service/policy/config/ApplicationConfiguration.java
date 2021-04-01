@@ -28,7 +28,13 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.policy.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.policy.common.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
@@ -47,10 +53,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating Policies
-     * These wil be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
-     * These policies will be used for prepopulating the {@link PolicyService}
+     * These wil be populated further using a UserConfiguration and ResourceConfiguration
+     * These policies will be used for pre-populating the {@link PolicyService}
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory}s
+     * @return a standard {@link PolicyConfiguration} containing a list of {@link PolicyPrepopulationFactory}s
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
@@ -60,12 +66,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A factory for a map of {@link uk.gov.gchq.palisade.rule.Rules} to a resourceId, using:
+     * A factory for a map of {@link Rules} to a resourceId, using:
      * - a {@link String} value of the resourceId
-     * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
-     * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
+     * - a list of {@link Rule} resource-level rules operating on a {@link Resource}
+     * - a list of {@link Rule} record-level rules operating on the type of a {@link LeafResource}
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory} capable of building a Policy from configuration
+     * @return a standard {@link PolicyPrepopulationFactory} capable of building a Policy from configuration
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
