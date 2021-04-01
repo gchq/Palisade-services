@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
-import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.manager.common.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.io.IOException;

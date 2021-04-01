@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.manager.common.Generated;
 
 import java.io.File;
 import java.util.ArrayList;

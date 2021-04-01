@@ -26,7 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.manager.common.Generated;
 import uk.gov.gchq.palisade.service.manager.runner.ConfigPrinter;
 import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
 import uk.gov.gchq.palisade.service.manager.runner.ScheduleRunner;
