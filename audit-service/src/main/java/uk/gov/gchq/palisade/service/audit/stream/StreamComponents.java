@@ -79,7 +79,7 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka CommitterSettings from the given config
      *
-     * @param system the applications actor system used to load config values
+     * @param system the application's actor system used to load config values
      * @return a {@link CommitterSettings} object for controlling Kafka commits
      */
     public CommitterSettings committerSettings(final ActorSystem system) {
