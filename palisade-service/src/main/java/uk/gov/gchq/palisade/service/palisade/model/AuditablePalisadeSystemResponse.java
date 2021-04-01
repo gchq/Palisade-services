@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.palisade.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.palisade.common.Generated;
 
 import java.util.Objects;
 import java.util.Optional;

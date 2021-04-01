@@ -23,7 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.palisade.common.Context;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 
 import java.io.IOException;

@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.stream;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.palisade.common.Generated;
 
 import java.util.HashMap;
 import java.util.Map;

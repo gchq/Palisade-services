@@ -19,9 +19,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
+import uk.gov.gchq.palisade.service.palisade.common.Context;
+import uk.gov.gchq.palisade.service.palisade.common.Generated;
+import uk.gov.gchq.palisade.service.palisade.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

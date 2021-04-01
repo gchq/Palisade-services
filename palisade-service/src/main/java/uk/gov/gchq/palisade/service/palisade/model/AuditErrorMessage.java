@@ -18,8 +18,8 @@ package uk.gov.gchq.palisade.service.palisade.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.palisade.common.Context;
+import uk.gov.gchq.palisade.service.palisade.common.Generated;
 
 import java.util.Map;
 import java.util.Objects;

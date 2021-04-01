@@ -33,9 +33,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.palisade.common.StreamMarker;
+import uk.gov.gchq.palisade.service.palisade.common.Token;
 import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
-import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
-import uk.gov.gchq.palisade.service.palisade.model.Token;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration.Topic;

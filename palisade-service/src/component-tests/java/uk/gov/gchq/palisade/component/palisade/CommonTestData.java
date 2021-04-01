@@ -16,13 +16,10 @@
 
 package uk.gov.gchq.palisade.component.palisade;
 
-import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,9 +41,5 @@ public class CommonTestData {
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT);
 
-    public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create(PALISADE_REQUEST, new HashMap<>()).withError(ERROR);
-
     public static final PalisadeSystemResponse SYSTEM_RESPONSE = PalisadeSystemResponse.Builder.create(PALISADE_REQUEST);
-    public static final AuditablePalisadeSystemResponse AUDITABLE_WITH_ERROR = AuditablePalisadeSystemResponse.Builder.create()
-            .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
 }
