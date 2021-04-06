@@ -15,33 +15,32 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceResponseTest {
 
     @Test
-    void testSerialiseResourceResponseToJson() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        LeafResource resource = new FileResource().id("/test/file.format")
+    void testSerialiseResourceResponseToJson() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+
+        var resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
 
-        ResourceResponse resourceResponse = ResourceResponse.Builder.create()
+        var resourceResponse = ResourceResponse.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
                 .withContext(new Context().purpose("testContext"))
@@ -50,6 +49,10 @@ class ResourceResponseTest {
 
         var actualJson = mapper.writeValueAsString(resourceResponse);
         var actualInstance = mapper.readValue(actualJson, resourceResponse.getClass());
+
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(resourceResponse);
 
         assertThat(actualInstance)
                 .as("Using recursion, check that the %s object has been deserialised successfully", resourceResponse.getClass().getSimpleName())

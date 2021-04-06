@@ -47,19 +47,19 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import reactor.core.publisher.Flux;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
@@ -283,7 +283,7 @@ class RedisPersistenceTest {
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
+            context.getEnvironment().setActiveProfiles("redis", "akka-test");
             // Start container
             REDIS.start();
 
@@ -303,7 +303,7 @@ class RedisPersistenceTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("redis", "akkatest");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("redis", "akka-test");
             KAFKA.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             KAFKA.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             KAFKA.start();

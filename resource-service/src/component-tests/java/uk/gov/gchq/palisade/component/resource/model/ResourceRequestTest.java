@@ -15,23 +15,23 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.User;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceRequestTest {
 
     @Test
-    void testResourceRequestSerializingAndDeseralizing() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ResourceRequest resourceRequest = ResourceRequest.Builder.create()
+    void testResourceRequestSerialisingAndDeserialising() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+
+        var resourceRequest = ResourceRequest.Builder.create()
                 .withUserId("originalUserId")
                 .withResourceId("testResourceId")
                 .withContext(new Context().purpose("testContext"))
@@ -39,6 +39,10 @@ class ResourceRequestTest {
 
         var actualJson = mapper.writeValueAsString(resourceRequest);
         var actualInstance = mapper.readValue(actualJson, resourceRequest.getClass());
+
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(resourceRequest);
 
         assertThat(actualInstance)
                 .as("Using recursion, check that the %s object has been deserialised successfully", resourceRequest.getClass().getSimpleName())

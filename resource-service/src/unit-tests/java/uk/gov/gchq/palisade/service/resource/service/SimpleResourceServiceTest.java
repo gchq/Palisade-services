@@ -18,14 +18,13 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,9 +36,10 @@ class SimpleResourceServiceTest {
     @Test
     void testJavaFilesInUnitTest() throws IOException {
         // Given we create a file and add it to the service
-        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
-        LeafResource resource = (LeafResource) ResourceBuilder.create(
+        var unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
+        var resource = (LeafResource) ResourceBuilder.create(
                 new File("./src/unit-tests/java/uk/gov/gchq/palisade/service/resource/ApplicationTestData.java").getCanonicalFile().toURI());
+
         resource.type("java.lang.String").serialisedFormat("java").connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
         Set<LeafResource> testFiles = new HashSet<>();
 
@@ -55,16 +55,16 @@ class SimpleResourceServiceTest {
     @Test
     void testCanFindTestResourceAvro() throws IOException {
         // Given we create a avro file
-        URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
-        LeafResource testResourceAvro = (LeafResource) ResourceBuilder.create(avroFileURI);
-        DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
+        var avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
+        var testResourceAvro = (LeafResource) ResourceBuilder.create(avroFileURI);
+        var testResourceDir = (DirectoryResource) testResourceAvro.getParent();
 
         // Given we add the avro to our list of expected returned files
-        FunctionalIterator<LeafResource> expectedAvroResource = FunctionalIterator.fromIterator(service.query(avroFileURI, x -> true));
-        LeafResource leafResource = expectedAvroResource.next();
+        var expectedAvroResource = FunctionalIterator.fromIterator(service.query(avroFileURI, x -> true));
+        var leafResource = expectedAvroResource.next();
 
         // When we request the avro by passing in the id of its directory
-        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()))
+        var resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()))
                 .filter(resource -> resource.getSerialisedFormat().equals("avro"));
 
         // Then it has been retrieved successfully
@@ -73,8 +73,8 @@ class SimpleResourceServiceTest {
                 .usingRecursiveComparison()
                 .isEqualTo(leafResource);
 
-        // When we get the resource by its seralised format
-        FunctionalIterator<LeafResource> resourcesByFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(leafResource.getSerialisedFormat()))
+        // When we get the resource by its serialised format
+        var resourcesByFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(leafResource.getSerialisedFormat()))
                 .filter(resource -> resource.getId().equals(leafResource.getId()));
 
         assertThat(resourcesByFormat.next())

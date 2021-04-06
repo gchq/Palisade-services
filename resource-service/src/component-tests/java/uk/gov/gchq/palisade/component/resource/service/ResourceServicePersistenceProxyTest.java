@@ -31,10 +31,11 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
@@ -45,7 +46,6 @@ import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.util.List;
@@ -71,19 +71,17 @@ class ResourceServicePersistenceProxyTest {
             .type("data")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);
-
+    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
+            .withUserId("user-id")
+            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
+            .withContext(new Context().purpose("test-purpose"))
+            .withUser(new User().userId("test-user"));
     @Autowired
     private ResourceServicePersistenceProxy resourceServiceAsyncProxy;
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
     private Materializer materializer;
-
-    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
-            .withUserId("user-id")
-            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
-            .withContext(new Context().purpose("test-purpose"))
-            .withUser(new User().userId("test-user"));
 
     @BeforeEach
     void setup() throws InterruptedException {

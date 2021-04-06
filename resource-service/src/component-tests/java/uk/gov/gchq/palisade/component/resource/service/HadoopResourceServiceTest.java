@@ -24,16 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.util.HadoopResourceDetails;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -89,7 +88,7 @@ class HadoopResourceServiceTest {
         writeFile(fs, dir, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
         writeFile(fs, dir, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
 
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service-mock");
+        var connectionDetail = new SimpleConnectionDetail().serviceName("data-service-mock");
         id1 = dir.resolve(getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE));
         resource1 = ((LeafResource) ResourceBuilder.create(id1))
                 .type(TYPE_CLASSNAME)
@@ -171,7 +170,7 @@ class HadoopResourceServiceTest {
     @Test
     void testShouldGetResourcesByType() throws Exception {
         // Given a new file with a new type is added
-        List<LeafResource> resultList = new ArrayList<>();
+        var resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
         HadoopResourceDetails.addTypeSupport("not" + TYPE_VALUE, TYPE_CLASSNAME + ".not");
 
@@ -188,7 +187,7 @@ class HadoopResourceServiceTest {
     @Test
     void testShouldGetResourcesByFormat() throws Exception {
         // Given a new file with a new format is added
-        List<LeafResource> resultList = new ArrayList<>();
+        var resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
 
         // When making a get request to the resource service by serialisedFormat
@@ -231,9 +230,9 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent1 = fileResource.getParent();
 
-        assertThat(dir.resolve("folder1/folder2/").toString())
+        assertThat(dir.resolve("folder1/folder2/"))
                 .as("Check the URI of the parent is the correct URI")
-                .isEqualTo(parent1.getId());
+                .hasToString(parent1.getId());
 
         assertThat(parent1)
                 .as("Check that the ParentResource has been instantiated correctly")
@@ -243,9 +242,9 @@ class HadoopResourceServiceTest {
         final ChildResource child = (ChildResource) parent1;
         final ParentResource parent2 = child.getParent();
 
-        assertThat(dir.resolve("folder1/").toString())
+        assertThat(dir.resolve("folder1/"))
                 .as("Check that the URI of the parent is the correct URI")
-                .isEqualTo(parent2.getId());
+                .hasToString(parent2.getId());
 
         assertThat(parent2)
                 .as("Check that the ParentResource has been instantiated correctly")
@@ -256,9 +255,9 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent3 = child2.getParent();
 
-        assertThat(dir.toString())
+        assertThat(dir)
                 .as("Check that the URI returned is the correct parent id")
-                .isEqualTo(parent3.getId());
+                .hasToString(parent3.getId());
 
         assertThat(parent3)
                 .as("Check that the ParentResource has been instantiated correctly")
@@ -269,9 +268,9 @@ class HadoopResourceServiceTest {
         final ChildResource child3 = (ChildResource) parent3;
         final ParentResource parent4 = child3.getParent();
 
-        assertThat(root.toString())
+        assertThat(root)
                 .as("Check the URI of the root is correct")
-                .isEqualTo(parent4.getId());
+                .hasToString(parent4.getId());
     }
 
     private Configuration createConf(final String fsDefaultName) {
