@@ -34,7 +34,7 @@ public class SerDesHealthIndicator implements HealthIndicator {
     protected static final Queue<Exception> SER_DES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
 
     /**
-     * Adds any encountered serialization exceptions to the {@link Queue} of exceptions
+     * Adds any encountered serialisation exceptions to the {@link Queue} of exceptions
      *
      * @param exception the encountered exception
      */
