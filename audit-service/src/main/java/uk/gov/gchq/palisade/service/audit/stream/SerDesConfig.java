@@ -48,8 +48,8 @@ import java.time.format.DateTimeFormatter;
 public final class SerDesConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerDesConfig.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -61,7 +61,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> errorKeySerializer() {
+    public static Serializer<String> errorKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -71,13 +71,13 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage auditRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
                 SerDesHealthIndicator.addSerDesExceptions(e);
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
     }
@@ -87,7 +87,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> errorKeyDeserializer() {
+    public static Deserializer<String> errorKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -97,7 +97,7 @@ public final class SerDesConfig {
      * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Deserializer<AuditErrorMessage> errorValueDeserializer(final AuditServiceConfigProperties configProperties) {
+    public static Deserializer<AuditErrorMessage> errorValueDeserialiser(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
@@ -105,7 +105,7 @@ public final class SerDesConfig {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
                 createFile("Error-", failedAuditString, configProperties);
                 SerDesHealthIndicator.addSerDesExceptions(e);
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
     }
@@ -116,7 +116,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> successKeySerializer() {
+    public static Serializer<String> successKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -126,13 +126,13 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditSuccessMessage)
      */
-    public static Serializer<AuditSuccessMessage> successValueSerializer() {
+    public static Serializer<AuditSuccessMessage> successValueSerialiser() {
         return (String ignored, AuditSuccessMessage auditRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
                 SerDesHealthIndicator.addSerDesExceptions(e);
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
     }
@@ -142,7 +142,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> successKeyDeserializer() {
+    public static Deserializer<String> successKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -152,7 +152,7 @@ public final class SerDesConfig {
      * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditSuccessMessage)
      */
-    public static Deserializer<AuditSuccessMessage> successValueDeserializer(final AuditServiceConfigProperties configProperties) {
+    public static Deserializer<AuditSuccessMessage> successValueDeserialiser(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
@@ -160,7 +160,7 @@ public final class SerDesConfig {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
                 createFile("Success-", failedAuditString, configProperties);
                 SerDesHealthIndicator.addSerDesExceptions(e);
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
     }
@@ -175,7 +175,7 @@ public final class SerDesConfig {
         File timestampedFile = new File(parent, fileName);
         try (FileWriter fileWriter = new FileWriter(timestampedFile, StandardCharsets.UTF_8, !timestampedFile.createNewFile())) {
             fileWriter.write(failedAuditString);
-            LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", prefix, timestampedFile);
+            LOGGER.warn("Failed to deserialise the '{}' audit message. Created file {}", prefix, timestampedFile);
         } catch (IOException ex) {
             LOGGER.error("Failed to write file to directory: {}", directory.getAbsoluteFile());
             LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
