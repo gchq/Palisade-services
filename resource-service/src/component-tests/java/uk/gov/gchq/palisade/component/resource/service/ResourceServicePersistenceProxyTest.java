@@ -71,17 +71,19 @@ class ResourceServicePersistenceProxyTest {
             .type("data")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);
-    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
-            .withUserId("user-id")
-            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
-            .withContext(new Context().purpose("test-purpose"))
-            .withUser(new User().userId("test-user"));
+
     @Autowired
     private ResourceServicePersistenceProxy resourceServiceAsyncProxy;
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
     private Materializer materializer;
+
+    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
+            .withUserId("user-id")
+            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
+            .withContext(new Context().purpose("test-purpose"))
+            .withUser(new User().userId("test-user"));
 
     @BeforeEach
     void setup() throws InterruptedException {

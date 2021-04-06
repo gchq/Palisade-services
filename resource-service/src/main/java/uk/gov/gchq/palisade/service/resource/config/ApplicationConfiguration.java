@@ -200,7 +200,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     /**
      * Used so that you can create custom mapper by starting with the default and then modifying if needed
      *
-     * @return a default ObjectMapper
+     * @return a default JSONSerialiser ObjectMapper
      */
     @Bean
     @Primary
