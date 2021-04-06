@@ -45,7 +45,6 @@ import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
-import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 
@@ -66,8 +65,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ScenarioPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceTest.class);
 
-    @Autowired
-    private ReactivePersistenceLayer persistenceLayer;
     @Autowired
     private ResourceServicePersistenceProxy proxy;
     @Autowired
@@ -151,6 +148,7 @@ class ScenarioPersistenceTest {
     // Test is still marked as transactional as we poke and prod the persistence layer directly to see what is persisted and what isn't
     // For spring reasons, we can't just mark the extractResourceCompleteness method as transactional
     @Test
+    @SuppressWarnings("checkstyle:methodlength")
     void testRunThroughTestScenario() {
         // Given -
         // Variables used to store returned results from the resource-service
@@ -181,13 +179,20 @@ class ScenarioPersistenceTest {
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
         returnedAuditable.forEach(response -> LOGGER.debug("Returned: {}", response.getResourceResponse().resource.getId()));
-        assertThat(returnedMultiFileRequest).isEqualTo(expectedReturned);
+
+        assertThat(returnedMultiFileRequest)
+                .as("Check that when I get a resource from persistence by the resource itself, the correct resource is returned")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted).isEqualTo(expectedPersisted);
+        assertThat(persisted)
+                .as("Check that the correct resource has been persisted")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedPersisted);
         LOGGER.debug("");
         LOGGER.info("");
 
@@ -207,13 +212,19 @@ class ScenarioPersistenceTest {
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
         returnedAuditable.forEach(response -> LOGGER.debug("Returned: {}", response.getResourceResponse().resource.getId()));
-        assertThat(returnedMultiFileDirRequest).isEqualTo(expectedReturned);
+        assertThat(returnedMultiFileDirRequest)
+                .as("Check that when I get resources from persistence by the resource Id, the correct resources are returned")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted).isEqualTo(expectedPersisted);
+        assertThat(persisted)
+                .as("Check that the correct resources have been persisted")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedPersisted);
         LOGGER.debug("");
         LOGGER.info("");
 
@@ -234,13 +245,19 @@ class ScenarioPersistenceTest {
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
         returnedAuditable.forEach(response -> LOGGER.debug("Returned: {}", response.getResourceResponse().resource.getId()));
-        assertThat(returnedTopLevelDirRequest).isEqualTo(expectedReturned);
+        assertThat(returnedTopLevelDirRequest)
+                .as("Check that when I get resources from persistence by the resource directory, the correct resources are returned")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted).isEqualTo(expectedPersisted);
+        assertThat(persisted)
+                .as("Check that the correct resources have been persisted")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedPersisted);
         LOGGER.debug("");
         LOGGER.info("");
 
@@ -261,13 +278,18 @@ class ScenarioPersistenceTest {
         // Then - resource service returned expected leaf resources
         LOGGER.debug("Expected: nothing");
         returnedAuditable.forEach(response -> LOGGER.debug("Returned: {}", response.getResourceResponse().resource.getId()));
-        assertThat(returnedEmptyDirRequest).isEqualTo(expectedReturned);
+        assertThat(returnedEmptyDirRequest)
+                .as("Check that when I get a resource from persistence in an empty directory, no resources are returned")
+                .isEmpty();
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted).isEqualTo(expectedPersisted);
+        assertThat(persisted)
+                .as("Check that the correct resources have been persisted")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedPersisted);
         LOGGER.debug("");
         LOGGER.info("");
 
@@ -288,13 +310,19 @@ class ScenarioPersistenceTest {
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
         returnedAuditable.forEach(response -> LOGGER.debug("Returned: {}", response.getResourceResponse().resource.getId()));
-        assertThat(returnedRootDirRequest).isEqualTo(expectedReturned);
+        assertThat(returnedRootDirRequest)
+                .as("Check that when I get resources from persistence by the root directory, the correct resources are returned")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted).isEqualTo(expectedPersisted);
+        assertThat(persisted)
+                .as("Check that the correct resources have been persisted")
+                .usingRecursiveComparison()
+                .isEqualTo(expectedPersisted);
         LOGGER.debug("");
         LOGGER.debug("");
     }

@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Response message that is returned to the client.  The message contains information that will identify this request
- * for access to the data and be used in a subsequent request to see the resources.
+ * Response message that is returned to the client.
+ * This message contains a unique token to link the request from the client to the data, and is used at the Filtered Resource Service to retrieve data via the Data Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PalisadeClientResponse {
@@ -35,9 +35,9 @@ public final class PalisadeClientResponse {
     private final String token;  //unique identifier for the request.
 
     /**
-     * Instantiates a new Response.
+     * Instantiates a new Response, taking in a unique request token as a parameter.
      *
-     * @param token the token
+     * @param token the unique request token
      */
     @JsonCreator
     public PalisadeClientResponse(final @JsonProperty("token") String token) {
@@ -47,7 +47,7 @@ public final class PalisadeClientResponse {
     /**
      * Gets token.
      *
-     * @return the token
+     * @return the unique token
      */
     @Generated
     public String getToken() {

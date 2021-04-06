@@ -48,12 +48,18 @@ class HealthActuatorContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
+        assertThat(restTemplate)
+                .as("Check that the restTemplate is autowired successfully")
+                .isNotNull();
     }
 
     @Test
     void testServiceIsHealthy() {
+        // Given that the service is running (and presumably healthy)
+
+        // When we GET the /actuator/health REST endpoint (used by k8s)
         ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+
         assertAll("Assert the Health Actuator",
                 () -> assertThat(responseEntity.getStatusCode())
                         .as("Check the status code of the response")

@@ -35,4 +35,13 @@ public class PropertyLoadingException extends RuntimeException {
         super(message, cause);
     }
 
+    /**
+     * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
+     *
+     * @param message message describing what action caused the exception
+     */
+    public PropertyLoadingException(final String message) {
+        super(message);
+    }
+
 }

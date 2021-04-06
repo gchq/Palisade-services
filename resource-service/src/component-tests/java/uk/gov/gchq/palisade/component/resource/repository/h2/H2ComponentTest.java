@@ -30,22 +30,21 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
-import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +54,7 @@ import static org.assertj.core.api.Assertions.fail;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"db-test"})
+@ActiveProfiles({"dbtest"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class H2ComponentTest {
 
@@ -138,8 +137,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(resourceResult).containsAll(expected);
+        assertThat(resourceResult)
+                .as("Check that when getting a Resource by its directory, the correct resources are returned")
+                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resource for a specific file
         resourceResult = proxy.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
@@ -154,8 +154,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(resourceResult).isEqualTo(expected);
+        assertThat(resourceResult)
+                .as("Check that when we get a Resource by itself, the correct resource is returned")
+                .containsOnly(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -174,8 +175,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we get resources by the Id of the directory, the correct resources are returned")
+                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by resourceId for a specific file
         idResult = proxy.getResourcesById(EMPLOYEE_AVRO_REQUEST)
@@ -189,8 +191,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(idResult).containsAll(expected);
+        assertThat(idResult)
+                .as("Check that when we request one resource by its ID, only the correct resource is returned")
+                .containsOnly(EMPLOYEE_AVRO_FILE);
     }
 
     @Test
@@ -209,8 +212,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
-        assertThat(typeResult).containsAll(expected);
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resources are returned")
+                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE);
 
         // When making a get request to the resource service by type
         typeResult = proxy.getResourcesByType(TEST_DIRECTORY_REQUEST, CLIENT_TYPE)
@@ -224,8 +228,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(CLIENT_AVRO_FILE);
-        assertThat(typeResult).containsAll(expected);
+        assertThat(typeResult)
+                .as("Check that when we request a resource by the directory and type, the correct resource is returned")
+                .containsOnly(CLIENT_AVRO_FILE);
     }
 
     @Test
@@ -244,8 +249,9 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request resource by their format and directory, the correct resources are returned")
+                .containsExactly(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
 
         // When making a get request to the resource service by serialisedFormat
         formatResult = proxy.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, JSON_FORMAT)
@@ -259,7 +265,8 @@ class H2ComponentTest {
                 .toCompletableFuture().join();
 
         // Then assert that the expected resource(s) are returned
-        expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
-        assertThat(formatResult).containsAll(expected);
+        assertThat(formatResult)
+                .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
+                .containsOnly(EMPLOYEE_JSON_FILE);
     }
 }

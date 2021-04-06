@@ -24,8 +24,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This class is a container for {@code PalisadeClientRequest} and {@code AuditErrorMessage} during stream processing.
- * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
+ * This class is a container for {@code PalisadeClientResponse} and {@code AuditErrorMessage} during stream processing.
+ * Under normal conditions only one of these will be non-null, if a PalisadeSystemResponse is attached the the request has been successful,
+ * otherwise an AuditErrorMessage will be attached
  */
 
 public final class AuditablePalisadeSystemResponse {
@@ -64,12 +65,13 @@ public final class AuditablePalisadeSystemResponse {
     }
 
     /**
-     * The static builder
+     * Builder class for the creation of instances of the AuditablePalisadeSystemResponse.
+     * This is a variant of the Fluent Builder
      */
     public static class Builder {
 
         /**
-         * The creator function
+         * Creates a new instance of the AuditablePalisadeSystemResponse
          *
          * @return the composed immutable object
          */
@@ -86,30 +88,30 @@ public final class AuditablePalisadeSystemResponse {
              * Create an {@link AuditablePalisadeSystemResponse} with only an {@link AuditErrorMessage}
              * This is indicative that something went wrong.
              *
-             * @param audit non-null value
-             * @return value object
+             * @param auditErrorMessage an error to be attached to the response object
+             * @return a link to the interface required to add an {@link AuditErrorMessage} and a null {@link PalisadeSystemResponse} to a now completed {@link AuditablePalisadeSystemResponse}.
              */
-            default AuditablePalisadeSystemResponse withAuditErrorMessage(AuditErrorMessage audit) {
-                return withResponseAndError(null, audit);
+            default AuditablePalisadeSystemResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage) {
+                return withResponseAndError(null, auditErrorMessage);
             }
 
             /**
-             * Create an {@link AuditablePalisadeSystemResponse} from  a {@link PalisadeClientRequest}.
+             * Create an {@link AuditablePalisadeSystemResponse} from a {@link PalisadeClientRequest}.
              * This will be converted into an {@link PalisadeSystemResponse}.
              *
-             * @param request non-null value
-             * @return value object
+             * @param clientRequest a request from the client to be attached to the response object
+             * @return a link to the interface required to add a {@link PalisadeSystemResponse} and null {@link AuditErrorMessage} to the now completed {@link AuditablePalisadeSystemResponse}
              */
-            default AuditablePalisadeSystemResponse withPalisadeRequest(PalisadeClientRequest request) {
-                return withPalisadeResponse(PalisadeSystemResponse.Builder.create(request));
+            default AuditablePalisadeSystemResponse withPalisadeRequest(PalisadeClientRequest clientRequest) {
+                return withPalisadeResponse(PalisadeSystemResponse.Builder.create(clientRequest));
             }
 
             /**
              * Create an {@link AuditablePalisadeSystemResponse} from a {@link PalisadeSystemResponse} and no error.
              * This is indicative of a successful request registered.
              *
-             * @param response non-null value
-             * @return value object
+             * @param response a non-null {@link PalisadeSystemResponse}
+             * @return a link to the interface required to add a {@link PalisadeSystemResponse} and a null {@link AuditErrorMessage} to a now completed {@link AuditablePalisadeSystemResponse}.
              */
             default AuditablePalisadeSystemResponse withPalisadeResponse(PalisadeSystemResponse response) {
                 return withResponseAndError(response, null);
@@ -119,11 +121,11 @@ public final class AuditablePalisadeSystemResponse {
              * Create an {@link AuditablePalisadeSystemResponse} supplying both the {@link PalisadeSystemResponse} and the {@link AuditErrorMessage}.
              * It is expected that exactly one of these is null and the other non-null.
              *
-             * @param request           value or null
-             * @param auditErrorMessage value or null
-             * @return value object
+             * @param response          either a {@link PalisadeSystemResponse} or null if the request was unsuccessful
+             * @param auditErrorMessage either null, if the request was successful, or an error message in a {@link AuditErrorMessage}
+             * @return a now completed {@link AuditablePalisadeSystemResponse} with either a response or an auditErrorMessage
              */
-            AuditablePalisadeSystemResponse withResponseAndError(PalisadeSystemResponse request, AuditErrorMessage auditErrorMessage);
+            AuditablePalisadeSystemResponse withResponseAndError(PalisadeSystemResponse response, AuditErrorMessage auditErrorMessage);
         }
     }
 

@@ -49,8 +49,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.resource.ContractTestData;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerialiser;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserialiser;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.common.Token;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
@@ -116,7 +116,7 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
@@ -126,7 +126,7 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
@@ -143,9 +143,11 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check that the correct amount of messages are returned")
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
+                        .as("Check the message contains the correct headers")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
@@ -154,17 +156,19 @@ class KafkaContractTest {
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the start header contains all the correct information")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the end header contains all the correct information")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-
         assertThat(results)
+                .as("Check that the response has all the correct Resource information")
                 .extracting(ConsumerRecord::value)
                 .extracting(result -> result.get("resource"))
                 .allSatisfy(resource -> {
@@ -188,7 +192,7 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output and error topics
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
@@ -202,7 +206,7 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
@@ -218,7 +222,7 @@ class KafkaContractTest {
         // Then - the results are as expected
         assertAll(
                 () -> assertThat(results)
-                        .as("The 'output' topic has 2 messages")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(2),
 
                 () -> assertThat(results)
@@ -256,7 +260,7 @@ class KafkaContractTest {
         assertAll("Asserting on the error topic",
                 // One error is produced
                 () -> assertThat(errorResults)
-                        .as("The 'error' topic has 1 message")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 // The error has the relevant headers, including the token
@@ -266,7 +270,6 @@ class KafkaContractTest {
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .as("Check the exception message")
                         .startsWith("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
@@ -305,14 +308,17 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .as("Check that the token is in the header")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
-
                             assertThat(result.value())
+                                    .as("Check the request returned is correct")
+                                    .usingRecursiveComparison()
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );

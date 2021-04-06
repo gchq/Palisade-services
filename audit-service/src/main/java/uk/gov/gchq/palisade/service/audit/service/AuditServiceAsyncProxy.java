@@ -50,7 +50,7 @@ public class AuditServiceAsyncProxy {
      *
      * @param token   the token for the Palisade request.
      * @param message the message received from another service
-     * @return a {@link CompletableFuture} of a {@link Boolean} value.
+     * @return a {@link CompletableFuture} containing a {@link List} of {@link Boolean} values.
      */
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {
         LOGGER.debug("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
@@ -62,7 +62,7 @@ public class AuditServiceAsyncProxy {
                             auditService.audit(token, successMessage);
                             return true;
                         }
-                        LOGGER.warn("An AuditSuccessMessage should only be sent by the `filtered-resource-service` or the `data-service`. Message received from `{}`",
+                        LOGGER.warn("An AuditSuccessMessage should only be sent by the `Filtered Resource Service` or the `Data Service`. Message received from `{}`",
                                 message.getServiceName());
                         return false;
                     } else if (message instanceof AuditErrorMessage) {

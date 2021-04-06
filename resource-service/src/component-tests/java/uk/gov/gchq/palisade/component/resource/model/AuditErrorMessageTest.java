@@ -15,13 +15,13 @@
  */
 package uk.gov.gchq.palisade.component.resource.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,14 +32,13 @@ class AuditErrorMessageTest {
      * Tests the creation of the message type, AuditErrorMessage using the builder
      * plus tests the serialising to a Json string and deserialising to an object.
      *
-     * @throws JsonProcessingException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
-     *                                 This equates to a failure to serialise or de-serialise the string.
+     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
-    void testAuditErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
-        var mapper = new ObjectMapper();
-
-        var auditErrorMessage = AuditErrorMessage.Builder.create()
+    void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("testResourceId")
                 .withContext(new Context().purpose("testContext"))
@@ -50,7 +49,7 @@ class AuditErrorMessageTest {
         var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
 
         assertThat(actualInstance)
-                .as("Ignoring the error, check %s using recursion)", auditErrorMessage.getClass().getSimpleName())
+                .as("Using recursion, check that the %s object has been deserialised successfully, ignoring the error field", auditErrorMessage.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessage);
@@ -60,6 +59,6 @@ class AuditErrorMessageTest {
                 .extracting(AuditErrorMessage::getError)
                 .isExactlyInstanceOf(Throwable.class)
                 .extracting("Message")
-                .isEqualTo(auditErrorMessage.getError().getMessage());
+                .isEqualTo("Something went wrong!");
     }
 }

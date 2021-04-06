@@ -101,7 +101,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
         @Bean
         @Primary
-        ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+        ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
             LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
             return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                     props.getAllActiveProperties().entrySet().stream()
@@ -118,25 +118,25 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final JsonNode userRequest) {
+        public byte[] serialize(final String s, final JsonNode resourceRequest) {
             try {
-                return MAPPER.writeValueAsBytes(userRequest);
+                return MAPPER.writeValueAsBytes(resourceRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + userRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + resourceRequest.toString(), e);
             }
         }
     }
 
     // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] userResponse) {
+        public JsonNode deserialize(final String s, final byte[] resourceResponse) {
             try {
-                return MAPPER.readTree(userResponse);
+                return MAPPER.readTree(resourceResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(resourceResponse), e);
             }
         }
     }
