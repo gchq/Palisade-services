@@ -108,7 +108,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return an instance of the ObjectMapper
      */
