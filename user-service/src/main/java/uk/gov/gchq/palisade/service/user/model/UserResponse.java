@@ -32,11 +32,11 @@ import java.util.StringJoiner;
 
 
 /**
- * This data represents the output for user-service which will include the User identified by the service.
- * This will be forwarded to the resource-service to identify the Resources associated with this query.
+ * This data represents the output for User Service which will include the User identified by the service.
+ * This will be forwarded to the Resource Service to identify the Resources associated with this query.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
- * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.
+ * uk.gov.gchq.palisade.service.user.model.UserResponse is the response from the User Service, this contains the returned user.
+ * uk.gov.gchq.palisade.service.resource.model.ResourceRequest contains the information from the User Service which is used to find the Resource(s).
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserResponse {
@@ -119,10 +119,10 @@ public final class UserResponse {
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
-         * UserRequest class.
+         * Starter method for the Builder class. This method is called to start the process of creating the
+         * UserResponse class.
          *
-         * @return interface  {@link IResourceId} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
             return userId -> resourceId -> context -> user ->
@@ -131,13 +131,12 @@ public final class UserResponse {
 
         /**
          * Starter method for the Builder class. This method is called to start the process of creating the
-         * UserRequest class.
-         * Starter method for the Builder class that uses a UserRequest and appends the User.
+         * UserResponse class. This method uses a UserRequest to create the UserResponse and then appends the User.
          * This method is called followed by the call to add user with the IUserId interface to create the
          * UserResponse class.
          *
-         * @param request is the request message that has been supplied to the user-service
-         * @return interface  {@link IUser} for the next step in the build.
+         * @param request is the request message that has been supplied to the User Service
+         * @return interface {@link IUser} for the next step in the build.
          */
 
         public static IUser create(final UserRequest request) {
@@ -174,7 +173,7 @@ public final class UserResponse {
         }
 
         /**
-         * Adds the user context information to the message.
+         * Adds the context information to the message.
          */
         public interface IContext {
 
@@ -205,7 +204,7 @@ public final class UserResponse {
              * Adds the user to this message.
              *
              * @param user for the request.
-             * @return interface {@link UserResponse} for the completed class from the builder.
+             * @return a {@link UserResponse} for the completed class from the builder.
              */
             UserResponse withUser(User user);
         }

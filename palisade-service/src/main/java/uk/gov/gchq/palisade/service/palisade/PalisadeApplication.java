@@ -36,7 +36,7 @@ import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
  * Loads the Palisade Service.  This  will provide a RESTful service for clients to register a data request.
  * The response will provide a unique URL (at the filtered-resource-service) for resources available for viewing.
  * This is the first in a chain of services that will process the request, with each taking on a singular task
- * accumulating at the end with the data that is permitted, filtered, redacted for each specific request.
+ * accumulating at the end with the data that is permitted, filtered, or redacted for each specific request.
  */
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class})
@@ -45,21 +45,21 @@ public class PalisadeApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeApplication.class);
     private final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner;
     private final PalisadeService palisadeService;
-    private final Materializer materializer;
+    private final Materializer materialiser;
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runner          the runner
-     * @param materializer    the Akka {@link Materializer} configured to be used
+     * @param materialiser    the Akka {@link Materializer} configured to be used
      * @param palisadeService the palisade service
      */
     public PalisadeApplication(
             final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner,
-            final Materializer materializer,
+            final Materializer materialiser,
             final PalisadeService palisadeService) {
         this.runner = runner;
-        this.materializer = materializer;
+        this.materialiser = materialiser;
         this.palisadeService = palisadeService;
     }
 
@@ -81,7 +81,7 @@ public class PalisadeApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        palisadeService.registerRequestSink(runner.run(materializer));
+        palisadeService.registerRequestSink(runner.run(materialiser));
     }
 }
 

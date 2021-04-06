@@ -49,7 +49,7 @@ class PalisadeServiceComponentTest extends CommonTestData {
     LinkedList<TokenRequestPair> sinkCollection;
 
     @Bean
-    Materializer materializer() {
+    Materializer materialiser() {
         return Materializer.createMaterializer(ActorSystem.create("test-actor-system"));
     }
 
@@ -62,13 +62,15 @@ class PalisadeServiceComponentTest extends CommonTestData {
 
     @Test
     void testContextLoads() {
-        assertThat(palisadeService).isNotNull();
+        assertThat(palisadeService)
+                .as("Check that the Palisade Service has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
     void testRegisterRequestReturnsAValidTokenRequestPair() throws InterruptedException {
         CompletableFuture<String> token = palisadeService.registerDataRequest(PALISADE_REQUEST);
-        //UUID.fromString contains its own uuid validation and will throw an error if an incorrect UUID is returned
+        // UUID.fromString contains its own uuid validation and will throw an error if an incorrect UUID is returned
         UUID uuid = UUID.fromString(token.join());
         assertThat(uuid)
                 .as("Check the uuid value is not null")
@@ -80,11 +82,12 @@ class PalisadeServiceComponentTest extends CommonTestData {
         if (sinkCollection.size() < 1) {
             TimeUnit.MILLISECONDS.sleep(100);
         }
+
         AuditablePalisadeSystemResponse auditableResponse = AuditablePalisadeSystemResponse.Builder.create().withPalisadeResponse(SYSTEM_RESPONSE);
         assertThat(sinkCollection)
+                .as("Check the list contains 1 TokenRequestPair containing the token and AuditablePalisadeSystemResponse")
                 .usingRecursiveComparison()
                 .asList()
-                .as("Check the list contains 1 TokenRequestPair containing the token and AuditablePalisadeSystemResponse")
                 .containsOnly(new TokenRequestPair(uuid.toString(), auditableResponse));
     }
 }
