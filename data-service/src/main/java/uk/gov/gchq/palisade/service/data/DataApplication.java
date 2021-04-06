@@ -97,7 +97,7 @@ public class DataApplication {
         auditMessageService.registerRequestSink(runner.run(materializer));
 
         // Add serialiser to the data-service
-        LOGGER.debug("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
+        LOGGER.info("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
         serialiserConfiguration.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
                 .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));
