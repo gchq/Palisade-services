@@ -15,17 +15,17 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: palisade-service
+  name: {{ include "filtered-resource-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
 spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
+    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "filtered-resource-service.root" . }}/filteredResource`)
       kind: Rule
       services:
-        - name: {{ include "palisade-service.name" . }}
+        - name: {{ include "filtered-resource-service.name" . }}
           port: 80
       middlewares:
-        - name: palisade-pathparam-regex
+        - name: filtered-resource-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
