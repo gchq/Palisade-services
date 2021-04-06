@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Specific test class for serialization testing
+ * Specific test class for serialisation testing
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class BadRequest {
