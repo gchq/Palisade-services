@@ -33,10 +33,11 @@ import java.util.StringJoiner;
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This version represents the original request.
- * Next in the sequence is the input for user-service where this data will be used as a request for a User.
- * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * Next in the sequence is the input for User Service where this data will be used as a request for a User.
+ * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest is the client request that has come into the Palisade Service.
- * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse is the response from the Palisade Service which is sent to the User Service
+ * uk.gov.gchq.palisade.service.user.request.UserRequest is the object received by the User Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PalisadeClientRequest {
@@ -108,16 +109,16 @@ public final class PalisadeClientRequest {
     }
 
     /**
-     * Builder class for the creation of the PalisadeClientRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of the PalisadeClientRequest. This is a variant of the Fluent Builder
      * which will use String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * PalisadeClientRequest class.
          *
-         * @return interface  {@link IUserId} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
             return userId -> resourceId -> context ->
