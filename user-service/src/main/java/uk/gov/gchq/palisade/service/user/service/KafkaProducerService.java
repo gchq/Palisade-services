@@ -56,14 +56,14 @@ public class KafkaProducerService {
      *
      * @param upstreamSink   a sink to the upstream topic
      * @param upstreamConfig the config for the topic (name, partitions, ...)
-     * @param materializer   the akka system materializer
+     * @param materialiser   the akka system materialiser
      */
     public KafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
                                 final ConsumerTopicConfiguration upstreamConfig,
-                                final Materializer materializer) {
+                                final Materializer materialiser) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
-        this.materializer = materializer;
+        this.materializer = materialiser;
     }
 
     /**

@@ -31,11 +31,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The UserRequest is the input for user-service to identify the User associated with the given User ID.
- * UserResponse is the output for this service which will include the User identified by the service.
+ * The UserRequest is the input for User Service, it contains a UserId value to identify the User associated with the request.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
- * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the user-service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse is the object sent from the Palisade Service, if the request was accepted.
+ * uk.gov.gchq.palisade.service.user.request.UserRequest contains the request information from the Palisade Service which is required to find a valid User.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserRequest {
@@ -90,39 +89,39 @@ public final class UserRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the UserRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the UserRequest. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
 
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * UserRequest class.
          *
-         * @return interface  {@link IUser} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IUser create() {
-            return user -> resource -> context ->
-                    new UserRequest(user, resource, context);
+        public static IUserId create() {
+            return userId -> resourceId -> context ->
+                    new UserRequest(userId, resourceId, context);
         }
 
         /**
          * Adds the user ID information for the request.
          */
-        public interface IUser {
+        public interface IUserId {
             /**
              * Adds the user's ID.
              *
              * @param userId user ID for the request.
-             * @return interface  {@link IResource} for the next step in the build.
+             * @return interface {@link IResourceId} for the next step in the build.
              */
-            IResource withUserId(String userId);
+            IResourceId withUserId(String userId);
         }
 
         /**
          * Adds the resource ID information to the message.
          */
-        public interface IResource {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
