@@ -56,14 +56,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {RestControllerWebMvcTest.class, PalisadeRestController.class})
 class RestControllerWebMvcTest extends CommonTestData {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     @MockBean
     private PalisadeService palisadeService;
     @Autowired
     private PalisadeRestController controller;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper mapper;
 
     @BeforeEach
     void setUp() {
@@ -78,34 +78,44 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertThat(controller)
+                .as("Check that the controller has been autowired successfully")
+                .isNotNull();
+
+        assertThat(mockMvc)
+                .as("Check that mockMvc has been autowired successfully")
+                .isNotNull();
+
+        assertThat(mapper)
+                .as("Check that the Object Mapper has been autowired successfully")
+                .isNotNull();
     }
 
 
     /**
      * Tests that when a post is sent to the rest endpoint, a valid response is returned, and the body contains a token
      *
-     * @throws Exception if MAPPER.writeValueAsString throws a JsonProcessingException, or if the mockMVC.perform fails
+     * @throws Exception if there is an issue deseralising the object, or if the mockMVC.perform fails
      */
     @Test
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
         MvcResult result = this.mockMvc.perform(post("/api/registerDataRequest")
                 .headers(new HttpHeaders())
-                .content(MAPPER.writeValueAsString(PALISADE_REQUEST))
+                .content(mapper.writeValueAsString(PALISADE_REQUEST))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted())
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(content().string(containsString(COMMON_UUID.toString())))
                 .andReturn();
-        PalisadeClientResponse response = MAPPER.readValue(result.getResponse().getContentAsString(), PalisadeClientResponse.class);
+
+        var response = mapper.readValue(result.getResponse().getContentAsString(), PalisadeClientResponse.class);
 
         //THEN
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);
         assertThat(response.getToken())
-                .as("Check the value of the response Token")
+                .as("Check the token returned in the response is the one we expect")
                 .isEqualTo(COMMON_UUID.toString());
     }
 
@@ -118,10 +128,8 @@ class RestControllerWebMvcTest extends CommonTestData {
      */
     @Test
     void testControllerErrorHandling() throws Exception {
-
-        RuntimeException somethingWentWrong = new RuntimeException("Something went wrong");
         Mockito.when(palisadeService.registerDataRequest(any()))
-                .thenReturn(CompletableFuture.failedFuture(somethingWentWrong));
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Something went wrong")));
         Mockito.when(palisadeService.errorMessage(any(), any(), any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
@@ -129,10 +137,10 @@ class RestControllerWebMvcTest extends CommonTestData {
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(new HttpHeaders())
-                .content(MAPPER.writeValueAsString(PALISADE_REQUEST)))
-                .andExpect(status().is5xxServerError()) //a 500 server error
+                .content(mapper.writeValueAsString(PALISADE_REQUEST)))
+                .andExpect(status().is5xxServerError()) // a 500 server error
                 .andDo(print())
-                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) //no message
+                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) // no message
                 .andReturn();
         String response = result.getResponse().getContentAsString();
 
