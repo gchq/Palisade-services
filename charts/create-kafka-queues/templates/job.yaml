@@ -39,7 +39,7 @@ spec:
       initContainers:
       - name: init-wait-for-services
         image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
-        command: ["/bin/wait-for-services.sh"]
+        command: ["/bin/bash", "/bin/wait-for-services.sh"]
         args:
         {{- range $index, $service := .Values.waitForServices }}
         - {{ printf "%s:%s" $service.name (include $service.tpl $) }}

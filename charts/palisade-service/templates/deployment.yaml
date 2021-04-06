@@ -46,17 +46,17 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8084
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/health
             port: 8084
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
@@ -78,7 +78,7 @@ spec:
       volumes:
       - name: {{ include "palisade-service.deployment.fullname" . }}
         persistentVolumeClaim:
-          claimName: {{ include "palisade-service.deployment.fullname" . }}
+          claimName: {{ include "palisade-service.deployment.fullname" . }}-{{ include "palisade.namespace" . }}
           readOnly: true
       - name: config-volume
         configMap:
