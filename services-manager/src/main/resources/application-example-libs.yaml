@@ -34,7 +34,7 @@ example:
   version: *
   libraryPath: ../Palisade-examples
   libs: &libraries
-    - ${example.libraryPath}/example-library/target/example-library-${example.version}.jar
+    - ${example.libraryPath}/example-library/target/example-library-${example.version}-jar-with-dependencies.jar
   service-profiles: &profiles
     - static
     - example

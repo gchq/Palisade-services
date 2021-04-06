@@ -18,40 +18,43 @@ service:
   port: 80
 
 kafkaCreateTopics:
-  - name: request
-    replicationFactor: 1
-    partitions: 1
-  - name: user
-    replicationFactor: 1
-    partitions: 1
-  - name: resource
-    replicationFactor: 1
-    partitions: 1
-  - name: rule
-    replicationFactor: 1
-    partitions: 1
-  - name: masked-resource
-    replicationFactor: 1
-    partitions: 1
-  - name: masked-resource-offset
-    replicationFactor: 1
-    partitions: 1
-  - name: error
-    replicationFactor: 1
-    partitions: 1
-  - name: success
-    replicationFactor: 1
-    partitions: 1
+- name: request
+  replicationFactor: 1
+  partitions: 1
+- name: user
+  replicationFactor: 1
+  partitions: 1
+- name: resource
+  replicationFactor: 1
+  partitions: 1
+- name: rule
+  replicationFactor: 1
+  partitions: 1
+- name: masked-resource
+  replicationFactor: 1
+  partitions: 1
+- name: masked-resource-offset
+  replicationFactor: 1
+  partitions: 1
+- name: error
+  replicationFactor: 1
+  partitions: 1
+- name: success
+  replicationFactor: 1
+  partitions: 1
 
 waitForServices:
-  - name: kafka
-    tpl: "palisade.kafka.url"
-  - name: zookeeper
-    tpl: "palisade.zookeeper.url"
+- name: kafka
+  tpl: "palisade.kafka.fullname"
+  port: 9092
+- name: zookeeper
+  tpl: "palisade.zookeeper.fullname"
+  port: 2181
+
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-d4ce4b0
+  tag: SNAPSHOT-b5969c5
   pullPolicy: IfNotPresent
 
 resources:

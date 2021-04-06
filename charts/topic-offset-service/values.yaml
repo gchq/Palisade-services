@@ -22,7 +22,7 @@ service:
 image:
   name: topic-offset-service
   base: jre
-  tag: SNAPSHOT-8f6e6e4
+  tag: SNAPSHOT-b5969c5
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

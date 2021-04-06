@@ -22,7 +22,7 @@ service:
 image:
   name: audit-service
   base: jre
-  tag: SNAPSHOT-d278fe6
+  tag: SNAPSHOT-b5969c5
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 
@@ -34,6 +34,6 @@ resources:
     cpu: 250m
     memory: 512Mi
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+nodeSelector: { }
+tolerations: [ ]
+affinity: { }
