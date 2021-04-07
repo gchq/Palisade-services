@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
+
+import com.fasterxml.jackson.databind.Module;
+
+import java.util.List;
 
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
+ * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
+ * in {@link JSONSerialiser}.
  */
-public class SerialiserInitialisationException extends RuntimeException {
-    /**
-     * Constructs a new SerialiserInitialisationException with the specified detail message and cause.
-     *
-     * @param message a {@link String} value detailing the error
-     * @param cause   a {@link Throwable} that caused the iss
-     */
-    public SerialiserInitialisationException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+public interface JSONSerialiserModules {
+    List<Module> getModules();
 }

@@ -21,7 +21,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.reader.common.DataFlavour;
+import uk.gov.gchq.palisade.reader.common.data.seralise.Serialiser;
 
 import java.util.Map;
 
@@ -33,8 +34,8 @@ public class PrepopulationConfiguration {
 
     /**
      * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of serialisers from a yaml file
-     * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s
-     * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
+     * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link Serialiser}s
+     * These serialisers will be used for pre-populating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
      *
      * @return a {@link StdSerialiserConfiguration} containing a list of {@link StdSerialiserPrepopulationFactory}s
      */
@@ -48,10 +49,10 @@ public class PrepopulationConfiguration {
     /**
      * Implementation of a {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
      * A factory for {@link Serialiser} objects, using:
-     * - a {@link Map} of the type and format required for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
+     * - a {@link Map} of the type and format required for a {@link DataFlavour}
      * - a {@link Map} of the serialiser class and the domain class needed to create a {@link Serialiser}
      *
-     * @return a standard {@link StdSerialiserPrepopulationFactory} capable of building a {@link Serialiser} and {@link uk.gov.gchq.palisade.reader.common.DataFlavour} from configuration
+     * @return a standard {@link StdSerialiserPrepopulationFactory} capable of building a {@link Serialiser} and {@link DataFlavour} from configuration
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)

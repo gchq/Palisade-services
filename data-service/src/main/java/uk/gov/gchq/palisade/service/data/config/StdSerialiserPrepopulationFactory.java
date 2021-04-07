@@ -16,9 +16,9 @@
 
 package uk.gov.gchq.palisade.service.data.config;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
+import uk.gov.gchq.palisade.reader.common.data.seralise.Serialiser;
+import uk.gov.gchq.palisade.service.data.common.Generated;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserConstructorNotFoundException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
@@ -45,7 +45,7 @@ public class StdSerialiserPrepopulationFactory {
     private String serialiserClass;
 
     /**
-     * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object
+     * Constructor with 0 arguments for a StdSerialiserPrepopulationFactory object
      */
     public StdSerialiserPrepopulationFactory() {
         flavourFormat = "";
@@ -54,7 +54,7 @@ public class StdSerialiserPrepopulationFactory {
     }
 
     /**
-     * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument
+     * Creates a StdSerialiserPrepopulationFactory, passing each member as an argument
      *
      * @param flavourFormat   a {@link String} value of the serialised format for a {@link DataFlavour}
      * @param flavourType     a {@link String} value of the fully qualified type for a {@link DataFlavour}
@@ -100,7 +100,7 @@ public class StdSerialiserPrepopulationFactory {
     }
 
     /**
-     * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a {@link StdSerialiserPrepopulationFactory}
+     * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a StdSerialiserPrepopulationFactory
      *
      * @return an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */

@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.Map;
 import java.util.Objects;

@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -94,12 +93,12 @@ public class SimpleDataService implements DataService {
 
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.debug("Reading from reader with request {}", authorisedDataRequest);
-            DataReaderRequest readerRequest = new DataReaderRequest()
+            var readerRequest = new DataReaderRequest()
                     .context(authorisedDataRequest.getContext())
                     .user(authorisedDataRequest.getUser())
                     .resource(authorisedDataRequest.getResource())
                     .rules(authorisedDataRequest.getRules());
-            DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
+            var readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
             LOGGER.debug("Writing reader response {} to output stream", readerResponse);
             try {

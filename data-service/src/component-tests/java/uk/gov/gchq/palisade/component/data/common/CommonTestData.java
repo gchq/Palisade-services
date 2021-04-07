@@ -15,13 +15,13 @@
  */
 package uk.gov.gchq.palisade.component.data.common;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.reader.common.rule.Rules;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -51,7 +51,6 @@ public class CommonTestData {
 
     public static final Context CONTEXT = new Context().purpose("testContext");
     public static final String USER_ID = "testUserId";
-    public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "test resource id";
 
     public static final LeafResource RESOURCE = new FileResource().id(LEAF_RESOURCE_ID)
@@ -61,7 +60,6 @@ public class CommonTestData {
             .parent(new SystemResource().id("/test"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
-
     public static final Map<String, Object> ATTRIBUTES = Collections.singletonMap("test key", "test value");
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
@@ -89,7 +87,7 @@ public class CommonTestData {
 
     public static final AuthorisedDataRequest AUTHORISED_DATA = AuthorisedDataRequest.Builder.create()
             .withResource(RESOURCE)
-            .withUser(USER)
+            .withUser(new User().userId(USER_ID))
             .withContext(CONTEXT)
             .withRules(RULES);
 
@@ -114,7 +112,7 @@ public class CommonTestData {
             new Rules<>()
     );
 
-    public static  final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
+    public static final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
             TOKEN + "2",
             new User().userId("user-id"),
             new FileResource().id(RESOURCE_ID + "1"),

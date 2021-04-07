@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
 
-/**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
- */
-public class SerialiserNotFoundException extends RuntimeException {
-    /**
-     * Constructs a new SerialiserNotFoundException with the specified detail message and cause.
-     *
-     * @param message a {@link String} value detailing the error
-     * @param cause   a {@link Throwable} that caused the iss
-     */
-    public SerialiserNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+
+import java.io.IOException;
+
+class ResourceKeyDeserialiser extends KeyDeserializer {
+    @Override
+    public Object deserializeKey(final String key, final DeserializationContext ctxt)
+            throws IOException {
+        return JSONSerialiser.deserialise(key, LeafResource.class);
     }
 }

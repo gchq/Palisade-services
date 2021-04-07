@@ -16,18 +16,17 @@
 
 package uk.gov.gchq.palisade.service.data;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.reader.common.Context;
 import uk.gov.gchq.palisade.reader.common.ResponseWriter;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.User;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.reader.common.rule.Rule;
+import uk.gov.gchq.palisade.reader.common.rule.Rules;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
@@ -41,22 +40,17 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DataServiceTestsCommon {
 
     public static final String REQUEST_TOKEN = "test-request-token";
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final User USER = new User().userId(USER_ID);
+    public static final User USER = new User().userId("test-user-id");
     public static final String RESOURCE_ID = "/test/resourceId";
-    public static final String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
-    public static final String RESOURCE_FORMAT = "avro";
-    public static final String DATA_SERVICE_NAME = "test-data-service";
-    public static final String RESOURCE_PARENT = "/test";
+
     public static final LeafResource LEAF_RESOURCE = new FileResource()
             .id(RESOURCE_ID)
-            .type(RESOURCE_TYPE)
-            .serialisedFormat(RESOURCE_FORMAT)
-            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-            .parent(new SystemResource().id(RESOURCE_PARENT));
+            .type("uk.gov.gchq.palisade.test.TestType")
+            .serialisedFormat("avro")
+            .connectionDetail(new SimpleConnectionDetail().serviceName("test-data-service"))
+            .parent(new SystemResource().id("/test"));
 
-    public static final String PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
+    public static final Context CONTEXT = new Context().purpose("test-purpose");
     public static final String RULE_MESSAGE = "test-rule";
 
     public static final Rules<Serializable> RULES = new Rules<>()
@@ -92,7 +86,6 @@ public class DataServiceTestsCommon {
     public static final String TEST_RESPONSE_MESSAGE = "test response for data request";
 
     public static final ResponseWriter RESPONSE_WRITER = new ResponseWriter() {
-
         final String testData = TEST_RESPONSE_MESSAGE;
 
         @Override
@@ -120,7 +113,7 @@ public class DataServiceTestsCommon {
 
         @Override
         public boolean isApplicable(final User user, final Context context) {
-            return false; //rules are not applicable
+            return false; // rules are not applicable
         }
     }
 }

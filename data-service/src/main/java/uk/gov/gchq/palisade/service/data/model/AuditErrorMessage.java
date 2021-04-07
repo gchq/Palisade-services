@@ -19,8 +19,8 @@ package uk.gov.gchq.palisade.service.data.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.Map;
 import java.util.Objects;
@@ -74,14 +74,14 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
-           *
-         * @param auditableAuthorisedDataRequest   the client request received by the data-service
+         *
+         * @param auditableAuthorisedDataRequest the client request received by the data-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
-            DataRequest dataRequest =  auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedDataRequest authorisedDataRequest =  auditableAuthorisedDataRequest.getAuthorisedDataRequest();
+            DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
+            AuthorisedDataRequest authorisedDataRequest = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
