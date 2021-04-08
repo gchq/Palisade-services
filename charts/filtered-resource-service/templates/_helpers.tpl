@@ -74,7 +74,6 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "filtered-resource-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
 {{- $revision := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $revision }}
 {{- end }}
