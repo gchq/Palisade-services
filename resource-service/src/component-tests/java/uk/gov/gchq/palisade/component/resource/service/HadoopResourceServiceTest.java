@@ -24,16 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
+import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.util.HadoopResourceDetails;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -89,7 +88,7 @@ class HadoopResourceServiceTest {
         writeFile(fs, dir, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
         writeFile(fs, dir, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
 
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service-mock");
+        var connectionDetail = new SimpleConnectionDetail().serviceName("data-service-mock");
         id1 = dir.resolve(getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE));
         resource1 = ((LeafResource) ResourceBuilder.create(id1))
                 .type(TYPE_CLASSNAME)
