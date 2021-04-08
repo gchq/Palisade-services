@@ -50,6 +50,7 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
 {{- end }}
+{{- end }}
 
 {{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
