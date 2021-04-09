@@ -13,19 +13,11 @@
 # limitations under the License.
 #
 apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+kind: Middleware
 metadata:
-  name: palisade-service
+  name: filtered-resource-pathparam-regex
   namespace: {{ include "palisade.namespace" . }}
 spec:
-  entryPoints:
-    - web
-  routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
-      kind: Rule
-      services:
-        - name: {{ include "palisade-service.name" . }}
-          port: 80
-      middlewares:
-        - name: palisade-pathparam-regex
-          namespace: {{ include "palisade.namespace" . }}
+  replacePathRegex:
+    regex: ^{{ include "filtered-resource-service.root" . }}/filteredResource/(.*)
+    replacement: /$1
