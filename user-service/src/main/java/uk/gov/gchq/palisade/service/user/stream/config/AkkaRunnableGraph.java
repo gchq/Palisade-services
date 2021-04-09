@@ -98,7 +98,7 @@ public class AkkaRunnableGraph {
                     /*
                      Return the user as a Pair of CommittableMessage<token,UserRequest>
                      and the auditableUserResponse from the UserServiceAsyncProxy.
-                     If an exception was thrown, return the ComittableMessage with a null AuditableUserResponse
+                     If an exception was thrown, return the CommittableMessage with a null AuditableUserResponse
                     */
                     return userRequest.map(request -> service.getUser(request)
                             .thenApply(auditableUserResponse -> Pair.create(message, auditableUserResponse)))
@@ -113,13 +113,13 @@ public class AkkaRunnableGraph {
                             // Produce Audit Message
                             ProducerMessage.single(
                                     new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                            SerDesConfig.errorValueSerialiser().serialize(null, audit), requestRecord.headers()),
                                     (Committable) messageAndResponse.first().committableOffset()))
                             .orElseGet(() ->
                                     // Produce Response
                                     ProducerMessage.single(
                                             new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                                    SerDesConfig.userValueSerializer().serialize(null, auditableUserResponse.map(AuditableUserResponse::getUserResponse).orElse(null)), requestRecord.headers()),
+                                                    SerDesConfig.userValueSerialiser().serialize(null, auditableUserResponse.map(AuditableUserResponse::getUserResponse).orElse(null)), requestRecord.headers()),
                                             messageAndResponse.first().committableOffset()));
                 })
 

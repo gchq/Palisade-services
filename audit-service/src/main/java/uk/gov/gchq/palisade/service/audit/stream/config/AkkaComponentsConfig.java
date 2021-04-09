@@ -68,7 +68,7 @@ public class AkkaComponentsConfig {
     /**
      * Public constructor for the {@link AkkaComponentsConfig}
      *
-     * @param configProperties configuration details for the audit-service
+     * @param configProperties configuration details for the Audit Service
      */
     public AkkaComponentsConfig(final AuditServiceConfigProperties configProperties) {
         this.configProperties = configProperties;
@@ -79,8 +79,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> successRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.successKeySerializer(),
-                SerDesConfig.successValueSerializer()
+                SerDesConfig.successKeySerialiser(),
+                SerDesConfig.successValueSerialiser()
         );
 
         return SUCCESS_INPUT_COMPONENTS.plainProducer(producerSettings);
@@ -92,8 +92,8 @@ public class AkkaComponentsConfig {
                                                                                                      final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = SUCCESS_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.successKeyDeserializer(),
-                SerDesConfig.successValueDeserializer(configProperties));
+                SerDesConfig.successKeyDeserialiser(),
+                SerDesConfig.successValueDeserialiser(configProperties));
 
         Topic successTopic = configuration.getTopic("success-topic");
         Subscription successSubscription = Optional.ofNullable(successTopic.getAssignment())
@@ -113,8 +113,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer()
+                SerDesConfig.errorKeySerialiser(),
+                SerDesConfig.errorValueSerialiser()
         );
 
         return ERROR_INPUT_COMPONENTS.plainProducer(producerSettings);
@@ -126,8 +126,8 @@ public class AkkaComponentsConfig {
                                                                                                  final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ERROR_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.errorKeyDeserializer(),
-                SerDesConfig.errorValueDeserializer(configProperties));
+                SerDesConfig.errorKeyDeserialiser(),
+                SerDesConfig.errorValueDeserialiser(configProperties));
 
         Topic errorTopic = configuration.getTopic("error-topic");
         Subscription errorSubscription = Optional.ofNullable(errorTopic.getAssignment())
