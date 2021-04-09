@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public interface DataService extends Service {
 
     /**
-     * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc)
+     * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc).
      *
      * @param request the client's request for a leaf resource and their unique request token
      * @return rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the
