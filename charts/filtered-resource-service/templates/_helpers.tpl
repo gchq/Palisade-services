@@ -75,7 +75,7 @@ Calculate a storage path based on the code release artifact id or the supplied v
 */}}
 {{- define "filtered-resource-service.deployment.path" }}
 {{- $revision := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $revision }}
+{{- printf "%s/%s/classpath/%s/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name .Values.global.deployment $revision }}
 {{- end }}
 
 {{/*
