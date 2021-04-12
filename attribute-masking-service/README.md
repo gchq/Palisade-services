@@ -20,11 +20,12 @@ limitations under the License.
 
 ![Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
 
-The Attribute-Masking Service will persist authorised requests and forward a redacted version of the resource onto the next service on the pipeline.
-This is an interim service on the Palisade stream pipeline that reads each resource sent from the Policy Service.
-It will take each of these resources, ascertain if it is a "start" or "end" marker for the set of records (has a token, but the message body is empty of content).
+The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is forwarded to the Topic-Offset Service and Filtered-Resource Service.
+This is an interim service on the Palisade stream pipeline that reads each messages sent from the Policy Service.
+It will take each of these messages, ascertain if it is a "start" or "end" marker for the set of records (has a token, but the message body is empty of content).
 If it is, no further processing is done.
-For messages that represent records, these are persisted as authorised requests and then a masked version of the resource is prepared to be forwarded to the next services.
+For messages that represent records, these are persisted as authorised requests.
+A version of the record message is then prepared with the restricted information redacted or removed which is then forwarded to the next services.
 Both types of messages (markers and records) are forwarded to both the Topic-Offset Service and the Filtered-Resource Service.
 If at any time during the processing of a message, an error occurs, an error message is produced and sent to the Audit Service.
 
