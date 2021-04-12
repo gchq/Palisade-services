@@ -26,13 +26,13 @@ import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
 /**
- * Static configuration for kafka key/value serialisers
- * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * Static configuration for kafka key/value serialisers.
+ * Each output has a pair of key/value serialisers.
+ * In general, the keys are not used so the choice of serialiser is not important.
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -40,49 +40,49 @@ public final class SerDesConfig {
 
 
     /**
-     * Kafka key serialiser for downstream messages going out as success
+     * Kafka key serialiser for downstream messages going out as success.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> successKeySerializer() {
+    public static Serializer<String> successKeySerialiser() {
         return new StringSerializer();
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as success
+     * Kafka value serialiser for downstream messages going out as success.
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditSuccessMessage> successValueSerializer() {
+    public static Serializer<AuditSuccessMessage> successValueSerialiser() {
         return (String ignored, AuditSuccessMessage auditSuccessMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditSuccessMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditSuccessMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditSuccessMessage.toString(), e);
             }
         };
     }
 
     /**
-     * Kafka key serialiser for downstream messages going out as errors
+     * Kafka key serialiser for downstream messages going out as errors.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> errorKeySerializer() {
+    public static Serializer<String> errorKeySerialiser() {
         return new StringSerializer();
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as errors
+     * Kafka value serialiser for downstream messages going out as errors.
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage auditErrorMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
             }
         };
     }

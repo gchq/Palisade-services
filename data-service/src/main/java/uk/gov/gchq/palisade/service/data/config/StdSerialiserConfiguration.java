@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.data.config;
 
-import uk.gov.gchq.palisade.reader.common.data.seralise.Serialiser;
 import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.ArrayList;
@@ -28,23 +27,23 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of policies from a yaml file
+ * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of serialisers from a yaml file.
  * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating
- * {@link Serialiser}.  These serialisers will be used for pre-populating the
- * {@link uk.gov.gchq.palisade.service.data.service.DataService}
+ * {@link uk.gov.gchq.palisade.data.serialise.Serialiser}.  These serialisers will be used for pre-populating the
+ * {@link uk.gov.gchq.palisade.service.data.service.DataService}.
  */
 public class StdSerialiserConfiguration {
 
     private List<StdSerialiserPrepopulationFactory> serialisers = new ArrayList<>();
 
     /**
-     * Constructor with 0 arguments for a StdSerialiserConfiguration object
+     * Constructor with 0 arguments for a {@link StdSerialiserConfiguration} object
      */
     public StdSerialiserConfiguration() {
     }
 
     /**
-     * Constructor with 1 arguments for a StdSerialiserConfiguration object
+     * Constructor with 1 arguments for a {@link StdSerialiserConfiguration} object.
      *
      * @param serialisers a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
      */

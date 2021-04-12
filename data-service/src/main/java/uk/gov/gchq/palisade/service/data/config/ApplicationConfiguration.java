@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
 public class ApplicationConfiguration {
@@ -51,7 +51,7 @@ public class ApplicationConfiguration {
 
     /**
      * Bean for the {@link JpaPersistenceLayer}.
-     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests
+     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests.
      *
      * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
      * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
@@ -99,7 +99,7 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Default JSON to Java seraialiser/deserialiser
+     * Default JSON to Java seraialiser/deserialiser.
      *
      * @return a new {@link ObjectMapper} with some additional configuration
      */

@@ -94,7 +94,7 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
 
 /**
  * An external requirement of the service is to audit the client's requests.
- * Both successful data requests and errors are to be sent to the audit-service to be recorded.
+ * Both successful data requests and errors are to be sent to the Audit Service to be recorded.
  */
 @SpringBootTest(
         classes = DataApplication.class,
@@ -127,7 +127,7 @@ class KafkaContractTest {
     }
 
     /**
-     * Tests the handling of the error messages on the kafka stream for data-service.  The expected results will be an
+     * Tests the handling of the error messages on the kafka stream for the Data Service.  The expected results will be an
      * AuditErrorMessage on a Kafka stream to the "error-topic" and return HTTP Internal Server Error.
      */
     @Test
@@ -138,7 +138,7 @@ class KafkaContractTest {
 
         // Given - we are already listening to the service error output
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
+                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserialiser(), TestSerDesConfig.errorValueDeserialiser())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -184,7 +184,7 @@ class KafkaContractTest {
     }
 
     /**
-     * Tests the handling of the successful messages on the kafka stream for data-service. The expected results will be an
+     * Tests the handling of the successful messages on the kafka stream for the Data Service. The expected results will be an
      * AuditSuccessMessage on a Kafka stream to the "success-topic" and return HTTP Accepted.
      */
     @Test
@@ -196,9 +196,9 @@ class KafkaContractTest {
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
-        // Given - we are already listening to the service error output
+        // Given - we are already listening to the service success output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
+                .create(akkaActorSystem, TestSerDesConfig.successKeyDeserialiser(), TestSerDesConfig.successValueDeserialiser())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
