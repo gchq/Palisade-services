@@ -42,16 +42,15 @@ If at any time during the processing of a message, an error occurs, an error mes
 
 *token is in the message header's metadata
 
-The service reads a message in from the Kafka "rule" topic as an [AttributeMaskingRequest](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingRequest.java).
+The service reads a message in from the Kafka `rule` topic as an [AttributeMaskingRequest](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingRequest.java).
 This request is first persisted in a store as an`AuthorisedRequestEntity`.
 The `LeafResource` in the request holds metadata for the resources that are being requested.
-If any of this metadata is classed as restricted data for this request, the metadata is then redacted or removed producing a masked version of the `LeafResource`.
+If any of this metadata is classed as restricted data for the request, the metadata is then redacted or removed producing a masked version of the `LeafResource`.
 The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditableAttributeMaskingResponse.java) ready to be forwarded.
-This will be forwarded onto the Kafka topic "masked-resource".
-Start and end markers are forwarded to the same Kafka topic.
+This will be forwarded onto the Kafka `masked-resource` topic.
+Start and end markers are forwarded to the same topic.
 Like the masked resource messages, the start and end markers will have the token (`x-request-token`) in the header, but will have an empty message body.
-Errors that occur during the process are bundled into an error message, `AuditErrorMessage` and sent to the Kafka topic "error" where they are retrieved by the Audit Service.
-
+Errors that occur during the process are bundled into an error message, `AuditErrorMessage` and sent to the Kafka `error` topic where they are retrieved by the Audit Service.
 
 ## REST Interface
 
@@ -69,7 +68,6 @@ List of message endpoints [AttributeMaskingRestController.maskAttributesMulti](s
 `POST /api/mask/multi`
   - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
-
 
 ## Example JSON Request
 ```
@@ -112,8 +110,6 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }'
 ```
-
-
 ## Example JSON Response
 ```
 {
@@ -142,8 +138,5 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }
 ```
-
-
 ## License
-
 Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
