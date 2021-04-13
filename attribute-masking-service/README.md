@@ -20,7 +20,7 @@ limitations under the License.
 
 ![Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
 
-The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is forwarded to the Topic-Offset Service and Filtered-Resource Service.
+The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is sent, via Kafka, to the Topic-Offset Service and Filtered-Resource Service.
 This is an interim service on the Palisade stream pipeline that reads each messages sent from the Policy Service.
 It will take each of these messages, ascertain if it is a "start" or "end" marker for the set of records (has a token, but the message body is empty of content).
 If it is, no further processing is done.
