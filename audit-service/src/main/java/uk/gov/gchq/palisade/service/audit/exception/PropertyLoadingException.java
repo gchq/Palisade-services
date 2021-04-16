@@ -23,7 +23,7 @@ package uk.gov.gchq.palisade.service.audit.exception;
  */
 public class PropertyLoadingException extends RuntimeException {
 
-    private static final long serialVersionUID = -4817267232100793550L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
@@ -33,6 +33,15 @@ public class PropertyLoadingException extends RuntimeException {
      */
     public PropertyLoadingException(final String message, final Throwable cause) {
         super(message, cause);
+    }
+
+    /**
+     * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
+     *
+     * @param message message describing what action caused the exception
+     */
+    public PropertyLoadingException(final String message) {
+        super(message);
     }
 
 }

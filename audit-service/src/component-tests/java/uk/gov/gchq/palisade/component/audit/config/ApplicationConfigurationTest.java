@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
@@ -35,14 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 class ApplicationConfigurationTest {
 
-    @SuppressWarnings("rawtypes")
     @Test
     void testConfigurationDefinesLoadedServices(@Autowired final Map<String, AuditService> auditServices) {
         assertThat(auditServices.values())
-            .extracting(as -> (Class) as.getClass())
-            .containsExactlyInAnyOrder(
-                LoggerAuditService.class,
-                StroomAuditService.class,
-                SimpleAuditService.class);
+                .as("Check that the different Audit Services have been started successfully")
+                .extracting(as -> (Class) as.getClass())
+                .containsExactlyInAnyOrder(
+                        LoggerAuditService.class,
+                        StroomAuditService.class,
+                        SimpleAuditService.class);
     }
 }

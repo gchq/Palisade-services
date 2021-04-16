@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
+import event.logging.BaseOutcome;
 import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,9 +30,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_EXCEPTION;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_LEAF_RESOURCE_ID;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_PURPOSE;
 import static uk.gov.gchq.palisade.service.audit.ApplicationTestData.TEST_RESOURCE_ID;
@@ -78,24 +79,35 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor.getAllValues()).hasSize(1);
+        assertThat(logCaptor.getAllValues())
+                .as("Check that one log message is produced")
+                .hasSize(1);
 
         var event = logCaptor.getValue();
-        var eventChain = event.getEventChain();
-        var eventSource = event.getEventSource();
         var eventDetail = event.getEventDetail();
 
-        assertAll(
-            () -> assertThat(eventSource.getDevice().getHostName()).isEqualTo(TEST_SERVER_NAME),
-            () -> assertThat(eventSource.getDevice().getIPAddress()).isEqualTo(TEST_SERVER_IP),
-            () -> assertThat(eventSource.getUser().getId()).isEqualTo(TEST_USER_ID),
-            () -> assertThat(eventDetail.getTypeId()).isEqualTo(DATA_SERVICE.value),
-            () -> assertThat(eventDetail.getDescription()).isEqualTo(READ_SUCCESS),
-            () -> assertThat(eventDetail.getPurpose().getJustification()).isEqualTo(TEST_PURPOSE),
-            () -> assertThat(eventDetail.getAuthorise().getObjects().get(0).getId()).isEqualTo(TEST_LEAF_RESOURCE_ID),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().isSuccess()).isTrue(),
-            () -> assertThat(eventChain.getActivity().getId()).isEqualTo(TEST_TOKEN)
-        );
+        assertThat(event.getEventSource())
+                .as("Check that the eventSource has been created successfully")
+                .extracting("device.hostName", "device.ipAddress", "user.id")
+                .contains(TEST_SERVER_NAME, TEST_SERVER_IP, TEST_USER_ID);
+
+        assertThat(event.getEventChain())
+                .as("Check that the activity id is the test token")
+                .extracting("activity.id")
+                .isEqualTo(TEST_TOKEN);
+
+        assertThat(eventDetail)
+                .as("Check that the event detail has been populated correctly")
+                .extracting("typeId", "description", "purpose.justification")
+                .contains(DATA_SERVICE.value, READ_SUCCESS, TEST_PURPOSE);
+
+        assertThat(eventDetail.getAuthorise().getObjects().get(0).getId())
+                .as("Check that the authorise contains the leaf resource Id")
+                .isEqualTo(TEST_LEAF_RESOURCE_ID);
+
+        assertThat(eventDetail.getAuthorise().getOutcome().isSuccess())
+                .as("Check that the outcome is a success")
+                .isTrue();
     }
 
     @Test
@@ -105,24 +117,35 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor.getAllValues()).hasSize(1);
+        assertThat(logCaptor.getAllValues())
+                .as("Check that one log message is produced")
+                .hasSize(1);
 
         var event = logCaptor.getValue();
-        var eventChain = event.getEventChain();
-        var eventSource = event.getEventSource();
         var eventDetail = event.getEventDetail();
 
-        assertAll(
-            () -> assertThat(eventSource.getDevice().getHostName()).isEqualTo(TEST_SERVER_NAME),
-            () -> assertThat(eventSource.getDevice().getIPAddress()).isEqualTo(TEST_SERVER_IP),
-            () -> assertThat(eventSource.getUser().getId()).isEqualTo(TEST_USER_ID),
-            () -> assertThat(eventDetail.getTypeId()).isEqualTo(FILTERED_RESOURCE_SERVICE.value),
-            () -> assertThat(eventDetail.getDescription()).isEqualTo(REQUEST_SUCCESS),
-            () -> assertThat(eventDetail.getPurpose().getJustification()).isEqualTo(TEST_PURPOSE),
-            () -> assertThat(eventDetail.getAuthorise().getObjects().get(0).getId()).isEqualTo(TEST_LEAF_RESOURCE_ID),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().isSuccess()).isTrue(),
-            () -> assertThat(eventChain.getActivity().getId()).isEqualTo(TEST_TOKEN)
-        );
+        assertThat(event.getEventSource())
+                .as("Check that the eventSource has been created successfully")
+                .extracting("device.hostName", "device.ipAddress", "user.id")
+                .contains(TEST_SERVER_NAME, TEST_SERVER_IP, TEST_USER_ID);
+
+        assertThat(event.getEventChain())
+                .as("Check that the activity id is the test token")
+                .extracting("activity.id")
+                .isEqualTo(TEST_TOKEN);
+
+        assertThat(eventDetail)
+                .as("Check that the event detail has been populated correctly")
+                .extracting("typeId", "description", "purpose.justification")
+                .contains(FILTERED_RESOURCE_SERVICE.value, REQUEST_SUCCESS, TEST_PURPOSE);
+
+        assertThat(eventDetail.getAuthorise().getObjects().get(0).getId())
+                .as("Check that the authorise contains the leaf resource Id")
+                .isEqualTo(TEST_LEAF_RESOURCE_ID);
+
+        assertThat(eventDetail.getAuthorise().getOutcome().isSuccess())
+                .as("Check that the outcome is a success")
+                .isTrue();
     }
 
     @Test
@@ -133,40 +156,56 @@ class StroomAuditServiceTest {
         Boolean result = auditService.audit(TEST_TOKEN, auditSuccessMessage(USER_SERVICE.value));
 
         //Then
-        assertThat(result).isFalse();
+        assertThat(result)
+                .as("Check that an error message from a non accepted service is not logged")
+                .isFalse();
     }
 
     @Test
     void testUserServiceAuditErrorMessage() {
         // Given
-        AuditErrorMessage message = auditErrorMessage(USER_SERVICE.value);
+        var message = auditErrorMessage(USER_SERVICE.value);
 
         // When
         auditService.audit(TEST_TOKEN, message);
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor.getAllValues()).hasSize(1);
+        assertThat(logCaptor.getAllValues())
+                .as("Check that one log message is produced")
+                .hasSize(1);
 
         var event = logCaptor.getValue();
-        var eventChain = event.getEventChain();
-        var eventSource = event.getEventSource();
         var eventDetail = event.getEventDetail();
 
-        assertAll(
-            () -> assertThat(eventSource.getDevice().getHostName()).isEqualTo(TEST_SERVER_NAME),
-            () -> assertThat(eventSource.getDevice().getIPAddress()).isEqualTo(TEST_SERVER_IP),
-            () -> assertThat(eventSource.getUser().getId()).isEqualTo(TEST_USER_ID),
-            () -> assertThat(eventDetail.getTypeId()).isEqualTo(USER_SERVICE.value),
-            () -> assertThat(eventDetail.getDescription())
-                .isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
-            () -> assertThat(eventDetail.getPurpose().getJustification()).isEqualTo(TEST_PURPOSE),
-            () -> assertThat(eventDetail.getAuthorise().getObjects().get(0).getId()).isEqualTo(TEST_RESOURCE_ID),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().isSuccess()).isFalse(),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().getDescription())
-                .isEqualTo(message.getErrorNode().get("message").textValue()),
-            () -> assertThat(eventChain.getActivity().getId()).isEqualTo(TEST_TOKEN)
-        );
+        assertThat(event.getEventSource())
+                .as("Check that the eventSource has been created successfully")
+                .extracting("device.hostName", "device.ipAddress", "user.id")
+                .contains(TEST_SERVER_NAME, TEST_SERVER_IP, TEST_USER_ID);
+
+        assertThat(event.getEventChain())
+                .as("Check that the activity id is the test token")
+                .extracting("activity.id")
+                .isEqualTo(TEST_TOKEN);
+
+        assertThat(eventDetail)
+                .as("Check that the event detail has been populated correctly")
+                .extracting("typeId", "description", "purpose.justification")
+                .contains(USER_SERVICE.value, message.getErrorNode().get("stackTrace").get(0).get("className").textValue(), TEST_PURPOSE);
+
+        assertThat(eventDetail.getAuthorise().getObjects().get(0).getId())
+                .as("Check that the authorise contains the leaf resource Id")
+                .isEqualTo(TEST_RESOURCE_ID);
+
+        assertThat(eventDetail.getAuthorise().getOutcome().isSuccess())
+                .as("Check that the outcome is a failure")
+                .isFalse();
+
+        assertThat(eventDetail.getAuthorise().getOutcome())
+                .as("Check that the outcome is a failure")
+                .extracting(BaseOutcome::getDescription)
+                .isEqualTo(TEST_EXCEPTION.getMessage());
+
     }
 
     @Test
@@ -179,27 +218,40 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor.getAllValues()).hasSize(1);
+        assertThat(logCaptor.getAllValues())
+                .as("Check that one log message is produced")
+                .hasSize(1);
 
         var event = logCaptor.getValue();
-        var eventChain = event.getEventChain();
-        var eventSource = event.getEventSource();
         var eventDetail = event.getEventDetail();
 
-        assertAll(
-            () -> assertThat(eventSource.getDevice().getHostName()).isEqualTo(TEST_SERVER_NAME),
-            () -> assertThat(eventSource.getDevice().getIPAddress()).isEqualTo(TEST_SERVER_IP),
-            () -> assertThat(eventSource.getUser().getId()).isEqualTo(TEST_USER_ID),
-            () -> assertThat(eventDetail.getTypeId()).isEqualTo(RESOURCE_SERVICE.value),
-            () -> assertThat(eventDetail.getDescription())
-                .isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
-            () -> assertThat(eventDetail.getPurpose().getJustification()).isEqualTo(TEST_PURPOSE),
-            () -> assertThat(eventDetail.getAuthorise().getObjects().get(0).getId()).isEqualTo(TEST_RESOURCE_ID),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().isSuccess()).isFalse(),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().getDescription())
-                .isEqualTo(message.getErrorNode().get("message").textValue()),
-            () -> assertThat(eventChain.getActivity().getId()).isEqualTo(TEST_TOKEN)
-        );
+        assertThat(event.getEventSource())
+                .as("Check that the eventSource has been created successfully")
+                .extracting("device.hostName", "device.ipAddress", "user.id")
+                .contains(TEST_SERVER_NAME, TEST_SERVER_IP, TEST_USER_ID);
+
+        assertThat(event.getEventChain())
+                .as("Check that the activity id is the test token")
+                .extracting("activity.id")
+                .isEqualTo(TEST_TOKEN);
+
+        assertThat(eventDetail)
+                .as("Check that the event detail has been populated correctly")
+                .extracting("typeId", "description", "purpose.justification")
+                .contains(RESOURCE_SERVICE.value, message.getErrorNode().get("stackTrace").get(0).get("className").textValue(), TEST_PURPOSE);
+
+        assertThat(eventDetail.getAuthorise().getObjects().get(0).getId())
+                .as("Check that the authorise contains the leaf resource Id")
+                .isEqualTo(TEST_RESOURCE_ID);
+
+        assertThat(eventDetail.getAuthorise().getOutcome().isSuccess())
+                .as("Check that the outcome is a failure")
+                .isFalse();
+
+        assertThat(eventDetail.getAuthorise().getOutcome())
+                .as("Check that the outcome is a failure")
+                .extracting(BaseOutcome::getDescription)
+                .isEqualTo(TEST_EXCEPTION.getMessage());
     }
 
     @Test
@@ -212,26 +264,39 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        assertThat(logCaptor.getAllValues()).hasSize(1);
+        assertThat(logCaptor.getAllValues())
+                .as("Check that one log message is produced")
+                .hasSize(1);
 
         var event = logCaptor.getValue();
-        var eventChain = event.getEventChain();
-        var eventSource = event.getEventSource();
         var eventDetail = event.getEventDetail();
 
-        assertAll(
-            () -> assertThat(eventSource.getDevice().getHostName()).isEqualTo(TEST_SERVER_NAME),
-            () -> assertThat(eventSource.getDevice().getIPAddress()).isEqualTo(TEST_SERVER_IP),
-            () -> assertThat(eventSource.getUser().getId()).isEqualTo(TEST_USER_ID),
-            () -> assertThat(eventDetail.getTypeId()).isEqualTo(POLICY_SERVICE.value),
-            () -> assertThat(eventDetail.getDescription())
-                .isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
-            () -> assertThat(eventDetail.getPurpose().getJustification()).isEqualTo(TEST_PURPOSE),
-            () -> assertThat(eventDetail.getAuthorise().getObjects().get(0).getId()).isEqualTo(TEST_RESOURCE_ID),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().isSuccess()).isFalse(),
-            () -> assertThat(eventDetail.getAuthorise().getOutcome().getDescription())
-                .isEqualTo(message.getErrorNode().get("message").textValue()),
-            () -> assertThat(eventChain.getActivity().getId()).isEqualTo(TEST_TOKEN)
-        );
+        assertThat(event.getEventSource())
+                .as("Check that the eventSource has been created successfully")
+                .extracting("device.hostName", "device.ipAddress", "user.id")
+                .contains(TEST_SERVER_NAME, TEST_SERVER_IP, TEST_USER_ID);
+
+        assertThat(event.getEventChain())
+                .as("Check that the activity id is the test token")
+                .extracting("activity.id")
+                .isEqualTo(TEST_TOKEN);
+
+        assertThat(eventDetail)
+                .as("Check that the event detail has been populated correctly")
+                .extracting("typeId", "description", "purpose.justification")
+                .contains(POLICY_SERVICE.value, message.getErrorNode().get("stackTrace").get(0).get("className").textValue(), TEST_PURPOSE);
+
+        assertThat(eventDetail.getAuthorise().getObjects().get(0).getId())
+                .as("Check that the authorise contains the leaf resource Id")
+                .isEqualTo(TEST_RESOURCE_ID);
+
+        assertThat(eventDetail.getAuthorise().getOutcome().isSuccess())
+                .as("Check that the outcome is a failure")
+                .isFalse();
+
+        assertThat(eventDetail.getAuthorise().getOutcome())
+                .as("Check that the outcome is a failure")
+                .extracting(BaseOutcome::getDescription)
+                .isEqualTo(TEST_EXCEPTION.getMessage());
     }
 }

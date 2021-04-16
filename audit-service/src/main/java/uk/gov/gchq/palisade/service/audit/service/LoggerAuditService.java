@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
@@ -107,8 +108,8 @@ public class LoggerAuditService implements AuditService {
                 return true;
             }
             auditLogger.warn(
-                "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
-                message.getServiceName());
+                    "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}",
+                    message.getServiceName());
             return false;
 
         } else if (message instanceof AuditErrorMessage) {

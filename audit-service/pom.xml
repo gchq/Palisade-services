@@ -49,6 +49,7 @@
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
         <avro.version>1.8.2</avro.version>
+        <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
@@ -102,6 +103,12 @@
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Utility classes used mainly for byte conversions -->
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <!-- A package of utility classes for classes in java.lang's hierarchy -->

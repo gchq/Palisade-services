@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 
 import java.util.Map;
 
@@ -59,11 +59,11 @@ class HealthActuatorContractTest {
 
         // Then check the response
         assertThat(responseEntity.getStatusCode())
-            .as("check status")
-            .isEqualTo(HttpStatus.OK);
+                .as("check status")
+                .isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody())
-            .as("check body")
-            .contains("\"status\":\"UP\"");
+                .as("check body")
+                .contains("\"status\":\"UP\"");
 
     }
 }

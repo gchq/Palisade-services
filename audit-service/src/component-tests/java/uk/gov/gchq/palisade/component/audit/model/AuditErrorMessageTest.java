@@ -33,8 +33,8 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws Exception if any error occurs during (de)serialisation
-     * @see AbstractSerialisationTest#testInstance(Object)
+     * @throws Exception if any error occurs during deserialisation
+     * @see AbstractSerialisationTest#assertSerialisation(Class, Object)
      */
     @Test
     void testAuditErrorMessageSerialisation() throws Exception {
@@ -42,19 +42,18 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
         // GIVEN the instance to check
 
         var expected = AuditErrorMessage.Builder.create()
-            .withUserId("originalUserID")
-            .withResourceId("testResourceId")
-            .withContext(new Context().purpose("testContext"))
-            .withServiceName("testServiceName")
-            .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
-            .withServerIp("testServerIP")
-            .withServerHostname("testServerHostname")
-            .withAttributes(Map.of("messagesSent", "23"))
-            .withError(new InternalError("Something went wrong!"));
+                .withUserId("originalUserID")
+                .withResourceId("testResourceId")
+                .withContext(new Context().purpose("testContext"))
+                .withServiceName("testServiceName")
+                .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
+                .withServerIp("testServerIP")
+                .withServerHostname("testServerHostname")
+                .withAttributes(Map.of("messagesSent", "23"))
+                .withError(new InternalError("Something went wrong!"));
 
         // THEN confirm that it can be serialised and then deserialised successfully.
 
         assertSerialisation(expected.getClass(), expected);
-
     }
 }

@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.audit.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAsyncExceptionHandler.class);
 
     @Override
-    public void handleUncaughtException(final Throwable throwable, final Method method, final Object... objects) {
+    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object... objects) {
         String parameters = Stream.of(objects)
                 .map(Object::toString)
                 .collect(Collectors.joining(", ", "[", "]"));

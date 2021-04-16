@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.common.Context;
 import uk.gov.gchq.palisade.service.audit.common.Generated;
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
@@ -449,8 +450,8 @@ public class StroomAuditService implements AuditService {
                 return true;
             }
             LOGGER.warn(
-                "An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
-                message.getServiceName());
+                    "An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                    message.getServiceName());
             return false;
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;

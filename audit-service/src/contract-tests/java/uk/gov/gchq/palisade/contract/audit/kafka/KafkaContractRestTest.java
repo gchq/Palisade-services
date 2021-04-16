@@ -35,11 +35,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.singletonList;
@@ -87,10 +88,10 @@ class KafkaContractRestTest {
 
     @AfterEach
     void tearDown() {
-        Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-            .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
-            .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
-            .forEach(File::deleteOnExit);
+        Arrays.stream(Objects.requireNonNull(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles()))
+                .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
+                .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
+                .forEach(File::deleteOnExit);
     }
 
     @Test
@@ -101,11 +102,12 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/error", ERROR_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
+        assertThat(responseEntity.getStatusCode())
+                .as("Check that the REST call has been accepted")
+                .isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         verify(auditService, timeout(3000).times(1)).audit(anyString(), any());
-
     }
 
     @Test
@@ -116,7 +118,9 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/success", GOOD_SUCCESS_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
+        assertThat(responseEntity.getStatusCode())
+                .as("Check that the REST call has been accepted")
+                .isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         Mockito.verify(auditService, Mockito.timeout(3000).times(1)).audit(anyString(), any());
@@ -131,7 +135,9 @@ class KafkaContractRestTest {
         var responseEntity = post("/api/success", BAD_SUCCESS_REQUEST_OBJ);
 
         // Then - check the REST request was accepted
-        assertThat(responseEntity.getStatusCode()).isEqualTo(ACCEPTED);
+        assertThat(responseEntity.getStatusCode())
+                .as("Check that the REST call has been accepted")
+                .isEqualTo(ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         verify(auditService, timeout(3000).times(0)).audit(anyString(), any());
@@ -142,12 +148,8 @@ class KafkaContractRestTest {
         var headers = singletonMap(HEADER, singletonList(REQUEST_TOKEN));
         var httpEntity = new HttpEntity<>(body, new LinkedMultiValueMap<>(headers));
         var responseEntity = restTemplate.postForEntity(url, httpEntity, Void.class);
-        waitForService();
-        return responseEntity;
-    }
-
-    private void waitForService() throws InterruptedException {
         TimeUnit.SECONDS.sleep(2);
+        return responseEntity;
     }
 
 }

@@ -67,6 +67,8 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
 
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        KAFKA_CONTAINER.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+        KAFKA_CONTAINER.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
         KAFKA_CONTAINER.start();
 
         // test kafka config
@@ -79,7 +81,7 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
 
 
     /**
-     * Configuration providing the test beans to be inject into test classes that
+     * Configuration providing the test beans to be injected into test classes that
      * require access to various objects to support access to Kafka/Akka
      */
     @Configuration
@@ -89,8 +91,8 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
         @Bean
         KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
             var topics = List.of(
-                new NewTopic("success", 1, (short) 1),
-                new NewTopic("error", 1, (short) 1));
+                    new NewTopic("success", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
             createTopics(topics, KAFKA_CONTAINER);
             return KAFKA_CONTAINER;
         }
@@ -112,13 +114,13 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
             // remove current port if found and then add back in with the port Kafka is
             // listening on
             var config = props.toHoconConfig(Stream
-                .concat(
-                    props.getAllActiveProperties()
-                        .entrySet()
-                        .stream()
-                        .filter(kafkaPort -> !kafkaPort.getKey().equals(portKey)),
-                    Stream.of(new AbstractMap.SimpleEntry<>(portKey, port)))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    .concat(
+                            props.getAllActiveProperties()
+                                    .entrySet()
+                                    .stream()
+                                    .filter(kafkaPort -> !kafkaPort.getKey().equals(portKey)),
+                            Stream.of(new AbstractMap.SimpleEntry<>(portKey, port)))
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
             return ActorSystem.create("actor-with-overrides", config);
         }
@@ -130,23 +132,23 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
         }
 
         @Bean
-        Serializer<JsonNode> requestSerializer(@Autowired final ObjectMapper objectMapper) {
+        Serializer<JsonNode> requestSerialiser(@Autowired final ObjectMapper objectMapper) {
             return (final String s, final JsonNode auditRequest) -> {
                 try {
                     return objectMapper.writeValueAsBytes(auditRequest);
                 } catch (JsonProcessingException e) {
-                    throw new SerializationFailedException("Failed to serialize " + auditRequest.toString(), e);
+                    throw new SerializationFailedException("Failed to serialise " + auditRequest.toString(), e);
                 }
             };
         }
 
         @Bean
-        Serializer<String> stringSerializer() {
+        Serializer<String> stringSerialiser() {
             return new StringSerializer();
         }
 
         private static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka)
-            throws ExecutionException, InterruptedException {
+                throws ExecutionException, InterruptedException {
             var host = String.format("%s:%d", "localhost", kafka.getFirstMappedPort());
             var adminProperties = Map.<String, Object>of(BOOTSTRAP_SERVERS_CONFIG, host);
             try (var admin = AdminClient.create(adminProperties)) {

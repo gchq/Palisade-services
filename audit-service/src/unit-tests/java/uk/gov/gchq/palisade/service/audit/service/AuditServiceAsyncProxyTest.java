@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 import java.util.Collections;
@@ -57,24 +58,25 @@ class AuditServiceAsyncProxyTest {
 
     private static Stream<Arguments> messages() {
         return Stream.of(
-            arguments("good success", USER_SERVICE, auditErrorMessage(USER_SERVICE), TRUE_RESULT),
-            arguments("good success", DATA_SERVICE, auditSuccessMessage(DATA_SERVICE), TRUE_RESULT),
-            arguments("bad success", RESOURCE_SERVICE, auditSuccessMessage(RESOURCE_SERVICE), FALSE_RESULT),
-            arguments("error message", FILTERED_RESOURCE_SERVICE, auditSuccessMessage(FILTERED_RESOURCE_SERVICE),
-                TRUE_RESULT));
+                arguments("good success", USER_SERVICE, auditErrorMessage(USER_SERVICE), TRUE_RESULT),
+                arguments("good success", DATA_SERVICE, auditSuccessMessage(DATA_SERVICE), TRUE_RESULT),
+                arguments("bad success", RESOURCE_SERVICE, auditSuccessMessage(RESOURCE_SERVICE), FALSE_RESULT),
+                arguments("error message", FILTERED_RESOURCE_SERVICE, auditSuccessMessage(FILTERED_RESOURCE_SERVICE), TRUE_RESULT));
     }
 
     @DisplayName("Test proxy result")
     @ParameterizedTest(name = "{index} => Test {0}, serviceName=''{1}'', expectedResult={3}")
     @MethodSource("messages")
     void testMessage(
-        final String text,
-        final ServiceName serviceName,
-        final AuditMessage message,
-        final List<Boolean> expectedResult) {
+            final String text,
+            final ServiceName serviceName,
+            final AuditMessage message,
+            final List<Boolean> expectedResult) {
 
         var actualResult = proxy.audit(TOKEN, message).join();
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult)
+                .as("Check that the messages have been audited successfully")
+                .isEqualTo(expectedResult);
 
     }
 

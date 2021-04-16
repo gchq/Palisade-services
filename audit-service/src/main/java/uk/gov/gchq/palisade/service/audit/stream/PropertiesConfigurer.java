@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +56,6 @@ import java.util.stream.StreamSupport;
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
 
-    @SuppressWarnings("java:S5998")
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final int PROPERTY_PATH = 1;
     private static final int PROPERTY_INDEX = 2;
@@ -91,7 +91,8 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
         envPropSources.forEach((final PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
-                locations = ((String) propertySource.getProperty("application.properties.locations"))
+                locations = ((String) Optional.ofNullable(propertySource.getProperty("application.properties.locations"))
+                        .orElseThrow(() -> new PropertyLoadingException("application.properties.locations could not be found")))
                         .split(LIST_ITEM_SEPARATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)

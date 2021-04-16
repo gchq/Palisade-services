@@ -32,37 +32,59 @@ public final class ApplicationTestData {
      * Common test data for all classes
      */
 
-    /** token in the form of a UUID */
+    /**
+     * token in the form of a UUID
+     */
     public static final String TEST_TOKEN = "token in the form of a UUID";
 
-    /** an identifier for the user */
+    /**
+     * an identifier for the user
+     */
     public static final String TEST_USER_ID = "an identifier for the user";
 
-    /** a pointer to a data resource */
+    /**
+     * a pointer to a data resource
+     */
     public static final String TEST_RESOURCE_ID = "a pointer to a data resource";
 
-    /** the purpose for the data access request */
+    /**
+     * the purpose for the data access request
+     */
     public static final String TEST_PURPOSE = "the purpose for the data access request";
 
-    /** test context */
+    /**
+     * test context
+     */
     public static final Context TEST_CONTEXT = new Context().purpose(TEST_PURPOSE);
 
-    /** test timestamp */
+    /**
+     * test timestamp
+     */
     public static final String TEST_TIMESTAMP = "2020-02-20";
 
-    /** the IP address of the server */
+    /**
+     * the IP address of the server
+     */
     public static final String TEST_SERVER_IP = "the IP address of the server";
 
-    /** the name of the server */
+    /**
+     * the name of the server
+     */
     public static final String TEST_SERVER_NAME = "the name of the server";
 
-    /** test empty attribute map */
+    /**
+     * test empty attribute map
+     */
     public static final Map<String, Object> TEST_ATTRIBUTES = new HashMap<>();
 
-    /** test throwable */
+    /**
+     * test throwable
+     */
     public static final Throwable TEST_EXCEPTION = new Throwable("exception message");
 
-    /** test leaf resource id */
+    /**
+     * test leaf resource id
+     */
     public static final String TEST_LEAF_RESOURCE_ID = "file:/test/resource/file.txt";
 
     static {

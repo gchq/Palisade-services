@@ -28,12 +28,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents information for a successful processing of a request which is forwarded to the audit-service.
+ * Represents information for a successful processing of a request which is forwarded to the Audit Service.
  * Note there are three classes that effectively represent the same kind of data but represent a different
  * stage of the process:
  * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the filtered-resource-service.
- * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the data-service.
+ * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
+ * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the Data Service.
  */
 public final class AuditSuccessMessage extends AuditMessage {
 
@@ -66,12 +66,12 @@ public final class AuditSuccessMessage extends AuditMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AuditSuccessMessage. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * AuditSuccessMessage class.
          *
          * @return public interface {@link IUserId} for the next step in the build.
@@ -108,13 +108,13 @@ public final class AuditSuccessMessage extends AuditMessage {
         }
 
         /**
-         * Adds the user context information to the message.
+         * Adds the context information to the message.
          */
         public interface IContext {
             /**
-             * Adds the user context information.
+             * Adds the context information.
              *
-             * @param context user context for the request.
+             * @param context the reason why the user wants access to the data.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
             default IServiceName withContext(final Context context) {
@@ -122,9 +122,9 @@ public final class AuditSuccessMessage extends AuditMessage {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the context information. Uses a JsonNode string form of the information.
              *
-             * @param context user context for the request.
+             * @param context the reason why the user wants access to the data.
              * @return public interface {@link IServiceName} for the next step in the build.
              */
             IServiceName withContextNode(JsonNode context);
@@ -139,16 +139,16 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the service name.
              *
              * @param serviceName name of the service that created the message.
-             * @return public interface  {@link ITimeStamp} for the next step in the build.
+             * @return public interface {@link ITimestamp} for the next step in the build.
              */
-            ITimeStamp withServiceName(String serviceName);
+            ITimestamp withServiceName(String serviceName);
         }
 
 
         /**
          * Adds the timestamp for when the service created this message.
          */
-        public interface ITimeStamp {
+        public interface ITimestamp {
 
             /**
              * Adds the timestamp for the message.
@@ -181,7 +181,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the server host name for where the message was created.
              *
              * @param serverHostname server host name.
-             * @return public interface  {@link IAttributes} for the next step in the build.
+             * @return public interface {@link IAttributes} for the next step in the build.
              */
             IAttributes withServerHostname(String serverHostname);
         }
@@ -193,7 +193,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             /**
              * Adds the attributes for the message.
              *
-             * @param attributes timestamp for the request.
+             * @param attributes the attributes for the request.
              * @return public interface {@link ILeafResourceId} for the next step in the build.
              */
             default ILeafResourceId withAttributes(final Map<String, Object> attributes) {
@@ -201,9 +201,9 @@ public final class AuditSuccessMessage extends AuditMessage {
             }
 
             /**
-             * Adds the attributes for the message.  Uses a JsonNode string form of the information.
+             * Adds the attributes for the message. Uses a JsonNode string form of the information.
              *
-             * @param attributes user context for the request.
+             * @param attributes the attributes for the request.
              * @return public interface {@link ILeafResourceId} for the next step in the build.
              */
             ILeafResourceId withAttributesNode(JsonNode attributes);
@@ -217,7 +217,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the leaf resource ID for the message.
              *
              * @param leafResourceId leaf resource ID.
-             * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
+             * @return class {@link AuditSuccessMessage} for the completed class from the builder.
              */
             AuditSuccessMessage withLeafResourceId(String leafResourceId);
         }

@@ -52,7 +52,7 @@ public class KafkaProducerService {
     private final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> upstreamErrorSink;
     private final Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> upstreamSuccessSink;
     private final ConsumerTopicConfiguration upstreamConfig;
-    private final Materializer materializer;
+    private final Materializer materialiser;
 
     /**
      * Autowired constructor for the rest controller
@@ -60,16 +60,16 @@ public class KafkaProducerService {
      * @param upstreamErrorSink   a sink to the upstream error topic
      * @param upstreamSuccessSink a sink to the upstream success topic
      * @param upstreamConfig      the config for the topic (name, partitions, ...)
-     * @param materializer        the akka system materializer
+     * @param materialiser        the akka system materialiser
      */
     public KafkaProducerService(final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> upstreamErrorSink,
                                 final Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> upstreamSuccessSink,
                                 final ConsumerTopicConfiguration upstreamConfig,
-                                final Materializer materializer) {
+                                final Materializer materialiser) {
         this.upstreamErrorSink = upstreamErrorSink;
         this.upstreamSuccessSink = upstreamSuccessSink;
         this.upstreamConfig = upstreamConfig;
-        this.materializer = materializer;
+        this.materialiser = materialiser;
     }
 
     /**
@@ -77,7 +77,7 @@ public class KafkaProducerService {
      * These requests are each written to the "success" kafka topic using the supplied headers for all of them.
      *
      * @param headers  a map of request headers
-     * @param requests a list of requests
+     * @param requests a {@link Collection} of requests
      * @return a {@link ResponseEntity} once all requests have been written to kafka
      */
     public ResponseEntity<Void> processSuccessRequest(final Map<String, String> headers,
@@ -101,7 +101,7 @@ public class KafkaProducerService {
         Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
                 .map(request -> new ProducerRecord<String, AuditSuccessMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
                 .toMat(this.upstreamSuccessSink, Keep.right())
-                .run(this.materializer)
+                .run(this.materialiser)
                 .toCompletableFuture()
                 .join();
 
@@ -114,7 +114,7 @@ public class KafkaProducerService {
      * These requests are each written to the "error" kafka topic using the supplied headers for all of them.
      *
      * @param headers  a map of request headers
-     * @param requests a list of requests
+     * @param requests a {@link Collection} of requests
      * @return a {@link ResponseEntity} once all requests have been written to kafka
      */
     @SuppressWarnings("unused")
@@ -139,7 +139,7 @@ public class KafkaProducerService {
         Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
                 .map(request -> new ProducerRecord<String, AuditErrorMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
                 .toMat(this.upstreamErrorSink, Keep.right())
-                .run(this.materializer)
+                .run(this.materialiser)
                 .toCompletableFuture()
                 .join();
 

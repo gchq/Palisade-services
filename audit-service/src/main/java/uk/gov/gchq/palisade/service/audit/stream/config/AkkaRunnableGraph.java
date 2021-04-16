@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.common.Token;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
@@ -45,7 +46,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.audit.AuditApplication}
+ * Configuration for the Akka Runnable Graph used by the {@link AuditApplication}
  * Configures the connection between Kafka, Akka and the service
  */
 @Configuration

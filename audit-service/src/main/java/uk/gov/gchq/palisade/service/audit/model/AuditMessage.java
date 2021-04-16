@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that has been
+ * This is the parent class for Audit information. It represents the common component of the data that has been
  * sent from each of the different services.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)

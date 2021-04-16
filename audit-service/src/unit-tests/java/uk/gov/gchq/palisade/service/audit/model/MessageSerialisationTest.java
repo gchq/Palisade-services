@@ -40,12 +40,12 @@ class MessageSerialisationTest extends AbstractSerialisationTest {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
-                arguments(auditErrorMessage(USER_SERVICE)),
-                arguments(auditErrorMessage(RESOURCE_SERVICE)),
-                arguments(auditErrorMessage(POLICY_SERVICE)),
-                arguments(auditSuccessMessage(DATA_SERVICE)),
-                arguments(auditSuccessMessage(FILTERED_RESOURCE_SERVICE)),
-                arguments(auditSuccessMessage(USER_SERVICE))
+                    arguments(auditErrorMessage(USER_SERVICE)),
+                    arguments(auditErrorMessage(RESOURCE_SERVICE)),
+                    arguments(auditErrorMessage(POLICY_SERVICE)),
+                    arguments(auditSuccessMessage(DATA_SERVICE)),
+                    arguments(auditSuccessMessage(FILTERED_RESOURCE_SERVICE)),
+                    arguments(auditSuccessMessage(USER_SERVICE))
             );
         }
     }

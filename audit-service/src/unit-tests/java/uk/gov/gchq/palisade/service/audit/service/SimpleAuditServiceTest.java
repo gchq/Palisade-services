@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
@@ -72,7 +73,9 @@ class SimpleAuditServiceTest {
         // When
         auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
         // Then
-        assertThat(getMessages(event -> true).get(0)).contains(AuditErrorMessage.class.getSimpleName());
+        assertThat(getMessages(event -> true).get(0))
+                .as("Check that the message logged is a %s", AuditErrorMessage.class.getSimpleName())
+                .contains(AuditErrorMessage.class.getSimpleName());
     }
 
     @Test
@@ -80,6 +83,8 @@ class SimpleAuditServiceTest {
         // When
         auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
         // Then
-        assertThat(getMessages(event -> true).get(0)).contains(AuditSuccessMessage.class.getSimpleName());
+        assertThat(getMessages(event -> true).get(0))
+                .as("Check that the message logged is a %s", AuditSuccessMessage.class.getSimpleName())
+                .contains(AuditSuccessMessage.class.getSimpleName());
     }
 }

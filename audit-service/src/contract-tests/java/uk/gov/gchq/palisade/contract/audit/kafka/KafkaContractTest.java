@@ -41,11 +41,12 @@ import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
+import uk.gov.gchq.palisade.service.audit.common.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -83,13 +84,13 @@ class KafkaContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
 
     @Autowired
-    Serializer<String> keySerializer;
+    Serializer<String> keySerialiser;
     @Autowired
-    Serializer<JsonNode> valueSerializer;
+    Serializer<JsonNode> valueSerialiser;
     @Autowired
     ActorSystem akkaActorSystem;
     @Autowired
-    Materializer akkaMaterializer;
+    Materializer akkaMaterialiser;
     @Autowired
     KafkaContainer kafka;
     @Autowired
@@ -106,7 +107,7 @@ class KafkaContractTest {
     @BeforeEach
     void setup() {
         fileCount = (final String prefix) -> Arrays
-                .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .stream(Objects.requireNonNull(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles()))
                 .filter(file -> file.getName().startsWith(prefix))
                 .collect(Collectors.toSet())
                 .size();
@@ -117,10 +118,10 @@ class KafkaContractTest {
 
     @AfterEach
     void tearDown() {
-        Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-            .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
-            .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
-            .forEach(File::deleteOnExit);
+        Arrays.stream(Objects.requireNonNull(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles()))
+                .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
+                .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
+                .forEach(File::deleteOnExit);
     }
 
     @Test
@@ -167,7 +168,7 @@ class KafkaContractTest {
                 GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L),
                 BAD_SUCCESS_RECORD_NODE_FACTORY.get().limit(2L),
                 GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L))
-            .flatMap(Function.identity());
+                .flatMap(Function.identity());
 
         // WHEN - we write to the input
         runStreamOf(requests);
@@ -178,7 +179,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedErrorDeserialization() throws Exception {
+    void testFailedErrorDeserialisation() throws Exception {
 
         // GIVEN
         // Add a message to the 'error' topic
@@ -193,13 +194,13 @@ class KafkaContractTest {
         // THEN - check an "Error-..." file has been created
         var actualErrorCount = currentErrorCount.get();
         assertThat(actualErrorCount)
-            .as("Check exactly 1 'Error' file has been created")
-            .isEqualTo(expectedErrorCount);
+                .as("Check exactly 1 'Error' file has been created")
+                .isEqualTo(expectedErrorCount);
     }
 
     @Test
     @DirtiesContext
-    void testFailedSuccessDeserialization() throws Exception {
+    void testFailedSuccessDeserialisation() throws Exception {
 
         // GIVEN
         // Add a message to the 'success' topic
@@ -213,8 +214,8 @@ class KafkaContractTest {
         // Then check a "Success-..." file has been created
         var actualSuccessCount = currentSuccessCount.get();
         assertThat(actualSuccessCount)
-            .as("Check exactly 1 'Success' file has been created")
-            .isEqualTo(expectedSuccessCount);
+                .as("Check exactly 1 'Success' file has been created")
+                .isEqualTo(expectedSuccessCount);
 
     }
 
@@ -224,19 +225,13 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-            .create(akkaActorSystem, keySerializer, valueSerializer)
-            .withBootstrapServers(bootstrapServers);
+                .create(akkaActorSystem, keySerialiser, valueSerialiser)
+                .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-            .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
-            .toCompletableFuture().join();
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
+                .toCompletableFuture().join();
 
-        waitForService();
-
-    }
-
-    private void waitForService() throws InterruptedException {
         TimeUnit.SECONDS.sleep(2);
     }
-
 }

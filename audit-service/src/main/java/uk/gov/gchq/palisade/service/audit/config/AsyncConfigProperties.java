@@ -20,7 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.service.audit.common.Generated;
 
-
 /**
  * webMVC config properties class used when configuring WebMVC as an executor when launching the service
  */
