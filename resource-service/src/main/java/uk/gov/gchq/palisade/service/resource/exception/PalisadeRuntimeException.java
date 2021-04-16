@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.resource.exception;
 
-package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
+/**
+ * Subtype of {@link RuntimeException} with additional constructors to support the inclusion of a HTTP error message
+ * along with the other exception details.
+ */
+public class PalisadeRuntimeException extends RuntimeException {
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-
-import uk.gov.gchq.palisade.reader.common.UserId;
-
-import java.io.IOException;
-
-class UserIdKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, UserId.class);
+    /**
+     * Initialises this exception with the given message.
+     *
+     * @param message message for the exception
+     * @param cause   the exception stack trace
+     */
+    public PalisadeRuntimeException(final String message, final Throwable cause) {
+        super(message, cause);
     }
+
 }

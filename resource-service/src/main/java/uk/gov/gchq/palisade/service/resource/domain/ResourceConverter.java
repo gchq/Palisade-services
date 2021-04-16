@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.resource.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -25,8 +24,9 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.lang.NonNull;
 
-import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
-import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ChildResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 
 import java.io.IOException;
 
@@ -40,9 +40,9 @@ public final class ResourceConverter {
     static {
         // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
         // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
-        RESOURCE_MAPPER = JsonMapper.builder()
-                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class)
-                .build();
+        // Note the copy, this modified mapper is still based on the original
+        RESOURCE_MAPPER = new ApplicationConfiguration().objectMapper().copy()
+                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class);
     }
 
     private ResourceConverter() {

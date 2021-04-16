@@ -16,10 +16,10 @@
 package uk.gov.gchq.palisade.component.resource.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.resource.common.Context;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 
 import java.util.Map;
@@ -37,7 +37,7 @@ class AuditErrorMessageTest {
      */
     @Test
     void testAuditErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
-        var mapper = new ObjectMapper();
+        var mapper = new ApplicationConfiguration().objectMapper();
 
         var auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
@@ -50,7 +50,7 @@ class AuditErrorMessageTest {
         var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
 
         assertThat(actualInstance)
-                .as("Using recursion, check that the %s object has been deserialised successfully, ignoring the error field", auditErrorMessage.getClass().getSimpleName())
+                .as("Ignoring the error, check %s using recursion", auditErrorMessage.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessage);

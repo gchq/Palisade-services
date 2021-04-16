@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.resource.common.resource;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+/**
+ * This interface indicates that a resource has a parent resource provides
+ * getter and setters to get the parent resource.
+ */
+public interface ChildResource extends Resource {
 
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+    /**
+     * Creates a child resource by specifying its parent
+     *
+     * @param parent the parent of this ChildResource
+     * @return a ChildResource with a parent in its hierarchy
+     */
+    ChildResource parent(ParentResource parent);
 
-import java.io.IOException;
+    ParentResource getParent();
 
-class ResourceKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, LeafResource.class);
-    }
+    void setParent(final ParentResource parent);
+
 }

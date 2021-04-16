@@ -31,12 +31,13 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
+import uk.gov.gchq.palisade.service.resource.common.Context;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.common.user.User;
+import uk.gov.gchq.palisade.service.resource.common.util.ResourceBuilder;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.resource.config.DefaultConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
@@ -59,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests to verify the handling of exceptions,and the population of audit objects during stream processing
  */
 @DataR2dbcTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, DefaultConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @ActiveProfiles({"db-test"})
@@ -71,19 +72,17 @@ class ResourceServicePersistenceProxyTest {
             .type("data")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);
-
+    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
+            .withUserId("user-id")
+            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
+            .withContext(new Context().purpose("test-purpose"))
+            .withUser(new User().userId("test-user"));
     @Autowired
     private ResourceServicePersistenceProxy resourceServiceAsyncProxy;
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
     private Materializer materializer;
-
-    private final Function<Integer, ResourceRequest> requestFactoryObj = i -> ResourceRequest.Builder.create()
-            .withUserId("user-id")
-            .withResourceId(String.format("file:/test/resourceId/data%d.txt", i))
-            .withContext(new Context().purpose("test-purpose"))
-            .withUser(new User().userId("test-user"));
 
     @BeforeEach
     void setup() throws InterruptedException {

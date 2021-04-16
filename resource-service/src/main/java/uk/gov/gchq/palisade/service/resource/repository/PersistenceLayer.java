@@ -19,7 +19,7 @@ import akka.NotUsed;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Source;
 
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

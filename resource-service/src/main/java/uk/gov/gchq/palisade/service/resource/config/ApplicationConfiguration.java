@@ -16,31 +16,33 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.reader.common.ConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.ResourceConfiguration;
-import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.reader.common.ResourceService;
-import uk.gov.gchq.palisade.reader.common.Service;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.Resource;
-import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
-import uk.gov.gchq.palisade.service.resource.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.resource.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.resource.common.resource.ConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourceConfiguration;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourceService;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
@@ -48,12 +50,8 @@ import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
-import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
-import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
@@ -67,22 +65,37 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.reactive"})
 @EnableConfigurationProperties({ResourceServiceConfigProperties.class})
+// Suppress dynamic class loading smell as it's needed for json serialisation
+@SuppressWarnings("java:S2658")
 public class ApplicationConfiguration implements AsyncConfigurer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
     private static final int THREAD_POOL = 6;
-    private final ResourceServiceConfigProperties resourceServiceConfigProperties;
+    private static final ObjectMapper MAPPER;
 
-    @Value("${web.client.data-service:data-service}")
-    private String dataServiceName;
-
-    /**
-     * Spring dependency-injection for dependant configs
-     *
-     * @param resourceServiceConfigProperties service-specific config
-     */
-    public ApplicationConfiguration(final ResourceServiceConfigProperties resourceServiceConfigProperties) {
-        this.resourceServiceConfigProperties = resourceServiceConfigProperties;
+    static {
+        MAPPER = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        // Reflect and add annotated classes as subtypes
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(RegisterJsonSubType.class));
+        scanner.findCandidateComponents("uk.gov.gchq.palisade")
+                .forEach((BeanDefinition beanDef) -> {
+                    try {
+                        Class<?> type = Class.forName(beanDef.getBeanClassName());
+                        Class<?> supertype = type.getAnnotation(RegisterJsonSubType.class).value();
+                        LOGGER.debug("Registered {} as json subtype of {}", type, supertype);
+                        MAPPER.registerSubtypes(type);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalArgumentException(ex);
+                    }
+                });
     }
 
     /**
@@ -98,31 +111,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return () -> resourceConfig.getResources().stream()
                 .map(factory -> factory.build(connectionDetailMapper))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link Resource}s
-     * These resources will be used for prepopulating the {@link ResourceService}
-     *
-     * @return a standard {@link ResourceConfiguration} containing a list of {@link ResourcePrepopulationFactory}s
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdResourceConfiguration resourceConfiguration() {
-        return new StdResourceConfiguration();
-    }
-
-    /**
-     * A factory for {@link Resource} objects, wrapping the {@link ResourceBuilder} with a type and serialisedFormat
-     * Note that this does not include resolving an appropriate {@link ConnectionDetail}, this is handled elsewhere
-     *
-     * @return a standard {@link ResourcePrepopulationFactory} capable of building a {@link Resource} from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
-    public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
-        return new StdResourcePrepopulationFactory();
     }
 
     /**
@@ -162,50 +150,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A bean for the implementation of the SimpleResourceService which is a simple implementation of
-     * {@link ResourceService} which extends {@link Service}
-     *
-     * @return a new instance of SimpleResourceService with a string value dataServiceName retrieved from the relevant profiles yaml
-     */
-    @Bean("simpleResourceService")
-    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple", matchIfMissing = true)
-    public ResourceService simpleResourceService() {
-        return new SimpleResourceService(dataServiceName, resourceServiceConfigProperties.getDefaultType());
-    }
-
-
-    /**
-     * A bean for the implementation of the HadoopResourceService which implements {@link ResourceService} used for retrieving resources from Hadoop
-     *
-     * @param config hadoop configuration
-     * @return a {@link ConfiguredHadoopResourceService} used for adding connection details to leaf resources
-     * @throws IOException ioexception
-     */
-    @Bean("hadoopResourceService")
-    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
-    public HadoopResourceService hadoopResourceService(final org.apache.hadoop.conf.Configuration config) throws IOException {
-        return new ConfiguredHadoopResourceService(config);
-    }
-
-    /**
-     * A bean for the HadoopConfiguration used when creating the hadoopResourceService
-     *
-     * @return a {@link org.apache.hadoop.conf.Configuration}
-     */
-    @Bean
-    public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
-        return new org.apache.hadoop.conf.Configuration();
-    }
-
-    /**
      * Used so that you can create custom mapper by starting with the default and then modifying if needed
      *
-     * @return a default JSONSerialiser ObjectMapper
+     * @return a configured object mapper
      */
     @Bean
     @Primary
-    public ObjectMapper jacksonObjectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+    public ObjectMapper objectMapper() {
+        return MAPPER;
     }
 
     @Override

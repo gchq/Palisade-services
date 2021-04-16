@@ -1,96 +1,4 @@
 uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
-+- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
-|  +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
-|  +- com.google.guava:guava:jar:28.2-android:compile
-|  |  +- com.google.guava:failureaccess:jar:1.0.1:compile
-|  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile
-|  |  +- org.checkerframework:checker-compat-qual:jar:2.5.5:compile
-|  |  +- com.google.errorprone:error_prone_annotations:jar:2.3.4:compile
-|  |  \- com.google.j2objc:j2objc-annotations:jar:1.3:compile
-|  +- commons-cli:commons-cli:jar:1.2:compile
-|  +- org.apache.commons:commons-math3:jar:3.1.1:compile
-|  +- org.apache.httpcomponents:httpclient:jar:4.5.12:compile
-|  |  \- org.apache.httpcomponents:httpcore:jar:4.4.13:compile
-|  +- commons-codec:commons-codec:jar:1.14:compile
-|  +- commons-io:commons-io:jar:2.5:compile
-|  +- commons-net:commons-net:jar:3.6:compile
-|  +- commons-collections:commons-collections:jar:3.2.2:compile
-|  +- javax.servlet:javax.servlet-api:jar:4.0.1:compile
-|  +- org.eclipse.jetty:jetty-server:jar:9.4.29.v20200521:compile
-|  |  +- org.eclipse.jetty:jetty-http:jar:9.4.29.v20200521:compile
-|  |  \- org.eclipse.jetty:jetty-io:jar:9.4.29.v20200521:compile
-|  +- org.eclipse.jetty:jetty-util:jar:9.4.29.v20200521:compile
-|  +- org.eclipse.jetty:jetty-servlet:jar:9.4.29.v20200521:compile
-|  |  \- org.eclipse.jetty:jetty-security:jar:9.4.29.v20200521:compile
-|  +- org.eclipse.jetty:jetty-webapp:jar:9.4.29.v20200521:compile
-|  |  \- org.eclipse.jetty:jetty-xml:jar:9.4.29.v20200521:compile
-|  +- javax.servlet.jsp:jsp-api:jar:2.1:runtime
-|  +- com.sun.jersey:jersey-core:jar:1.19:compile
-|  |  \- javax.ws.rs:jsr311-api:jar:1.1.1:compile
-|  +- com.sun.jersey:jersey-servlet:jar:1.19:compile
-|  +- com.sun.jersey:jersey-json:jar:1.19:compile
-|  |  +- org.codehaus.jettison:jettison:jar:1.1:compile
-|  |  +- com.sun.xml.bind:jaxb-impl:jar:2.2.3-1:compile
-|  |  |  \- javax.xml.bind:jaxb-api:jar:2.3.1:compile
-|  |  |     \- javax.activation:javax.activation-api:jar:1.2.0:compile
-|  |  +- org.codehaus.jackson:jackson-core-asl:jar:1.9.2:compile
-|  |  +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.2:compile
-|  |  +- org.codehaus.jackson:jackson-jaxrs:jar:1.9.2:compile
-|  |  \- org.codehaus.jackson:jackson-xc:jar:1.9.2:compile
-|  +- com.sun.jersey:jersey-server:jar:1.19:compile
-|  +- commons-logging:commons-logging:jar:1.1.3:compile
-|  +- log4j:log4j:jar:1.2.17:compile
-|  +- commons-beanutils:commons-beanutils:jar:1.9.3:compile
-|  +- org.apache.commons:commons-configuration2:jar:2.1.1:compile
-|  +- org.apache.commons:commons-lang3:jar:3.10:compile
-|  +- org.apache.commons:commons-text:jar:1.4:compile
-|  +- org.slf4j:slf4j-api:jar:1.7.30:compile
-|  +- org.apache.avro:avro:jar:1.7.7:compile
-|  |  +- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
-|  |  \- org.xerial.snappy:snappy-java:jar:1.0.5:compile
-|  +- com.google.re2j:re2j:jar:1.1:compile
-|  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
-|  +- com.google.code.gson:gson:jar:2.8.6:compile
-|  +- org.apache.hadoop:hadoop-auth:jar:3.2.1:compile
-|  |  +- com.nimbusds:nimbus-jose-jwt:jar:4.41.1:compile
-|  |  |  \- com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
-|  |  +- net.minidev:json-smart:jar:2.3:compile
-|  |  |  \- net.minidev:accessors-smart:jar:1.2:compile
-|  |  |     \- org.ow2.asm:asm:jar:5.0.4:compile
-|  |  \- org.apache.curator:curator-framework:jar:4.0.1:compile
-|  +- com.jcraft:jsch:jar:0.1.54:compile
-|  +- org.apache.curator:curator-client:jar:2.13.0:compile
-|  +- org.apache.curator:curator-recipes:jar:4.0.1:compile
-|  +- com.google.code.findbugs:jsr305:jar:3.0.0:compile
-|  +- org.apache.htrace:htrace-core4:jar:4.1.0-incubating:compile
-|  +- org.apache.zookeeper:zookeeper:jar:3.4.13:compile
-|  |  +- jline:jline:jar:0.9.94:compile
-|  |  +- org.apache.yetus:audience-annotations:jar:0.5.0:compile
-|  |  \- io.netty:netty:jar:3.10.6.Final:compile
-|  +- org.apache.commons:commons-compress:jar:1.18:compile
-|  +- org.apache.kerby:kerb-simplekdc:jar:1.0.1:compile
-|  |  +- org.apache.kerby:kerb-client:jar:1.0.1:compile
-|  |  |  +- org.apache.kerby:kerby-config:jar:1.0.1:compile
-|  |  |  +- org.apache.kerby:kerb-core:jar:1.0.1:compile
-|  |  |  |  \- org.apache.kerby:kerby-pkix:jar:1.0.1:compile
-|  |  |  |     +- org.apache.kerby:kerby-asn1:jar:1.0.1:compile
-|  |  |  |     \- org.apache.kerby:kerby-util:jar:1.0.1:compile
-|  |  |  +- org.apache.kerby:kerb-common:jar:1.0.1:compile
-|  |  |  |  \- org.apache.kerby:kerb-crypto:jar:1.0.1:compile
-|  |  |  +- org.apache.kerby:kerb-util:jar:1.0.1:compile
-|  |  |  \- org.apache.kerby:token-provider:jar:1.0.1:compile
-|  |  \- org.apache.kerby:kerb-admin:jar:1.0.1:compile
-|  |     +- org.apache.kerby:kerb-server:jar:1.0.1:compile
-|  |     |  \- org.apache.kerby:kerb-identity:jar:1.0.1:compile
-|  |     \- org.apache.kerby:kerby-xdr:jar:1.0.1:compile
-|  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
-|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
-|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  +- org.codehaus.woodstox:stax2-api:jar:3.1.4:compile
-|  +- com.fasterxml.woodstox:woodstox-core:jar:5.0.3:compile
-|  \- dnsjava:dnsjava:jar:2.1.7:compile
-+- uk.gov.gchq.palisade:hadoop-resource:jar:0.5.0-SNAPSHOT:compile
-+- uk.gov.gchq.palisade:readers-common:jar:0.5.0-SNAPSHOT:compile
 +- com.typesafe.akka:akka-stream_2.13:jar:2.6.10:compile
 |  +- org.scala-lang:scala-library:jar:2.13.3:compile
 |  +- com.typesafe.akka:akka-actor_2.13:jar:2.6.10:compile
@@ -103,9 +11,11 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 +- com.typesafe.akka:akka-stream-kafka_2.13:jar:2.0.4:compile
 |  +- org.apache.kafka:kafka-clients:jar:2.5.0:compile
 |  |  +- com.github.luben:zstd-jni:jar:1.4.4-7:compile
-|  |  \- org.lz4:lz4-java:jar:1.7.1:compile
+|  |  +- org.lz4:lz4-java:jar:1.7.1:compile
+|  |  \- org.xerial.snappy:snappy-java:jar:1.1.7.3:compile
 |  \- org.scala-lang.modules:scala-collection-compat_2.13:jar:2.1.6:compile
 +- com.typesafe.akka:akka-slf4j_2.13:jar:2.6.10:compile
+|  \- org.slf4j:slf4j-api:jar:1.7.30:compile
 +- com.typesafe.akka:akka-discovery_2.13:jar:2.6.10:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
@@ -121,6 +31,9 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  \- org.yaml:snakeyaml:jar:1.26:compile
 |  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-actuator:jar:2.3.1.RELEASE:compile
+|  |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
+|  |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  |  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  \- io.micrometer:micrometer-core:jar:1.5.1:compile
 |     +- org.hdrhistogram:HdrHistogram:jar:2.1.12:compile
@@ -167,6 +80,9 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  +- org.springframework.boot:spring-boot-test:jar:2.3.1.RELEASE:test
 |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:2.3.1.RELEASE:test
 |  +- com.jayway.jsonpath:json-path:jar:2.4.0:test
+|  |  \- net.minidev:json-smart:jar:2.3:test
+|  |     \- net.minidev:accessors-smart:jar:1.2:test
+|  |        \- org.ow2.asm:asm:jar:5.0.4:test
 |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:2.3.3:test
 |  |  \- jakarta.activation:jakarta.activation-api:jar:1.2.2:test
 |  +- org.assertj:assertj-core:jar:3.16.1:test
@@ -195,6 +111,7 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 +- org.testcontainers:kafka:jar:1.14.3:test
 |  \- org.testcontainers:testcontainers:jar:1.14.3:test
 |     +- org.jetbrains:annotations:jar:19.0.0:test
+|     +- org.apache.commons:commons-compress:jar:1.20:test
 |     +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
 |     +- org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test
 |     +- org.rnorth:tcp-unix-socket-proxy:jar:1.0.2:test

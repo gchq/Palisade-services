@@ -16,11 +16,11 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import uk.gov.gchq.palisade.reader.common.ResourceConfiguration;
-import uk.gov.gchq.palisade.reader.common.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.reader.common.ResourceService;
-import uk.gov.gchq.palisade.reader.common.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.common.Generated;
+import uk.gov.gchq.palisade.service.resource.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourceConfiguration;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourceService;
 
 import java.util.Collections;
 import java.util.List;

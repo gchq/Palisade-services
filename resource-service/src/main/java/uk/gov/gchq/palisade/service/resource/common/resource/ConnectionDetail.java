@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.resource.common.resource;
 
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
- * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
- * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
- * in {@link JSONSerialiser}.
+ * A High level API for passing details of how to connect to a resource
  */
-public interface JSONSerialiserModules {
-    List<Module> getModules();
+@JsonTypeInfo(use = Id.NAME)
+public interface ConnectionDetail extends Serializable {
+
+    /**
+     * Creates a default connection detail of the Service Name
+     *
+     * @return a service name as a connection detail
+     */
+    String createConnection();
+
 }

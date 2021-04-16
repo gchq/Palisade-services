@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
+package uk.gov.gchq.palisade.service.resource.common.resource;
+
 /**
- * Classes for handling JSON serialisation and deserialisation.
+ * This interface indicates that a resource has child resources which can be
+ * found by using the resource service to getResourcesByResource passing in the
+ * current resource
  */
-package uk.gov.gchq.palisade.service.resource.common.jsonserialisation;
+public interface ParentResource extends Resource {
+
+}

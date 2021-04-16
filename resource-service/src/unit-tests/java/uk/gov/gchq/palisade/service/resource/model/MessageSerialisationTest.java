@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import uk.gov.gchq.palisade.service.resource.ApplicationTestData;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -31,7 +32,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MessageSerialisationTest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     static class MessageTypeSource implements ArgumentsProvider {
         @Override

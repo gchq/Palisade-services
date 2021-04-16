@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.reader.common.util.ResourceBuilder;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.common.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;

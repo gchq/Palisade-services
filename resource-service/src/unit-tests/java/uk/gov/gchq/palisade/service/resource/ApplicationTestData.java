@@ -18,14 +18,14 @@ package uk.gov.gchq.palisade.service.resource;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.UserId;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.resource.common.Context;
 import uk.gov.gchq.palisade.service.resource.common.Token;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.resource.common.user.User;
+import uk.gov.gchq.palisade.service.resource.common.user.UserId;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;

@@ -27,6 +27,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.resource.common.Token;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
 
@@ -44,9 +45,9 @@ public class ContractTestData {
         // hide the constructor, this is just a collection of static objects
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.reader.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.reader.common.User\"}}";
-    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.reader.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.reader.common.User\"}}";
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@type\":\"User\"}}";
+    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@type\":\"User\"}}";
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_REQUEST_NODE;
     public static final ResourceRequest REQUEST_OBJ;

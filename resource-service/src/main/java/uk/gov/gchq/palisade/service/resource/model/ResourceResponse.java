@@ -17,14 +17,17 @@ package uk.gov.gchq.palisade.service.resource.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.Context;
 import uk.gov.gchq.palisade.service.resource.common.Generated;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.user.User;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -40,9 +43,10 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.policy.model.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class ResourceResponse {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     // Unique identifier for the user
     private final String userId;

@@ -21,10 +21,10 @@ import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.reader.common.resource.ChildResource;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.ParentResource;
-import uk.gov.gchq.palisade.reader.common.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ChildResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ParentResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.OrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;

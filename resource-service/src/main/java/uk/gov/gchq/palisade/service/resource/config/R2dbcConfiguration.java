@@ -56,7 +56,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
      */
     public R2dbcConfiguration(final ConnectionFactory defaultConnectionFactory) {
         this.defaultConnectionFactory = defaultConnectionFactory;
-        LOGGER.debug("Initialised R2DBC repositories");
+        LOGGER.debug("Initialised R2DBC repositories: {}", this.defaultConnectionFactory.getMetadata().getName());
     }
 
     @Override
@@ -85,7 +85,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
     ConnectionFactoryInitializer initializer() {
         ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
         initializer.setConnectionFactory(defaultConnectionFactory);
-        initializer.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("schema.sql")));
+        initializer.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("./schema.sql")));
         return initializer;
     }
 

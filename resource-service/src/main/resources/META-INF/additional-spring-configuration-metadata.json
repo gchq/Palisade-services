@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "resource.implementation",
+      "type": "java.lang.String",
+      "description": "The implementation for the underlying ResourceService, default 'simple'"
+    },
+    {
+      "name": "population.resourceProvider",
+      "type": "java.lang.String",
+      "description": "The implementation for the resource pre-populator, default 'std'"
+    },
+    {
+      "name": "resource.defaultType",
+      "type": "java.lang.String",
+      "description": "If using the 'simple' ResourceService, set the default 'type' of discovered resources"
+    },
+    {
+      "name": "web.client.data-service",
+      "type": "java.lang.String",
+      "description": "If using the 'simple' ResourceService, set the default 'connectionDetail' of discovered resources"
+    }
+  ]
+}

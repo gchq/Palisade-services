@@ -39,6 +39,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 
 class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
 
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
@@ -71,6 +72,8 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
         configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "db-test", "test-resource");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        KAFKA_CONTAINER.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+        KAFKA_CONTAINER.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
         KAFKA_CONTAINER.start();
 
         // test kafka config

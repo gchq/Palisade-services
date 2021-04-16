@@ -15,8 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.resource.exception;
 
-import uk.gov.gchq.palisade.reader.common.ResourceService;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.common.resource.ResourceService;
 
 /**
  * A {@code NoSuchResourceException} is a {@link RuntimeException} thrown by a

@@ -48,32 +48,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <!-- Hadoop config classes -->
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
-            <exclusions>
-                <!-- Exclude incompatible Log4J -->
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <!-- Specific resource-service for Hadoop -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>hadoop-resource</artifactId>
-            <version>0.5.0-${readers.revision}</version>
-        </dependency>
-        <dependency>
-            <!-- Readers Common to contain common data service code -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>readers-common</artifactId>
-            <version>0.5.0-${readers.revision}</version>
-        </dependency>
-
         <!--
         ~ Akka and Alpakka (Kafka)
         -->
