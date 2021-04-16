@@ -22,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface the the persistence store containing all requests for resources that have been authorised
- * by Palisade. This has been populated by some external service (attribute-masking-service) with tokens
- * and leafResources, along with the User, LeafResource, Rules and Context that must be applied before
+ * by Palisade. This has been populated by some external service (Attribute-Masking Service) with tokens
+ * and leafResourceIds, along with the User, LeafResource, Rules and Context that must be applied before
  * returning data to the client.
  */
 public interface PersistenceLayer {
