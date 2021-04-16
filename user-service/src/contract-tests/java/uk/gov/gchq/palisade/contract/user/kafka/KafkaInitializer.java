@@ -118,37 +118,37 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode userRequest) {
             try {
                 return MAPPER.writeValueAsBytes(userRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + userRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + userRequest.toString(), e);
             }
         }
     }
 
-    // Deserializer for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    // Deserialiser for downstream test output
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] userResponse) {
             try {
                 return MAPPER.readTree(userResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(userResponse), e);
             }
         }
     }
 
-    // Deserializer for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+    // Deserialiser for downstream test error output
+    static class ErrorDeserialiser implements Deserializer<AuditErrorMessage> {
         @Override
         public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
             try {
                 return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(auditErrorMessage), e);
             }
         }
     }

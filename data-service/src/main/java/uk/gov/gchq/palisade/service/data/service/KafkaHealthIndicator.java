@@ -35,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
- * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
+ * Kafka health indicator.  Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
 @Component
@@ -46,7 +46,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
     private final ProducerTopicConfiguration topicConfiguration;
 
     /**
-     * Requires the AdminClient to interact with Kafka
+     * Requires the AdminClient to interact with Kafka.
      *
      * @param adminClient        of the cluster
      * @param topicConfiguration contains the producer topic configuration
