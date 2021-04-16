@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset;
+package uk.gov.gchq.palisade.service.topicoffset.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.service.topicoffset.common.Context;
+import uk.gov.gchq.palisade.service.topicoffset.config.ApplicationConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ContextTest {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ApplicationConfiguration().objectMapper();
 
     @Test
     void testContextShouldSerialiseAndDeseralise() throws JsonProcessingException {

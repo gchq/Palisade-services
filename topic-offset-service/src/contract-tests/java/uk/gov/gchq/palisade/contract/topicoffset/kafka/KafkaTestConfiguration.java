@@ -67,6 +67,8 @@ public class KafkaTestConfiguration {
         final KafkaContainer container = new KafkaContainer("5.5.1");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        container.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+        container.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
         container.start();
 
         createTopics(this.topics, container);

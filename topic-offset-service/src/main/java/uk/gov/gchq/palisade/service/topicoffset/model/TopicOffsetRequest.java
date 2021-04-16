@@ -19,14 +19,15 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.service.topicoffset.common.Context;
 import uk.gov.gchq.palisade.service.topicoffset.common.Generated;
-import uk.gov.gchq.palisade.service.topicoffset.common.resource.LeafResource;
-import uk.gov.gchq.palisade.service.topicoffset.common.resource.Resource;
+import uk.gov.gchq.palisade.service.topicoffset.config.ApplicationConfiguration;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -43,9 +44,10 @@ import java.util.StringJoiner;
  * </ul>
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class TopicOffsetRequest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource ID that that is being asked to access
@@ -87,16 +89,9 @@ public final class TopicOffsetRequest {
     }
 
     @Generated
-    public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resource, LeafResource.class);
+    public JsonNode getResource() {
+        return this.resource;
     }
-
-    @Generated
-    @JsonIgnore
-    public JsonNode getResourceNode() {
-        return resource;
-    }
-
 
     /**
      * Builder class for the creation of instances of the TopicOffsetRequest.  This is a variant of the Fluent Builder
@@ -169,16 +164,6 @@ public final class TopicOffsetRequest {
          * Adds the resource to this message.
          */
         public interface IResource {
-            /**
-             * Adds the resource that has been requested to access.
-             *
-             * @param resource that is requested to access.
-             * @return interface {@link TopicOffsetRequest} for the completed class from the builder.
-             */
-            default TopicOffsetRequest withResource(Resource resource) {
-                return withResourceNode(MAPPER.valueToTree(resource));
-            }
-
             /**
              * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
              *

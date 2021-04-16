@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.topicoffset.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import uk.gov.gchq.palisade.service.topicoffset.common.Generated;
 
@@ -32,6 +34,7 @@ import java.util.StringJoiner;
  * the client request to retrieve the data.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class TopicOffsetResponse {
 
     private final Long commitOffset;  //Kafka commit offset of a start-of-stream message

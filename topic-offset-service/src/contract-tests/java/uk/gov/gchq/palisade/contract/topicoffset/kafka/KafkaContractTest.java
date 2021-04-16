@@ -59,10 +59,11 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.contract.topicoffset.ContractTestData;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 import uk.gov.gchq.palisade.service.topicoffset.common.Token;
+import uk.gov.gchq.palisade.service.topicoffset.common.topicoffset.TopicOffsetService;
+import uk.gov.gchq.palisade.service.topicoffset.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
-import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.SerDesConfig;
@@ -94,7 +95,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {

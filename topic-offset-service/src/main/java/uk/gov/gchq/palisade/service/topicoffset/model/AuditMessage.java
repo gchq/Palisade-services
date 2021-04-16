@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.service.topicoffset.common.Context;
 import uk.gov.gchq.palisade.service.topicoffset.common.Generated;
+import uk.gov.gchq.palisade.service.topicoffset.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
@@ -41,12 +41,11 @@ import java.util.StringJoiner;
  * This is the parent class for Audit information.  It represents the common component of the data that is to be
  * sent to audit service.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
     public static final String SERVICE_NAME = "topic-offset-service";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    protected static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     protected final String userId; //Unique identifier for the user.
     protected final String resourceId;  //Resource Id that is being asked to access.
     protected final JsonNode context;   //Relevant context information about the request.

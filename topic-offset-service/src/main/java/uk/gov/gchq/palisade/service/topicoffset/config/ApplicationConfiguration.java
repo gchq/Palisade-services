@@ -15,15 +15,22 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
+import uk.gov.gchq.palisade.service.topicoffset.common.topicoffset.TopicOffsetService;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.SimpleTopicOffsetService;
-import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
 /**
  * Spring configuration of the Topic Offset Service.
@@ -32,6 +39,19 @@ import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 @Configuration
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+    }
 
     @Bean
     TopicOffsetService topicOffsetService() {
@@ -43,6 +63,17 @@ public class ApplicationConfiguration {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
         return (String token, TopicOffsetRequest request, Throwable error)
                 -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
+    }
+
+    /**
+     * Used so that you can create custom mapper by starting with the default and then modifying if needed
+     *
+     * @return a configured object mapper
+     */
+    @Bean
+    @Primary
+    public ObjectMapper objectMapper() {
+        return MAPPER;
     }
 
 }
