@@ -15,9 +15,31 @@ limitations under the License.
 --->
 # Data Service
 
-The core API for the Data Service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.  
+The Data Service accepts client requests to retrieve resources that have been registered on their behalf.
+These will be the response to the initial requests sent to the Palisade service that have been collected, filtered and in conformance to the defined rules and to the context of the request.
+The client is expected to send a request containing the token and resource id that is used to uniquely identify the resource request.
+The response will be an output stream holding the data resources. 
+To see more information on client requests, see the Palisade Client's library.
 
-The client request will contain the token and resource id that is used to uniquely identify this resource request.
+The key components of the service is the implementation of the [DataService](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java) interface and the supporting services.
+This comes in the form of an implementation of [DataService](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java) interface, [SimpleDataService](src/main/java/uk/gov/gchq/palisade/service/data/service/SimpleDataService.java), that uses the Palisade Reader library for the implementation of a solution using a database. 
+This is then wrapped in a class, [AuditableDataService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditableDataService.java), that will provide the data in a form that can be used in constructing the response that is sent back to the client, and the audit message that is sent to the Audit Service using the [AuditMessageService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditMessageService.java).
+
+# Flow of Control
+
+![Data Service diagram](doc/data-service.png)
+
+The Data Service is implemented as a RESTFul service using a Spring Controller ([DataController](src/main/java/uk/gov/gchq/palisade/service/data/web/DataController.java)) as the service endpoint.
+The processing of each client request will drive the workflow though the service.
+This will start with authorising the request ([DataService.authoriseReqeust](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java)).
+If successful, the next step will be to read the data ([DataService.read](src/main/java/uk/gov/gchq/palisade/service/data/service/DataService.java)) which will return a stream of the data to the client.
+Upon completion, an audit success message ([AuditSuccessMessage](src/main/java/uk/gov/gchq/palisade/service/data/model/AuditSuccessMessage.java)) is sent to the Audit Service indicating a successful transfer of the data.
+If during the authorisation request or at any time in the read request there is a error, the request is stopped, and an error message ([AuditErrorMessage](src/main/java/uk/gov/gchq/palisade/service/data/model/AuditErrorMessage.java)) is sent to the Audit Service.
+
+Kafka streaming is only used for the processing of audit messages.
+This is exposed in the functionality provided by the [AuditMessageService](src/main/java/uk/gov/gchq/palisade/service/data/service/AuditMessageService.java).
+This will take both audit success and audit error messages and process them using the functionality provided in the [AkkaRunnableGraph](src/main/java/uk/gov/gchq/palisade/service/data/stream/config/AkkaRunnableGraph.java)'s `runner` method.
+In this method, the message types are separated into success and error messages where they are then used to construct messages for the respective kafka error and success topics.
 
 ## Message Model and Database Domain
 
@@ -40,10 +62,10 @@ The client request will contain the token and resource id that is used to unique
 
 ## REST Interface
 
-The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
-been requested and prepared in the initial request to Palisade services. 
+The application exposes one endpoint to the client for retrieving the resources.
+This will be the data that has previously been requested and prepared in the initial request to the Palisade services. 
 * `POST data/read/chunked`
-    - returns a `202 ACCEPTED` and a streamed HTTP response body which will provides the resource.
+    - returns a `200 OK` and a streamed HTTP response body which will provide the resource(s).
 
 ## Example JSON Request
 ```

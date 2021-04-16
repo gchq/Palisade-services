@@ -38,8 +38,10 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
+import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
+import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
@@ -52,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * Tests to verify the handling of exceptions,and the population of audit objects during stream processing
@@ -61,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class ResourceServicePersistenceProxyTest {
 
@@ -97,8 +98,13 @@ class ResourceServicePersistenceProxyTest {
 
     @Test
     void testContextLoads() {
-        assertThat(resourceServiceAsyncProxy).isNotNull();
-        assertThat(persistenceLayer).isNotNull();
+        assertThat(resourceServiceAsyncProxy)
+                .as("Check the resourceProxy has been autowired successfully")
+                .isNotNull();
+
+        assertThat(persistenceLayer)
+                .as("Check the persistenceLayer has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
@@ -112,11 +118,16 @@ class ResourceServicePersistenceProxyTest {
         final List<AuditableResourceResponse> result = future.toCompletableFuture().join();
 
         // Then check there is no error and check the returned resource ID
-        assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0).getAuditErrorMessage()).isNull(),
-                () -> assertThat(result.get(0).getResourceResponse().getResource().getId()).isEqualTo(FILE_1.getId())
-        );
+        assertThat(result.get(0))
+                .as("Check that there is no AuditErrorMessage")
+                .extracting(AuditableResourceResponse::getAuditErrorMessage)
+                .isNull();
+
+        assertThat(result.get(0))
+                .as("Check the resourceResponse has the correct resource attached")
+                .extracting(AuditableResourceResponse::getResourceResponse)
+                .extracting(ResourceResponse::getResourceId)
+                .isEqualTo(FILE_1.getId());
     }
 
     @Test
@@ -130,13 +141,17 @@ class ResourceServicePersistenceProxyTest {
                 .toCompletableFuture().join();
 
         // Then check there is an error
-        assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0).getResourceResponse()).isNull(),
-                () -> assertThat(result.get(0).getAuditErrorMessage().getError())
-                        .isExactlyInstanceOf(NoSuchResourceException.class)
-                        .getCause()
-                        .hasMessageContaining("Failed to walk path " + File.separator + "test" + File.separator + "resourceId" + File.separator + "data2.txt")
-        );
+        assertThat(result.get(0))
+                .as("Check that there is no ResourceResponse")
+                .extracting(AuditableResourceResponse::getResourceResponse)
+                .isNull();
+
+        assertThat(result.get(0))
+                .as("Check that the resourceServiceAsyncProxy throws the correct error when processing an invalid request")
+                .extracting(AuditableResourceResponse::getAuditErrorMessage)
+                .extracting(AuditErrorMessage::getError)
+                .isExactlyInstanceOf(NoSuchResourceException.class)
+                .extracting("Message")
+                .isEqualTo("Failed to walk path " + File.separator + "test" + File.separator + "resourceId" + File.separator + "data2.txt");
     }
 }
