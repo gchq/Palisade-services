@@ -17,10 +17,11 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import uk.gov.gchq.palisade.service.user.common.Generated;
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.common.user.User;
+import uk.gov.gchq.palisade.service.user.common.user.UserPrepopulationFactory;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -57,8 +58,8 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      */
     public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
-        this.auths = auths;
-        this.roles = roles;
+        this.auths = new HashSet<>(auths);
+        this.roles = new HashSet<>(roles);
     }
 
     @Generated
@@ -73,25 +74,25 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     @Generated
     public Set<String> getAuths() {
-        return auths;
+        return new HashSet<>(auths);
     }
 
     @Generated
     public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
-        this.auths = auths;
+        this.auths = new HashSet<>(auths);
         return this;
     }
 
     @Generated
     public Set<String> getRoles() {
-        return roles;
+        return new HashSet<>(roles);
     }
 
     @Generated
     public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
-        this.roles = roles;
+        this.roles = new HashSet<>(roles);
         return this;
     }
 

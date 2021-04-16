@@ -38,7 +38,7 @@ import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.component.user.service.RedisUserCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.service.user.common.Context;
-import uk.gov.gchq.palisade.service.user.common.User;
+import uk.gov.gchq.palisade.service.user.common.user.User;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;

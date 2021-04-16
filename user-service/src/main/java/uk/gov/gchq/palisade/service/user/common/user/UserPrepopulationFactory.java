@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.user.common.user;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+/**
+ * This class defines the top level of the cache prepopulation.
+ * <p>
+ * The only requirement is that there is a warm method, used to create the object
+ */
+public interface UserPrepopulationFactory {
 
-import uk.gov.gchq.palisade.service.user.common.UserId;
+    /**
+     * Creates a {@link User} using the data within an implementation of the UserPrepopulationFactory.
+     *
+     * @return the {@link User} that has been created.
+     */
+    User build();
 
-import java.io.IOException;
-
-class UserIdKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, UserId.class);
-    }
 }

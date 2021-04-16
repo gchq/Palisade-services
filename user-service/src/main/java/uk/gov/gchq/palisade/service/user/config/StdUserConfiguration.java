@@ -17,11 +17,12 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import uk.gov.gchq.palisade.service.user.common.Generated;
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.user.common.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.common.user.User;
+import uk.gov.gchq.palisade.service.user.common.user.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.common.user.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.common.user.UserService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -52,19 +53,19 @@ public class StdUserConfiguration implements UserConfiguration {
      * @param users a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
     public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
-        this.users = users;
+        this.users = new ArrayList<>(users);
     }
 
     @Override
     @Generated
     public List<StdUserPrepopulationFactory> getUsers() {
-        return users;
+        return new ArrayList<>(users);
     }
 
     @Generated
     public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
-        this.users = users;
+        this.users = new ArrayList<>(users);
     }
 
     @Override

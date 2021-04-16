@@ -27,16 +27,23 @@ host operating system account or PKI based user authentication.
 The User Service separates this concern from the rest of the system. Other components use this service's API to request user details. 
 Some deployments may also allow Palisade to add users to the system, hence the presence of the `addUser()` method in the `UserService` interface.
 
-## Message Model and Database Domain
+## High Level Architecture
 
-| UserRequest     | UserResponse     | AuditErrorMessage | AuditableUserResponse |
-|:----------------|:-----------------|:------------------|:----------------------|
-| *token          | *token           | *token            | *token                | 
-| userId          | userId           | userId            | UserResponse          |  
-| resourceId      | resourceId       | resourceId        | AuditErrorMessage     |
-| context         | context          | context           |                       |
-|                 | User             | exception         |                       | 
-|                 |                  | serverMetadata    |                       |
+<!--- 
+See user-service/doc/user-service.drawio for the source of this diagram
+--->
+![User Service diagram](doc/user-service.png)
+
+## Message Model
+
+| UserRequest     | UserResponse     | AuditErrorMessage |
+|:----------------|:-----------------|:------------------|
+| *token          | *token           | *token            |
+| userId          | userId           | userId            |
+| resourceId      | resourceId       | resourceId        |
+| context         | context          | context           |
+|                 | User             | exception         |
+|                 |                  | serverMetadata    |
   
 (fields marked with * are acquired from headers metadata)
 
@@ -50,7 +57,7 @@ that is then sent to the [Audit service](../audit-service) to be audited appropr
 
 ## REST Interface
 
-The application exposes two REST endpoints used for debugging or mocking kafka entrypoints:
+The application exposes two REST endpoints used for debugging or mocking the kafka entrypoint:
 * `POST api/user`
   - accepts an `x-request-token` `String` header, any number of extra headers, and a single `UserRequest` in the body
   - returns a `202 ACCEPTED` after writing the headers and `UserRequest` to kafka
@@ -74,7 +81,7 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
 ```
 
 
-## Example JSON Response
+## Example JSON Kafka Topic ('user') Output
 ```
 '{
   "userId": "test-user-id",
@@ -99,6 +106,24 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
   }
 }'
 ```
+
+## User pre-population / Cache Warming
+
+This service can be populated with a list of initial users at start-up.
+By specifying all the configuration and pre-population factory values, any user information in the configuration list will be added to the service at runtime.
+This includes being added to the cache, so that the basic `NullUserService` implementation, coupled with the `UserServiceCachingProxy`, acts solely using the cache.
+
+**Note:** This means that after the cache eviction TTL (Time To Live), found in [application.yaml](src/main/resources/application.yaml), the User Service will no longer contain any user information.
+ 
+An example of this can be seen in this [Test Yaml](src/contract-tests/resources/application-pre-population.yaml) file which adds a basic user to the cache when the service starts up.
+
+How to override the uploaded users:
+1. Create a new `User` class
+1. Create a new `UserConfiguration` class
+1. Create a new `UserPrepopulationFactory` class
+1. Create a new `ApplicationConfiguration` class that includes a bean for the new `UserConfiguration` and `UserPrepopulationFactory` classes. 
+   They should be conditional on the property `userProvider` from within a yaml file.
+1. Create a new application yaml file that defines the `userProvider` value and includes a list of users, with all their fields and respective values (if required), that are to be added to the backing store
 
 ### Notes
 

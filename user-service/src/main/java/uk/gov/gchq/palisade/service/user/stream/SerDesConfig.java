@@ -25,6 +25,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
@@ -33,15 +34,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * The static configuration for kafka key/value serializers/deserializers
- * - Each input has a pair of key/value deserializers
- * - Each output has a pair of key/value serializers
- * In general, the keys are not used, so the choice of serializer is not important
+ * The static configuration for kafka key/value serialisers/deserialisers
+ * - Each input has a pair of key/value deserialisers
+ * - Each output has a pair of key/value serialisers
  */
 public final class SerDesConfig {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -51,9 +51,9 @@ public final class SerDesConfig {
      * Kafka key serialiser for upstream messages coming in as input
      * Used by the Rest Controller to insert requests onto the topic
      *
-     * @return an appropriate key serializer for the topic's message content
+     * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> requestKeySerializer() {
+    public static Serializer<String> requestKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -61,38 +61,38 @@ public final class SerDesConfig {
      * Kafka value serialiser for upstream messages coming in as input
      * Used by the Rest Controller to insert requests onto the topic
      *
-     * @return an appropriate value serializer for the topic's message content
+     * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<UserRequest> requestValueSerializer() {
+    public static Serializer<UserRequest> requestValueSerialiser() {
         return (String ignored, UserRequest userRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(userRequest);
             } catch (IOException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + userRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + userRequest.toString(), e);
             }
         };
     }
 
     /**
-     * Kafka key deserializer for upstream messages coming in as input
+     * Kafka key deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate key deserializer for the topic's message content
+     * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> requestKeyDeserializer() {
+    public static Deserializer<String> requestKeyDeserialiser() {
         return new StringDeserializer();
     }
 
     /**
-     * Kafka value deserializer for upstream messages coming in as input
+     * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserializer for the topic's message content
+     * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<UserRequest> requestValueDeserializer() {
+    public static Deserializer<UserRequest> requestValueDeserialiser() {
         return (String ignored, byte[] userRequest) -> {
             try {
                 return MAPPER.readValue(userRequest, UserRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(userRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(userRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -111,23 +111,23 @@ public final class SerDesConfig {
     /**
      * Kafka key serialiser for downstream messages going out as output
      *
-     * @return an appropriate key serializer for the topic's message content
+     * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> userKeySerializer() {
+    public static Serializer<String> userKeySerialiser() {
         return new StringSerializer();
     }
 
     /**
      * Kafka value serialiser for downstream messages going out as output
      *
-     * @return an appropriate value serializer for the topic's message content
+     * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<UserResponse> userValueSerializer() {
+    public static Serializer<UserResponse> userValueSerialiser() {
         return (String ignored, UserResponse userResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(userResponse);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + userResponse.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + userResponse.toString(), e);
             }
         };
     }
@@ -137,7 +137,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<byte[]> passthroughValueSerializer() {
+    public static Serializer<byte[]> passthroughValueSerialiser() {
         return (String ignored, byte[] bytes) -> bytes;
     }
 
@@ -146,7 +146,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> errorKeySerializer() {
+    public static Serializer<String> errorKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -155,12 +155,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage auditErrorMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
             }
         };
     }

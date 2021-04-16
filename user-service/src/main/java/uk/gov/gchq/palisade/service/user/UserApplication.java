@@ -29,10 +29,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.event.EventListener;
 
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.user.common.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.common.user.User;
+import uk.gov.gchq.palisade.service.user.common.user.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.common.user.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.common.user.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
@@ -63,21 +63,21 @@ public class UserApplication {
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer  the Akka {@link Materializer} configured to be used
+     * @param materialiser  the Akka {@link Materializer} configured to be used
      * @param service       the specific {@link UserService} implementation
      * @param configuration the {@link UserConfiguration} required for loading {@link User}s into the service
      * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public UserApplication(
             final Collection<RunnableGraph<?>> runners,
-            final Materializer materializer,
+            final Materializer materialiser,
             final UserServiceCachingProxy service,
             @Qualifier("userConfiguration") final UserConfiguration configuration,
             @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.service = service;
         this.userConfig = configuration;
         this.runners = new HashSet<>(runners);
-        this.materializer = materializer;
+        this.materializer = materialiser;
         this.executor = executor;
     }
 

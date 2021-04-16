@@ -15,8 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.user.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.service.user.common.Context;
@@ -29,9 +32,11 @@ import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
- * Note all the services can potentially send an error message.
+ * forwarded to the Audit Service.
+ * Note - all the services can potentially send an AuditErrorMessage.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditErrorMessage extends AuditMessage {
 
     private final Throwable error;  //Error that occurred
@@ -54,13 +59,13 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AuditErrorMessage. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
-         * AuditSuccessMessage class.
+         * Starter method for the Builder class. This method is called to start the process of creating the
+         * AuditErrorMessage class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */
@@ -71,10 +76,11 @@ public final class AuditErrorMessage extends AuditMessage {
 
         /**
          * Starter method for the Builder class that uses a UserRequest for the request specific part of the Audit message.
-         * This method is called followed by the call to add resource with the IResource interface to create the
-         * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
+         * This method is called followed by the call to add the error with the IError interface to create the
+         * AuditErrorMessage class.
+         * The service specific information is generated in the parent class, {@link AuditMessage}.
          *
-         * @param request    the request message that was sent to the palisade-service
+         * @param request    the request message that was sent to the User Service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
@@ -127,7 +133,7 @@ public final class AuditErrorMessage extends AuditMessage {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
              * @return interface {@link IAttributes} for the next step in the build.
@@ -156,7 +162,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the error for the message.
              *
              * @param error that occurred.
-             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
+             * @return an {@link AuditErrorMessage} for the completed class from the builder.
              */
             AuditErrorMessage withError(Throwable error);
         }

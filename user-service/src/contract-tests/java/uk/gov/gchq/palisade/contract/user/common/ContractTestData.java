@@ -27,6 +27,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.user.common.Token;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import java.util.function.Function;
@@ -43,13 +44,13 @@ public class ContractTestData {
         // hide the constructor, this is just a collection of static objects
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_USER_ID_REQUEST_NODE;
     public static final UserRequest REQUEST_OBJ;
     public static final UserRequest NO_USER_ID_REQUEST_OBJ;
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.user.common.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
-    public static final String NO_USER_JSON = "{\"userId\":\"invalid-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.user.common.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    public static final String NO_USER_JSON = "{\"userId\":\"invalid-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
 
 
     static {

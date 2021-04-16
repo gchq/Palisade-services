@@ -15,38 +15,75 @@
  */
 package uk.gov.gchq.palisade.service.user.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.user.common.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.user.common.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.user.common.user.User;
+import uk.gov.gchq.palisade.service.user.common.user.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.common.user.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.common.user.UserService;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
-import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
+// Suppress dynamic class loading smell as it's needed for json serialisation
+@SuppressWarnings("java:S2658")
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final int THREAD_POOL = 6;
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        // Reflect and add annotated classes as subtypes
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(RegisterJsonSubType.class));
+        scanner.findCandidateComponents("uk.gov.gchq.palisade")
+                .forEach((BeanDefinition beanDef) -> {
+                    try {
+                        Class<?> type = Class.forName(beanDef.getBeanClassName());
+                        Class<?> supertype = type.getAnnotation(RegisterJsonSubType.class).value();
+                        LOGGER.debug("Registered {} as json subtype of {}", type, supertype);
+                        MAPPER.registerSubtypes(type);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalArgumentException(ex);
+                    }
+                });
+    }
 
     /**
      * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link User}s
@@ -80,7 +117,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      */
     @Bean
     public UserServiceCachingProxy cacheableUserServiceProxy(final UserService userService) {
-        LOGGER.info("Instantiated UserServiceCachingProxy with {}", userService.getClassName());
+        LOGGER.info("Instantiated UserServiceCachingProxy with {}", userService.getClass().getName());
         return new UserServiceCachingProxy(userService);
     }
 
@@ -111,24 +148,24 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return an instance of the ObjectMapper
      */
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return MAPPER;
     }
 
     @Override
     @Bean("threadPoolTaskExecutor")
     public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek((ThreadPoolTaskExecutor ex) -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(THREAD_POOL);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
     }
 
     @Override

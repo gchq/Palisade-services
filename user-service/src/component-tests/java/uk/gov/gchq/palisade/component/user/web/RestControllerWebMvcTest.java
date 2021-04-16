@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.user.common.CommonTestData;
 import uk.gov.gchq.palisade.service.user.common.Token;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.user.web.UserRestController;
 
@@ -41,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @WebMvcTest(controllers = {UserRestController.class})
 @ContextConfiguration(classes = {RestControllerWebMvcTest.class, UserRestController.class})
 class RestControllerWebMvcTest extends CommonTestData {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @MockBean
     KafkaProducerService kafkaProducerService;

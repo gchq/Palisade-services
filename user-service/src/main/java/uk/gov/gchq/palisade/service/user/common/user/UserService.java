@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.service;
+package uk.gov.gchq.palisade.service.user.common.user;
 
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
 /**
@@ -28,7 +26,7 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
  * of 'Palisade' users.</strong> The actual authentication of users should be provided by an external service outside of
  * Palisade. For example, this could be via a centralized PKI service or by a SASL/Kerberos implementation. </p>
  */
-public interface UserService extends Service {
+public interface UserService {
     /**
      * Look up a user by their ID. The request contains the {@link String} to lookup from the
      * {@link UserService}. If the requested {@link String} doesn't exist in this {@link

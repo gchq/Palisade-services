@@ -40,6 +40,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
@@ -57,7 +58,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
             .withReuse(true);
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
         try (AdminClient admin = AdminClient.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA_CONTAINER.getFirstMappedPort())))) {
@@ -71,6 +72,8 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
         configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "caffeine", "pre-population", "debug");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        KAFKA_CONTAINER.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+        KAFKA_CONTAINER.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
         KAFKA_CONTAINER.start();
 
         // test kafka config
@@ -118,37 +121,37 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode userRequest) {
             try {
                 return MAPPER.writeValueAsBytes(userRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + userRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + userRequest.toString(), e);
             }
         }
     }
 
-    // Deserializer for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    // Deserialiser for downstream test output
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] userResponse) {
             try {
                 return MAPPER.readTree(userResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(userResponse), e);
             }
         }
     }
 
-    // Deserializer for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+    // Deserialiser for downstream test error output
+    static class ErrorDeserialiser implements Deserializer<AuditErrorMessage> {
         @Override
         public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
             try {
                 return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(auditErrorMessage), e);
             }
         }
     }

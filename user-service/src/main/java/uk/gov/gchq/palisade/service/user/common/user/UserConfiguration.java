@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.common.jsonserialisation;
-
-import com.fasterxml.jackson.databind.Module;
+package uk.gov.gchq.palisade.service.user.common.user;
 
 import java.util.List;
 
-/**
- * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
- * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
- * in {@link JSONSerialiser}.
- */
-public interface JSONSerialiserModules {
-    List<Module> getModules();
+public interface UserConfiguration {
+
+    /**
+     * Gets a {@link List} of the {@link UserPrepopulationFactory} implemented
+     * objects that have been created from a yaml file.
+     *
+     * @return a {@link List} of the objects that have implemented {@link UserPrepopulationFactory}.
+     */
+    List<? extends UserPrepopulationFactory> getUsers();
+
 }

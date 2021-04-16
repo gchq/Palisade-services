@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.user.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.user.common.User;
-import uk.gov.gchq.palisade.service.user.common.UserId;
+import uk.gov.gchq.palisade.service.user.common.user.User;
+import uk.gov.gchq.palisade.service.user.common.user.UserId;
+import uk.gov.gchq.palisade.service.user.common.user.UserService;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -65,6 +65,8 @@ import static java.util.Objects.requireNonNull;
  * This implementation does not allow you to add users.
  * </p>
  */
+@SuppressWarnings({"java:S134", "java:S3776", "java:S1699", "java:S1068"})
+// Suppress nested ifs, cognitive complexity, private variable and try-with resources code smells
 public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
@@ -77,21 +79,21 @@ public abstract class AbstractLdapUserService implements UserService {
      *
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
-    public AbstractLdapUserService(final LdapContext context) {
+    protected AbstractLdapUserService(final LdapContext context) {
         this.context = context;
         this.ldapConfigPath = null;
     }
 
     /**
      * <p>
-     * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
+     * Constructs a AbstractLdapUserService with a given path to {@link LdapContext}.
      * </p>
      *
      * @param ldapConfigPath the path to config for initializing {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
-     * @throws IOException     if IO issues occur whilst loading the LDAP config.
-     * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
+     * @throws IOException     if an IOException issue occurs whilst loading the LDAP config.
+     * @throws NamingException if a NamingException is encountered whilst constructing the LDAP context
      */
-    public AbstractLdapUserService(final String ldapConfigPath)
+    protected AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
         this.ldapConfigPath = ldapConfigPath;
@@ -109,7 +111,6 @@ public abstract class AbstractLdapUserService implements UserService {
                     .auths(getAuths(new UserId().id(userId), userAttrs, context))
                     .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
-            LOGGER.error("Unable to get user from LDAP ", ex);
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
         }
     }
