@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.palisade.model;
 import akka.japi.Pair;
 
 /**
- * The type Token request pair.
+ * A Pair containing the unique token, and the AuditablePalisadeSystemResponse associated with it.
  */
 public class TokenRequestPair extends Pair<String, AuditablePalisadeSystemResponse> {
     private static final long serialVersionUID = 1L;
@@ -27,8 +27,8 @@ public class TokenRequestPair extends Pair<String, AuditablePalisadeSystemRespon
     /**
      * Instantiates a new Token request pair.
      *
-     * @param token          the token
-     * @param systemResponse the original request from the client converted to be a response from the palisade-service onto kafka
+     * @param token          the unique token
+     * @param systemResponse the original request from the client enriched into a response object to be sent by kafka to the User Service
      */
     public TokenRequestPair(final String token, final AuditablePalisadeSystemResponse systemResponse) {
         super(token, systemResponse);

@@ -42,7 +42,7 @@ public class AuditMessageService {
     }
 
     /**
-     *  Sends messages to the Audit Service using a Kafka stream.
+     * Sends messages to the Audit Service using a Kafka stream.
      *
      * @param tokenMessagePair the constructed message detailing the resource read, the rules applied and other metadata
      * @implNote Any implementation of this should ensure it has confirmation that the message has been persisted downstream.

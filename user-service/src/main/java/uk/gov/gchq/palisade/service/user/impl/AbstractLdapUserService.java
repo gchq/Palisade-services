@@ -78,7 +78,7 @@ public abstract class AbstractLdapUserService implements UserService {
      *
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
-    public AbstractLdapUserService(final LdapContext context) {
+    protected AbstractLdapUserService(final LdapContext context) {
         this.context = context;
         this.ldapConfigPath = null;
     }
@@ -89,10 +89,10 @@ public abstract class AbstractLdapUserService implements UserService {
      * </p>
      *
      * @param ldapConfigPath the path to config for initializing {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
-     * @throws IOException     if IO issues occur whilst loading the LDAP config.
-     * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
+     * @throws IOException     if an IOException issue occurs whilst loading the LDAP config.
+     * @throws NamingException if a NamingException is encountered whilst constructing the LDAP context
      */
-    public AbstractLdapUserService(final String ldapConfigPath)
+    protected AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
         this.ldapConfigPath = ldapConfigPath;
@@ -110,7 +110,6 @@ public abstract class AbstractLdapUserService implements UserService {
                     .auths(getAuths(new UserId().id(userId), userAttrs, context))
                     .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
-            LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
         }
     }

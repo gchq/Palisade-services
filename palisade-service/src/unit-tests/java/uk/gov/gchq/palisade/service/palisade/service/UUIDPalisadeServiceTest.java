@@ -30,10 +30,10 @@ class UUIDPalisadeServiceTest extends CommonTestData {
 
     @Test
     void testUUIDCreation() {
-        //When
+        // When we hardcode the token to be returned from the service
         Mockito.doReturn(COMMON_UUID.toString()).when(uuidPalisadeService).createToken(any());
 
-        //When the service is called to create the token
+        // When the service is called to create the token
         String token = uuidPalisadeService.createToken(PALISADE_REQUEST);
 
         //Then the token is a valid uuid
