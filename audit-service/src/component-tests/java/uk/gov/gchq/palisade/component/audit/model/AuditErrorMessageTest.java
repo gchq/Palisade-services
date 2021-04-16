@@ -34,7 +34,7 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
      * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws Exception if any error occurs during (de)serialisation
-     * @see AbstractSerialisationTest#testInstance(Object)
+     * @see AbstractSerialisationTest#assertSerialisation(Class, Object)
      */
     @Test
     void testAuditErrorMessageSerialisation() throws Exception {
@@ -45,7 +45,7 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
             .withUserId("originalUserID")
             .withResourceId("testResourceId")
             .withContext(new Context().purpose("testContext"))
-            .withServiceName("testServicename")
+            .withServiceName("testServiceName")
             .withTimestamp(ZonedDateTime.now(UTC).format(ISO_INSTANT))
             .withServerIp("testServerIP")
             .withServerHostname("testServerHostname")

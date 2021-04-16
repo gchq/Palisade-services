@@ -24,7 +24,7 @@ spec:
     - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
       kind: Rule
       services:
-        - name: palisade-service
+        - name: {{ include "palisade-service.name" . }}
           port: 80
       middlewares:
         - name: palisade-pathparam-regex

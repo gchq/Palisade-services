@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,7 +90,8 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
         envPropSources.forEach((PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
-                locations = ((String) propertySource.getProperty("application.properties.locations"))
+                locations = ((String) Optional.ofNullable(propertySource.getProperty("application.properties.locations"))
+                        .orElseThrow(() -> new PropertyLoadingException("application.properties.locations could not be found")))
                         .split(LIST_ITEM_SEPARATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)
@@ -119,6 +121,11 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         }
     }
 
+    /**
+     * Get all the active properties from the environment
+     *
+     * @return a {@link Map} of String values
+     */
     public Map<String, String> getAllActiveProperties() {
         return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
                 .filter(ps -> ps instanceof EnumerablePropertySource).map(EnumerablePropertySource.class::cast)

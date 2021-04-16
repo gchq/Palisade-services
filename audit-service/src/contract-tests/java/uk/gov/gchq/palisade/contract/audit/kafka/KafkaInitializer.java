@@ -130,18 +130,18 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
         }
 
         @Bean
-        Serializer<JsonNode> requestSerializer(@Autowired final ObjectMapper objectMapper) {
+        Serializer<JsonNode> requestSerialiser(@Autowired final ObjectMapper objectMapper) {
             return (final String s, final JsonNode auditRequest) -> {
                 try {
                     return objectMapper.writeValueAsBytes(auditRequest);
                 } catch (JsonProcessingException e) {
-                    throw new SerializationFailedException("Failed to serialize " + auditRequest.toString(), e);
+                    throw new SerializationFailedException("Failed to serialise " + auditRequest.toString(), e);
                 }
             };
         }
 
         @Bean
-        Serializer<String> stringSerializer() {
+        Serializer<String> stringSerialiser() {
             return new StringSerializer();
         }
 

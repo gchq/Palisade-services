@@ -134,7 +134,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 
 It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
 using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
-[testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
+[test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the backing store when the service starts up.
 
 ## Hadoop and Windows
 

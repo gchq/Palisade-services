@@ -17,7 +17,7 @@
 package uk.gov.gchq.palisade.service.data.exception;
 
 /**
- * Specialised exception thrown by the data-service when an IOException occurred while reading
+ * Specialised exception thrown by the Data Service when an IOException occurred while reading
  * from the data-reader.
  */
 public class ReadException extends RuntimeException {
