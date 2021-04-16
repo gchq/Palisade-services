@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Configuration for Akka Kafka producer
+ * Configuration for Akka Kafka producer.
  */
 @ConfigurationProperties("akka.kafka.producer")
 public class ProducerTopicConfiguration {
@@ -96,8 +96,8 @@ public class ProducerTopicConfiguration {
     }
 
     /**
-     * Configuration for Kafka topics, comprised of topic name and partitions
-     * Note that a service should not be aware of topic replication factor
+     * Configuration for Kafka topics, comprised of topic name and partitions.
+     * Note that a service should not be aware of topic replication factor.
      */
     public static class Topic {
         private String name;

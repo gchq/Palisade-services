@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.contract.data.config.model;
 
+
 import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.io.Serializable;

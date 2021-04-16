@@ -49,6 +49,10 @@ management:
 population:
   serialiserProvder: std
 
+data:
+  service.implementation: simple
+  reader.implementation: simple
+
 async:
   webMvcTimeout: 60000
   corePoolSize: 6

@@ -20,6 +20,7 @@ package uk.gov.gchq.palisade.service.data.exception;
  * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
  */
 public class SerialiserConstructorNotFoundException extends RuntimeException {
+
     /**
      * Constructs a new SerialiserConstructorNotFoundException with the specified detail message and cause.
      *
@@ -29,4 +30,5 @@ public class SerialiserConstructorNotFoundException extends RuntimeException {
     public SerialiserConstructorNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
     }
+
 }

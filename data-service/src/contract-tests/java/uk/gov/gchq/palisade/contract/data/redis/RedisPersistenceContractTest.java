@@ -31,19 +31,19 @@ import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
 import uk.gov.gchq.palisade.contract.data.redis.RedisPersistenceContractTest.Initializer;
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.reader.common.rule.Rules;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.DataApplication;
+import uk.gov.gchq.palisade.service.data.common.Context;
+import uk.gov.gchq.palisade.service.data.common.data.DataService;
+import uk.gov.gchq.palisade.service.data.common.data.reader.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.data.common.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.data.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.data.common.rule.Rules;
+import uk.gov.gchq.palisade.service.data.common.user.User;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
-import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

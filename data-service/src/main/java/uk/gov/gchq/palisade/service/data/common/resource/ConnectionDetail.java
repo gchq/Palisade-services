@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
+package uk.gov.gchq.palisade.service.data.common.resource;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+import java.io.Serializable;
+
 /**
- * Classes for handling JSON serialisation and deserialisation.
+ * A High level API for passing details of how to connect to a resource
  */
-package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
+@JsonTypeInfo(use = Id.NAME)
+public interface ConnectionDetail extends Serializable {
+
+    /**
+     * Creates a default connection detail of the Service Name
+     *
+     * @return a service name as a connection detail
+     */
+    String createConnection();
+
+}

@@ -16,44 +16,72 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import akka.stream.Materializer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import uk.gov.gchq.palisade.reader.HadoopDataReader;
-import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
-import uk.gov.gchq.palisade.service.data.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.data.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.data.common.data.DataService;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
-import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
+// Suppress dynamic class loading smell as it's needed for json serialisation
+@SuppressWarnings("java:S2658")
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final ObjectMapper MAPPER;
 
-    private static final int CORE_POOL_SIZE = 6;
+    static {
+        MAPPER = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        // Reflect and add annotated classes as subtypes
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(RegisterJsonSubType.class));
+        scanner.findCandidateComponents("uk.gov.gchq.palisade")
+                .forEach((BeanDefinition beanDef) -> {
+                    try {
+                        Class<?> type = Class.forName(beanDef.getBeanClassName());
+                        Class<?> supertype = type.getAnnotation(RegisterJsonSubType.class).value();
+                        LOGGER.debug("Registered {} as json subtype of {}", type, supertype);
+                        MAPPER.registerSubtypes(type);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalArgumentException(ex);
+                    }
+                });
+    }
 
     /**
      * Bean for the {@link JpaPersistenceLayer}.
-     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests
+     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests.
      *
-     * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
+     * @param requestsRepository an instance of the requests' repository, backed by either caffeine or redis (depending on profile)
      * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
      * @return a {@link JpaPersistenceLayer} wrapping the repository instance, providing async methods for getting data from persistence
      */
@@ -61,20 +89,6 @@ public class ApplicationConfiguration {
     JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
                                             final @Qualifier("threadPoolTaskExecutor") Executor executor) {
         return new JpaPersistenceLayer(requestsRepository, executor);
-    }
-
-    /**
-     * Bean for a {@link SimpleDataService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
-     * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
-     *
-     * @param persistenceLayer the persistence layer for reading authorised requests
-     * @param dataReader       the data reader to use for reading resource data from storage
-     * @return a new {@link SimpleDataService}
-     */
-    @Bean
-    DataService simpleDataService(final PersistenceLayer persistenceLayer,
-                                  final DataReader dataReader) {
-        return new SimpleDataService(persistenceLayer, dataReader);
     }
 
     @Bean
@@ -88,33 +102,14 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
+     * Used so that you can create custom mapper by starting with the default and then modifying if needed
      *
-     * @return a new instance of {@link HadoopDataReader}
-     * @throws IOException ioException
-     */
-    @Bean
-    DataReader hadoopDataReader() throws IOException {
-        return new HadoopDataReader();
-    }
-
-    /**
-     * Default JSON to Java seraialiser/deserialiser
-     *
-     * @return a new {@link ObjectMapper} with some additional configuration
+     * @return a configured object mapper
      */
     @Bean
     @Primary
-    ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+    public ObjectMapper objectMapper() {
+        return MAPPER;
     }
 
-    @Bean("threadPoolTaskExecutor")
-    public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
-        ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(CORE_POOL_SIZE);
-        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        return ex;
-    }
 }

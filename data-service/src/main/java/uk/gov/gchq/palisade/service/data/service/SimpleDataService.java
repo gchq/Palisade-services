@@ -19,8 +19,10 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.common.data.DataService;
+import uk.gov.gchq.palisade.service.data.common.data.reader.DataReader;
+import uk.gov.gchq.palisade.service.data.common.data.reader.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.common.data.reader.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -35,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Simple implementation of a data-service, which reads using a data-reader and audits the
+ * Simple implementation of a Data Service, which reads using a data-reader and audits the
  * number of records processed and returned.
  */
 public class SimpleDataService implements DataService {
@@ -58,7 +60,7 @@ public class SimpleDataService implements DataService {
     }
 
     /**
-     * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
+     * Query for the references. It will return the information needed to retrieve the resources. If there is no
      * data to be returned, a {@link ForbiddenException} is thrown.
      *
      * @param dataRequest data provided by the client for requesting the resource
@@ -98,7 +100,7 @@ public class SimpleDataService implements DataService {
                     .user(authorisedDataRequest.getUser())
                     .resource(authorisedDataRequest.getResource())
                     .rules(authorisedDataRequest.getRules());
-            var readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
+            DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
             LOGGER.debug("Writing reader response {} to output stream", readerResponse);
             try {

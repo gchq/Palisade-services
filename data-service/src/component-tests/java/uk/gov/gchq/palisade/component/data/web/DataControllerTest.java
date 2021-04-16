@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,9 +112,9 @@ class DataControllerTest {
                 .isEmpty();
 
         //verifies the three service calls the Controller is expected to make
-        verify(serviceMock, times(1)).authoriseRequest(any());
-        verify(serviceMock, times(1)).read(any(), any());
-        verify(auditMessageServiceMock, times(1)).auditMessage(any());
+        verify(serviceMock, timeout(3000).times(1)).authoriseRequest(any());
+        verify(serviceMock, timeout(3000).times(1)).read(any(), any());
+        verify(auditMessageServiceMock, timeout(3000).times(1)).auditMessage(any());
     }
 
     /**

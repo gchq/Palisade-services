@@ -15,11 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.data.model;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.rule.Rules;
+import uk.gov.gchq.palisade.service.data.common.Context;
 import uk.gov.gchq.palisade.service.data.common.Generated;
+import uk.gov.gchq.palisade.service.data.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.data.common.rule.Rules;
+import uk.gov.gchq.palisade.service.data.common.user.User;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -91,11 +91,11 @@ public final class AuthorisedDataRequest {
         }
 
         /**
-         * Adds the resource to the message
+         * Adds the resource to the message.
          */
         public interface IResource {
             /**
-             * Adds the resource to the message
+             * Adds the resource to the message.
              *
              * @param resource that is being requested
              * @return interface {@link IUser} for the next step in the build.
@@ -104,11 +104,11 @@ public final class AuthorisedDataRequest {
         }
 
         /**
-         * Adds the user requesting the resource
+         * Adds the user requesting the resource.
          */
         public interface IUser {
             /**
-             * Adds the user requesting the resource
+             * Adds the user requesting the resource.
              *
              * @param user the client's unique user
              * @return interface {@link IContext} for the next step in the build.
@@ -117,11 +117,11 @@ public final class AuthorisedDataRequest {
         }
 
         /**
-         * Adds the context for the request
+         * Adds the context for the request.
          */
         public interface IContext {
             /**
-             * Adds the context for the request
+             * Adds the context for the request.
              *
              * @param context the client's unique token
              * @return interface {@link IRules} for the next step in the build.
@@ -130,11 +130,11 @@ public final class AuthorisedDataRequest {
         }
 
         /**
-         * Adds the rules to apply to the resource
+         * Adds the rules to apply to the resource.
          */
         public interface IRules {
             /**
-             * Adds the rules to apply to the resource
+             * Adds the rules to apply to the resource.
              *
              * @param rules that are to apply to the resource
              * @return the completed class from the builder

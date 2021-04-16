@@ -16,8 +16,8 @@
 package uk.gov.gchq.palisade.service.data.common;
 
 /**
- * Simply stores the expected header key for Tokens
- * Since the content of tokens are strings, there is no need for further implementation
+ * Stores the expected header key for Tokens.
+ * Since the content of tokens are strings, there is no need for further implementation.
  * If desired, this could extend eg. UUID if more meaningful Token processing was desired.
  */
 public final class Token {

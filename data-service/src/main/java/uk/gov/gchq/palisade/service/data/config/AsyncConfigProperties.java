@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import uk.gov.gchq.palisade.service.data.common.Generated;
 
 /**
- * webMVC config properties class used when configuring WebMVC as an executor when launching the service
+ * Async config properties class used when configuring async executors
  */
 @ConfigurationProperties(prefix = "async")
 public class AsyncConfigProperties {

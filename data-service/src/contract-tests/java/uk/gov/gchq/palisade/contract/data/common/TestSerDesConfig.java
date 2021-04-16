@@ -20,6 +20,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
@@ -33,8 +34,8 @@ import java.nio.charset.Charset;
  * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class TestSerDesConfig {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private TestSerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -45,7 +46,7 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> keyDeserializer() {
+    public static Deserializer<String> successKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -54,12 +55,12 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<AuditSuccessMessage> valueDeserializer() {
+    public static Deserializer<AuditSuccessMessage> successValueDeserialiser() {
         return (String ignored, byte[] auditMessage) -> {
             try {
                 return MAPPER.readValue(auditMessage, AuditSuccessMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
             }
         };
     }
@@ -69,7 +70,7 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> errorKeyDeserializer() {
+    public static Deserializer<String> errorKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -78,12 +79,12 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+    public static Deserializer<AuditErrorMessage> errorValueDeserialiser() {
         return (String ignored, byte[] auditMessage) -> {
             try {
                 return MAPPER.readValue(auditMessage, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
             }
         };
     }

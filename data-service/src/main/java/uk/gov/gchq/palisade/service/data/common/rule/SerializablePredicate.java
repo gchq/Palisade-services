@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.data.common.rule;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+import java.io.Serializable;
+import java.util.function.Predicate;
 
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-
-import java.io.IOException;
-
-class ResourceKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, LeafResource.class);
-    }
+/**
+ * A serializable interface for a {@link Predicate}
+ *
+ * @param <T> the type of the input to the predicate
+ */
+public interface SerializablePredicate<T> extends Predicate<T>, Serializable {
 }

@@ -21,28 +21,61 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
-import uk.gov.gchq.palisade.reader.common.data.seralise.Serialiser;
+import uk.gov.gchq.palisade.service.data.common.data.DataFlavour;
+import uk.gov.gchq.palisade.service.data.common.data.DataService;
+import uk.gov.gchq.palisade.service.data.common.data.reader.DataReader;
+import uk.gov.gchq.palisade.service.data.common.data.seralise.Serialiser;
+import uk.gov.gchq.palisade.service.data.reader.SimpleDataReader;
+import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
 import java.util.Map;
 
 /**
- * Bean configuration and dependency injection graph
+ * Overridable beans for the data-service.
+ * Additional classpath-jars may override these for implementation-specific behaviour.
  */
 @Configuration
-public class PrepopulationConfiguration {
+public class DefaultConfiguration {
+
+    /**
+     * Bean for a {@link SimpleDataService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
+     * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
+     *
+     * @param persistenceLayer the persistence layer for reading authorised requests
+     * @param dataReader       the data reader to use for reading resource data from storage
+     * @return a new {@link SimpleDataService}
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "data.service", name = "implementation", havingValue = "simple", matchIfMissing = true)
+    DataService simpleDataService(final PersistenceLayer persistenceLayer,
+                                  final DataReader dataReader) {
+        return new SimpleDataService(persistenceLayer, dataReader);
+    }
+
+    /**
+     * Bean for a {@link SimpleDataReader}, this simply reads from the local filesystem.
+     *
+     * @return a new {@link SimpleDataReader}
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "data.reader", name = "implementation", havingValue = "simple", matchIfMissing = true)
+    DataReader simpleDataReader() {
+        return new SimpleDataReader();
+    }
 
     /**
      * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of serialisers from a yaml file
      * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link Serialiser}s
-     * These serialisers will be used for pre-populating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
+     * These serialisers will be used for pre-populating the {@link DataService}
      *
      * @return a {@link StdSerialiserConfiguration} containing a list of {@link StdSerialiserPrepopulationFactory}s
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
-    public StdSerialiserConfiguration serialiserConfiguration() {
+    StdSerialiserConfiguration serialiserConfiguration() {
         return new StdSerialiserConfiguration();
     }
 
@@ -56,7 +89,7 @@ public class PrepopulationConfiguration {
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
-    public StdSerialiserPrepopulationFactory serialiserPrepopulationFactory() {
+    StdSerialiserPrepopulationFactory serialiserPrepopulationFactory() {
         return new StdSerialiserPrepopulationFactory();
     }
 }

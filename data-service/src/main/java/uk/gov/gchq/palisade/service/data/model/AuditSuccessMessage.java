@@ -18,8 +18,10 @@ package uk.gov.gchq.palisade.service.data.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.data.common.Context;
 import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.Map;
@@ -27,15 +29,16 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Represents information for a successful processing of a request which is forwarded to the audit-service.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
+ * Represents information for a successful processing of a request which is forwarded to the Audit Service.
+ * Note there are three classes that effectively represent the same data but represent a different stage of the process:
+ * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service;
+ * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service;
  * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the Data Service.
- * The version produced by the Data Service is unique in that it includes the leafResourceId and the
+ * The version produced by the Data Service is unique in that it includes the {@code leafResourceId} and the
  * two resource counters: records processed; and records returned; which are included in the attributes map.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditSuccessMessage extends AuditMessage {
 
     public static final String RECORDS_PROCESSED = "RECORDS_PROCESSED";
@@ -54,7 +57,7 @@ public final class AuditSuccessMessage extends AuditMessage {
 
     /**
      * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
-     * which will use Java Objects for the components in the build.
+     * which will use only Java Objects for the components in the build.
      */
     public static class Builder {
 
@@ -62,11 +65,11 @@ public final class AuditSuccessMessage extends AuditMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.
          *
-         * @return interface {@link IUserId} for the next step in the build.
+         * @return interface {@link ILeafResourceId} for the next step in the build.
          */
         public static ILeafResourceId create() {
-            return leafResourceId ->  userId -> resourceId -> context -> attributes ->
-                    new AuditSuccessMessage(leafResourceId,  userId, resourceId, context, attributes);
+            return leafResourceId -> userId -> resourceId -> context -> attributes ->
+                    new AuditSuccessMessage(leafResourceId, userId, resourceId, context, attributes);
         }
 
         /**
@@ -74,12 +77,12 @@ public final class AuditSuccessMessage extends AuditMessage {
          * It is followed by the call to add resource with the {@code IAttributes} interface to create the
          * AuditSuccessMessage class.
          *
-         * @param auditableAuthorisedDataRequest the authorised request stored by the attribute-masking-service
+         * @param auditableAuthorisedDataRequest the authorised request stored by the Attribute Masking Service
          * @return interface {@link IAttributes} for the next step in the build.
          */
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
             DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedDataRequest readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
+            AuthorisedDataRequest readerRequestModel = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
@@ -153,10 +156,9 @@ public final class AuditSuccessMessage extends AuditMessage {
             AuditSuccessMessage withAttributes(Map<String, Object> attributes);
 
             /**
-             * Adds the attributes supplied by the data service that are included in the auditing message:
-             * the number of records processed (total number of records in the resource) and
-             * the number of records returned (excludes those which were totally redacted, but
-             * includes those that were just masked)
+             * Adds the attributes supplied by the data service that are included for auditing the number of:
+             * records processed (total number of records in the resource); and
+             * records returned (excludes redacted, but includes masked);
              *
              * @param recordsProcessed a count of the total number of records processed by the service
              * @param recordsReturned  a count of the number of records returned to the client (excludes

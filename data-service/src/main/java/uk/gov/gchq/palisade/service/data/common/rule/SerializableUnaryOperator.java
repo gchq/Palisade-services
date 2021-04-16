@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.data.common.rule;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+import java.io.Serializable;
+import java.util.function.UnaryOperator;
 
-import uk.gov.gchq.palisade.reader.common.UserId;
-
-import java.io.IOException;
-
-class UserIdKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, UserId.class);
-    }
+/**
+ * A serializable interface for a {@link UnaryOperator}
+ *
+ * @param <T> the type of the operand and result of the operator
+ */
+public interface SerializableUnaryOperator<T> extends UnaryOperator<T>, Serializable {
 }

@@ -19,23 +19,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.data.common.Context;
 
 import javax.persistence.AttributeConverter;
 
 import java.util.Optional;
 
 /**
- * Convert between Java {@link Context} objects and serialised {@link String}s stored in a database
- * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s
+ * Convert between Java {@link Context} objects and serialised {@link String}s stored in a database.
+ * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s.
  */
 public class ContextConverter implements AttributeConverter<Context, String> {
     private final ObjectMapper objectMapper;
 
     /**
-     * Default constructor specifying the object mapper for (de)serializing objects
+     * Default constructor specifying the object mapper for deserialising objects
      *
-     * @param objectMapper the object mapper for reading and writing columns and objects
+     * @param objectMapper the object mapper for reading and writing columns and objects.
      */
     public ContextConverter(final ObjectMapper objectMapper) {
         this.objectMapper = Optional.ofNullable(objectMapper)

@@ -21,16 +21,16 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class contains the authorised access to the resource.  This class is a container for the original data,
- * {@link DataRequest}, the reference to the data that is authorised to be seen, {@link AuthorisedDataRequest} and
- * {@link AuditErrorMessage} processing.  The container will hold the {@code AuditErrorMessage} if there was an error
- * in getting the authorised data.
+ * The class contains the information about whether the read request is authorised. This will include the
+ * data request, {@link DataRequest}, the reference to the data that is authorised to be seen,
+ * {@link AuthorisedDataRequest}, and {@link AuditErrorMessage} if there was an error in requesting the
+ * authorisation.
  */
 public final class AuditableAuthorisedDataRequest {
 
-    private final DataRequest dataRequest;
-    private final AuthorisedDataRequest authorisedDataRequest;
-    private final AuditErrorMessage auditErrorMessage;
+    private final DataRequest dataRequest; //client request for the data
+    private final AuthorisedDataRequest authorisedDataRequest; //authorised data
+    private final AuditErrorMessage auditErrorMessage;  //error message if there was an issue
 
     private AuditableAuthorisedDataRequest(
             final DataRequest dataRequest,

@@ -16,10 +16,13 @@
 
 package uk.gov.gchq.palisade.service.data.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import uk.gov.gchq.palisade.reader.common.Context;
+import uk.gov.gchq.palisade.service.data.common.Context;
 import uk.gov.gchq.palisade.service.data.common.Generated;
 
 import java.util.Map;
@@ -29,8 +32,10 @@ import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
+ * forwarded to the Audit Service. Note all of the services can potentially send an {@code AuditErrorMessage}.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditErrorMessage extends AuditMessage {
 
     private final Throwable error;  //Error that occurred
@@ -64,7 +69,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditErrorMessage class.
          *
-         * @return interface {@link IUserId} for the next step in the build.
+         * @return interface {@link ILeafResourceId} for the next step in the build.
          */
         public static ILeafResourceId create() {
             return leafResourceId -> userId -> resourceId -> context -> attributes -> error ->
@@ -75,7 +80,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
          *
-         * @param auditableAuthorisedDataRequest the client request received by the data-service
+         * @param auditableAuthorisedDataRequest information from the authorising data request
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
@@ -92,9 +97,9 @@ public final class AuditErrorMessage extends AuditMessage {
 
         /**
          * Starter method for the Builder class that uses the {@link DataRequest} and will expect the next builder
-         * method to be for the attribue map
+         * method to be for the attribute map
          *
-         * @param dataRequest the authorised request stored by the attribute-masking-service
+         * @param dataRequest the authorised request stored by the Attribute Masking Service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
@@ -167,7 +172,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the attributes for the message.
              *
              * @param attributes timestamp for the request.
-             * @return interface {@link ILeafResourceId} for the next step in the build.
+             * @return interface {@link IError} for the next step in the build.
              */
             IError withAttributes(Map<String, Object> attributes);
         }

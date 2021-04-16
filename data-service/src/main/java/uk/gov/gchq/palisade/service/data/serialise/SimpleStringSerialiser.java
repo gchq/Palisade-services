@@ -13,18 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.data.serialise;
 
-package uk.gov.gchq.palisade.service.data.common.jsonserialisation;
-
-import com.fasterxml.jackson.databind.Module;
-
-import java.util.List;
+import uk.gov.gchq.palisade.service.data.common.data.seralise.LineSerialiser;
 
 /**
- * A {@code JSONSerialiserModuleFactory} is a simple factory that returns
- * a list of {@link Module}s to be uses in an {@link com.fasterxml.jackson.databind.ObjectMapper}
- * in {@link JSONSerialiser}.
+ * A simple seraliser for strings, will return the seralised or deseralised string of an object passed in
  */
-public interface JSONSerialiserModules {
-    List<Module> getModules();
+public class SimpleStringSerialiser extends LineSerialiser<String> {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public String serialiseLine(final String obj) {
+        return obj;
+    }
+
+    @Override
+    public String deserialiseLine(final String line) {
+        return line;
+    }
 }
