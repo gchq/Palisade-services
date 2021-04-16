@@ -24,7 +24,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Common test data used in the KafkaContractTest
@@ -40,7 +40,6 @@ public class ContractTestData {
     public static final String ERROR_JSON;
     public static final String REQUEST_TOKEN = "test-request-token";
     public static final String ERROR_TOKEN = "";
-    public static final Throwable ERROR = new Throwable("An error");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
@@ -57,7 +56,7 @@ public class ContractTestData {
     }
 
     static {
-        AuditErrorMessage error = AuditErrorMessage.Builder.create(REQUEST_OBJ, new HashMap<>()).withError(ERROR);
+        AuditErrorMessage error = AuditErrorMessage.Builder.create(REQUEST_OBJ, Map.of()).withError(new Throwable("Something went wrong!"));
         try {
             ERROR_JSON = MAPPER.writeValueAsString(error);
         } catch (JsonProcessingException ex) {

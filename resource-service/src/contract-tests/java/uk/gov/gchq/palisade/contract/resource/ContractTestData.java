@@ -83,20 +83,6 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to parse error contract test data", e);
         }
     };
-    public static final Function<Integer, ResourceRequest> REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
-    public static final Function<Integer, ResourceRequest> NO_USER_ID_REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(NO_RESOURCE_REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert error contract test data to objects", e);
-        }
-    };
 
     public static final String REQUEST_TOKEN = "test-request-token";
     public static final Headers START_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes())});

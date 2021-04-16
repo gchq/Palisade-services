@@ -1,6 +1,7 @@
 uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
 |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
+|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
@@ -99,11 +100,9 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
 +- com.google.code.gson:gson:jar:2.8.5:compile
 +- uk.gov.gchq.palisade:hadoop-reader:jar:0.5.0-SNAPSHOT:compile
-|  +- ch.qos.logback:logback-core:jar:1.2.3:compile
-|  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  +- uk.gov.gchq.palisade:readers-common:jar:0.5.0-SNAPSHOT:compile
-|  +- uk.gov.gchq.palisade:shade-hadoop-client:jar:0.5.0-SNAPSHOT:compile
+|  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
+|  |  \- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  \- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
 |     +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
 |     +- com.google.guava:guava:jar:28.2-android:compile
@@ -144,7 +143,6 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |     +- commons-beanutils:commons-beanutils:jar:1.9.3:compile
 |     +- org.apache.commons:commons-configuration2:jar:2.1.1:compile
 |     +- org.apache.commons:commons-text:jar:1.4:compile
-|     +- org.slf4j:slf4j-log4j12:jar:1.7.30:compile
 |     +- com.google.re2j:re2j:jar:1.1:compile
 |     +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
 |     +- org.apache.hadoop:hadoop-auth:jar:3.2.1:compile

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The class contains the audit message from the processing of the request.  This will be a {@link AuditSuccessMessage}
+ * The class contains the audit message from the processing of the request. This will be a {@link AuditSuccessMessage}
  * or possibly an {@link AuditErrorMessage} message generated in the processing of the request.
  */
 public final class AuditableDataResponse {
@@ -64,7 +64,7 @@ public final class AuditableDataResponse {
     }
 
     /**
-     * The static builder
+     * The static builder.
      */
     public static class Builder {
 
@@ -78,12 +78,12 @@ public final class AuditableDataResponse {
         }
 
         /**
-         * Adds the token to the response
+         * Adds the token to the response.
          */
         public interface IToken {
 
             /**
-             * Adds the token to the response
+             * Adds the token to the response.
              *
              * @param token the client's unique token
              * @return interface {@link ISuccess} for the next step in the build.
