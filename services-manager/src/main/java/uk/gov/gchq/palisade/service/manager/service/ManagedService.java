@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
-import uk.gov.gchq.palisade.service.manager.common.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ import java.util.function.Supplier;
  * Wrapper around a Feign client to call out to a collection of URIs rather than a single REST service
  * Allows multiple instances of a service to be running and all of them to be effected by shutdown, logging changes, etc.
  */
-public class ManagedService implements Service {
+public class ManagedService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
     private final ManagedClient managedClient;
     private final Supplier<Collection<URI>> uriSupplier;
@@ -54,7 +53,7 @@ public class ManagedService implements Service {
     public boolean isHealthy() {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     int status = HttpStatus.NOT_FOUND.value();
                     try {
                         status = this.managedClient.getHealth(clientUri).status();
@@ -80,7 +79,7 @@ public class ManagedService implements Service {
     public void setLoggers(final String packageName, final String configuredLevel) throws IOException {
         Collection<URI> clientUris = this.uriSupplier.get();
         Optional<Response> failures = clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     Response response = this.managedClient.setLoggers(clientUri, packageName, configuredLevel);
                     LOGGER.debug("Client uri {} responded with {}", clientUri, response);
                     return response;

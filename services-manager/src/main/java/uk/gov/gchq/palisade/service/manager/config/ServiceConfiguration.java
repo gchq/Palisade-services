@@ -52,24 +52,24 @@ public class ServiceConfiguration {
 
     @Generated
     public List<String> getPaths() {
-        return paths;
+        return new ArrayList<>(paths);
     }
 
     @Generated
     public void setPaths(final List<String> paths) {
         requireNonNull(paths);
-        this.paths = paths;
+        this.paths = new ArrayList<>(paths);
     }
 
     @Generated
     public List<String> getProfiles() {
-        return profiles;
+        return new ArrayList<>(profiles);
     }
 
     @Generated
     public void setProfiles(final List<String> profiles) {
         requireNonNull(profiles);
-        this.profiles = profiles;
+        this.profiles = new ArrayList<>(profiles);
     }
 
     @Generated
