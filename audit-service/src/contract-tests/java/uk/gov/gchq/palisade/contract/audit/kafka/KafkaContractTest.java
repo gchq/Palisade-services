@@ -83,13 +83,13 @@ class KafkaContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
 
     @Autowired
-    Serializer<String> keySerializer;
+    Serializer<String> keySerialiser;
     @Autowired
-    Serializer<JsonNode> valueSerializer;
+    Serializer<JsonNode> valueSerialiser;
     @Autowired
     ActorSystem akkaActorSystem;
     @Autowired
-    Materializer akkaMaterializer;
+    Materializer akkaMaterialiser;
     @Autowired
     KafkaContainer kafka;
     @Autowired
@@ -178,7 +178,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedErrorDeserialization() throws Exception {
+    void testFailedErrorDeserialisation() throws Exception {
 
         // GIVEN
         // Add a message to the 'error' topic
@@ -199,7 +199,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedSuccessDeserialization() throws Exception {
+    void testFailedSuccessDeserialisation() throws Exception {
 
         // GIVEN
         // Add a message to the 'success' topic
@@ -224,11 +224,11 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-            .create(akkaActorSystem, keySerializer, valueSerializer)
+            .create(akkaActorSystem, keySerialiser, valueSerialiser)
             .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-            .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+            .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
             .toCompletableFuture().join();
 
         waitForService();

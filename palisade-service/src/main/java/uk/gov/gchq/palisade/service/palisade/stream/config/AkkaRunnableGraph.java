@@ -72,7 +72,6 @@ public class AkkaRunnableGraph {
         // Get error topic from config
         Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
-
         return source
                 .flatMapConcat((TokenRequestPair tokenAndRequest) -> {
 
@@ -84,28 +83,29 @@ public class AkkaRunnableGraph {
                         Optional<AuditablePalisadeSystemResponse> auditablePalisadeRequest = Optional.ofNullable(value);
                         // Map the auditable request to either a PalisadeClientRequest or AuditErrorMessage
                         return auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getAuditErrorMessage).map(audit ->
+                                // If there was an error message present
                                 new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
-                                        SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
+                                        SerDesConfig.errorValueSerialiser().serialize(null, audit), headers))
                                 .orElseGet(() ->
                                         new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
-                                                SerDesConfig.requestSerializer().serialize(null,
+                                                SerDesConfig.requestSerialiser().serialize(null,
                                                         auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getPalisadeResponse)
                                                                 .orElse(null)), headers)
                                 );
                     };
 
-                    //create the start of stream message
+                    // Create the start of stream message
                     Headers startHeaders = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenAndRequest.first().getBytes(Charset.defaultCharset())),
                             new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes(Charset.defaultCharset()))});
 
-                    //create Headers for body
+                    // Create Headers for body
                     Headers requestHeaders = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenAndRequest.first().getBytes(Charset.defaultCharset()))});
 
-                    //create the end of stream message
+                    // Create the end of stream message
                     Headers endHeaders = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenAndRequest.first().getBytes(Charset.defaultCharset())),
                             new RecordHeader(StreamMarker.HEADER, StreamMarker.END.toString().getBytes(Charset.defaultCharset()))});
 
-                    LOGGER.debug("token {} and request: {}", tokenAndRequest.first(), tokenAndRequest.second());
+                    LOGGER.debug("Token {} and Request: {}", tokenAndRequest.first(), tokenAndRequest.second());
                     return Source.from(List.of(
                             recordFunc.apply(null, startHeaders), // Start of Stream Message
                             recordFunc.apply(tokenAndRequest.second(), requestHeaders), // Body
