@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 
@@ -30,6 +32,7 @@ import java.util.StringJoiner;
  * information needed to retrieve the data for this Resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class TopicOffsetMessage {
 
     /**

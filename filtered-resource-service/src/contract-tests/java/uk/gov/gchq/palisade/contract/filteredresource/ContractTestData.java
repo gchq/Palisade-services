@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 
 /**
@@ -32,7 +33,7 @@ public final class ContractTestData {
     private ContractTestData() {
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"commitOffset\":1}";
     public static final String REQUEST_TOKEN = "test-request-token";

@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.common.jsonserialisation;
+package uk.gov.gchq.palisade.service.filteredresource.common.resource;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import uk.gov.gchq.palisade.service.filteredresource.common.resource.LeafResource;
+import java.io.Serializable;
 
-import java.io.IOException;
+/**
+ * A High level API for passing details of how to connect to a resource
+ */
+@JsonTypeInfo(use = Id.NAME)
+public interface ConnectionDetail extends Serializable {
 
-class ResourceKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, LeafResource.class);
-    }
+    /**
+     * Creates a default connection detail of the Service Name
+     *
+     * @return a service name as a connection detail
+     */
+    String createConnection();
+
 }

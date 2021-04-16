@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.filteredresource.common.Context;
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 
 import java.util.Map;
 import java.util.Objects;
@@ -39,9 +42,10 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditSuccessMessage extends AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource

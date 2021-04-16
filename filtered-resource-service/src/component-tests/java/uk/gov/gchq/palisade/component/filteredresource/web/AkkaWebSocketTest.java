@@ -47,8 +47,9 @@ import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenErrorM
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.common.Context;
 import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.filteredresource.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -81,7 +82,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 class AkkaWebSocketTest {
     static final Logger LOGGER = LoggerFactory.getLogger(AkkaWebSocketTest.class);
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     static final String HOST = "localhost";
     static final int PORT = 18080;
     // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, which will be followed by 1 COMPLETE message)

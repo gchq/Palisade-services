@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,24 +28,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.gchq.palisade.service.filteredresource.common.Context;
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
 import uk.gov.gchq.palisade.service.filteredresource.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The FilteredResourceRequest is the input for results-service where the resource is queued-up ready for the client's request
+ * The FilteredResourceRequest is the input for Filtered-Resource Service where the resource is queued-up ready for the client's request
  * to retrieve the Resource.
- * TopicOffsetMessage is the output for this service which will be send the client the information needed to
- * retrieve this data.
+ * TopicOffsetMessage is the output for this service which will sent to the client and contain the information needed to retrieve this data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse is the output from the attribute-masking-service.
- * uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest is the input for the filtered-resource-service.
+ * The uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse is the output from the Attribute-Masking Service.
+ * The FilteredResourceRequest is the input for the Filtered-Resource Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class FilteredResourceRequest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     private final String userId;  // Unique identifier for the user
     private final String resourceId;  // Resource ID that that is being asked to access
@@ -97,12 +100,12 @@ public final class FilteredResourceRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the FilteredResourceRequest.  This is a variant of the Fluent Builder
-     * which will use Java Objects or JsonNodes equivalents for the components in the build.
+     * Builder class for the creation of instances of the FilteredResourceRequest.
+     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * FilteredResourceRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.
@@ -126,11 +129,11 @@ public final class FilteredResourceRequest {
         }
 
         /**
-         * Adds the resource ID information to the message.
+         * Adds the resourceId to the message.
          */
         public interface IResourceId {
             /**
-             * Adds the resource ID.
+             * Adds the resourceId to the message.
              *
              * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
@@ -140,11 +143,11 @@ public final class FilteredResourceRequest {
 
 
         /**
-         * Adds the user context information to the message.
+         * Adds the users' context information to the message.
          */
         public interface IContext {
             /**
-             * Adds the user context information.
+             * Adds the users' context information.
              *
              * @param context user context for the request.
              * @return interface {@link IResource} for the next step in the build.
@@ -154,7 +157,7 @@ public final class FilteredResourceRequest {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
              * @return interface {@link IResource} for the next step in the build.
@@ -178,10 +181,10 @@ public final class FilteredResourceRequest {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return interface {@link IResource} for the next step in the build.
+             * @return class {@link FilteredResourceRequest} for the completed class from the builder.
              */
             FilteredResourceRequest withResourceNode(JsonNode context);
         }

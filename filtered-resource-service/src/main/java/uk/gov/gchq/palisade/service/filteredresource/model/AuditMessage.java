@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +24,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.filteredresource.common.Context;
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
@@ -42,12 +42,11 @@ import java.util.StringJoiner;
  * This is the parent class for Audit information.  It represents the common component of the data that is to be
  * sent to audit service.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
     public static final String SERVICE_NAME = "filtered-resource-service";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    protected static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.

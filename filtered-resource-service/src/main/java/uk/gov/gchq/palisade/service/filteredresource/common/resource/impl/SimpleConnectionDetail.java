@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.common.service;
+package uk.gov.gchq.palisade.service.filteredresource.common.resource.impl;
 
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.filteredresource.common.resource.ConnectionDetail;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -24,8 +26,9 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A simple implementation of the {@link ConnectionDetail} that holds a reference to the {@link Service}
+ * A simple implementation of the {@link ConnectionDetail} that points to the correct Data Service
  */
+@RegisterJsonSubType(ConnectionDetail.class)
 public class SimpleConnectionDetail implements ConnectionDetail {
     private static final long serialVersionUID = 1L;
 

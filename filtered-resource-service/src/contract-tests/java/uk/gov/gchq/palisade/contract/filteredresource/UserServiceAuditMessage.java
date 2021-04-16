@@ -26,6 +26,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.filteredresource.common.Context;
 import uk.gov.gchq.palisade.service.filteredresource.common.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
@@ -49,7 +50,7 @@ public class UserServiceAuditMessage {
     // Hardcode the service as 'user-service' for use in test data
     public static final String SERVICE_NAME = "user-service";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    protected static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.

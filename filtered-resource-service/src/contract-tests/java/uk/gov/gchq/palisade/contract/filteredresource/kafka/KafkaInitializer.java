@@ -37,6 +37,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
@@ -54,7 +55,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
             .withReuse(true);
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
         try (AdminClient admin = AdminClient.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA_CONTAINER.getFirstMappedPort())))) {
@@ -68,6 +69,8 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
         configurableApplicationContext.getEnvironment().setActiveProfiles("k8s", "akka", "debug");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        KAFKA_CONTAINER.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+        KAFKA_CONTAINER.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
         KAFKA_CONTAINER.start();
 
         // test kafka config

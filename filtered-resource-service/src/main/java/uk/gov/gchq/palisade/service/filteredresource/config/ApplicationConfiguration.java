@@ -17,15 +17,25 @@
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import akka.actor.typed.ActorRef;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import uk.gov.gchq.palisade.service.filteredresource.common.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.filteredresource.common.RegisterJsonSubType;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
@@ -48,7 +58,37 @@ import java.util.concurrent.Executor;
  */
 @Configuration
 @EnableConfigurationProperties(ServerProperties.class)
+// Suppress dynamic class loading smell as it's needed for json serialisation
+@SuppressWarnings("java:S2658")
 public class ApplicationConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        // Reflect and add annotated classes as subtypes
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(RegisterJsonSubType.class));
+        scanner.findCandidateComponents("uk.gov.gchq.palisade")
+                .forEach((BeanDefinition beanDef) -> {
+                    try {
+                        Class<?> type = Class.forName(beanDef.getBeanClassName());
+                        Class<?> supertype = type.getAnnotation(RegisterJsonSubType.class).value();
+                        LOGGER.debug("Registered {} as json subtype of {}", type, supertype);
+                        MAPPER.registerSubtypes(type);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalArgumentException(ex);
+                    }
+                });
+    }
 
     @Bean
     TokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(
@@ -123,10 +163,15 @@ public class ApplicationConfiguration {
         return TokenErrorMessageController.create(persistenceLayer);
     }
 
+    /**
+     * Used so that you can create custom mapper by starting with the default and then modifying if needed
+     *
+     * @return a configured object mapper
+     */
+    @Bean
     @Primary
-    @Bean("jsonSerialiser")
-    ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+    public ObjectMapper objectMapper() {
+        return MAPPER;
     }
 
 }
