@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.attributemask.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.Generated;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -35,13 +38,14 @@ import java.util.StringJoiner;
  * provided to the client.
  * This will be forwarded to the filtered-resource-service in preparation for the client's request for the related Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse is the output from the attribute-masking-service.
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the filtered-resource-service.
+ * The AttributeMaskingResponse is the output from the Attribute-Masking Service.
+ * The uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest is the input for the Filtered-Resource Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NAME)
 public final class AttributeMaskingResponse {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource ID that that is being asked to access

@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.common.Token;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingResponse;
@@ -55,7 +56,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication}
+ * Configuration for the Akka Runnable Graph used by the {@link AttributeMaskingApplication}
  * Configures the connection between Kafka, Akka and the service
  */
 @Configuration

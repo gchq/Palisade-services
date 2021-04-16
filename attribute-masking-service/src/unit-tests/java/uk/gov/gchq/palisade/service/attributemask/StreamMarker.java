@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
+package uk.gov.gchq.palisade.service.attributemask;
+
 /**
- * Classes for handling JSON serialisation and deserialisation.
+ * Marks the start or end of a stream of messages.
+ * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
+ * Will not be present for all other (content-ful) messages.
  */
-package uk.gov.gchq.palisade.service.attributemask.common.jsonserialisation;
+public enum StreamMarker {
+    START,
+    END;
+
+    public static final String HEADER = "x-stream-marker";
+}

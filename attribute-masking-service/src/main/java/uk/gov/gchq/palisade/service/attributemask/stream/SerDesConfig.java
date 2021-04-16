@@ -24,6 +24,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
@@ -35,10 +36,10 @@ import java.nio.charset.Charset;
  * Static configuration for kafka key/value serialisers/deserialisers
  * - Each input has a pair of key/value deserialisers
  * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class SerDesConfig {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
     private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
 

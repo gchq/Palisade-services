@@ -41,50 +41,55 @@ public final class AuditableAttributeMaskingRequest {
     }
 
     /**
-     * The static builder
+     * Builder class for the creation of instances of the {@link AttributeMaskingRequest}.
+     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
 
         /**
-         * Compose with {@code AttributeMaskingRequest}
-         */
-        public interface IAttributeMaskingRequest {
-            /**
-             * Compose value
-             * @param request or null
-             * @return value object
-             */
-            IAuditErrorMessage withAttributeMaskingRequest(AttributeMaskingRequest request);
-        }
-
-        /**
-         * Compose with {@code AuditErrorMessage}
-         */
-        public interface IAuditErrorMessage {
-            /**
-             * Compose value
-             * @param audit or null
-             * @return value object
-             */
-            AuditableAttributeMaskingRequest withAuditErrorMessage(AuditErrorMessage audit);
-
-            /**
-             * Without error audit
-             * @return the composed immutable object
-             */
-            default AuditableAttributeMaskingRequest withNoError() {
-                return this.withAuditErrorMessage(null);
-            }
-        }
-
-        /**
-         * The creator function
-         * @return the composed immutable object
+         * Starter method for the Builder class.
+         * This method is called to start the process of creating the AuditableAttributeMaskingRequest class.
+         *
+         * @return interface {@link IAttributeMaskingRequest} for the next step in the build.
          */
         public static IAttributeMaskingRequest create() {
             return request -> audit -> new AuditableAttributeMaskingRequest(request, audit);
         }
 
+        /**
+         * Creates an AuditableAttributeMaskingRequest with the addition of a AttributeMaskingRequest
+         */
+        public interface IAttributeMaskingRequest {
+            /**
+             * Adds a AttributeMaskingRequest to the message
+             *
+             * @param request a AttributeMaskingRequest or a null value
+             * @return interface {@link IAuditErrorMessage} for the next step in the build.
+             */
+            IAuditErrorMessage withAttributeMaskingRequest(AttributeMaskingRequest request);
+        }
+
+        /**
+         * Adds a {@link AuditErrorMessage} to the message if an error was thrown in this service
+         */
+        public interface IAuditErrorMessage {
+            /**
+             * Adds a {@link AuditErrorMessage} to the message if an error was thrown in this service
+             *
+             * @param audit a AuditErrorMessage if one was thrown in the service or null if one was not thrown
+             * @return a default interface {@link AuditableAttributeMaskingRequest} to attach a null AuditErrorMessage
+             */
+            AuditableAttributeMaskingRequest withAuditErrorMessage(AuditErrorMessage audit);
+
+            /**
+             * By default, add a null AuditErrorMessage to indicate that no error was thrown in the service
+             *
+             * @return class {@link AuditableAttributeMaskingRequest} for the completed class from the builder.
+             */
+            default AuditableAttributeMaskingRequest withNoError() {
+                return this.withAuditErrorMessage(null);
+            }
+        }
     }
 
     @Override

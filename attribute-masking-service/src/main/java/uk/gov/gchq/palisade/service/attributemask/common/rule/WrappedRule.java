@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.Generated;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -45,7 +45,6 @@ import static java.util.Objects.requireNonNull;
 public class WrappedRule<T extends Serializable> implements Rule<T> {
 
     public static final String WRAPPED_RULE_WAS_INITIALISED_WITH_NULL = "WrappedRule was initialised with null.";
-    public static final String RULE_STRING = "rule";
     public static final String FUNCTION_STRING = "function";
     public static final String PREDICATE_STRING = "predicate";
     private static final long serialVersionUID = 1L;
@@ -75,6 +74,13 @@ public class WrappedRule<T extends Serializable> implements Rule<T> {
         this.predicate = predicate;
     }
 
+    /**
+     * A seralisiable WrappedRule constructor, taking the rule, function and predicate
+     *
+     * @param rule      the rule to be applied to the resource
+     * @param function  the simple {@link UnaryOperator} rule to wrap.
+     * @param predicate the simple {@link Predicate} rule to wrap.
+     */
     @JsonCreator
     public WrappedRule(@JsonProperty("rule") final Rule<T> rule,
                        @JsonProperty("function") final SerialisableUnaryOperator<T> function,

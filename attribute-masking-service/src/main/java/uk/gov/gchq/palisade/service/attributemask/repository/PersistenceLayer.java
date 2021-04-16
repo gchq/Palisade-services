@@ -16,20 +16,20 @@
 package uk.gov.gchq.palisade.service.attributemask.repository;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Asynchronously persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
+ * Asynchronously persist an authorised request. This is a write-only interface, while the Data Service holds a read-only interface.
  */
 public interface PersistenceLayer {
 
     /**
-     * Asynchronously persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
+     * Asynchronously persist an authorised request. This is a write-only interface, while the Data Service holds a read-only interface.
      *
      * @param token    the token {@link String} for the client request as a whole, created by the palisade-service
      * @param user     the {@link User} as authorised and returned by the user-service

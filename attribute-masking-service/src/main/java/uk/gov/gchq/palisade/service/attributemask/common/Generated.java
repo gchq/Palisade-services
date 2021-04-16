@@ -28,8 +28,8 @@ import java.lang.annotation.Target;
  * through: Code ->
  *          Generate ->
  *          [method] ->
- *          ... -
- *          Prepend "@uk.gov.gchq.palisade.service.policy.common.Generated" to the velocity template.
+ *          ... ->
+ *          Prepend "@uk.gov.gchq.palisade.service.attributemask.common.Generated" to the velocity template.
  *
  * Alternatively, xml files representing these code generation templates can
  * be found under ~/.IntelliJIdea${year.version}/config/options:

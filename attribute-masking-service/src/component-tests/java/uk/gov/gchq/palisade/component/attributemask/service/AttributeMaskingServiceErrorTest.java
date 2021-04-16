@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.component.attributemask.service;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,16 +29,14 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.component.attributemask.repository.ExecutorTestConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.Generated;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
@@ -57,7 +53,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests to verify the handling of exceptions and the population of audit objects during stream processing
+ * Tests to verify the handling of exceptions, and the population of audit objects during stream processing
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = {ExecutorTestConfiguration.class, AttributeMaskingServiceErrorTest.Config.class})
@@ -65,7 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
 class AttributeMaskingServiceErrorTest {
 
-    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
+    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"@type\":\"User\"},\"resource\":{\"@type\":\"FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"@type\":\"SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"@type\":\"SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"@type\":\"ContractTestData$PassThroughRule\"}}}}", i, i);
 
     private final Function<Integer, JsonNode> requestFactoryNode = i -> {
         try {
@@ -92,27 +88,33 @@ class AttributeMaskingServiceErrorTest {
     @Test
     void testPersistenceFailure() {
         // Given a masking request
-        final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
+        final var attributeMaskingRequest = requestFactoryObj.apply(1);
         // When persisting
-        final CompletableFuture<AuditableAttributeMaskingRequest> subject = this.attributeMaskingService.storeAuthorisedRequest("test-token", attributeMaskingRequest);
+        final var request = this.attributeMaskingService.storeAuthorisedRequest("test-token", attributeMaskingRequest).join();
+
         // Then the service suppresses exception and populates Audit object
-        assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
-                .as("verify that exception is propagated into an auditable object and returned")
+        assertThat(request)
+                .as("Check that the request has an error and that the error message has been populated successfully")
+                .extracting(AuditableAttributeMaskingRequest::getAuditErrorMessage)
+                .extracting(AuditErrorMessage::getError)
+                .isInstanceOf(Throwable.class)
+                .extracting(Throwable::getMessage)
                 .isEqualTo("Cannot persist");
 
-        assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(attributeMaskingRequest).withNoError()).getAttributeMaskingRequest())
-                .as("verify that auditable object has no payload")
+        assertThat(request)
+                .as("Check that the request has a null AttributeMaskingRequest")
+                .extracting(AuditableAttributeMaskingRequest::getAttributeMaskingRequest)
                 .isNull();
     }
 
     @Test
     void testMaskingFailure() {
         // Given a masking request
-        final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
+        final var attributeMaskingRequest = requestFactoryObj.apply(1);
         // When masking
-        final AuditableAttributeMaskingResponse subject = this.attributeMaskingService.maskResourceAttributes(attributeMaskingRequest);
+        final var response = this.attributeMaskingService.maskResourceAttributes(attributeMaskingRequest);
         // Then the service suppresses exception and populates Audit object
-        assertThat(subject)
+        assertThat(response)
                 .as("verify that exception is propagated into an auditable object and returned")
                 .extracting(AuditableAttributeMaskingResponse::getAuditErrorMessage)
                 .isNotNull()
@@ -120,7 +122,7 @@ class AttributeMaskingServiceErrorTest {
                 .extracting(Throwable::getMessage)
                 .isEqualTo("Cannot mask");
 
-        assertThat(subject)
+        assertThat(response)
                 .as("verify that auditable object has no payload")
                 .extracting(AuditableAttributeMaskingResponse::getAttributeMaskingResponse)
                 .isNull();
@@ -146,15 +148,14 @@ class AttributeMaskingServiceErrorTest {
                 .withResource(attributeMaskingRequest.getResource())
                 .withRules(attributeMaskingRequest.getRules());
         // When persisting
-        var subject = this.attributeMaskingService.storeAuthorisedRequest("broken-token", broken);
-        // hen the service suppresses exception and populates Audit object
-        assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()))
+        var request = this.attributeMaskingService.storeAuthorisedRequest("broken-token", broken).join();
+        // Then the service suppresses exception and populates Audit object
+        assertThat(request)
                 .as("verify that exception is propagated into an auditable object and returned")
                 .extracting(AuditableAttributeMaskingRequest::getAuditErrorMessage)
                 .extracting(AuditErrorMessage::getError)
                 .extracting(Throwable::getMessage)
-                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.service.attributemask.common.Context]: missing type id property 'class'\n" +
-                        " at [Source: UNKNOWN; line: -1, column: -1]");
+                .isEqualTo("Cannot persist");
     }
 
     @Configuration
@@ -199,24 +200,6 @@ class AttributeMaskingServiceErrorTest {
         public CompletableFuture<AttributeMaskingRequest> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
             throw new RuntimeException("Cannot persist");
         }
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private static class Stub {
-
-        public String getValue() {
-            return value;
-        }
-
-        @JsonProperty("value")
-        private String value;
-
-        @JsonGetter("class")
-        @Generated
-        public String getClassName() {
-            return getClass().getName();
-        }
-
     }
 
 }

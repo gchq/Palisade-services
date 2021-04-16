@@ -39,7 +39,7 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Default boilerplate templates for creating Akka {@link Sink}s and {@link Source}s
- * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
+ * These have different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
  *
  * @param <K> generic Key type
  * @param <V> generic Value type

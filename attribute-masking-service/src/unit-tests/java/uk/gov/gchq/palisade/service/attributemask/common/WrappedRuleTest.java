@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.service.attributemask.common.rule.WrappedRule;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("java:S5778")
 class WrappedRuleTest {
 
     @Test
@@ -49,8 +48,9 @@ class WrappedRuleTest {
     }
 
     @Test
-    void test0Arguments() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(null, null, null));
+    void testZeroArguments() {
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(null, null, null),
+                "A null WrappedRule should throw an exception");
 
         assertThat(exception)
                 .as("Check that the message attached appropriately describes the exception")
@@ -60,7 +60,8 @@ class WrappedRuleTest {
 
     @Test
     void testNullPredicate() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), o -> o, null));
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), o -> o, null),
+                "A null Predicate should throw an exception");
 
         assertThat(exception)
                 .as("Check that the message attached appropriately describes the exception")
@@ -70,7 +71,8 @@ class WrappedRuleTest {
 
     @Test
     void testNullFunction() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), null, o -> true));
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), null, o -> true),
+                "A null Function should throw an exception");
 
         assertThat(exception)
                 .as("Check that the message attached appropriately describes the exception")
@@ -80,7 +82,8 @@ class WrappedRuleTest {
 
     @Test
     void testNullRule() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(null, (SerialisableUnaryOperator<String>) String::toString, o -> true));
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(null, (SerialisableUnaryOperator<String>) String::toString, o -> true),
+                "A null Rule should throw an exception");
 
         assertThat(exception)
                 .as("Check that the message attached appropriately describes the exception")
@@ -89,8 +92,9 @@ class WrappedRuleTest {
     }
 
     @Test
-    void test3Arguments() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), o -> o, o -> true));
+    void testThreeArguments() {
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WrappedRule<>(new TestRule(), o -> o, o -> true),
+                "Passing in only 3 Arguments should throw an exception");
 
         assertThat(exception)
                 .as("Check that the message attached appropriately describes the exception")

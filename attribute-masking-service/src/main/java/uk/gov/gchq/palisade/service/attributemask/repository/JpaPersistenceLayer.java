@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 import javax.transaction.Transactional;
@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link PersistenceLayer} for the attribute-masking-service.
+ * Java JPA implementation of a {@link PersistenceLayer} for the Attribute-Masking Service.
  * Delegates to a CrudRepository save method.
  */
 public class JpaPersistenceLayer implements PersistenceLayer {

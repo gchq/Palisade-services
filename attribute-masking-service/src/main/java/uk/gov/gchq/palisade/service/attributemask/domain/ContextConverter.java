@@ -33,7 +33,8 @@ public class ContextConverter implements AttributeConverter<Context, String> {
     private final ObjectMapper objectMapper;
 
     /**
-     * Default constructor specifying the object mapper for (de)serializing objects
+     * Default constructor specifying the object mapper for deserialising objects
+     *
      * @param objectMapper the object mapper for reading and writing columns and objects
      */
     public ContextConverter(final ObjectMapper objectMapper) {

@@ -19,10 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ContextTest {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @Test
     void testContextShouldSerialiseAndDeseralise() throws JsonProcessingException {
@@ -30,12 +32,12 @@ class ContextTest {
         var context = new Context().purpose("purpose1");
 
         // And Then serialising and deseralising it
-        var actualJson = mapper.writeValueAsString(context);
-        var actualInstance = mapper.readValue(actualJson, Context.class);
+        var actualJson = MAPPER.writeValueAsString(context);
+        var actualInstance = MAPPER.readValue(actualJson, Context.class);
 
         // Then
         assertThat(actualInstance)
-                .as("Check using recursion, that the %s has been deserialized successfully", context.getClass().getSimpleName())
+                .as("Check using recursion, that the %s has been deserialised successfully", context.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .isEqualTo(context);
     }

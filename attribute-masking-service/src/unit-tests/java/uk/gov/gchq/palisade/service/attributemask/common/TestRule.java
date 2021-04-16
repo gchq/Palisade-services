@@ -17,7 +17,9 @@
 package uk.gov.gchq.palisade.service.attributemask.common;
 
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rule;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 
+@RegisterJsonSubType(Rule.class)
 public class TestRule implements Rule<String> {
     @Override
     public String apply(final String item, final User user, final Context context) {

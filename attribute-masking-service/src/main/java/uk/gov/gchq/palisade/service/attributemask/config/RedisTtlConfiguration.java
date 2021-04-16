@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Additional Redis configuration to set time-to-live on a per-keyspace basis.
- * This must still be enabled in the domain entity with the {@link org.springframework.data.redis.core.TimeToLive} annotation.
+ * This must still be enabled in the domain entity with the {@link TimeToLive} annotation.
  */
 @Configuration
 @ConditionalOnProperty(

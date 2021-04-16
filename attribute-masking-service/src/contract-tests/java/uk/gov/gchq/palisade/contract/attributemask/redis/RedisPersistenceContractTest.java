@@ -117,6 +117,7 @@ class RedisPersistenceContractTest {
         // Values for the entity are correct
         var redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
+                .as("Check that the returned hash contains the correct token and resourceId")
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
                 .containsEntry("resourceId", ContractTestData.REQUEST_OBJ.getResource().getId());
     }

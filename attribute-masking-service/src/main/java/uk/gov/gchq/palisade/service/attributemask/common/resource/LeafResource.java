@@ -17,21 +17,36 @@
 package uk.gov.gchq.palisade.service.attributemask.common.resource;
 
 
-import uk.gov.gchq.palisade.service.attributemask.common.service.ConnectionDetail;
-
 /**
  * A leaf resource is the interface for any resource that can be read for data
  * and is not just part of the hierarchical resource structure.
  * A LeafResource is expected to have a type and a serialised format. The type is a way of grouping
- * data of the same structure. The serialised format is the format of the file, e.g CSV, Parquet.
+ * data of the same structure. The serialised format is the format of the file, e.g. CSV, Parquet.
  */
-
 public interface LeafResource extends ChildResource {
 
+    /**
+     * The type is a way of grouping data of the same structure.
+     *
+     * @param type a String value of the type
+     * @return a LeafResource with a type attached
+     */
     LeafResource type(final String type);
 
+    /**
+     * The serialised format is the format of the file, e.g. CSV, Parquet.
+     *
+     * @param serialisedFormat a String value of the format
+     * @return a LeafResource with a format attached
+     */
     LeafResource serialisedFormat(final String serialisedFormat);
 
+    /**
+     * The connection detail is the location of the service for where the resource is stored, often as a serviceName
+     *
+     * @param connectionDetail a ConnectionDetail containing a serviceName or location of the resource
+     * @return a LeafResource with a ConnectionDetail attached
+     */
     LeafResource connectionDetail(final ConnectionDetail connectionDetail);
 
     String getType();

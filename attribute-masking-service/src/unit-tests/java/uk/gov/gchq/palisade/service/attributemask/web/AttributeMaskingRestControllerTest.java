@@ -34,7 +34,6 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +56,7 @@ class AttributeMaskingRestControllerTest {
     @Test
     void testControllerDelegatesToAkkaSink() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(
+        var attributeMaskingRestController = new AttributeMaskingRestController(
                 new KafkaProducerService(aggregatorSink, mockTopicConfig, materializer)
         );
         Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
@@ -65,29 +64,33 @@ class AttributeMaskingRestControllerTest {
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
         // when the controller is called with a request
-        Map<String, String> headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        var headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
         attributeMaskingRestController.maskAttributes(headers, ApplicationTestData.REQUEST);
 
         // Then the sink aggregated the request
         assertThat(sinkAggregation)
+                .as("Check that there is one message on the topic")
                 .hasSize(1)
-                .first().satisfies(record -> assertAll("Test Record Headers and Value",
-                () -> assertThat(record)
-                        .extracting(ProducerRecord::value)
-                        .isEqualTo(ApplicationTestData.REQUEST),
+                .first()
+                .satisfies(record -> assertAll("Test Record Headers and Value",
+                        () -> assertThat(record)
+                                .as("Check that extracting the AttributeMaskingRequest, it is the same as the request we passed in to the service")
+                                .extracting(ProducerRecord::value)
+                                .isEqualTo(ApplicationTestData.REQUEST),
 
-                () -> assertThat(record)
-                        .extracting(ProducerRecord::headers)
-                        .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
-                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
-                )
-        );
+                        () -> assertThat(record)
+                                .as("Check that the returned headers contain the correct token")
+                                .extracting(ProducerRecord::headers)
+                                .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
+                                .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
+                        )
+                );
     }
 
     @Test
     void testControllerAcceptsNulls() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(
+        var attributeMaskingRestController = new AttributeMaskingRestController(
                 new KafkaProducerService(aggregatorSink, mockTopicConfig, materializer)
         );
         Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
@@ -95,23 +98,27 @@ class AttributeMaskingRestControllerTest {
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
         // when the controller is called with a request
-        Map<String, String> headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        var headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
         attributeMaskingRestController.maskAttributes(headers, null);
 
         // Then the sink aggregated the request
         assertThat(sinkAggregation)
+                .as("Check that there is one message on the topic")
                 .hasSize(1)
-                .first().satisfies(record -> assertAll("Test Record Headers and Value",
-                () -> assertThat(record)
-                        .extracting(ProducerRecord::value)
-                        .isNull(),
+                .first()
+                .satisfies(record -> assertAll("Test Record Headers and Value",
+                        () -> assertThat(record)
+                                .as("Check that extracting the AttributeMaskingRequest, it is the same as the request we passed in to the service")
+                                .extracting(ProducerRecord::value)
+                                .isNull(),
 
-                () -> assertThat(record)
-                        .extracting(ProducerRecord::headers)
-                        .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
-                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
-                )
-        );
+                        () -> assertThat(record)
+                                .as("Check that the returned headers contain the correct token")
+                                .extracting(ProducerRecord::headers)
+                                .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
+                                .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
+                        )
+                );
     }
 
 }

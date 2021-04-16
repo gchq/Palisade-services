@@ -22,9 +22,9 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.Generated;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 import uk.gov.gchq.palisade.service.attributemask.config.RedisTtlConfiguration;
 
 import javax.persistence.Column;
@@ -41,7 +41,7 @@ import java.util.StringJoiner;
  * An entity for access to a single leafResource with a set of rules (and user/context to apply)
  * to be persisted in a repository/database. A (unique) key is created from the concatenation of
  * the token and leafResource id, which is used for indexing. This will later be retrieved by the
- * data-service to assert the client's access has been authorised and the rules for such access.
+ * data-service to assert the client's access has been authorised, and the rules for such access.
  */
 @Entity
 @Table(
@@ -86,7 +86,7 @@ public class AuthorisedRequestEntity {
     protected Long timeToLive;
 
     /**
-     * Empty-constructor for (de)serialisation functions
+     * Empty-constructor for deserialisation functions
      */
     public AuthorisedRequestEntity() {
         // Empty constructor

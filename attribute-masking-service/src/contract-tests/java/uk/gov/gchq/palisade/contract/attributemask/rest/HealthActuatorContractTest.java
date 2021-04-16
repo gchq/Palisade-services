@@ -46,7 +46,9 @@ class HealthActuatorContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
+        assertThat(restTemplate)
+                .as("Check that the restTemplate has been autowired successfully")
+                .isNotNull();
     }
 
     @Test

@@ -15,8 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
@@ -28,10 +31,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
- * Note all of the services can potentially send an error message.
+ * Represents information for an error that has occurred during the processing of a request.
+ * This information is forwarded to the Audit Service.
+ * Note all the services can potentially send an error message.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditErrorMessage extends AuditMessage {
 
     private final Throwable error;  //Error that occurred
@@ -54,8 +59,8 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
-     * which will use Java Objects or JsonNodes equivalents for the components in the build.
+     * Builder class for the creation of instances of the AuditSuccessMessage.
+     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**

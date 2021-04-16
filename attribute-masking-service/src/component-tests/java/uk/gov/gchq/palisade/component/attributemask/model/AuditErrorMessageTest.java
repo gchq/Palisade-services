@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 
 import java.util.Map;
@@ -27,18 +28,17 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AuditErrorMessageTest {
-
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws JsonProcessingException throws if the {@link AuditErrorMessage}
-     *                                 object cannot be serialised into JSON, or deseralised back into the object.
+     * @throws JsonProcessingException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
-        var mapper = new ObjectMapper();
+    void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws JsonProcessingException {
 
         var auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
@@ -47,15 +47,15 @@ class AuditErrorMessageTest {
                 .withAttributes(Map.of("messagesSent", "23"))
                 .withError(new Throwable("Something went wrong!"));
 
-        var actualJson = mapper.writeValueAsString(auditErrorMessage);
-        var actualInstance = mapper.readValue(actualJson, auditErrorMessage.getClass());
+        var actualJson = MAPPER.writeValueAsString(auditErrorMessage);
+        var actualInstance = MAPPER.readValue(actualJson, auditErrorMessage.getClass());
 
         assertThat(actualInstance)
                 .as("Check that whilst using the objects toString method, the objects are the same")
                 .isEqualTo(auditErrorMessage);
 
         assertThat(actualInstance)
-                .as("Ignoring the error, check %s using recursion)", auditErrorMessage.getClass().getSimpleName())
+                .as("Ignoring the error, check %s using recursion", auditErrorMessage.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessage);

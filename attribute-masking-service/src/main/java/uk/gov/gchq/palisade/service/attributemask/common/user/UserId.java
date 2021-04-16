@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.common;
+package uk.gov.gchq.palisade.service.attributemask.common.user;
+
+import uk.gov.gchq.palisade.service.attributemask.common.Generated;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -50,7 +52,7 @@ public class UserId implements Serializable {
     /**
      * Updates the id of the UserID
      *
-     * @param id a non null String representing the id of the user
+     * @param id a non-null String representing the id of the user
      * @return the UserId object
      */
     @Generated
@@ -65,7 +67,7 @@ public class UserId implements Serializable {
     }
 
     @Generated
-    public void setId(final String id) {
+    public final void setId(final String id) {
         requireNonNull(id);
         this.id = id;
     }

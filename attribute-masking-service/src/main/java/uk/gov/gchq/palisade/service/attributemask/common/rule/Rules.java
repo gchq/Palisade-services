@@ -22,7 +22,7 @@ import uk.gov.gchq.palisade.service.attributemask.common.Generated;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to encapsulate the list of {@link Rule}s that apply to a resource and is provided with a user
- * friendly message to explain what the set of rules are.
+ * This class is used to encapsulate the list of {@link Rule}s that apply to a resource and is
+ * provided with a user-friendly message to explain what the set of rules are.
  *
  * @param <T> The type of data records that the rules will be applied to.
  */
@@ -167,7 +167,7 @@ public class Rules<T extends Serializable> implements Serializable {
     /**
      * Tests if this rule set if empty.
      *
-     * @return {@code true} if this rule set contains at least one rule
+     * @return true if this rule set contains at least one rule
      */
     public boolean containsRules() {
         return !rulesMap.isEmpty();
@@ -182,12 +182,12 @@ public class Rules<T extends Serializable> implements Serializable {
             return false;
         }
         Rules<?> other = (Rules<?>) o;
-        LinkedList<Class<? extends Rule>> thisRuleClasses = this.rulesMap.values().stream()
+        List<Class<? extends Rule>> thisRuleClasses = this.rulesMap.values().stream()
                 .map(Rule::getClass)
-                .collect(Collectors.toCollection(LinkedList::new));
-        LinkedList<Class<? extends Rule>> otherRuleClasses = other.rulesMap.values().stream()
+                .collect(Collectors.toList());
+        List<Class<? extends Rule>> otherRuleClasses = other.rulesMap.values().stream()
                 .map(Rule::getClass)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toList());
         return thisRuleClasses.equals(otherRuleClasses);
     }
 

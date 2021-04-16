@@ -20,28 +20,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
-import uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AttributeMaskingRequestTest {
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws JsonProcessingException throws if the {@link AttributeMaskingRequest}
-     *                                 object cannot be serialised into JSON, or deseralised back into the object.
+     * @throws JsonProcessingException throws if the {@link AttributeMaskingRequest} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testAttributeMaskingRequestSerialisingAndDeserialising() throws JsonProcessingException {
-        var mapper = new ObjectMapper();
-
+    void testGroupedDependantAttributeMaskingRequestSerialisingAndDeserialising() throws JsonProcessingException {
         var resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
@@ -56,15 +56,15 @@ class AttributeMaskingRequestTest {
                 .withResource(resource)
                 .withRules(new Rules<>());
 
-        var actualJson = mapper.writeValueAsString(attributeMaskingRequest);
-        var actualInstance = mapper.readValue(actualJson, attributeMaskingRequest.getClass());
+        var actualJson = MAPPER.writeValueAsString(attributeMaskingRequest);
+        var actualInstance = MAPPER.readValue(actualJson, attributeMaskingRequest.getClass());
 
         assertThat(actualInstance)
                 .as("Check that whilst using the objects toString method, the objects are the same")
                 .isEqualTo(attributeMaskingRequest);
 
         assertThat(actualInstance)
-                .as("Check %s using recursion)", attributeMaskingRequest.getClass().getSimpleName())
+                .as("Check %s using recursion", attributeMaskingRequest.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .isEqualTo(attributeMaskingRequest);
 

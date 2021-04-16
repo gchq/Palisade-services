@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.Generated;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
@@ -38,15 +38,14 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that is to be
- * sent to audit service.
+ * This is the parent class for Audit information. It represents the common component of the data that is to be
+ * sent to Audit Service.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
     public static final String SERVICE_NAME = "attribute-masking-service";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    protected static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.

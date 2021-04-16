@@ -20,17 +20,15 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.Token;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
-import uk.gov.gchq.palisade.service.attributemask.common.UserId;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.attributemask.common.rule.Rule;
 import uk.gov.gchq.palisade.service.attributemask.common.rule.Rules;
-import uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
+import uk.gov.gchq.palisade.service.attributemask.common.user.UserId;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
 
 import java.io.Serializable;
 
@@ -63,13 +61,6 @@ public class ApplicationTestData {
     public static final Context CONTEXT = new Context().purpose("test-purpose");
 
     public static final String RULE_MESSAGE = "test-rule";
-
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
-    }
 
     public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
 

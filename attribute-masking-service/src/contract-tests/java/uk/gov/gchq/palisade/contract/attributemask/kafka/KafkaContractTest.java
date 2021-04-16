@@ -24,7 +24,6 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Producer;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Source;
-import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -42,7 +41,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -54,17 +52,15 @@ import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.common.Token;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -76,8 +72,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "rule" topic is written to by the policy-service and read by this service.
- * The downstream "filtered-resource" topic is written to by this service and read by the filtered-resource-service.
+ * The upstream "rule" topic is written to by the Policy Service and read by this service.
+ * The downstream "filtered-resource" topic is written to by this service and read by the Filtered-Resource Service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(
@@ -106,7 +102,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSets(final long messageCount) {
         // Create a variable number of requests
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
@@ -115,26 +111,26 @@ class KafkaContractTest {
         final long recordCount = messageCount + 2;
 
         // Given - we are already listening to the output
-        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
+        var consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
+        var probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we write to the input
-        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+        var producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer);
 
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, recordCount)
+        var resultSeq = probe.request(recordCount);
+        var results = LongStream.range(0, recordCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -143,20 +139,25 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check that there are %s messages on the topic", (int) recordCount)
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
+                        .as("Check the message contains the correct token")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check that the header contains the request token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the message contains the correct Start header")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the message contains the correct End header")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
@@ -165,18 +166,46 @@ class KafkaContractTest {
         results.removeLast();
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
+                        .as("Check that there are %s messages on the topic", (int) messageCount)
                         .hasSize((int) messageCount),
 
                 () -> assertThat(results)
+                        .as("Check that all messages contain the correct token")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check that the message headers contain the token")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertThat(results.stream()
                         .map(ConsumerRecord::value)
                         .map(response -> response.get("resource").get("type").asInt())
                         .collect(Collectors.toList()))
-                        .isSorted()
+                        .as("The results should be sorted correctly")
+                        .isSorted(),
+
+                () -> assertThat(results)
+                        .as("The message should have been processed and deserialized correctly")
+                        .allSatisfy(result -> {
+                            assertThat(result.value().get("userId").asText())
+                                    .as("The userId inside the message should be test-user-id")
+                                    .isEqualTo("test-user-id");
+
+                            assertThat(result.value().get("resourceId").asText())
+                                    .as("The resourceId inside the message should be /test/resourceId")
+                                    .isEqualTo("/test/resourceId");
+
+                            assertThat(result.value().get("context").get("contents").get("purpose").asText())
+                                    .as("The purpose inside the context object should be test-purpose")
+                                    .isEqualTo("test-purpose");
+
+                            assertThat(result.value().get("resource").get("serialisedFormat").asText())
+                                    .as("The resource format should be avro")
+                                    .isEqualTo("avro");
+
+                            assertThat(result.value().get("resource").get("@type").asText())
+                                    .as("The resource format should be a FileResource")
+                                    .isEqualTo(FileResource.class.getSimpleName());
+                        })
         );
     }
 
@@ -184,27 +213,29 @@ class KafkaContractTest {
     @DirtiesContext
     void testRestEndpoint() {
         // Given - we are already listening to the service input
-        ConsumerSettings<String, AttributeMaskingRequest> consumerSettings = ConsumerSettings
+        var consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.ruleKeyDeserializer(), SerDesConfig.ruleValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Probe<ConsumerRecord<String, AttributeMaskingRequest>> probe = Consumer
+        var probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we POST to the rest endpoint
-        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AttributeMaskingRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity("/api/mask", entity, Void.class);
+        var headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        var entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        var response = restTemplate.postForEntity("/api/mask", entity, Void.class);
 
         // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode())
+                .as("Check that the REST call has been accepted")
+                .isEqualTo(HttpStatus.ACCEPTED);
 
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, AttributeMaskingRequest>> resultSeq = probe.request(1);
-        LinkedList<ConsumerRecord<String, AttributeMaskingRequest>> results = LongStream.range(0, 1)
+        var resultSeq = probe.request(1);
+        var results = LongStream.range(0, 1)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -212,14 +243,18 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check that one message is returned")
                         .hasSize(1),
 
                 () -> assertThat(results)
+                        .as("Check that the message has the correct contents")
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .as("Check that the token is in the headers")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
 
                             assertThat(result.value())
+                                    .as("Check that the request object has been returned correctly")
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );

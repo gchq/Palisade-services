@@ -21,25 +21,25 @@ import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.attributemask.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AttributeMaskingResponseTest {
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws JsonProcessingException throws if the {@link AttributeMaskingResponse}
-     *                                 object cannot be serialised into JSON, or deseralised back into the object.
+     * @throws JsonProcessingException throws if the {@link AttributeMaskingResponse} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testAttributeMaskingResponseSerialisingAndDeserialising() throws JsonProcessingException {
-        var mapper = new ObjectMapper();
-
+    void testGroupedDependantAttributeMaskingResponseSerialisingAndDeserialising() throws JsonProcessingException {
         var resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
@@ -52,15 +52,15 @@ class AttributeMaskingResponseTest {
                 .withContext(new Context().purpose("testContext"))
                 .withResource(resource);
 
-        var actualJson = mapper.writeValueAsString(attributeMaskingResponse);
-        var actualInstance = mapper.readValue(actualJson, attributeMaskingResponse.getClass());
+        var actualJson = MAPPER.writeValueAsString(attributeMaskingResponse);
+        var actualInstance = MAPPER.readValue(actualJson, AttributeMaskingResponse.class);
 
         assertThat(actualInstance)
                 .as("Check that whilst using the objects toString method, the objects are the same")
                 .isEqualTo(attributeMaskingResponse);
 
         assertThat(actualInstance)
-                .as("Check %s using recursion)", attributeMaskingResponse.getClass().getSimpleName())
+                .as("Check %s using recursion", attributeMaskingResponse.getClass().getSimpleName())
                 .usingRecursiveComparison()
                 .isEqualTo(attributeMaskingResponse);
     }

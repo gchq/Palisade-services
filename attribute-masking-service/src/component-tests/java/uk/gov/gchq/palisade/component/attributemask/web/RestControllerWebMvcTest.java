@@ -24,13 +24,18 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import uk.gov.gchq.palisade.component.attributemask.web.RestControllerWebMvcTest.MapperConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.common.Token;
+import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
 
@@ -39,9 +44,16 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {AttributeMaskingRestController.class})
-@ContextConfiguration(classes = {RestControllerWebMvcTest.class, AttributeMaskingRestController.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, AttributeMaskingRestController.class, MapperConfiguration.class})
 class RestControllerWebMvcTest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    @Configuration
+    static class MapperConfiguration {
+        @Bean
+        @Primary
+        ObjectMapper objectMapper() {
+            return new ApplicationConfiguration().objectMapper();
+        }
+    }
 
     @MockBean
     private KafkaProducerService serviceMock;
@@ -49,6 +61,8 @@ class RestControllerWebMvcTest {
     private AttributeMaskingRestController controller;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper mapper;
 
     @BeforeEach
     void setUp() {
@@ -63,17 +77,21 @@ class RestControllerWebMvcTest {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertThat(controller)
+                .as("Check that the controller has been autowired successfully")
+                .isNotNull();
+
+        assertThat(mockMvc)
+                .as("Check that the mockMvc has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
-    @SuppressWarnings("java:S6299")
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/api/mask")
                 .header(Token.HEADER, ApplicationTestData.REQUEST_TOKEN)
-                .content(MAPPER.writeValueAsBytes(ApplicationTestData.REQUEST))
+                .content(mapper.writeValueAsBytes(ApplicationTestData.REQUEST))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }

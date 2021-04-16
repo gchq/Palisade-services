@@ -23,14 +23,20 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
-import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.PassThroughRule;
+import uk.gov.gchq.palisade.service.attributemask.PassThroughRule;
 import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.CONTEXT;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.LEAF_RESOURCE;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.REQUEST_TOKEN;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.RESOURCE_ID;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.RULES;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.RULE_MESSAGE;
+import static uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.USER;
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, ExecutorTestConfiguration.class})
@@ -45,32 +51,45 @@ class JpaPersistenceLayerTest {
 
     @Test
     void testContextLoads() {
-        assertThat(persistenceLayer).isNotNull();
-        assertThat(requestsRepository).isNotNull();
+        assertThat(persistenceLayer)
+                .as("Check that the persistenceLayer has been autowired successfully")
+                .isNotNull();
+
+        assertThat(requestsRepository)
+                .as("Check that the requestsRepository has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
     void testPutAndGetReturnsExpectedEntity() {
         // given the persistence layer has something stored in it
         persistenceLayer.putAsync(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.USER,
-                ApplicationTestData.LEAF_RESOURCE,
-                ApplicationTestData.CONTEXT,
-                ApplicationTestData.RULES
+                REQUEST_TOKEN,
+                USER,
+                LEAF_RESOURCE,
+                CONTEXT,
+                RULES
         ).join();
 
         // when all entities are retrieved from the repository
-        Iterable<AuthorisedRequestEntity> authorisedRequests = requestsRepository.findAll();
+        var authorisedRequests = requestsRepository.findAll();
 
         // then the persistence layer has persisted the entity in the repository
         assertThat(authorisedRequests)
+                .as("Check that there is one entity returned")
                 .hasSize(1)
-                .allMatch(requestEntity -> requestEntity.getToken().equals(ApplicationTestData.REQUEST_TOKEN))
-                .allMatch(requestEntity -> requestEntity.getResourceId().equals(ApplicationTestData.RESOURCE_ID))
-                .allMatch(requestEntity -> requestEntity.getUser().equals(ApplicationTestData.USER))
-                .allMatch(requestEntity -> requestEntity.getLeafResource().equals(ApplicationTestData.LEAF_RESOURCE))
-                .allMatch(requestEntity -> requestEntity.getContext().equals(ApplicationTestData.CONTEXT))
-                .allMatch(requestEntity -> requestEntity.getRules().getRules().get(ApplicationTestData.RULE_MESSAGE).getClass().equals(PassThroughRule.class));
+                .allSatisfy(requestEntity -> {
+                    assertThat(requestEntity)
+                            .as("Check that by extracting the objects from the entity, they are the correct ones")
+                            .extracting("token", "resourceId", "user", "leafResource", "context")
+                            .contains(REQUEST_TOKEN, RESOURCE_ID, USER, LEAF_RESOURCE, CONTEXT);
+
+                    assertThat(requestEntity.getRules().getRules())
+                            .as("Check that the rules map contains the correct rule")
+                            .containsKeys(RULE_MESSAGE)
+                            .as("Check that the rule in the map is a PassThroughRule")
+                            .extractingByKey(RULE_MESSAGE)
+                            .isInstanceOf(PassThroughRule.class);
+                });
     }
 }

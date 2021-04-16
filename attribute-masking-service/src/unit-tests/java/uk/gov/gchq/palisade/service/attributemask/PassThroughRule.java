@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.common.rule;
-
+package uk.gov.gchq.palisade.service.attributemask;
 
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
-import uk.gov.gchq.palisade.service.attributemask.common.resource.LeafResource;
+import uk.gov.gchq.palisade.service.attributemask.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.attributemask.common.rule.Rule;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 
 import java.io.Serializable;
 
-public class IsTextResourceRule implements Serializable, Rule<LeafResource> {
+@RegisterJsonSubType(Rule.class)
+public class PassThroughRule<T extends Serializable> implements Rule<T> {
     @Override
-    public LeafResource apply(final LeafResource record, final User user, final Context context) {
-        if (record.getSerialisedFormat().equalsIgnoreCase("txt")) {
-            return record;
-        }
-        return null;
+    public T apply(final T record, final User user, final Context context) {
+        return record;
     }
 }

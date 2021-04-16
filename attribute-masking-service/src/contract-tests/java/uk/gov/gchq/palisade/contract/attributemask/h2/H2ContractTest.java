@@ -26,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.common.Context;
-import uk.gov.gchq.palisade.service.attributemask.common.User;
+import uk.gov.gchq.palisade.service.attributemask.common.user.User;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 
@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * An external requirement of the service is to write to an external persistence store.
- * This store will then be read by the data-service to apply rules for a data-read.
+ * This store will then be read by the Data Service to apply rules for a data-read.
  * Upon storing an authorised request with the service, an external entity should be able to retrieve it.
  * The key distinction between this and the JpaPersistenceLayerTest is while the aforementioned inspects
  * its own instance of the database, this test creates two distinct, separate connections.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackageClasses = {AuthorisedRequestsRepositoryExternalConnection.class, AuthorisedRequestsRepository.class})
-@ActiveProfiles({"db-test", "akka"})
+@ActiveProfiles({"db-test", "akka-test"})
 class H2ContractTest {
 
     @Autowired
@@ -53,7 +53,7 @@ class H2ContractTest {
     @Test
     void testContextLoads() {
         assertThat(attributeMaskingService)
-                .as("Check that the attributeMaskingService ahs been autowired successfully")
+                .as("Check that the attributeMaskingService has been autowired successfully")
                 .isNotNull();
 
         assertThat(externalRepositoryConnection)
@@ -69,11 +69,12 @@ class H2ContractTest {
                 ContractTestData.REQUEST_OBJ
         ).join();
 
-        // When the "data-service" (this test class) retrieves this stored request
+        // When the "Data Service" (this test class) retrieves this stored request
         var persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ContractTestData.REQUEST_TOKEN, ContractTestData.RESOURCE_ID);
 
-        assertThat(persistedEntity).get()
+        assertThat(persistedEntity)
                 .as("Check after extracting individual fields from the entity, that they have been persisted correctly")
+                .get()
                 .extracting("resourceId", "user", "context")
                 .contains(ContractTestData.RESOURCE_ID, new User().userId(ContractTestData.USER_ID), new Context().purpose(ContractTestData.PURPOSE));
 

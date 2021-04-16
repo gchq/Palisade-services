@@ -22,7 +22,7 @@ import uk.gov.gchq.palisade.service.attributemask.common.Generated;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 /**
- * Capture a thrown exception and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
+ * Capture a thrown exception, and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
  * This allows exceptions to be audited along with their original request.
  * These exceptions are elevated to {@link RuntimeException}s.
  */
@@ -30,7 +30,7 @@ public class AuditableException extends RuntimeException {
     private final transient ConsumerRecord<String, AttributeMaskingRequest> request;
 
     /**
-     * Capture a thrown exception and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
+     * Capture a thrown exception, and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
      * This allows exceptions to be audited along with their original request.
      *
      * @param request the original request to the service that caused the exception
