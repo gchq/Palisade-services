@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.common;
+package uk.gov.gchq.palisade.service.policy.common.user;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+import uk.gov.gchq.palisade.service.policy.common.Generated;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -35,11 +37,7 @@ import static java.util.Objects.requireNonNull;
  * For example it could be used for deciding what actions users are allowed to perform, such as READ/WRITE.
  * The user auths are used specifically to decide what visibilities users can see.
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.CLASS,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "class"
-)
+@JsonTypeInfo(use = Id.NAME)
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -48,16 +46,16 @@ public class User implements Serializable {
     private Set<String> auths = new HashSet<>();
 
     /**
-     * Constructs an empty User.
+     * Constructs an empty {@link User}.
      */
     public User() {
         //no-args constructor needed for serialization only
     }
 
     /**
-     * Copy constructor for a User.
+     * Copy constructor for a {@link User}.
      *
-     * @param user the User that will be copied.
+     * @param user the {@link User} that will be copied.
      */
     User(final User user) {
         requireNonNull(user, "User to be cloned cannot be null");
@@ -159,37 +157,31 @@ public class User implements Serializable {
     }
 
     @Generated
-    public void setUserId(final UserId userId) {
+    public final void setUserId(final UserId userId) {
         requireNonNull(userId);
         this.userId = userId;
     }
 
     @Generated
     public Set<String> getRoles() {
-        return roles;
+        return new HashSet<>(roles);
     }
 
     @Generated
-    public void setRoles(final Set<String> roles) {
+    public final void setRoles(final Set<String> roles) {
         requireNonNull(roles);
-        this.roles = roles;
+        this.roles = new HashSet<>(roles);
     }
 
     @Generated
     public Set<String> getAuths() {
-        return auths;
+        return new HashSet<>(auths);
     }
 
     @Generated
-    public void setAuths(final Set<String> auths) {
+    public final void setAuths(final Set<String> auths) {
         requireNonNull(auths);
-        this.auths = auths;
-    }
-
-    @JsonGetter("class")
-    @Generated
-    public String getClassName() {
-        return getClass().getName();
+        this.auths = new HashSet<>(auths);
     }
 
     @Override

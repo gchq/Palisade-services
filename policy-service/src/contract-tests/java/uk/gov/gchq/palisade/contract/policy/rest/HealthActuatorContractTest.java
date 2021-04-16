@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to keep-alive in k8s.
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = PolicyApplication.class,
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"management.health.kafka.enabled=false" }
+        properties = {"management.health.kafka.enabled=false"}
 )
 @ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
@@ -47,17 +48,23 @@ class HealthActuatorContractTest {
 
     @Test
     void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
+        assertThat(restTemplate)
+                .as("Check that the restTemplate has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
     void testServiceIsHealthy() {
         // Given that the service is running (and presumably healthy)
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
 
-        // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
 }

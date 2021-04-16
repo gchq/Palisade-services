@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
+import uk.gov.gchq.palisade.component.policy.MapperConfiguration;
 import uk.gov.gchq.palisade.service.policy.common.Token;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
@@ -40,9 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @WebMvcTest(controllers = {PolicyRestController.class})
-@ContextConfiguration(classes = {RestControllerWebMvcTest.class, PolicyRestController.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, PolicyRestController.class, MapperConfiguration.class})
 class RestControllerWebMvcTest extends CommonTestData {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
     private KafkaProducerService kafkaProducerService;
@@ -50,6 +51,9 @@ class RestControllerWebMvcTest extends CommonTestData {
     private PolicyRestController controller;
     @Autowired
     private MockMvc mockMvc;
+    @Qualifier("objectMapper")
+    @Autowired
+    private ObjectMapper mapper;
 
     @BeforeEach
     void setUp() {
@@ -80,7 +84,7 @@ class RestControllerWebMvcTest extends CommonTestData {
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/api/policy")
                 .header(Token.HEADER, REQUEST_TOKEN)
-                .content(MAPPER.writeValueAsBytes(POLICY_REQUEST))
+                .content(mapper.writeValueAsBytes(POLICY_REQUEST))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }

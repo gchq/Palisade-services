@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.common.jsonserialisation;
+package uk.gov.gchq.palisade.component.policy;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.service.policy.common.UserId;
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 
-import java.io.IOException;
-
-class UserIdKeyDeserialiser extends KeyDeserializer {
-    @Override
-    public Object deserializeKey(final String key, final DeserializationContext ctxt)
-            throws IOException {
-        return JSONSerialiser.deserialise(key, UserId.class);
+@Configuration
+public
+class MapperConfiguration {
+    @Bean
+    @Primary
+    ObjectMapper objectMapper() {
+        return new ApplicationConfiguration().objectMapper();
     }
 }

@@ -15,14 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.policy.common.rule;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
-import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 
 import java.io.Serializable;
 
@@ -44,12 +41,7 @@ import java.io.Serializable;
  *            by the record reader before being passed to the apply(T, User, Context) method.
  */
 @FunctionalInterface
-@JsonPropertyOrder(value = {"class"}, alphabetic = true)
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.CLASS,
-        include = As.EXISTING_PROPERTY,
-        property = "class"
-)
+@JsonTypeInfo(use = Id.NAME)
 public interface Rule<T extends Serializable> extends Serializable {
     /**
      * Applies the rule logic to redact or modify the record based on the user and context.
@@ -74,13 +66,4 @@ public interface Rule<T extends Serializable> extends Serializable {
         return true;
     }
 
-    @JsonGetter("class")
-    default String getClassName() {
-        return getClass().getName();
-    }
-
-    @JsonSetter("class")
-    default void setClassName(final String className) {
-        // do nothing.
-    }
 }

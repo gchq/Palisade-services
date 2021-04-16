@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.service;
+package uk.gov.gchq.palisade.service.policy.common.policy;
 
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.common.service.Service;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -31,7 +30,7 @@ import java.util.Optional;
  * Note that a resource could be a file, stream, directory or even the system
  * resource (policies added to the system resource would be applied globally).
  */
-public interface PolicyService extends Service {
+public interface PolicyService {
 
     /**
      * GetResourceRules is used by the service to get any resource rules that could be applied against the resource.

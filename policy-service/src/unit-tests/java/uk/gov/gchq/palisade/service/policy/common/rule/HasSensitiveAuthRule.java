@@ -14,19 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.policy.common;
+package uk.gov.gchq.palisade.service.policy.common.rule;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
-import uk.gov.gchq.palisade.service.policy.common.User;
-import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
-import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
+import uk.gov.gchq.palisade.service.policy.common.RegisterJsonSubType;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 
 import java.io.Serializable;
 
-public class PassThroughRule implements Serializable, Rule<Resource> {
+/**
+ * A Test rule created to filter out resources if the users authorisation does not include 'Sensitive'
+ *
+ * @param <T> The record to be filtered
+ */
+@RegisterJsonSubType(Rule.class)
+public class HasSensitiveAuthRule<T extends Serializable> implements Rule<T> {
     private static final long serialVersionUID = 1L;
 
-    public Resource apply(final Resource resource, final User user, final Context context) {
-        return resource;
+    @Override
+    public T apply(final T record, final User user, final Context context) {
+        if (user.getAuths().contains("Sensitive")) {
+            return record;
+        } else {
+            return null;
+        }
     }
 }

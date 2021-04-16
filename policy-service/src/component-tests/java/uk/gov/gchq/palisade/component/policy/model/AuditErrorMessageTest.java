@@ -15,59 +15,51 @@
  */
 package uk.gov.gchq.palisade.component.policy.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
+import uk.gov.gchq.palisade.component.policy.MapperConfiguration;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = AuditErrorMessageTest.class)
+@ContextConfiguration(classes = {AuditErrorMessageTest.class, MapperConfiguration.class})
 class AuditErrorMessageTest extends CommonTestData {
 
-    @Autowired
-    private JacksonTester<AuditErrorMessage> jsonTester;
-
     /**
-     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserializes and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialize the string.
+     * @throws JsonProcessingException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantErrorMessageSerializingAndDeserializing() throws IOException {
+    void testErrorMessageSerializingAndDeserialising() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
 
-        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
-        ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
-        AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(AUDIT_ERROR_MESSAGE);
+        var actualInstance = mapper.readValue(actualJson, AUDIT_ERROR_MESSAGE.getClass());
 
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(AUDIT_ERROR_MESSAGE);
 
-        assertAll("AuditErrorMessage serializing and deserializing comparison",
-                () -> assertThat(auditErrorMessageObject)
-                        .usingRecursiveComparison()
-                        .ignoringFieldsOfTypes(Throwable.class)
-                        .as("The serialized and deserialized object should have the same values as the original, ignoring the Throwable value")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+        assertThat(actualInstance)
+                .as("Ignoring the error, check %s using recursion", AUDIT_ERROR_MESSAGE.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(AUDIT_ERROR_MESSAGE);
 
-                () -> assertThat(auditErrorMessageObject)
-                        .extracting(AuditErrorMessage::getError)
-                        .as("The serialized and deserialized object should have an error")
-                        .isNotNull()
-                        .extracting(Throwable::getMessage)
-                        .as("The serialized and deserialized object should have the same error message as the original")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE.getError().getMessage())
-        );
+        assertThat(actualInstance)
+                .as("Extracting the exception, check it has been deserialised successfully")
+                .extracting(AuditErrorMessage::getError)
+                .isExactlyInstanceOf(Throwable.class)
+                .extracting("Message")
+                .isEqualTo(AUDIT_ERROR_MESSAGE.getError().getMessage());
     }
 }

@@ -19,10 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ContextTest {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ApplicationConfiguration().objectMapper();
 
     @Test
     void testContextShouldSerialiseAndDeseralise() throws JsonProcessingException {

@@ -15,9 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.policy.exception;
 
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyService;
 import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
 /**
  * A {@code NoSuchPolicyException} is a {@link RuntimeException} thrown by a {@link PolicyService} implementation to

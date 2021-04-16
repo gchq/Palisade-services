@@ -18,12 +18,11 @@ package uk.gov.gchq.palisade.service.policy.common.rule;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
 import uk.gov.gchq.palisade.service.policy.common.Generated;
-import uk.gov.gchq.palisade.service.policy.common.User;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -41,7 +40,6 @@ import static java.util.Objects.requireNonNull;
  * @param <T> The type of the record. In normal cases the raw data will be deserialised
  *            by the record reader before being passed to the {@link Rule#apply(Serializable, User, Context)}.
  */
-@JsonPropertyOrder(value = {"class", "rule", "function", "predicate"}, alphabetic = true)
 public class WrappedRule<T extends Serializable> implements Rule<T> {
 
     public static final String WRAPPED_RULE_WAS_INITIALISED_WITH_NULL = "WrappedRule was initialised with null.";
@@ -75,6 +73,13 @@ public class WrappedRule<T extends Serializable> implements Rule<T> {
         this.predicate = predicate;
     }
 
+    /**
+     * A Seralisiable WrappedRule constuctor, taking the rule, function and predicate
+     *
+     * @param rule      the rule to be applied to the resource
+     * @param function  the simple {@link UnaryOperator} rule to wrap.
+     * @param predicate the simple {@link Predicate} rule to wrap.
+     */
     @JsonCreator
     public WrappedRule(@JsonProperty("rule") final Rule<T> rule,
                        @JsonProperty("function") final SerialisableUnaryOperator<T> function,

@@ -28,18 +28,35 @@ public class UriBuilder {
 
     private Optional<URI> baseUri = Optional.empty();
 
+    /**
+     * Taking a baseUri, creates a properly formatted URI
+     *
+     * @param baseUri an unformatted uri
+     * @return a properly formatted uri
+     */
     public static IScheme create(final URI baseUri) {
         UriBuilder builder = new UriBuilder();
         builder.baseUri = Optional.of(baseUri);
         return builder.build();
     }
 
+    /**
+     * The starter method for the Builder class.
+     *
+     * @return the composed immutable object
+     */
     public static IScheme create() {
         return new UriBuilder().build();
     }
 
+    /**
+     * Starter method for the Builder class.  This method is called to start the process of creating the
+     * URI class.
+     *
+     * @return interface {@link IScheme} for the next step in the build.
+     */
     private IScheme build() {
-        return scheme -> authority -> path -> query -> fragment -> {
+        return scheme -> authority -> path -> query -> (String fragment) -> {
             String thisScheme = Optional.ofNullable(scheme).or(() -> baseUri.map(URI::getScheme)).orElseThrow();
             String thisAuth = Optional.ofNullable(authority).or(() -> baseUri.map(URI::getAuthority)).orElse(null);
             String thisPath = Optional.ofNullable(path).or(() -> baseUri.map(URI::getPath)).orElseThrow();
@@ -59,41 +76,111 @@ public class UriBuilder {
         };
     }
 
+    /**
+     * Adds the scheme to the URI
+     */
     public interface IScheme {
+        /**
+         * Adds the {@link URI#getScheme()} to the URI
+         *
+         * @param scheme the string scheme for the uri
+         * @return interface {@link IAuthority} for the next step in the build.
+         */
         IAuthority withScheme(String scheme);
 
+        /**
+         * By default, create the uri without a scheme
+         *
+         * @return interface {@link IAuthority} for the next step in the build.
+         */
         default IAuthority withoutScheme() {
             return withScheme(null);
         }
     }
 
+    /**
+     * Adds the authority to the URI
+     */
     public interface IAuthority {
+        /**
+         * Adds the {@link URI#getAuthority()} to the URI
+         *
+         * @param authority the string authority for the uri
+         * @return interface {@link IPath} for the next step in the build.
+         */
         IPath withAuthority(String authority);
 
+        /**
+         * By default, create a uri without the authority
+         *
+         * @return interface {@link IPath} for the next step in the build
+         */
         default IPath withoutAuthority() {
             return withAuthority(null);
         }
     }
 
+    /**
+     * Adds the path to the URI
+     */
     public interface IPath {
+        /**
+         * Adds the {@link URI#getPath()} to the URI
+         *
+         * @param path the string path for the uri
+         * @return interface {@link IQuery} for the next step in the build.
+         */
         IQuery withPath(String path);
 
+        /**
+         * By default, create a uri without the path
+         *
+         * @return interface {@link IQuery} for the next step in the build
+         */
         default IQuery withoutPath() {
             return withPath(null);
         }
     }
 
+    /**
+     * Adds the query to the URI
+     */
     public interface IQuery {
+        /**
+         * Adds the {@link URI#getQuery()} to the URI
+         *
+         * @param query the string query for the uri
+         * @return interface {@link IFragment} for the next step in the build.
+         */
         IFragment withQuery(String query);
 
+        /**
+         * By default, create a uri without the query
+         *
+         * @return interface {@link IFragment} for the next step in the build
+         */
         default IFragment withoutQuery() {
             return withQuery(null);
         }
     }
 
+    /**
+     * Adds the fragment to the URI
+     */
     public interface IFragment {
+        /**
+         * Adds the {@link URI#getFragment()} to the URI
+         *
+         * @param fragment the string fragment for the uri
+         * @return a now completed URI object
+         */
         URI withFragment(String fragment);
 
+        /**
+         * By default, create a uri without a fragment
+         *
+         * @return a now completed URI object
+         */
         default URI withoutFragment() {
             return withFragment(null);
         }

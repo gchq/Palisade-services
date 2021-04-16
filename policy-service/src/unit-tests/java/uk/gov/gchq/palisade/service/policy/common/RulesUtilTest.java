@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.gchq.palisade.service.policy.common.Util.applyRulesToItem;
+import static uk.gov.gchq.palisade.service.policy.common.util.RulesUtil.applyRulesToItem;
 
-class UtilTest {
+class RulesUtilTest {
 
     @Test
     void testTheReturnResourceIfNoRulesAreApplied() {

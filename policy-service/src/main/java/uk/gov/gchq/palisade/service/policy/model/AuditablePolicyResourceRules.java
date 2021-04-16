@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import uk.gov.gchq.palisade.service.policy.common.Generated;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
@@ -34,10 +37,11 @@ public final class AuditablePolicyResourceRules {
     private final Rules<LeafResource> rules;
     private final AuditErrorMessage auditErrorMessage;
 
+    @JsonCreator
     private AuditablePolicyResourceRules(
-            final PolicyRequest policyRequest,
-            final Rules<LeafResource> rules,
-            final AuditErrorMessage auditErrorMessage) {
+            final @JsonProperty("policyRequest") PolicyRequest policyRequest,
+            final @JsonProperty("rules") Rules<LeafResource> rules,
+            final @JsonProperty("auditErrorMessage") AuditErrorMessage auditErrorMessage) {
 
         this.policyRequest = policyRequest;
         this.rules = rules;

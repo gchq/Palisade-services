@@ -19,13 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
-import uk.gov.gchq.palisade.service.policy.common.User;
-import uk.gov.gchq.palisade.service.policy.common.Util;
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyService;
 import uk.gov.gchq.palisade.service.policy.common.resource.ChildResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
+import uk.gov.gchq.palisade.service.policy.common.util.RulesUtil;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 
 import java.io.Serializable;
@@ -94,7 +95,7 @@ public class PolicyServiceHierarchyProxy {
      * @return an Optional {@link Resource} which is only present if the resource is accessible
      */
     public static <R extends Resource> R applyRulesToResource(final User user, final R resource, final Context context, final Rules<R> rules) {
-        return Util.applyRulesToItem(resource, user, context, rules);
+        return RulesUtil.applyRulesToItem(resource, user, context, rules);
     }
 
     /**

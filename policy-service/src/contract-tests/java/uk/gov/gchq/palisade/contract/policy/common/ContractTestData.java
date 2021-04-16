@@ -27,6 +27,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.policy.common.Token;
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 
 import java.util.function.Function;
@@ -43,13 +44,13 @@ public class ContractTestData {
         // hide the constructor, this is just a collection of static objects
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     public static final JsonNode REQUEST_NODE;
 
     public static final PolicyRequest REQUEST_OBJ;
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.service.policy.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource\",\"id\":\"file:/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
-    public static final String NO_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"noResourceRulesUser\",\"resourceId\":\"file:/test/noRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"noResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.service.policy.common.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource\",\"id\":\"file:/test/noRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@type\":\"User\"},\"resource\":{\"@type\":\"FileResource\",\"id\":\"file:/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"@type\":\"SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"@type\":\"DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"@type\":\"SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
+    public static final String NO_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"noResourceRulesUser\",\"resourceId\":\"file:/test/noRulesResource\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"noResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@type\":\"User\"},\"resource\":{\"@type\":\"FileResource\",\"id\":\"file:/test/noRulesResource\",\"attributes\":{},\"connectionDetail\":{\"@type\":\"SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"@type\":\"DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"@type\":\"SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
 
     static {
         try {

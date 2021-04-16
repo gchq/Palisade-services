@@ -15,16 +15,17 @@
  */
 package uk.gov.gchq.palisade.service.policy.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RulesTest {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ApplicationConfiguration().objectMapper();
 
     @Test
     void testThatUpdatingDifferentRules() {
@@ -61,7 +62,7 @@ class RulesTest {
                 .addRule("ageOffRule", new TestRule()
                 );
 
-        final String testRule = "{\"message\":\"Age off and visibility filtering\",\"rules\":{\"ageOffRule\":{\"className\":\"uk.gov.gchq.palisade.service.policy.common.TestRule\"}}}";
+        final String testRule = "{\"message\":\"Age off and visibility filtering\",\"rules\":{\"ageOffRule\":{\"@type\":\"TestRule\"}}}";
 
         assertThat(testRule)
                 .as("The string testRule should match the serialised json rule object")

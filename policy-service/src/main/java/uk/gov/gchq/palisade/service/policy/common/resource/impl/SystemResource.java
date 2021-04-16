@@ -16,9 +16,16 @@
 
 package uk.gov.gchq.palisade.service.policy.common.resource.impl;
 
+import uk.gov.gchq.palisade.service.policy.common.RegisterJsonSubType;
 import uk.gov.gchq.palisade.service.policy.common.resource.AbstractResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.ParentResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 
+/**
+ * A SystemResource is the Palisade representation of a root directory inside a system
+ * {@code eg. "file:/dev/Palisade/pom.xml" = System "/" -> Directory "/dev/" -> Directory "/dev/Palisade/" -> File "/dev/Palisade/pom.xml" }
+ */
+@RegisterJsonSubType(Resource.class)
 public class SystemResource extends AbstractResource implements ParentResource {
     private static final long serialVersionUID = 1L;
 

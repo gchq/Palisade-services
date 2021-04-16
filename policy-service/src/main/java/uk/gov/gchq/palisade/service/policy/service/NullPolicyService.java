@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.service.policy.service;
 
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyService;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 

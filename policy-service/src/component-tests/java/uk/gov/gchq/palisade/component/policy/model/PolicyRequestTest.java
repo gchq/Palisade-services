@@ -24,6 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
+import uk.gov.gchq.palisade.component.policy.MapperConfiguration;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = PolicyRequestTest.class)
+@ContextConfiguration(classes = {PolicyRequestTest.class, MapperConfiguration.class})
 class PolicyRequestTest extends CommonTestData {
 
     @Autowired

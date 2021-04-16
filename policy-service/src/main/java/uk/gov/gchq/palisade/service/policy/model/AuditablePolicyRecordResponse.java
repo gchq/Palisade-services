@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import uk.gov.gchq.palisade.service.policy.common.Generated;
 
 import java.util.Objects;
@@ -30,15 +33,17 @@ public final class AuditablePolicyRecordResponse {
     private final PolicyResponse policyResponse;
     private final AuditErrorMessage auditErrorMessage;
 
+    @JsonCreator
     private AuditablePolicyRecordResponse(
-            final PolicyResponse policyResponse,
-            final AuditErrorMessage auditErrorMessage) {
+            final @JsonProperty("policyResponse") PolicyResponse policyResponse,
+            final @JsonProperty("auditErrorMessage") AuditErrorMessage auditErrorMessage) {
         this.policyResponse = policyResponse;
         this.auditErrorMessage = auditErrorMessage;
     }
 
     /**
      * Chain any errors from previous stream elements
+     *
      * @param audit the previous audit or null
      * @return a new instance of this object
      */
@@ -66,6 +71,7 @@ public final class AuditablePolicyRecordResponse {
 
         /**
          * The creator function
+         *
          * @return the composed immutable object
          */
         public static IPolicyResponse create() {
@@ -78,6 +84,7 @@ public final class AuditablePolicyRecordResponse {
         public interface IPolicyResponse {
             /**
              * Compose value
+             *
              * @param response value or null
              * @return value object
              */
@@ -90,6 +97,7 @@ public final class AuditablePolicyRecordResponse {
         public interface IAuditErrorMessage {
             /**
              * Compose value
+             *
              * @param audit value or null
              * @return value object
              */

@@ -44,6 +44,7 @@ import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.policy.common.rule.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
@@ -168,10 +169,11 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
                         .as("The returned rules optional should have a value present")
                         .isPresent(),
 
-                () -> assertThat(recordRules).isPresent().get()
+                () -> assertThat(recordRules)
+                        .as("Recursively check the returned rules")
+                        .get()
                         .extracting("rules")
                         .usingRecursiveComparison()
-                        .as("Recursively check the returned rules")
                         .isEqualTo(newPolicy.getRules())
         );
     }
@@ -179,7 +181,19 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
-        assertThat(cacheProxy.getResourceRules((ACCESSIBLE_JSON_TXT_FILE.getId()))).get().isNotNull();
+        var resourceRules = cacheProxy.getResourceRules((ACCESSIBLE_JSON_TXT_FILE.getId()));
+
+        assertThat(resourceRules)
+                .as("Check that a rule has been returned")
+                .isPresent();
+
+        assertThat(resourceRules.get().getRules())
+                .as("Check that the rules map contains the correct rule")
+                .containsKeys("Does nothing")
+                .as("Check that the rule in the map is a PassThroughRule")
+                .extractingByKey("Does nothing")
+                .isInstanceOf(PassThroughRule.class);
+
 
         // Given - a sufficient amount of time has passed
         TimeUnit.SECONDS.sleep(1);

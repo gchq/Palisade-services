@@ -16,14 +16,14 @@
 
 package uk.gov.gchq.palisade.component.policy;
 
-import uk.gov.gchq.palisade.service.policy.ApplicationTestData.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.common.Context;
-import uk.gov.gchq.palisade.service.policy.common.User;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
+import uk.gov.gchq.palisade.service.policy.common.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.common.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;

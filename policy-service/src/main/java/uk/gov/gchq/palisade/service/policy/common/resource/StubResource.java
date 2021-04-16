@@ -17,26 +17,38 @@
 package uk.gov.gchq.palisade.service.policy.common.resource;
 
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.policy.common.service.ConnectionDetail;
 
 import java.util.Comparator;
 
+/**
+ * A mock resource used in tests within this service
+ */
 public class StubResource extends AbstractLeafResource {
+    private static final long serialVersionUID = 1L;
 
+    private static final Comparator<StubResource> COMP = Comparator.comparing(StubResource::getSerialisedFormat)
+            .thenComparing(StubResource::getType)
+            .thenComparing(StubResource::getId);
     private static final SystemResource PARENT = new SystemResource().id("file");
 
-    public StubResource() {
-    }
-
+    /**
+     * Builder Constructor for the stub resource, taking in all individual componenets of a LeafResource and returning a StubResource
+     *
+     * @param type             the String value of the resources type
+     * @param id               the id of the resource
+     * @param format           the format of the resource, e.g. avro, txt
+     * @param connectionDetail the name of the service which is storing the data
+     */
+    @SuppressWarnings("java:S1699")
+    // supress constructor overridable method smell
     public StubResource(final String type, final String id, final String format, final ConnectionDetail connectionDetail) {
-        id(id);
-        type(type);
-        serialisedFormat(format);
-        connectionDetail(connectionDetail);
-        parent(PARENT);
+        this.id(id);
+        this.type(type);
+        this.serialisedFormat(format);
+        this.connectionDetail(connectionDetail);
+        this.parent(PARENT);
     }
 
-    private static final Comparator<StubResource> COMP = Comparator.comparing(StubResource::getSerialisedFormat).thenComparing(StubResource::getType).thenComparing(StubResource::getId);
 
     /**
      * {@inheritDoc}

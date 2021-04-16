@@ -17,12 +17,13 @@
 package uk.gov.gchq.palisade.service.policy.config;
 
 import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyService;
 import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.common.service.PolicyConfiguration;
-import uk.gov.gchq.palisade.service.policy.common.service.PolicyPrepopulationFactory;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -55,19 +56,19 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * @param policies a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
     public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
-        this.policies = policies;
+        this.policies = new ArrayList<>(policies);
     }
 
     @Override
     @Generated
     public List<StdPolicyPrepopulationFactory> getPolicies() {
-        return policies;
+        return new ArrayList<>(policies);
     }
 
     @Generated
     public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
         requireNonNull(policies);
-        this.policies = policies;
+        this.policies = new ArrayList<>(policies);
     }
 
     @Override

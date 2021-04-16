@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.policy;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
-import uk.gov.gchq.palisade.service.policy.common.User;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.impl.FileResource;
@@ -27,6 +26,7 @@ import uk.gov.gchq.palisade.service.policy.common.rule.IsTextResourceRule;
 import uk.gov.gchq.palisade.service.policy.common.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.common.rule.PredicateRule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 
 import java.util.Arrays;
 import java.util.Collections;

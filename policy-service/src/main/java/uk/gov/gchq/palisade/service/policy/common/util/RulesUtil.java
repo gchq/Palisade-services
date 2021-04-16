@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.common;
+package uk.gov.gchq.palisade.service.policy.common.util;
 
+import uk.gov.gchq.palisade.service.policy.common.Context;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.common.user.User;
 
 import java.io.Serializable;
 
@@ -26,12 +28,12 @@ import static java.util.Objects.isNull;
 /**
  * Common utility methods.
  */
-public final class Util {
+public final class RulesUtil {
 
     /**
      * Empty constructor
      */
-    private Util() {
+    private RulesUtil() {
     }
 
     /**

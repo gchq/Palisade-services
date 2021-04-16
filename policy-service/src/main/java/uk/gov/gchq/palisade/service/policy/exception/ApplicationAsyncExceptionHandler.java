@@ -23,6 +23,9 @@ import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * An Async Exception handler to handle asynchronous exceptions thrown in this service
+ */
 public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAsyncExceptionHandler.class);

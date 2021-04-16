@@ -15,8 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.service.policy.common.Context;
@@ -28,10 +31,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
- * Note all of the services can potentially send an error message.
+ * Represents information for an error that has occurred during the processing of a request.
+ * This information is forwarded to the Audit Service.
+ * Note all the services can potentially send an error message.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditErrorMessage extends AuditMessage {
 
     private final Throwable error;  //Error that occurred
@@ -54,12 +59,12 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AuditSuccessMessage. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * AuditSuccessMessage class.
          *
          * @return interface {@link IUserId} for the next step in the build.
@@ -70,11 +75,11 @@ public final class AuditErrorMessage extends AuditMessage {
         }
 
         /**
-         * Starter method for the Builder class that uses a PolicyRequest for the request specific part of the Audit message.
+         * Starter method for the Builder class which uses a PolicyRequest for the request specific part of the Audit message.
          * This method is called followed by the call to add resource with the IError interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request    the request message that was sent to the palisade-service
+         * @param request    the request message that was sent to the Palisade Service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */

@@ -20,11 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.policy.common.Generated;
+import uk.gov.gchq.palisade.service.policy.common.policy.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.policy.common.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.common.resource.Resource;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rule;
 import uk.gov.gchq.palisade.service.policy.common.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.common.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.policy.common.util.ResourceBuilder;
 
 import java.io.Serializable;
@@ -72,6 +72,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         this.recordRules = recordRules;
     }
 
+    @SuppressWarnings("java:S2658") // Suppress dynamic class loading smell
     private static Rule createRule(final String rule) {
         try {
             LOGGER.debug("Adding rule {}", rule);

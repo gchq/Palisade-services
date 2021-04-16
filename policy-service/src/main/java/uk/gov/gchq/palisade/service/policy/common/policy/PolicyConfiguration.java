@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.common.service;
+package uk.gov.gchq.palisade.service.policy.common.policy;
 
 import java.util.List;
 
+/**
+ * A configuration class used to pre-populate the service with policies
+ */
+@SuppressWarnings("java:S1452") // Suppress Generic types smell
 public interface PolicyConfiguration {
 
     /**
