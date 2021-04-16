@@ -60,7 +60,7 @@ public final class TokenMessagePair {
     public static class Builder {
 
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * TokenMessagePair instance.
          *
          * @return interface {@link IToken} for the next step in the build.

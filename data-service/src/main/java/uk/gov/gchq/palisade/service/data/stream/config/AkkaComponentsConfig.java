@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
- * Configuration for all kafka connections for the data-service
+ * Configuration for all kafka connections for the Data Service
  */
 @Configuration
 public class AkkaComponentsConfig {
@@ -67,8 +67,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
+                SerDesConfig.errorKeySerialiser(),
+                SerDesConfig.errorValueSerialiser());
 
         return ERROR_COMPONENTS.plainProducer(producerSettings);
     }
@@ -77,8 +77,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> plainSuccessSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.successKeySerializer(),
-                SerDesConfig.successValueSerializer());
+                SerDesConfig.successKeySerialiser(),
+                SerDesConfig.successValueSerialiser());
 
         return SUCCESS_COMPONENTS.plainProducer(producerSettings);
     }

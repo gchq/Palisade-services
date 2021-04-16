@@ -15,17 +15,14 @@
  */
 package uk.gov.gchq.palisade.component.palisade.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,27 +31,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PalisadeClientResponseTest {
 
     @Autowired
-    private JacksonTester<PalisadeClientResponse> jsonTester;
+    private ObjectMapper mapper;
+
+    @Test
+    void testContextLoads() {
+        assertThat(mapper)
+                .as("Check that the ObjectMapper has been autowired successfully")
+                .isNotNull();
+    }
 
     /**
-     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserializes and tests against the original response Object.
+     * Takes the JSON Object, deserialises and tests against the original response Object.
      *
-     * @throws IOException throws if the {@link PalisadeClientResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialize or deserialize the string.
+     * @throws JsonProcessingException throws if the {@link PalisadeClientResponse} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testPalisadeClientResponseSerializingAndDeserializing() throws IOException {
+    void testPalisadeClientResponseSerialisationAndDeserialisation() throws JsonProcessingException {
         PalisadeClientResponse palisadeClientResponse = new PalisadeClientResponse("tokenID");
 
-        JsonContent<PalisadeClientResponse> responseJsonContent = jsonTester.write(palisadeClientResponse);
+        var actualJson = mapper.writeValueAsString(palisadeClientResponse);
+        var actualInstance = mapper.readValue(actualJson, palisadeClientResponse.getClass());
 
-        ObjectContent<PalisadeClientResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
-        PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
+        assertThat(actualInstance)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(palisadeClientResponse);
 
-        assertThat(palisadeClientResponseObject).usingRecursiveComparison()
-                .as("Recursively compare the PalisadeClientResponse object")
+        assertThat(actualInstance)
+                .as("Recursively check that the PalisadeClientResponse object has not been modified during serialisation")
+                .usingRecursiveComparison()
                 .isEqualTo(palisadeClientResponse);
     }
 }

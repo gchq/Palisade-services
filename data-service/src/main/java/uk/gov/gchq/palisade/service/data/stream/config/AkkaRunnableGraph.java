@@ -43,7 +43,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Configuration for the Akka Runnable Graph used by the data-service for the connection to the audit-service via a
+ * Configuration for the Akka Runnable Graph used by the Data Service to send messages to the Audit Service via a
  * Kafka stream.
  */
 @Configuration

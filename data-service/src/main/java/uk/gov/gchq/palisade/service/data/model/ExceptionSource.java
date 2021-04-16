@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.data.model;
 
 /**
  * An ExceptionSource enum used to add attributes to the {@link AuditErrorMessage}
- * when reporting an error within the Data Service
+ * when reporting an error within the Data Service.
  */
 public enum ExceptionSource {
 

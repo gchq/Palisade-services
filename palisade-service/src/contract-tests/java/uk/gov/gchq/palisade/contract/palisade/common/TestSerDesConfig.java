@@ -27,63 +27,63 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * Static configuration for kafka key/value serializers/deserializers
- * - Each input has a pair of key/value deserializers
- * - Each output has a pair of key/value serializers
- * In general, the keys are not used, so the choice of serializer is not important
+ * Static configuration for kafka key/value serialisers/deserialisers
+ * - Each input has a pair of key/value deserialisers
+ * - Each output has a pair of key/value serialisers
+ * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class TestSerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private TestSerDesConfig() {
         // Static collection of objects, class should never be instantiated
     }
 
     /**
-     * Kafka key deserializer for upstream messages coming in as input
+     * Kafka key deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate key deserializer for the topic's message content
+     * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> requestKeyDeserializer() {
+    public static Deserializer<String> requestKeyDeserialiser() {
         return new StringDeserializer();
     }
 
     /**
-     * Kafka value deserializer for upstream messages coming in as input
+     * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserializer for the topic's message content
+     * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<PalisadeSystemResponse> requestValueDeserializer() {
+    public static Deserializer<PalisadeSystemResponse> requestValueDeserialiser() {
         return (String ignored, byte[] palisadeResponse) -> {
             try {
                 return MAPPER.readValue(palisadeResponse, PalisadeSystemResponse.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeResponse, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(palisadeResponse, Charset.defaultCharset()), e);
             }
         };
     }
 
     /**
-     * Kafka key deserializer for upstream messages coming in as input
+     * Kafka key deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate key deserializer for the topic's message content
+     * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> errorKeyDeserializer() {
+    public static Deserializer<String> errorKeyDeserialiser() {
         return new StringDeserializer();
     }
 
     /**
-     * Kafka value deserializer for upstream messages coming in as input
+     * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserializer for the topic's message content
+     * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+    public static Deserializer<AuditErrorMessage> errorValueDeserialiser() {
         return (String ignored, byte[] auditErrorMessage) -> {
             try {
                 return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditErrorMessage, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(auditErrorMessage, Charset.defaultCharset()), e);
             }
         };
     }

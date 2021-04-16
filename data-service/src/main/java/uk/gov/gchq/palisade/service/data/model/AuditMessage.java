@@ -37,11 +37,11 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that is to be
+ * This is the parent class for Audit information. It represents the common component of the data that is to be
  * sent to Audit Service.  Note this version of {@code AuditMessage} is unique in comparison to the {@code AuditMessage}
- * from the other service in that it will include the {@code leafResourceId}.  In addition the {@code userID},
- * {@code resourceID} and {@code context} can be null.  This can occur when this message represents an error for a
- * request that is not authorised to access the data.
+ * from the other service in that it will include the {@code leafResourceId}. In addition, it is possible that the
+ * the {@code userId}, {@code resourceId} and {@code context} can be null. This can occur when this message represents
+ * an error for a request that is not authorised to access the data.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
