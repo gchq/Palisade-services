@@ -16,13 +16,17 @@
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import akka.stream.Materializer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.service.palisade.common.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 
@@ -34,19 +38,27 @@ import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 public class ApplicationConfiguration {
 
     @Bean
-    PalisadeService palisadeService(final Materializer materializer) {
-        return new UUIDPalisadeService(materializer);
+    PalisadeService palisadeService(final Materializer materialiser) {
+        return new UUIDPalisadeService(materialiser);
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return a new instance of the ObjectMapper
      */
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
     }
 
 }

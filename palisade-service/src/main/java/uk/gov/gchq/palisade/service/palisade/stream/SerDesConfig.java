@@ -21,6 +21,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 
@@ -31,8 +32,8 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
  * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class SerDesConfig {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -43,7 +44,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> requestKeySerializer() {
+    public static Serializer<String> requestKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -52,23 +53,14 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<PalisadeSystemResponse> requestSerializer() {
+    public static Serializer<PalisadeSystemResponse> requestSerialiser() {
         return (String ignored, PalisadeSystemResponse request) -> {
             try {
                 return MAPPER.writeValueAsBytes(request);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + request.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + request.toString(), e);
             }
         };
-    }
-
-    /**
-     * Kafka key serialiser for downstream messages going out as output
-     *
-     * @return an appropriate key serialiser for the topic's message content
-     */
-    public static Serializer<String> errorKeySerializer() {
-        return new StringSerializer();
     }
 
     /**
@@ -76,12 +68,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage errorRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(errorRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + errorRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + errorRequest.toString(), e);
             }
         };
     }
@@ -91,7 +83,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<byte[]> passthroughValueSerializer() {
+    public static Serializer<byte[]> passthroughValueSerialiser() {
         return (String ignored, byte[] bytes) -> bytes;
     }
 }

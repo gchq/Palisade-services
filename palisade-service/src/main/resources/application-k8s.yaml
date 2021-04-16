@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 
-# TODO: replace h2 with redis
 spring:
   profiles:
     include:

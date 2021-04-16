@@ -20,7 +20,6 @@ import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,14 +35,20 @@ public class CommonTestData {
         PALISADE_REQUEST = PalisadeClientRequest.Builder.create()
                 .withUserId("testUserId")
                 .withResourceId("/test/resourceId")
-                .withContext(Collections.singletonMap("purpose", "testContext"));
+                .withContext(Map.of("purpose", "testContext"));
+    }
 
+    static {
         AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder
                 .create(PALISADE_REQUEST, Map.of("messages", "10")).withError(ERROR);
+    }
 
+    static {
         AUDITABLE_PALISADE_REQUEST = AuditablePalisadeSystemResponse.Builder
                 .create().withPalisadeRequest(PALISADE_REQUEST);
+    }
 
+    static {
         AUDITABLE_PALISADE_ERROR = AuditablePalisadeSystemResponse.Builder
                 .create().withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
     }

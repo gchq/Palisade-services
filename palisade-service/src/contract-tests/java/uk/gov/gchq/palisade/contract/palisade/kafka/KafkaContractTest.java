@@ -20,7 +20,6 @@ import akka.kafka.ConsumerSettings;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
-import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -46,7 +45,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,7 +59,6 @@ import uk.gov.gchq.palisade.service.palisade.PalisadeApplication;
 import uk.gov.gchq.palisade.service.palisade.common.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.common.Token;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
@@ -87,15 +84,15 @@ import static org.mockito.ArgumentMatchers.any;
 /**
  * An external requirement of the service is to connect to one kafka topic.
  * The input is the requests for data that come from the client via the website
- * The downstream "request" topic is written to by this service and read by the user-service.
+ * The downstream "request" topic is written to by this service and read by the User Service.
  */
 @SpringBootTest(
         classes = PalisadeApplication.class,
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaContractTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
+@Import({KafkaContractTest.KafkaInitialiser.Config.class})
+@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitialiser.class})
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
     public static final String REGISTER_DATA_REQUEST = "/api/registerDataRequest";
@@ -107,7 +104,7 @@ class KafkaContractTest {
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
-    private Materializer akkaMaterializer;
+    private Materializer akkaMaterialiser;
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
@@ -121,27 +118,29 @@ class KafkaContractTest {
         Mockito.doReturn(ContractTestData.REQUEST_TOKEN).when(service).createToken(any());
 
         // Given - we are already listening to the service input
-        ConsumerSettings<String, PalisadeSystemResponse> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserializer(), TestSerDesConfig.requestValueDeserializer())
+        var consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserialiser(), TestSerDesConfig.requestValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 3;
 
-        Probe<ConsumerRecord<String, PalisadeSystemResponse>> probe = Consumer
+        var probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
-        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<PalisadeClientRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
+        var headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        var entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        var response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
 
         // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode())
+                .as("Check that the REST call has been accepted")
+                .isEqualTo(HttpStatus.ACCEPTED);
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, PalisadeSystemResponse>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, PalisadeSystemResponse>> results = LongStream.range(0, recordCount)
+        var resultSeq = probe.request(recordCount);
+        var results = LongStream.range(0, recordCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -194,27 +193,29 @@ class KafkaContractTest {
         Mockito.when(service.registerDataRequest(any())).thenThrow(RuntimeException.class);
 
         // Given - we are already listening to the service input
-        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
+        var consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserialiser(), TestSerDesConfig.errorValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 
-        Probe<ConsumerRecord<String, AuditErrorMessage>> probe = Consumer
+        var probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
-        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.ERROR_TOKEN));
-        HttpEntity<PalisadeClientRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
+        var headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.ERROR_TOKEN));
+        var entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        var response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
 
         // Then - the REST request encountered an error
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getStatusCode())
+                .as("Check that the REST call has returned a server error")
+                .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         // When - results are pulled from the error stream
-        Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, AuditErrorMessage>> results = LongStream.range(0, recordCount)
+        var resultSeq = probe.request(recordCount);
+        var results = LongStream.range(0, recordCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -224,27 +225,33 @@ class KafkaContractTest {
                 .as("Check there is only 1 result from the error probe")
                 .hasSize(1)
                 .allSatisfy(result -> {
-                    assertThat(result.value()).usingRecursiveComparison()
-                            .ignoringFieldsOfTypes(Throwable.class).ignoringFields("timestamp")
+                    assertThat(result)
                             .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable and TimeStamp values")
+                            .extracting(ConsumerRecord::value)
+                            .usingRecursiveComparison()
+                            .ignoringFields("timestamp", "error")
                             .isEqualTo(ContractTestData.ERROR_OBJ);
-                    assertThat(result.value().getError())
+
+                    assertThat(result)
                             .as("Check the error class within the AuditErrorMessage")
+                            .extracting(ConsumerRecord::value)
+                            .extracting(AuditErrorMessage::getError)
                             .isInstanceOf(Throwable.class);
+
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .as("Check the byte value of the request-token header")
                             .isEqualTo(ContractTestData.ERROR_TOKEN.getBytes());
                 });
     }
 
-    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
+    public static class KafkaInitialiser implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitialiser.class);
 
         static final KafkaContainer KAFKA = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA.getFirstMappedPort())))) {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitialiser.KAFKA.getFirstMappedPort())))) {
                 admin.createTopics(newTopics);
                 LOGGER.info("created topics: " + admin.listTopics().names().get());
             }
@@ -255,6 +262,8 @@ class KafkaContractTest {
             configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test");
             KAFKA.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             KAFKA.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+            KAFKA.addEnv("KAFKA_ADVERTISED_HOST_NAME", "zookeeper");
+            KAFKA.addEnv("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181");
             KAFKA.start();
 
             // test kafka config
@@ -296,7 +305,7 @@ class KafkaContractTest {
 
             @Bean
             @Primary
-            Materializer materializer(final ActorSystem system) {
+            Materializer materialiser(final ActorSystem system) {
                 return Materializer.createMaterializer(system);
             }
         }

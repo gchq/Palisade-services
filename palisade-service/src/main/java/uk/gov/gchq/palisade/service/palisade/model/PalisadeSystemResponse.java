@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.palisade.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import uk.gov.gchq.palisade.service.palisade.common.Context;
 import uk.gov.gchq.palisade.service.palisade.common.Generated;
@@ -32,16 +34,18 @@ import java.util.stream.Collectors;
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This version represents the original request.
- * Next in the sequence is the input for user-service where this data will be used as a request for a User.
- * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * Next in the sequence is the input for User Service where this data will be used as a request for a User.
+ * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest is the client request that has come into the Palisade Service.
- * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse is the response from the Palisade Service which is sent to the User Service
+ * uk.gov.gchq.palisade.service.user.request.UserRequest is the object received by the User Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class PalisadeSystemResponse {
 
-    private final String userId;  //Unique identifier for the user.
-    private final String resourceId;  //Resource that that is being asked to access.
+    private final String userId;  // Unique identifier for the user.
+    private final String resourceId;  // Resource that that is being asked to access.
     private final Context context;
 
     @JsonCreator
