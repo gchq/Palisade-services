@@ -15,8 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.audit.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.service.audit.common.Context;
@@ -35,6 +38,8 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
  * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the Data Service.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditSuccessMessage extends AuditMessage {
 
     private final String leafResourceId;  //leafResource ID for the resource

@@ -31,6 +31,7 @@ class SerDesHealthIndicatorTest {
 
     @BeforeEach
     void setup() {
+        SerDesHealthIndicator.SER_DES_EXCEPTIONS.clear();
         healthIndicator = new SerDesHealthIndicator();
     }
 

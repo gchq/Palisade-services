@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.audit.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.service.audit.common.Context;
 import uk.gov.gchq.palisade.service.audit.common.Generated;
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 
 import java.util.Map;
 import java.util.Objects;
@@ -35,11 +35,10 @@ import java.util.StringJoiner;
  * This is the parent class for Audit information. It represents the common component of the data that has been
  * sent from each of the different services.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
     @SuppressWarnings("java:S2039") // Suppress the 'Member variable visibility' warning
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
 
     private final String userId; // Unique identifier for the user.
     private final String resourceId; // Resource that that is being asked to access.

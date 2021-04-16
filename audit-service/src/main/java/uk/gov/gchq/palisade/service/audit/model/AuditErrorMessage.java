@@ -15,9 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.audit.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.service.audit.common.Context;
@@ -34,6 +37,8 @@ import java.util.StringJoiner;
  * Note each of the services can potentially send an error message. This version is for recording the information in
  * the Audit Service.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonTypeInfo(use = Id.NONE)
 public final class AuditErrorMessage extends AuditMessage {
 
     private final JsonNode error;  //Error that occurred

@@ -27,6 +27,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.audit.common.Token;
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
@@ -44,7 +45,7 @@ public class ContractTestData {
         // hide the constructor, this is just a collection of static objects
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     public static final JsonNode ERROR_REQUEST_NODE;
     public static final JsonNode GOOD_SUCCESS_REQUEST_NODE;
     public static final JsonNode BAD_SUCCESS_REQUEST_NODE;
@@ -53,9 +54,9 @@ public class ContractTestData {
     public static final AuditSuccessMessage GOOD_SUCCESS_REQUEST_OBJ;
     public static final AuditSuccessMessage BAD_SUCCESS_REQUEST_OBJ;
     public static final BadRequest BAD_REQUEST_OBJ;
-    public static final String ERROR_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"exception message\",\"suppressed\":[],\"localizedMessage\":\"exception message\"}}";
-    public static final String GOOD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"data-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
-    public static final String BAD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.service.audit.common.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
+    public static final String ERROR_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"exception message\",\"suppressed\":[],\"localizedMessage\":\"exception message\"}}";
+    public static final String GOOD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"data-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
+    public static final String BAD_SUCCESS_REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@type\":\"Context\",\"contents\":{\"purpose\":\"purpose\"}},\"serviceName\":\"user-service\",\"timestamp\":\"2020-01-01\",\"serverIP\":\"The IP of the server\",\"serverHostname\":\"The name of the server\",\"attributes\":{\"messages\":\"5\"},\"leafResourceId\":\"file:/test/resource/file.txt\"}";
     public static final String BAD_REQUEST_JSON = "{\"message\":\"This is a message that should not be deserialised by the Audit-Service\"}";
 
     static {

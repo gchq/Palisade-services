@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
@@ -47,7 +48,7 @@ import java.time.format.DateTimeFormatter;
  */
 public final class SerDesConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerDesConfig.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ApplicationConfiguration().objectMapper();
     private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
     private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
