@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Provides an auditable wrapper to the {@link DataService}.  For each of the methods provided in the in the
+ * Provides an auditable wrapper to the {@link DataService}. For each of the methods provided in the in the
  * {@code DataService}, there is a corresponding method in this class for requesting the information and providing a
  * response wrapped with the data or the exception when an error has occurred.
  */
@@ -65,7 +65,7 @@ public class AuditableDataService {
     }
 
     /**
-     * Reads the authorised resource and passes this onto the client in the form an {@link OutputStream}.  The response
+     * Reads the authorised resource and passes this onto the client in the form an {@link OutputStream}. The response
      * is used in the construction of the audit message for this request.
      *
      * @param auditableAuthorisedDataRequest provides the reference to the authorised data request

@@ -65,7 +65,7 @@ public class AkkaSystemConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    Materializer getMaterializer(final ActorSystem system) {
+    Materializer getMaterialiser(final ActorSystem system) {
         return Materializer.createMaterializer(system);
     }
 }

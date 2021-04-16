@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Simple implementation of a data-service, which reads using a data-reader and audits the
+ * Simple implementation of a Data Service, which reads using a data-reader and audits the
  * number of records processed and returned.
  */
 public class SimpleDataService implements DataService {
@@ -59,7 +59,7 @@ public class SimpleDataService implements DataService {
     }
 
     /**
-     * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
+     * Query for the references. It will return the information needed to retrieve the resources. If there is no
      * data to be returned, a {@link ForbiddenException} is thrown.
      *
      * @param dataRequest data provided by the client for requesting the resource
