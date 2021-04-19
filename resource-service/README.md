@@ -80,7 +80,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    }
 }
 ```
@@ -107,7 +107,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    },
    "resource":{
       "class":"uk.gov.gchq.palisade.resource.impl.FileResource",
@@ -116,7 +116,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
          
       },
       "connectionDetail":{
-         "class":"uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+         "class":"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
          "serviceName":"data-service"
       },
       "parent":{

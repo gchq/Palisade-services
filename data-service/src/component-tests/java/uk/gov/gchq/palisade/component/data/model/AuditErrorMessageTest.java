@@ -23,7 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 

@@ -46,7 +46,7 @@ import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
 import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
+import uk.gov.gchq.palisade.service.resource.hadoop.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
