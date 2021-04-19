@@ -42,13 +42,13 @@ public interface DataReader {
      * to do so, or if it is currently serving too many requests then it may throw a
      * {@link NoCapacityException}.
      *
-     * @param request {@link DataReaderRequest} containing the resource to be
-     *                read, rules to be applied, the user requesting the data
-     *                and the purpose for accessing the data.
+     * @param request          {@link DataReaderRequest} containing the resource to be
+     *                         read, rules to be applied, the user requesting the data
+     *                         and the purpose for accessing the data.
      * @param recordsProcessed the number of records processed (for auditing)
      *                         that will be effected by the data reader
-     * @param recordsReturned the number of records returned (for auditing)
-     *                        that will be effected by the data reader
+     * @param recordsReturned  the number of records returned (for auditing)
+     *                         that will be effected by the data reader
      * @return a {@link DataReaderRequest} that contains the stream of data
      * @throws NoCapacityException if the data reader is unable to serve this request due to
      *                             workload issues or lack of capacity
@@ -58,8 +58,8 @@ public interface DataReader {
     /**
      * Adds a serialiser with the {@link DataFlavour} and {@link Serialiser} values
      *
-     * @param flavour       the {@link DataFlavour} value to be added
-     * @param serialiser    the {@link Serialiser} value to be added
+     * @param flavour    the {@link DataFlavour} value to be added
+     * @param serialiser the {@link Serialiser} value to be added
      */
     void addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser);
 

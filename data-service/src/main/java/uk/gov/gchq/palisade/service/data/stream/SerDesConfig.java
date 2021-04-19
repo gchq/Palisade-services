@@ -27,7 +27,6 @@ import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
 
-
 /**
  * Static configuration for kafka key/value serialisers.
  * Each output has a pair of key/value serialisers.

@@ -81,14 +81,14 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "attribute-masking-service.deployment.fullname" . }}
+        - name: {{ include "attribute-masking-service.classpathJars.name" . }}
           mountPath: {{ include "attribute-masking-service.deployment.path" . }}
         - name: config-volume
           mountPath: {{ include "attribute-masking-service.config.path" . }}
       volumes:
-      - name: {{ include "attribute-masking-service.deployment.fullname" . }}
+      - name: {{ include "attribute-masking-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "attribute-masking-service.deployment.fullname" . }}-{{ include "palisade.namespace" . }}
+          claimName: {{ include "attribute-masking-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:

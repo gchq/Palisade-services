@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.data.config;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserConstructorNotFoundException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
+import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;

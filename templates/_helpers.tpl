@@ -42,38 +42,27 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- if eq .Values.global.hosting "local" }}
-{{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
-{{- else if eq .Values.global.hosting "aws" }}
-{{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
+{{- define "palisade.classpathJars.name" }}
+{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "palisade.deployment.revision" .) (include "palisade.namespace" .) | replace "/" "-"}}
 {{- end }}
-{{- else }}
+
+{{/*
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "palisade.classpathJars.mounts" }}
 {{- if eq .Values.global.hosting "local" }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath (include "palisade.deployment.revision" .) }}
 {{- else if eq .Values.global.hosting "aws" }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
-{{- end }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath (include "palisade.deployment.revision" .) }}
 {{- end }}
 {{- end }}
 
 {{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade.deployment.name" }}
-{{- include "palisade.deployment.path" . | base }}
-{{- end }}
-
-{{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
-*/}}
-{{- define "palisade.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "palisade.deployment.name" . }}
+{{- define "palisade.deployment.revision" }}
+{{- $revision := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 
 {{/*

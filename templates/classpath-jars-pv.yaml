@@ -26,9 +26,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  name: {{ include "palisade.classpathJars.name" . }}
   labels:
-    selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+    selectorFilter: {{ include "palisade.classpathJars.name" . }}
     {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
     {{- else if eq $sc "efs-sc" }}
@@ -45,12 +45,12 @@ spec:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
   {{- if eq $sc "hostpath" }}
   hostPath:
-    path: {{ include "palisade.deployment.path" . }}
+    path: {{ include "palisade.classpathJars.mounts" . }}
     type: DirectoryOrCreate
   {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ include "palisade.deployment.path" . }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ include "palisade.classpathJars.mounts" . }}
   {{- end }}
 {{- end }}

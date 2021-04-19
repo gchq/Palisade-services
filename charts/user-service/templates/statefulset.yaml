@@ -81,14 +81,14 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "user-service.deployment.fullname" . }}
+        - name: {{ include "user-service.classpathJars.name" . }}
           mountPath: {{ include "user-service.deployment.path" . }}
         - name: config-volume
           mountPath: {{ include "user-service.config.path" . }}
       volumes:
-      - name: {{ include "user-service.deployment.fullname" . }}
+      - name: {{ include "user-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "user-service.deployment.fullname" . }}-{{ include "palisade.namespace" . }}
+          claimName: {{ include "user-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:

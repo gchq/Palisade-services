@@ -25,17 +25,11 @@ metadata:
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
-  ports:
-  - name: palisade-redis
-    port: 6379
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
-{{- if eq .Values.global.hosting "aws" }}
-  externalName: redis-master.palisade-shared.svc.cluster.local
-  ports:
-  - port: 6379
-{{- else }}
-  externalName: palisade-redis-master.{{ include "palisade.namespace" . }}.svc.cluster.local
-  ports:
-  - port: 6379
-{{- end }}
+  # FQDN can be shortened inside current namespace, and inside current cluster
+  {{- if eq .Values.global.hosting "aws" }}
+  externalName: redis-master.palisade-shared
+  {{- else }}
+  externalName: palisade-redis-master.{{ include "palisade.namespace" . }}
+  {{- end }}

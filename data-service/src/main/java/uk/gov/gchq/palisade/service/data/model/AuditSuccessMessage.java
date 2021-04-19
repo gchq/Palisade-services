@@ -65,8 +65,8 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link ILeafResourceId} for the next step in the build.
          */
         public static ILeafResourceId create() {
-            return leafResourceId ->  userId -> resourceId -> context -> attributes ->
-                    new AuditSuccessMessage(leafResourceId,  userId, resourceId, context, attributes);
+            return leafResourceId -> userId -> resourceId -> context -> attributes ->
+                    new AuditSuccessMessage(leafResourceId, userId, resourceId, context, attributes);
         }
 
         /**
@@ -79,7 +79,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          */
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
             DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedDataRequest readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
+            AuthorisedDataRequest readerRequestModel = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())

@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.model;
 
-/**
- * An ExceptionSource enum used to add attributes to the {@link AuditErrorMessage}
- * when reporting an error within the Data Service.
- */
-public enum ExceptionSource {
+package uk.gov.gchq.palisade.service.policy.rule;
 
-    /**
-     * If an exception is thrown when requesting the authorised resources.
-     */
-    AUTHORISED_REQUEST,
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.user.User;
 
-    /**
-     * If an exception is thrown in reading the resource.
-     */
-    READ;
+import java.io.Serializable;
 
-    public static final String ATTRIBUTE_KEY = "METHOD";
-
+public class PassThroughRule<T extends Serializable> implements Serializable, Rule<T> {
+    @Override
+    public T apply(final T record, final User user, final Context context) {
+        return record;
+    }
 }
