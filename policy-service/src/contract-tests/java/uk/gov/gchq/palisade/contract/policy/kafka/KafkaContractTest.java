@@ -157,7 +157,7 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture()
                 .join();
 
@@ -276,7 +276,7 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture()
                 .join();
 
@@ -430,7 +430,7 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaContractTest.KafkaInitializer.KAFKA.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture()
                 .join();
 

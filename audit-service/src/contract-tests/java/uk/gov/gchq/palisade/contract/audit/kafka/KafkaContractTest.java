@@ -228,7 +228,7 @@ class KafkaContractTest {
             .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-            .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
+            .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
             .toCompletableFuture().join();
 
         waitForService();
