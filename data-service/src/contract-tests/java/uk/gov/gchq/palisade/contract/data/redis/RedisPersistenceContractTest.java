@@ -30,20 +30,20 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
 import uk.gov.gchq.palisade.contract.data.redis.RedisPersistenceContractTest.Initializer;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.concurrent.CompletableFuture;
 

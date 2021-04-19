@@ -72,7 +72,7 @@ class PalisadeServiceTest extends CommonTestData {
         // When we make a request to the client
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
         // And then force an error to be returned, signifying a rejected request
-        service.errorMessage(PALISADE_REQUEST, token.join(), Map.of("messages", "10"), ERROR);
+        service.errorMessage(PALISADE_REQUEST, token.join(), Map.of("messages", "10"), ERROR).join();
 
         // Then the response is valid and contains all the information we require
         assertAll(

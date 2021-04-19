@@ -30,12 +30,9 @@ spec:
     port: 9092
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
-{{- if eq .Values.global.hosting "aws" }}
-  externalName: kafka.palisade-shared.svc.cluster.local
-  ports:
-  - port: 9092
-{{- else }}
-  externalName: palisade-kafka.{{ include "palisade.namespace" . }}.svc.cluster.local
-  ports:
-  - port: 9092
-{{- end }}
+  # FQDN can be shortened inside current namespace, and inside current cluster
+  {{- if eq .Values.global.hosting "aws" }}
+  externalName: kafka.palisade-shared
+  {{- else }}
+  externalName: palisade-kafka.{{ include "palisade.namespace" . }}
+  {{- end }}

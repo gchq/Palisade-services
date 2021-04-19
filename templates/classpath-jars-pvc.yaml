@@ -30,7 +30,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  name: {{ include "palisade.classpathJars.name" . }}
   labels:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
@@ -50,5 +50,5 @@ spec:
   {{- if eq $provisioning "static" }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+      selectorFilter: {{ include "palisade.classpathJars.name" . }}
   {{- end }}

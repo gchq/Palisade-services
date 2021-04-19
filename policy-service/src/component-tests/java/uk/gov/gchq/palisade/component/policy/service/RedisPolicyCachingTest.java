@@ -39,13 +39,14 @@ import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.component.policy.service.RedisPolicyCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
-import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.policy.config.DefaultConfiguration;
+import uk.gov.gchq.palisade.service.policy.rule.IsTextResourceRule;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
 import java.io.Serializable;
@@ -57,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(
-        classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
+        classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
         properties = {"spring.cache.redis.timeToLive=1s"}
 )

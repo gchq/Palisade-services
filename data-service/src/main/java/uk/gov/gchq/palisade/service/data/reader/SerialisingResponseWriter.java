@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.RulesUtil;
 

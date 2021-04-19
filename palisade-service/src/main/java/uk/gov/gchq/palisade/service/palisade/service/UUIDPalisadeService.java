@@ -23,6 +23,7 @@ import java.util.UUID;
 
 /**
  * A UUID Palisade service which extends {@link PalisadeService}, used to create the uuid token.
+ *
  * @implNote A duplicate of this class can be created with a new implementation of token generation in the future.
  */
 public class UUIDPalisadeService extends PalisadeService {

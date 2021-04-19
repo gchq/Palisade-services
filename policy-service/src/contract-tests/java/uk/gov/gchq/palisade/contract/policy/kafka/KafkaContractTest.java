@@ -234,7 +234,7 @@ class KafkaContractTest {
 
                             assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
                                     .as("The class of the rules object inside the message should be %s", "PassThroughRule")
-                                    .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule");
+                                    .isEqualTo("uk.gov.gchq.palisade.service.policy.rule.PassThroughRule");
                         })
         );
     }
@@ -431,8 +431,8 @@ class KafkaContractTest {
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
-        .toCompletableFuture()
-        .join();
+                .toCompletableFuture()
+                .join();
 
 
         // When - results are pulled from the output stream

@@ -16,11 +16,11 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.reader.DataReader;
 
 import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;

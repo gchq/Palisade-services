@@ -87,7 +87,8 @@ public final class AuditablePolicyResourceResponse {
         /**
          * Takes the data for the request, rules.  Is a partial constructor and is expecting the modified resources
          * to complete the build of the class.
-         * @param auditablePolicyResourceRules  holds the data from the request and the related rules
+         *
+         * @param auditablePolicyResourceRules holds the data from the request and the related rules
          * @return the composed immutable object
          */
         public static IModifiedResource create(final AuditablePolicyResourceRules auditablePolicyResourceRules) {

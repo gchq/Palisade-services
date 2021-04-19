@@ -43,8 +43,8 @@ global:
       nameOverride: "kafka-proxy"
 
   zookeeper:
-    exports: {}
-    nameOverride: "zookeeper-proxy"
+    exports:
+      nameOverride: "zookeeper-proxy"
 
   redis:
     # install: install redis persistence and caching data storage platform

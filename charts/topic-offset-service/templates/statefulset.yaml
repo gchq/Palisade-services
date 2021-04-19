@@ -81,14 +81,14 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "topic-offset-service.deployment.fullname" . }}
+        - name: {{ include "topic-offset-service.classpathJars.name" . }}
           mountPath: {{ include "topic-offset-service.deployment.path" . }}
         - name: config-volume
           mountPath: {{ include "topic-offset-service.config.path" . }}
       volumes:
-      - name: {{ include "topic-offset-service.deployment.fullname" . }}
+      - name: {{ include "topic-offset-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "topic-offset-service.deployment.fullname" . }}-{{ include "palisade.namespace" . }}
+          claimName: {{ include "topic-offset-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:

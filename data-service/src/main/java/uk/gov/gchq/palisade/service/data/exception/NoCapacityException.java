@@ -27,7 +27,7 @@ public class NoCapacityException extends IOException {
     /**
      * Constructs a new {@link NoCapacityException} with the specified detail message.
      *
-     * @param message   a {@link String} value detailing the error
+     * @param message a {@link String} value detailing the error
      */
     public NoCapacityException(final String message) {
         super(message);
@@ -36,7 +36,7 @@ public class NoCapacityException extends IOException {
     /**
      * Constructs a new {@link NoCapacityException} with the cause.
      *
-     * @param cause     a {@link Throwable} that caused the error
+     * @param cause a {@link Throwable} that caused the error
      */
     public NoCapacityException(final Throwable cause) {
         super(cause);
@@ -45,8 +45,8 @@ public class NoCapacityException extends IOException {
     /**
      * Constructs a new {@link NoCapacityException} with the specified detail message and cause.
      *
-     * @param message   a {@link String} value detailing the error
-     * @param cause     a {@link Throwable} that caused the error
+     * @param message a {@link String} value detailing the error
+     * @param cause   a {@link Throwable} that caused the error
      */
     public NoCapacityException(final String message, final Throwable cause) {
         super(message, cause);

@@ -83,14 +83,14 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "audit-service.deployment.fullname" . }}
+        - name: {{ include "audit-service.classpathJars.name" . }}
           mountPath: {{ include "audit-service.deployment.path" . }}
         - name: config-volume
           mountPath: {{ include "audit-service.config.path" . }}
       volumes:
-      - name: {{ include "audit-service.deployment.fullname" . }}
+      - name: {{ include "audit-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "audit-service.deployment.fullname" . }}-{{ include "palisade.namespace" . }}
+          claimName: {{ include "audit-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.policy.common;
+package uk.gov.gchq.palisade.service.policy.rule;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.user.User;
 
 import java.io.Serializable;
 
-public class PassThroughRule implements Serializable, Rule<Resource> {
-    private static final long serialVersionUID = 1L;
-
-    public Resource apply(final Resource resource, final User user, final Context context) {
-        return resource;
+public class HasTestingPurpose<T extends Serializable> implements Serializable, Rule<T> {
+    @Override
+    public T apply(final T record, final User user, final Context context) {
+        if (context.getPurpose().equalsIgnoreCase("testing")) {
+            return record;
+        } else {
+            return null;
+        }
     }
 }
