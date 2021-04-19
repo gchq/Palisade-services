@@ -16,12 +16,11 @@
 package uk.gov.gchq.palisade.component.data.common;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -31,6 +30,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.Map;
@@ -109,15 +109,23 @@ public class CommonTestData {
     public static final AuthorisedRequestEntity ENTITY1 = new AuthorisedRequestEntity(
             TOKEN + "1",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
+            new FileResource().id(RESOURCE_ID + "1")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );
 
-    public static  final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
+    public static final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
             TOKEN + "2",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
+            new FileResource().id(RESOURCE_ID + "1")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );
@@ -125,7 +133,11 @@ public class CommonTestData {
     public static final AuthorisedRequestEntity ENTITY3 = new AuthorisedRequestEntity(
             TOKEN + "1",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "3"),
+            new FileResource().id(RESOURCE_ID + "3")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );

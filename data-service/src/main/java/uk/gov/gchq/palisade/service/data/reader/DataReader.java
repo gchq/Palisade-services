@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * apply the rules, then passes back to the data service the stream of data in
  * the expected format.
  * <p>
- * There is a utility method {@link uk.gov.gchq.palisade.Util#applyRulesToStream(java.util.stream.Stream, uk.gov.gchq.palisade.User, uk.gov.gchq.palisade.Context, uk.gov.gchq.palisade.rule.Rules, java.util.concurrent.atomic.AtomicLong, java.util.concurrent.atomic.AtomicLong)}
+ * There is a utility method {@link uk.gov.gchq.palisade.util.RulesUtil#applyRulesToStream(java.util.stream.Stream, uk.gov.gchq.palisade.user.User, uk.gov.gchq.palisade.Context, uk.gov.gchq.palisade.rule.Rules, java.util.concurrent.atomic.AtomicLong, java.util.concurrent.atomic.AtomicLong)}
  * that does the part of applying the rules provided your input data is in the
  * format that the rules expect.
  */
@@ -63,21 +63,4 @@ public interface DataReader {
      */
     void addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser);
 
-    /**
-     * Gets the class name
-     *
-     * @return  the {@link String} value of the class
-     */
-    default String _getClass() {
-        return getClass().getName();
-    }
-
-    /**
-     * Sets the class name
-     *
-     * @param className the {@link String} value of the class
-     */
-    default void _setClass(final String className) {
-        // do nothing.
-    }
 }

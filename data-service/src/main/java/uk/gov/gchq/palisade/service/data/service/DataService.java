@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.data.reader.DataReader;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
@@ -35,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * The {@link DataReader} will then connect to the resource and apply the rules before streaming the data back to
  * the {@link DataService} which forwards the data back to the client.
  */
-public interface DataService extends Service {
+public interface DataService {
 
     /**
      * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc).

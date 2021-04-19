@@ -26,6 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.data.config.DefaultConfiguration;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
@@ -46,7 +47,7 @@ import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY2;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY3;
 
 @DataJpaTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, DefaultConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
