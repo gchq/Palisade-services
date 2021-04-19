@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * This interface is used by DataService implementations to retrieve the {@link DataRespon}
+ * This interface is used by DataService implementations to retrieve the {@link uk.gov.gchq.palisade.service.data.model.DataReaderResponse}
  * and examine the response metadata (e.g. schema) before asking for the Palisade filtered data to be written to an {@link OutputStream}.
  */
 public interface ResponseWriter extends AutoCloseable {
