@@ -19,8 +19,8 @@ package uk.gov.gchq.palisade.service.user.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.user.User;
+import uk.gov.gchq.palisade.user.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
