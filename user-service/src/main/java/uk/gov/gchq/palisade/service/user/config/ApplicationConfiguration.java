@@ -28,12 +28,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -44,12 +44,13 @@ import java.util.concurrent.Executor;
 @Configuration
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final int THREAD_POOL = 6;
 
     /**
-     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link User}s
      * These users will be used for pre-populating the {@link UserService}
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
+     * @return a standard {@link UserConfiguration} containing a list of {@link UserPrepopulationFactory}s
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
@@ -59,9 +60,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A factory for {@link uk.gov.gchq.palisade.User} objects, using a userId, a list of authorizations and a list of roles
+     * A factory for {@link User} objects, using a userId, a list of authorizations and a list of roles
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.User} from configuration
+     * @return a standard {@link UserPrepopulationFactory} capable of building a {@link User} from configuration
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")
@@ -77,7 +78,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      */
     @Bean
     public UserServiceCachingProxy cacheableUserServiceProxy(final UserService userService) {
-        LOGGER.info("Instantiated UserServiceCachingProxy with {}", userService.getClassName());
+        LOGGER.info("Instantiated UserServiceCachingProxy with {}", userService.getClass().getName());
         return new UserServiceCachingProxy(userService);
     }
 
@@ -115,7 +116,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
     @Override
@@ -123,7 +124,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek((ThreadPoolTaskExecutor ex) -> {
             ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
+            ex.setCorePoolSize(THREAD_POOL);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }

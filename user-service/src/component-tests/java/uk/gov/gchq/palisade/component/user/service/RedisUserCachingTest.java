@@ -37,12 +37,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.component.user.service.RedisUserCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;

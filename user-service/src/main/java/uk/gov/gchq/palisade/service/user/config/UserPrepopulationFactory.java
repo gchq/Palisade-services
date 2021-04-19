@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import uk.gov.gchq.palisade.user.User;
+
 /**
  * This class defines the top level of the cache prepopulation.
  * <p>
@@ -35,7 +37,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
         include = As.EXISTING_PROPERTY,
         property = "class"
 )
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 public interface UserPrepopulationFactory {
 
     /**

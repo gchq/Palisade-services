@@ -29,10 +29,10 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.List;

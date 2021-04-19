@@ -49,8 +49,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.contract.user.common.StreamMarker;
 import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.Config;
 import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.RequestSerialiser;
@@ -62,6 +60,8 @@ import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.SerDesConfig;
+import uk.gov.gchq.palisade.user.User;
+import uk.gov.gchq.palisade.user.UserId;
 
 import java.util.Collections;
 import java.util.LinkedList;
