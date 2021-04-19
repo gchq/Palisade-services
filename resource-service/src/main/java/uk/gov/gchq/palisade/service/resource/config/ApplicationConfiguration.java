@@ -172,29 +172,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
 
     /**
-     * A bean for the implementation of the HadoopResourceService which implements {@link ResourceService} used for retrieving resources from Hadoop
-     *
-     * @param config hadoop configuration
-     * @return a {@link ConfiguredHadoopResourceService} used for adding connection details to leaf resources
-     * @throws IOException ioexception
-     */
-    @Bean("hadoopResourceService")
-    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
-    public HadoopResourceService hadoopResourceService(final org.apache.hadoop.conf.Configuration config) throws IOException {
-        return new ConfiguredHadoopResourceService(config);
-    }
-
-    /**
-     * A bean for the HadoopConfiguration used when creating the hadoopResourceService
-     *
-     * @return a {@link org.apache.hadoop.conf.Configuration}
-     */
-    @Bean
-    public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
-        return new org.apache.hadoop.conf.Configuration();
-    }
-
-    /**
      * Used so that you can create custom mapper by starting with the default and then modifying if needed
      *
      * @return a default JSONSerialiser ObjectMapper

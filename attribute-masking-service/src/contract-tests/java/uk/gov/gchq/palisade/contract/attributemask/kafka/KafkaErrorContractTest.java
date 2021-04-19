@@ -46,7 +46,6 @@ import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
 import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ErrorDeserializer;
@@ -63,6 +62,7 @@ import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingAspect
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;

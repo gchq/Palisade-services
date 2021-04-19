@@ -20,6 +20,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,6 +32,7 @@ class SerDesHealthIndicatorTest {
     @BeforeEach
     void setup() {
         healthIndicator = new SerDesHealthIndicator();
+        SerDesHealthIndicator.SER_DES_EXCEPTIONS.clear();
     }
 
     @AfterEach
