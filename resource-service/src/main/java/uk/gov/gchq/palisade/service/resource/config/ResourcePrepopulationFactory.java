@@ -16,14 +16,13 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import uk.gov.gchq.palisade.resource.ConnectionDetail;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
@@ -52,13 +51,4 @@ public interface ResourcePrepopulationFactory {
      */
     Entry<Resource, LeafResource> build(Function<String, ConnectionDetail> connectionDetailMapper);
 
-    @JsonGetter("class")
-    default String getClassName() {
-        return getClass().getName();
-    }
-
-    @JsonSetter("class")
-    default void setClassName(final String className) {
-        // do nothing.
-    }
 }

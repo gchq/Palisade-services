@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;

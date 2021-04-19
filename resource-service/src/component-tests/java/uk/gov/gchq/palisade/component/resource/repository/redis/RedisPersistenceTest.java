@@ -48,17 +48,17 @@ import org.testcontainers.containers.KafkaContainer;
 import reactor.core.publisher.Flux;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.nio.ByteBuffer;

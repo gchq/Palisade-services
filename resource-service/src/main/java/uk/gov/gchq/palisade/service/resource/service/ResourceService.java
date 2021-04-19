@@ -36,7 +36,7 @@ import java.util.Iterator;
  * don't happen to be any resources that do not match a request, instead they will simply return empty ${@link Iterator}
  * instances.
  */
-public interface ResourceService extends Service {
+public interface ResourceService {
 
     /**
      * Get a list of resources based on a specific resource. This allows for the retrieval of the appropriate {@link
@@ -86,7 +86,7 @@ public interface ResourceService extends Service {
      * to that resource and allows Palisade to provide policy controlled access to it via the other methods in this
      * interface.
      *
-     * @param resource         the resource that Palisade can manage access to
+     * @param resource the resource that Palisade can manage access to
      * @return whether or not the addResource call completed successfully
      */
     Boolean addResource(final LeafResource resource);
