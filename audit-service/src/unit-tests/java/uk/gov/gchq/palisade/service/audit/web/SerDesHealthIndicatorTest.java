@@ -20,8 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,8 +41,8 @@ class SerDesHealthIndicatorTest {
     @Test
     void testHealthUp() {
         assertThat(healthIndicator.health().getStatus())
-            .as("Check health status is UP")
-            .isEqualTo(Status.UP);
+                .as("Check health status is UP")
+                .isEqualTo(Status.UP);
     }
 
     @Test
@@ -52,10 +50,10 @@ class SerDesHealthIndicatorTest {
         // Given the service has encountered at least 1 serialisation exception
         SerDesHealthIndicator.addSerDesExceptions(new Exception("This is a test"));
         assertThat(healthIndicator.health().getStatus())
-            .as("Check health status as DOWN")
-            .isEqualTo(Status.DOWN);
+                .as("Check health status as DOWN")
+                .isEqualTo(Status.DOWN);
         assertThat(healthIndicator.health().getDetails())
-            .as("Check health status has some details")
-            .isNotEmpty();
+                .as("Check health status has some details")
+                .isNotEmpty();
     }
 }
