@@ -68,7 +68,7 @@ public class ResourceApplication {
      * @param materializer    the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor        an executor for any {@link CompletableFuture}s (preferably the application task executor)
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory},
+     * @param resourceBuilder a {@link Supplier} of resources as built by a ResourcePrepopulationFactory,
      *                        but with a connection detail attached
      */
     public ResourceApplication(final Set<RunnableGraph<?>> runners,
