@@ -77,8 +77,12 @@ class TopicOffsetRestControllerTest {
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
-        assertThat(mockMvc).isNotNull();
+        assertThat(controller)
+                .as("Check that the controller has been started successfully")
+                .isNotNull();
+        assertThat(mockMvc)
+                .as("Check that mockMVC has been started successfully")
+                .isNotNull();
     }
 
     /**
