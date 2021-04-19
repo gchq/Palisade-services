@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.component.attributemask.service;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,10 +29,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.component.attributemask.repository.ExecutorTestConfiguration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -195,24 +191,6 @@ class AttributeMaskingServiceErrorTest {
         public CompletableFuture<AttributeMaskingRequest> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
             throw new RuntimeException("Cannot persist");
         }
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private static class Stub {
-
-        public String getValue() {
-            return value;
-        }
-
-        @JsonProperty("value")
-        private String value;
-
-        @JsonGetter("class")
-        @Generated
-        public String getClassName() {
-            return getClass().getName();
-        }
-
     }
 
 }
