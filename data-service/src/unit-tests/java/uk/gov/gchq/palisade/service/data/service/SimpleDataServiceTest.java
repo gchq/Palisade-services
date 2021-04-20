@@ -118,6 +118,7 @@ class SimpleDataServiceTest {
      * Test for {@link SimpleDataService#read(AuthorisedDataRequest, OutputStream, AtomicLong, AtomicLong)}.
      * The method will return {@code OutputStream} linked to the input provided by the {@code DataReader} and supply
      * the requested data.
+     *
      * @throws NoCapacityException if the reader fails
      */
     @Test

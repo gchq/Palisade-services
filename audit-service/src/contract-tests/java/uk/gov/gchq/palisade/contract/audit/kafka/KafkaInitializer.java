@@ -55,10 +55,10 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
  * An application context initializer that
  */
 public class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
 
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1").withReuse(true);
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
+            .withReuse(false);
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {

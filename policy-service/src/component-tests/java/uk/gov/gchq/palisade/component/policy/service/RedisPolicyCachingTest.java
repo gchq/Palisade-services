@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.component.policy.service;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,17 +26,11 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 
-import uk.gov.gchq.palisade.component.policy.service.RedisPolicyCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -67,8 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Import(RedisAutoConfiguration.class)
 @ActiveProfiles({"redis"})
 class RedisPolicyCachingTest extends PolicyTestCommon {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyCachingTest.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyCachingTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
@@ -195,28 +187,4 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
     }
 
 
-    public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        private static final int REDIS_PORT = 6379;
-
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withNetwork(Network.SHARED)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            RedisPolicyCachingTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
 }

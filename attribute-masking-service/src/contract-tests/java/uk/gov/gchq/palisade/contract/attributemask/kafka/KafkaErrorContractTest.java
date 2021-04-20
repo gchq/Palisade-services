@@ -47,9 +47,8 @@ import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ErrorDeserializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaInitializer.ErrorDeserializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaInitializer.RequestSerializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;

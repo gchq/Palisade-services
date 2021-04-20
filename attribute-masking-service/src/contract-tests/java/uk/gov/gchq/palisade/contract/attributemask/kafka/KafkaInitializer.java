@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.resource.kafka;
+package uk.gov.gchq.palisade.contract.attributemask.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
@@ -39,7 +39,8 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -51,16 +52,18 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
+/**
+ * Common test file used configure Kafka for use in the KafkaContractTests
+ */
 public class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-
-    static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
+    public static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
             .withReuse(false);
 
-    static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
+    static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
+        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA_CONTAINER.getFirstMappedPort())))) {
             admin.createTopics(newTopics);
             LOGGER.info("created topics: " + admin.listTopics().names().get());
         }
@@ -68,14 +71,14 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
 
     @Override
     public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "db-test", "test-resource");
+        configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest");
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         KAFKA_CONTAINER.start();
 
         // test kafka config
         String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + KAFKA_CONTAINER.getFirstMappedPort();
+        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
     }
 
@@ -83,8 +86,8 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
     public static class Config {
 
         private final List<NewTopic> topics = List.of(
-                new NewTopic("user", 1, (short) 1),
-                new NewTopic("resource", 1, (short) 1),
+                new NewTopic("rule", 1, (short) 1),
+                new NewTopic("masked-resource", 1, (short) 1),
                 new NewTopic("error", 1, (short) 1));
 
         @Bean
@@ -95,18 +98,19 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
 
         @Bean
         KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-            createTopics(this.topics, KAFKA_CONTAINER);
+            createTopics(this.topics);
             return KAFKA_CONTAINER;
         }
 
         @Bean
         @Primary
-        ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
+        ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
             LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
             return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                     props.getAllActiveProperties().entrySet().stream()
                             .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
                     Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                    .peek(entry -> LOGGER.info("Config key {} = {}", entry.getKey(), entry.getValue()))
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
         }
 
@@ -118,25 +122,36 @@ public class KafkaInitializer implements ApplicationContextInitializer<Configura
     }
 
     // Serialiser for upstream test input
-    static class RequestSerialiser implements Serializer<JsonNode> {
+    public static class RequestSerializer implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final JsonNode resourceRequest) {
+        public byte[] serialize(final String s, final JsonNode attributeMaskingRequest) {
             try {
-                return MAPPER.writeValueAsBytes(resourceRequest);
+                return MAPPER.writeValueAsBytes(attributeMaskingRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialise " + resourceRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialize " + attributeMaskingRequest.toString(), e);
             }
         }
     }
 
-    // Deserialiser for downstream test output
-    static class ResponseDeserialiser implements Deserializer<JsonNode> {
+    public static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] resourceResponse) {
+        public JsonNode deserialize(final String s, final byte[] attributeMaskingResponse) {
             try {
-                return MAPPER.readTree(resourceResponse);
+                return MAPPER.readTree(attributeMaskingResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialise " + new String(resourceResponse), e);
+                throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingResponse), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test error output
+    public static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+        @Override
+        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
+            try {
+                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
             }
         }
     }

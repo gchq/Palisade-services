@@ -65,6 +65,7 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.UserServiceAuditErrorMessage;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
+import uk.gov.gchq.palisade.contract.filteredresource.redis.RedisInitializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;

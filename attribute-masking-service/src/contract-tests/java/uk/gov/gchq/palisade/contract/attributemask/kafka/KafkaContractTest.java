@@ -50,9 +50,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaInitializer.RequestSerializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;

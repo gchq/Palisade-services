@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.component.filteredresource.repository;
+package uk.gov.gchq.palisade.contract.filteredresource.redis;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.redis.AutoConfigureDataRedis;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
 
-import uk.gov.gchq.palisade.component.filteredresource.repository.RedisPersistenceComponentTest.Initializer;
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
@@ -51,37 +43,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"})
 @ContextConfiguration(
         classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisTtlConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
-        initializers = Initializer.class
+        initializers = RedisInitializer.class
 )
 @EnableAutoConfiguration
 @AutoConfigureDataRedis
-@AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("redis")
-class RedisPersistenceComponentTest {
-
-    private static final int REDIS_PORT = 6379;
+class RedisPersistenceContractTest {
 
     protected void cleanCache() {
         requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
-    }
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NonNull final ConfigurableApplicationContext context) {
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
     }
 
     @AfterEach

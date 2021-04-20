@@ -20,18 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
-import uk.gov.gchq.palisade.contract.data.redis.RedisPersistenceContractTest.Initializer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -53,28 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles({"redis"})
 @EnableRedisRepositories
-@ContextConfiguration(initializers = Initializer.class)
+@ContextConfiguration(initializers = RedisInitializer.class)
 class RedisPersistenceContractTest {
-    private static final int REDIS_PORT = 6379;
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NonNull final ConfigurableApplicationContext context) {
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
 
     @Autowired
     private DataService service;
