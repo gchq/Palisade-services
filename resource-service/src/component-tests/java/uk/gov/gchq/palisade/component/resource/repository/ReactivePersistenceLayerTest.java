@@ -72,7 +72,8 @@ class ReactivePersistenceLayerTest {
                 .via(persistenceLayer.withPersistenceById(resource.getId()))
                 .via(persistenceLayer.withPersistenceByType(resource.getType()))
                 .via(persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat()))
-                .runWith(Sink.ignore(), materializer);
+                .runWith(Sink.ignore(), materializer)
+        .toCompletableFuture().join();
 
         TimeUnit.SECONDS.sleep(1);
     }
