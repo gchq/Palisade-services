@@ -146,7 +146,7 @@ class AttributeMaskingServiceErrorTest {
         // hen the service suppresses exception and populates Audit object
         assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property 'class'\n at [Source: UNKNOWN; line: -1, column: -1]");
+                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property '@class'\n at [Source: UNKNOWN; line: -1, column: -1]");
     }
 
     @Configuration
