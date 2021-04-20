@@ -56,7 +56,7 @@ public class AuditMessage {
     protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
 
     @JsonCreator
-    @SuppressWarnings("java:S112") // suppress generic exception rule
+    @SuppressWarnings("java:S112") // Suppress generic exception smell
     protected AuditMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,

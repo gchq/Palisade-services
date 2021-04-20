@@ -68,7 +68,7 @@ public class ResourceApplication {
      * @param materializer    the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor        an executor for any {@link CompletableFuture}s (preferably the application task executor)
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory},
+     * @param resourceBuilder a {@link Supplier} of resources as built by a ResourcePrepopulationFactory,
      *                        but with a connection detail attached
      */
     public ResourceApplication(final Set<RunnableGraph<?>> runners,
@@ -97,7 +97,7 @@ public class ResourceApplication {
     /**
      * This method perform 2 actions on the {@link ApplicationReadyEvent}
      * <ol>
-     *     <li>Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}</li>
+     *     <li>Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.resource.service.ResourceService}</li>
      *     <li>Runs all available Akka {@link RunnableGraph}s until completion.</li>
      * </ol>
      * The 'main' threads of the application during runtime are the completable futures spawned here.
@@ -105,7 +105,7 @@ public class ResourceApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void serverForever() {
         // Add resources to persistence
-        LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
+        LOGGER.info("Pre-populating using resource builder: {}", resourceBuilder);
 
         resourceBuilder.get()
                 .forEach((Entry<Resource, LeafResource> entry) -> {

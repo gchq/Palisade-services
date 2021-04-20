@@ -18,6 +18,9 @@ package uk.gov.gchq.palisade.service.user.config;
 
 import java.util.List;
 
+/**
+ * This class is responsible for acquiring any pre-population factories for the User Service
+ */
 public interface UserConfiguration {
 
     /**
@@ -26,6 +29,7 @@ public interface UserConfiguration {
      *
      * @return a {@link List} of the objects that have implemented {@link UserPrepopulationFactory}.
      */
+    @SuppressWarnings("java:S1452")
     List<? extends UserPrepopulationFactory> getUsers();
 
 }

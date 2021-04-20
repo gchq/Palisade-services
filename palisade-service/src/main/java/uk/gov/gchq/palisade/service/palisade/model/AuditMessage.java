@@ -60,6 +60,7 @@ public class AuditMessage {
     protected String serviceName = SERVICE_NAME;  //service that sent the message
 
     @JsonCreator
+    @SuppressWarnings("java:S112") // Suppress generic exception smell
     protected AuditMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,

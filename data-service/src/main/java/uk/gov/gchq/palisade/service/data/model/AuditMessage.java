@@ -80,6 +80,7 @@ public class AuditMessage {
     private final String leafResourceId;  //leafResource ID for the resource
 
     @JsonCreator
+    @SuppressWarnings("java:S112") // Suppress generic exception smell
     protected AuditMessage(
             @Nullable final @JsonProperty("userId") String userId,
             @Nullable final @JsonProperty("resourceId") String resourceId,

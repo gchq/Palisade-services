@@ -28,7 +28,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to request that the {@link uk.gov.gchq.palisade.reader.common.DataReader}
+ * This class is used to request that the {@link uk.gov.gchq.palisade.service.data.reader.DataReader}
  * read a resource and apply the necessary rules. The details for this request are persisted by
  * the attribute-masking-service and retrieved by the data-service.
  */

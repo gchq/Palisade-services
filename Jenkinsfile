@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib@feature/PAL-999-keep-common-library')_
 
 timestamps {
     services()
