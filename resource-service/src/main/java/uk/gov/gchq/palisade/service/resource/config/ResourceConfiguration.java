@@ -19,6 +19,9 @@ package uk.gov.gchq.palisade.service.resource.config;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * This class is responsible for acquiring any pre-population factories for the Resource Service
+ */
 public interface ResourceConfiguration {
 
     /**
@@ -28,6 +31,7 @@ public interface ResourceConfiguration {
      *
      * @return a {@link List} of the objects that have implemented {@link ResourcePrepopulationFactory}.
      */
+    @SuppressWarnings("java:S1452")
     List<? extends ResourcePrepopulationFactory> getResources();
 
 }

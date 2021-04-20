@@ -18,6 +18,9 @@ package uk.gov.gchq.palisade.service.policy.config;
 
 import java.util.List;
 
+/**
+ * This class is responsible for acquiring any pre-population factories for the Policy Service
+ */
 public interface PolicyConfiguration {
 
     /**
@@ -26,6 +29,7 @@ public interface PolicyConfiguration {
      *
      * @return a {@link List} of the objects that have implemented {@link PolicyPrepopulationFactory}.
      */
+    @SuppressWarnings("java:S1452")
     List<? extends PolicyPrepopulationFactory> getPolicies();
 
 }

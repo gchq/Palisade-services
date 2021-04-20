@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.config;
-
-import java.util.List;
+package uk.gov.gchq.palisade.service.attributemask.exception;
 
 /**
- * This class is responsible for acquiring any pre-population factories for the User Service
+ * An {@link AuditMessageException} is a {@link RuntimeException} thrown within the {@code AuditMessage}
+ * class to indicate that a part of the required data could not be acquired.
  */
-public interface UserConfiguration {
+public class AuditMessageException extends RuntimeException {
 
     /**
-     * Gets a {@link List} of the {@link UserPrepopulationFactory} implemented
-     * objects that have been created from a yaml file.
+     * Initialises this exception with the given message and cause.
      *
-     * @return a {@link List} of the objects that have implemented {@link UserPrepopulationFactory}.
+     * @param message   message to report
+     * @param throwable the underlying cause of this exception
      */
-    @SuppressWarnings("java:S1452")
-    List<? extends UserPrepopulationFactory> getUsers();
-
+    public AuditMessageException(final String message, final Throwable throwable) {
+        super(message, throwable);
+    }
 }

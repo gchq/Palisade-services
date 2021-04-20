@@ -24,6 +24,9 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
+/**
+ * The default configuration beans for the Policy Service
+ */
 @Configuration
 public class DefaultConfiguration {
     /**

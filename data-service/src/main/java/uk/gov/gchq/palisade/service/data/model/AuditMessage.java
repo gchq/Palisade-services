@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.exception.AuditMessageException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -102,7 +103,7 @@ public class AuditMessage {
             this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
-            throw new RuntimeException("Failed to get server host and IP address", e);
+            throw new AuditMessageException("Failed to get server host and IP address", e);
         }
     }
 

@@ -25,6 +25,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 
+/**
+ * A simple data reader that connects to the data and streams the raw data
+ */
 public class SimpleDataReader extends SerialisedDataReader {
     @Override
     protected InputStream readRaw(final LeafResource resource) {
