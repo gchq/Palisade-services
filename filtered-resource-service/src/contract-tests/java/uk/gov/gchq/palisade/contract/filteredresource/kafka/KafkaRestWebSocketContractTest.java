@@ -279,7 +279,7 @@ class KafkaRestWebSocketContractTest {
                 akkaMaterializer);
         // Get the (HTTP) response, a websocket upgrade
         request.first().toCompletableFuture()
-                .get(1, TimeUnit.SECONDS);
+                .get(10, TimeUnit.SECONDS);
 
         // Late POST of offsets after client request has been initialized
         postOffsets.run();
