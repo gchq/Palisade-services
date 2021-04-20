@@ -16,19 +16,10 @@
 
 package uk.gov.gchq.palisade.service.data.reader;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import uk.gov.gchq.palisade.Generated;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,51 +29,12 @@ import static java.util.Objects.requireNonNull;
  * of these two features.
  */
 public class DataFlavour {
-    /**
-     * The delimiter between data type and serialised format.
-     */
-    public static final Pattern DELIMITER = Pattern.compile("##");
-    private static final int PARTS = 2;
 
     /**
-     * The internal store of the flavour. The left entry is the data type and the right entry is the serialised format.
+     * The internal store of the flavour.
      */
-    private final ImmutablePair<String, String> flavour;
-
-    /**
-     * Class to ensure {@link DataFlavour}s can be serialised into JSON.
-     */
-    public static final class FlavourSerializer extends StdSerializer<DataFlavour> {
-
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Constructs a {@link FlavourSerializer} for the {@link DataFlavour} class
-         */
-        public FlavourSerializer() {
-            super(DataFlavour.class);
-        }
-
-        @Override
-        public void serialize(final DataFlavour dataFlavour, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeFieldName(dataFlavour.getDataType() + DELIMITER + dataFlavour.getSerialisedFormat());
-        }
-    }
-
-    /**
-     * Class to ensure {@link DataFlavour}s can be deserialised from JSON.
-     */
-    public static final class FlavourDeserializer extends KeyDeserializer {
-
-        @Override
-        public Object deserializeKey(final String text, final DeserializationContext deserializationContext) throws IOException {
-            String[] parts = DELIMITER.split(text);
-            if (parts.length != PARTS) {
-                throw new IllegalStateException("error deserialising " + text + " as a DataFlavour, should be in format \"<data_type>" + DELIMITER + "<seralised_format>\"");
-            }
-            return DataFlavour.of(parts[0], parts[1]);
-        }
-    }
+    private final String type;
+    private final String format;
 
     /**
      * Create a flavour.
@@ -100,7 +52,8 @@ public class DataFlavour {
         if (serialisedFormat.trim().isEmpty()) {
             throw new IllegalArgumentException("serialisedFormat cannot be empty");
         }
-        flavour = ImmutablePair.of(dataType, serialisedFormat);
+        this.type = dataType;
+        this.format = serialisedFormat;
     }
 
     /**
@@ -123,7 +76,7 @@ public class DataFlavour {
      */
     @Generated
     public String getDataType() {
-        return this.flavour.left;
+        return this.type;
     }
 
     /**
@@ -133,7 +86,7 @@ public class DataFlavour {
      */
     @Generated
     public String getSerialisedFormat() {
-        return this.flavour.right;
+        return this.format;
     }
 
     @Override
@@ -146,22 +99,22 @@ public class DataFlavour {
             return false;
         }
         final DataFlavour that = (DataFlavour) o;
-        return Objects.equals(flavour.left, that.flavour.left) &&
-                Objects.equals(flavour.right, that.flavour.right);
+        return Objects.equals(type, that.type) &&
+                Objects.equals(format, that.format);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(flavour.left, flavour.right);
+        return Objects.hash(type, format);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", DataFlavour.class.getSimpleName() + "[", "]")
-                .add("flavour.left=" + flavour.left)
-                .add("flavour.right=" + flavour.right)
+                .add("type=" + type)
+                .add("format=" + format)
                 .toString();
     }
 }
