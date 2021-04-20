@@ -232,7 +232,7 @@ class KafkaContractTest {
                                     .as("The message inside the rules object should be %s", "no rules set")
                                     .isEqualTo("no rules set");
 
-                            assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
+                            assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("@class").asText())
                                     .as("The class of the rules object inside the message should be %s", "PassThroughRule")
                                     .isEqualTo("uk.gov.gchq.palisade.service.policy.rule.PassThroughRule");
                         })
