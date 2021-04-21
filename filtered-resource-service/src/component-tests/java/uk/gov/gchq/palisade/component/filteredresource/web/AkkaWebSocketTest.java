@@ -85,7 +85,7 @@ class AkkaWebSocketTest {
     static final String HOST = "localhost";
     static final int PORT = 18080;
     // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, which will be followed by 1 COMPLETE message)
-    static int nMESSAGES = 100;
+    static final int nMESSAGES = 100;
 
     // Test data
     final String token = "test-token";
