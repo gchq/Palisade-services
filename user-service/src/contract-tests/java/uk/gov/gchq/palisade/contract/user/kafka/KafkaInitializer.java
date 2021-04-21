@@ -56,7 +56,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
             .withReuse(false)
-            .withNetworkMode("localhost");
+            .withNetworkMode("host");
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
