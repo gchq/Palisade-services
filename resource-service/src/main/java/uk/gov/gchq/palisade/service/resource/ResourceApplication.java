@@ -117,7 +117,8 @@ public class ResourceApplication {
                             .via(persistence.withPersistenceById(rootResource.getId()))
                             .via(persistence.withPersistenceByType(leafResource.getType()))
                             .via(persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat()))
-                            .runWith(loggingSink, materializer);
+                            .runWith(loggingSink, materializer)
+                            .toCompletableFuture().join();
                 });
 
         // Then start up kafka

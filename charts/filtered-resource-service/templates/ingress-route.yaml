@@ -21,7 +21,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "filtered-resource-service.root" . }}/filteredResource`)
+    - match: PathPrefix(`{{ include "filtered-resource-service.root" . }}/filteredResource`)
       kind: Rule
       services:
         - name: {{ include "filtered-resource-service.name" . }}

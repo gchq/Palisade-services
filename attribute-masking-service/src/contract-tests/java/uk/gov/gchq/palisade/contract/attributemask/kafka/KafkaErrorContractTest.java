@@ -123,7 +123,8 @@ class KafkaErrorContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // When - errors are pulled from the error stream, pulling the number of errors thrown
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorSeq = errorProbe.request(1);

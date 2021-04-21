@@ -91,7 +91,8 @@ class ResourceServicePersistenceProxyTest {
                 .via(persistenceLayer.withPersistenceById(FILE_1.getId()))
                 .via(persistenceLayer.withPersistenceByType(FILE_1.getType()))
                 .via(persistenceLayer.withPersistenceBySerialisedFormat(FILE_1.getSerialisedFormat()))
-                .runWith(Sink.seq(), materializer);
+                .runWith(Sink.seq(), materializer)
+                .toCompletableFuture().join();
 
         TimeUnit.SECONDS.sleep(1);
     }
