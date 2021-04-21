@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.topicoffset.kafka;
+package uk.gov.gchq.palisade.contract.user.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
@@ -38,16 +38,17 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.service.topicoffset.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
 import java.io.IOException;
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
@@ -64,9 +65,9 @@ public class KafkaTestConfiguration {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final List<NewTopic> topics = List.of(
-            new NewTopic("masked-resource", 3, (short) 1),
-            new NewTopic("masked-resource-offset", 3, (short) 1),
-            new NewTopic("error", 3, (short) 1));
+            new NewTopic("request", 1, (short) 1),
+            new NewTopic("user", 1, (short) 1),
+            new NewTopic("error", 1, (short) 1));
 
     @Bean
     @ConditionalOnMissingBean
@@ -90,18 +91,19 @@ public class KafkaTestConfiguration {
 
     @Bean
     @Primary
-    Materializer getMaterialiser(final ActorSystem system) {
-        return Materializer.createMaterializer(system);
+    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+        LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
+        return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
+                props.getAllActiveProperties().entrySet().stream()
+                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                Stream.of(new SimpleEntry<String, String>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue))));
     }
 
     @Bean
     @Primary
-    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-        return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
-                props.getAllActiveProperties().entrySet().stream()
-                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
-                Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
+    Materializer getMaterialiser(final ActorSystem system) {
+        return Materializer.createMaterializer(system);
     }
 
     static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
@@ -119,25 +121,25 @@ public class KafkaTestConfiguration {
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
+        public byte[] serialize(final String s, final JsonNode userRequest) {
             try {
-                return MAPPER.writeValueAsBytes(topicOffsetRequest);
+                return MAPPER.writeValueAsBytes(userRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + userRequest.toString(), e);
             }
         }
     }
 
     // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
+        public JsonNode deserialize(final String s, final byte[] userResponse) {
             try {
-                return MAPPER.readTree(topicOffsetResponse);
+                return MAPPER.readTree(userResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(userResponse), e);
             }
         }
     }

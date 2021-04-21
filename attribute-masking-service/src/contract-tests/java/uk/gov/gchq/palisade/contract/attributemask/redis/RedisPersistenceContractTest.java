@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
-import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaInitializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
@@ -46,8 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"spring.data.redis.repositories.timeToLive.AuthorisedRequestEntity=1s", "akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class, RedisInitializer.class})
+@Import({KafkaTestConfiguration.class})
+@ContextConfiguration(initializers = {RedisInitializer.class})
 @ActiveProfiles({"redis", "akkatest"})
 class RedisPersistenceContractTest {
     static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);

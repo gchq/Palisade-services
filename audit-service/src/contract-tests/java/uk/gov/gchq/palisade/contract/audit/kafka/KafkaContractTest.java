@@ -36,7 +36,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
@@ -75,8 +74,7 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"akka-test"})
 class KafkaContractTest {
 
@@ -91,7 +89,7 @@ class KafkaContractTest {
     @Autowired
     Materializer akkaMaterialiser;
     @Autowired
-    KafkaContainer kafka;
+    KafkaContainer kafkaContainer;
     @Autowired
     AuditServiceConfigProperties auditServiceConfigProperties;
 
@@ -220,7 +218,7 @@ class KafkaContractTest {
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
 
-        var bootstrapServers = kafka.getBootstrapServers();
+        var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings

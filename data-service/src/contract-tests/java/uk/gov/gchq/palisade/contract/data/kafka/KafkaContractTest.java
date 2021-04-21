@@ -41,8 +41,8 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
@@ -81,16 +81,17 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import({KafkaTestConfiguration.class})
 @ActiveProfiles({"akka-test"})
-public class KafkaContractTest {
+class KafkaContractTest {
     public static final String READ_CHUNKED = "/read/chunked";
 
     @Autowired
     private TestRestTemplate restTemplate;
     @MockBean
     private AuditableDataService serviceMock;
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -120,7 +121,7 @@ public class KafkaContractTest {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserialiser(), TestSerDesConfig.errorValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
@@ -180,7 +181,7 @@ public class KafkaContractTest {
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.successKeyDeserialiser(), TestSerDesConfig.successValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, AuditSuccessMessage>> probe = Consumer

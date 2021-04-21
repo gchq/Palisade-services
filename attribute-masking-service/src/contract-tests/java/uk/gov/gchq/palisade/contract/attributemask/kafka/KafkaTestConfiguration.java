@@ -28,15 +28,13 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
-import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
@@ -53,73 +51,72 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
- * Common test file used configure Kafka for use in the KafkaContractTests
+ * Configuration providing the test beans to be injected into test classes that
+ * require access to various objects to support access to Kafka/Akka
  */
-public class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
+@Configuration
+@ConditionalOnProperty(
+        value = "akka.discovery.config.services.kafka.from-config",
+        havingValue = "false"
+)
+public class KafkaTestConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTestConfiguration.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
-            .withReuse(true)
-            .withNetworkMode("host");
+    private final List<NewTopic> topics = List.of(
+            new NewTopic("rule", 1, (short) 1),
+            new NewTopic("masked-resource", 1, (short) 1),
+            new NewTopic("error", 1, (short) 1));
 
-    static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
-        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitializer.KAFKA_CONTAINER.getFirstMappedPort())))) {
+    @Bean
+    @ConditionalOnMissingBean
+    static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
+        return new PropertiesConfigurer(resourceLoader, environment);
+    }
+
+    @Bean
+    KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
+        final KafkaContainer container = new KafkaContainer("5.5.1")
+                .withReuse(true)
+                .withNetworkMode("host");
+        container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+        container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+        container.start();
+
+        createTopics(this.topics, container);
+
+        return container;
+    }
+
+    @Bean
+    @Primary
+    Materializer getMaterialiser(final ActorSystem system) {
+        return Materializer.createMaterializer(system);
+    }
+
+    @Bean
+    @Primary
+    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
+        LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
+        return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
+                props.getAllActiveProperties().entrySet().stream()
+                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
+    }
+
+    static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
+        try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, getKafkaBrokers(kafka)))) {
             admin.createTopics(newTopics);
             LOGGER.info("created topics: " + admin.listTopics().names().get());
         }
     }
 
-    @Override
-    public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-        configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest");
-        KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-        KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-        KAFKA_CONTAINER.start();
-
-        // test kafka config
-        String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
-    }
-
-    @Configuration
-    public static class Config {
-
-        private final List<NewTopic> topics = List.of(
-                new NewTopic("rule", 1, (short) 1),
-                new NewTopic("masked-resource", 1, (short) 1),
-                new NewTopic("error", 1, (short) 1));
-
-        @Bean
-        @ConditionalOnMissingBean
-        static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
-            return new PropertiesConfigurer(resourceLoader, environment);
-        }
-
-        @Bean
-        KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-            createTopics(this.topics);
-            return KAFKA_CONTAINER;
-        }
-
-        @Bean
-        @Primary
-        ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-            LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
-            return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
-                    props.getAllActiveProperties().entrySet().stream()
-                            .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
-                    Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
-                    .peek(entry -> LOGGER.info("Config key {} = {}", entry.getKey(), entry.getValue()))
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
-        }
-
-        @Bean
-        @Primary
-        Materializer materializer(final ActorSystem system) {
-            return Materializer.createMaterializer(system);
-        }
+    static String getKafkaBrokers(final KafkaContainer kafka) {
+        Integer mappedPort = kafka.getFirstMappedPort();
+        String brokers = String.format("%s:%d", "localhost", mappedPort);
+        LOGGER.info("brokers: " + brokers);
+        return brokers;
     }
 
     // Serialiser for upstream test input

@@ -60,11 +60,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.UserServiceAuditErrorMessage;
-import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
+import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaTestConfiguration.ErrorDeserializer;
 import uk.gov.gchq.palisade.contract.filteredresource.redis.RedisInitializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -106,8 +107,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.NONE,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class, RedisInitializer.class})
+@Import({KafkaTestConfiguration.class})
+@ContextConfiguration(initializers = {RedisInitializer.class})
 @ActiveProfiles({"k8s", "akka"})
 class KafkaRestWebSocketContractTest {
     private static final String HOST = "localhost";
@@ -124,6 +125,8 @@ class KafkaRestWebSocketContractTest {
     private TokenOffsetPersistenceLayer persistenceLayer;
     @Autowired
     private TokenErrorMessagePersistenceLayer errorMessagePersistenceLayer;
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -198,7 +201,7 @@ class KafkaRestWebSocketContractTest {
         if (errorProbe == null) {
             ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                     .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                    .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                    .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                     .withGroupId("error-topic-test-consumer");
             errorProbe = Consumer
                     .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))

@@ -37,8 +37,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.palisade.common.ContractTestData;
@@ -74,8 +74,7 @@ import static org.mockito.ArgumentMatchers.any;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaInitialiser.Config.class})
-@ContextConfiguration(initializers = {KafkaInitialiser.class})
+@Import({KafkaTestConfiguration.class})
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
     public static final String REGISTER_DATA_REQUEST = "/api/registerDataRequest";
@@ -84,6 +83,8 @@ class KafkaContractTest {
     PalisadeService service;
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -104,7 +105,7 @@ class KafkaContractTest {
         ConsumerSettings<String, PalisadeSystemResponse> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserialiser(), TestSerDesConfig.requestValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 3;
 
@@ -177,7 +178,7 @@ class KafkaContractTest {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserialiser(), TestSerDesConfig.errorValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitialiser.KAFKA.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 

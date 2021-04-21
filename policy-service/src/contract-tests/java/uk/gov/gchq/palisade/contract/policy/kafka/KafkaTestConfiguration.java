@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.topicoffset.kafka;
+package uk.gov.gchq.palisade.contract.policy.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -38,7 +37,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.service.topicoffset.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -64,8 +63,8 @@ public class KafkaTestConfiguration {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final List<NewTopic> topics = List.of(
-            new NewTopic("masked-resource", 3, (short) 1),
-            new NewTopic("masked-resource-offset", 3, (short) 1),
+            new NewTopic("resource", 3, (short) 1),
+            new NewTopic("rule", 3, (short) 1),
             new NewTopic("error", 3, (short) 1));
 
     @Bean
@@ -75,7 +74,7 @@ public class KafkaTestConfiguration {
     }
 
     @Bean
-    KafkaContainer kafkaContainer() throws Exception {
+    KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
         final KafkaContainer container = new KafkaContainer("5.5.1")
                 .withReuse(false)
                 .withNetworkMode("host");
@@ -96,7 +95,8 @@ public class KafkaTestConfiguration {
 
     @Bean
     @Primary
-    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
+        LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
         return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                 props.getAllActiveProperties().entrySet().stream()
                         .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
@@ -118,26 +118,26 @@ public class KafkaTestConfiguration {
         return brokers;
     }
 
-    // Serialiser for upstream test input
+    // Serializer for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
+        public byte[] serialize(final String s, final JsonNode policyRequest) {
             try {
-                return MAPPER.writeValueAsBytes(topicOffsetRequest);
+                return MAPPER.writeValueAsBytes(policyRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialize " + policyRequest.toString(), e);
             }
         }
     }
 
-    // Deserialiser for downstream test output
+    // Deserializer for downstream test output
     static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
+        public JsonNode deserialize(final String s, final byte[] policyResponse) {
             try {
-                return MAPPER.readTree(topicOffsetResponse);
+                return MAPPER.readTree(policyResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
+                throw new SerializationFailedException("Failed to deserialize " + new String(policyResponse), e);
             }
         }
     }

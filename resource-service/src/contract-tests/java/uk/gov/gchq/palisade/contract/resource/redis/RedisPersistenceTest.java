@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Flux;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -58,8 +58,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {RedisInitializer.class, KafkaInitializer.class})
+@Import({KafkaTestConfiguration.class})
+@ContextConfiguration(initializers = {RedisInitializer.class})
 @ActiveProfiles({"redis", "akka-test"})
 class RedisPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceTest.class);
