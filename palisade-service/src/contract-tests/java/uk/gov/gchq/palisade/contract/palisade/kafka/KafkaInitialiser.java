@@ -48,7 +48,8 @@ public class KafkaInitialiser implements ApplicationContextInitializer<Configura
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitialiser.class);
 
     static final KafkaContainer KAFKA = new KafkaContainer("5.5.1")
-            .withReuse(false);
+            .withReuse(false)
+            .withNetworkMode("host");
 
     static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
         try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaInitialiser.KAFKA.getFirstMappedPort())))) {

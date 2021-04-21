@@ -99,6 +99,9 @@ public class KafkaHealthIndicator implements HealthIndicator {
             } else if (healthyStates.contains(consumerGroupDescription.state())) {
                 LOGGER.debug("Accepted non-STABLE state as healthy because it was found in the healthy set: {}", healthyStates);
                 return true;
+            } else {
+                LOGGER.error("No STABLE state identified, marking service as unhealthy");
+                return false;
             }
 
         } catch (InterruptedException e) {
