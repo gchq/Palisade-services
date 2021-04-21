@@ -52,7 +52,8 @@ import java.util.stream.Stream;
 class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
-            .withReuse(false);
+            .withReuse(false)
+            .withNetworkMode("host");
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

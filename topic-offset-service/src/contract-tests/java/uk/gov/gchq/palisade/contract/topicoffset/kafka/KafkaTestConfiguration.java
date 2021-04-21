@@ -64,7 +64,9 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws Exception {
-        final KafkaContainer container = new KafkaContainer("5.5.1");
+        final KafkaContainer container = new KafkaContainer("5.5.1")
+                .withReuse(false)
+                .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         container.start();
