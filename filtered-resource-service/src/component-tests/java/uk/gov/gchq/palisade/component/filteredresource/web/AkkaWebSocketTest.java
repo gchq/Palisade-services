@@ -123,13 +123,13 @@ class AkkaWebSocketTest {
     final AuditServiceSinkFactory sinkFactory = token -> Flow.<AuditableWebSocketMessage>create()
             .filter(message -> message.getCommittable() != null) // Similar to the service implementation, only 'audit' things that are committable
             .toMat(listSink, Keep.right());
-    // Finally, create the websocketEventService from its parts
+    // Finally, create the WebSocketEventService from its parts
     final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, errorMessageController, sinkFactory, sourceFactory);
 
     // WebSocket endpoint to be tested
     final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
     // Akka runtime
-    final ActorSystem system = ActorSystem.create("websocket-test");
+    final ActorSystem system = ActorSystem.create("WebSocket-test");
     final Materializer materializer = Materializer.createMaterializer(system);
 
     // Server will be torn down and recreated for each test, thus not final
@@ -401,7 +401,7 @@ class AkkaWebSocketTest {
                 clientFlow,
                 materializer);
 
-        // Get the (HTTP) response, a websocket upgrade
+        // Get the (HTTP) response, a WebSocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first()
                 .toCompletableFuture().join();
         LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
