@@ -16,9 +16,9 @@
 
 package uk.gov.gchq.palisade.component.policy.service;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -33,7 +33,7 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
             .withReuse(true);
 
     @Override
-    public void initialize(@NotNull final ConfigurableApplicationContext context) {
+    public void initialize(@NonNull final ConfigurableApplicationContext context) {
         context.getEnvironment().setActiveProfiles("redis", "akkatest");
         // Start container
         REDIS.start();

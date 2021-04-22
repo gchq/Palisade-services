@@ -36,6 +36,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
@@ -76,7 +77,8 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-        final KafkaContainer container = new KafkaContainer("5.5.1")
+        final DockerImageName kafkaImageName = DockerImageName.parse("confluentinc/cp-kafka:5.5.1");
+        final KafkaContainer container = new KafkaContainer(kafkaImageName)
                 .withReuse(true)
                 .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");

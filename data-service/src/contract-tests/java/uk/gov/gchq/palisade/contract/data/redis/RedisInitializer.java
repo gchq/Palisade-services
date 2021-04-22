@@ -21,11 +21,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     private static final int REDIS_PORT = 6379;
 
-    static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
+    static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:6-alpine"))
             .withExposedPorts(REDIS_PORT)
             .withReuse(true);
 

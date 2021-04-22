@@ -37,6 +37,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
@@ -77,8 +78,9 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws Exception {
-        final KafkaContainer container = new KafkaContainer("5.5.1")
-                .withReuse(true)
+        final DockerImageName kafkaImageName = DockerImageName.parse("confluentinc/cp-kafka:5.5.1");
+        final KafkaContainer container = new KafkaContainer(kafkaImageName)
+                .withReuse(false)
                 .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");

@@ -33,11 +33,11 @@
     <properties>
         <!-- Dependency versions -->
         <scala.version>2.13</scala.version>
-        <akka.version>2.6.8</akka.version>
-        <alpakka.version>2.0.4</alpakka.version>
+        <akka.version>2.6.10</akka.version>
+        <alpakka.version>2.1.0-M1</alpakka.version>
 
         <!-- Test dependency versions -->
-        <testcontainers.version>1.14.3</testcontainers.version>
+        <testcontainers.version>1.15.3</testcontainers.version>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
         <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
