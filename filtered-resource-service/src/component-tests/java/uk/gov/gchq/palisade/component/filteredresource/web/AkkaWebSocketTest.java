@@ -374,11 +374,8 @@ class AkkaWebSocketTest {
      *
      * @param wsMsgSource A source containing the number of webSocketMessages and the type of messages to send
      * @return a CompletableFuture of a List of messages that have been returned from the service
-     * @throws ExecutionException   – if this future completed exceptionally
-     * @throws InterruptedException – if the current thread was interrupted while waiting
-     * @throws TimeoutException     – if the wait timed out
      */
-    private CompletableFuture<List<WebSocketMessage>> sendAndReceiveMessages(final Source<Message, NotUsed> wsMsgSource) throws InterruptedException, ExecutionException, TimeoutException {
+    private CompletableFuture<List<WebSocketMessage>> sendAndReceiveMessages(final Source<Message, NotUsed> wsMsgSource) {
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
         Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
@@ -394,8 +391,8 @@ class AkkaWebSocketTest {
                 materializer);
 
         // Get the (HTTP) response, a websocket upgrade
-        WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
-                .get(1, TimeUnit.SECONDS);
+        WebSocketUpgradeResponse wsUpgrade = request.first()
+                .toCompletableFuture().join();
         LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
         // Get the result of the client sink, a list of (WebSocket) responses
