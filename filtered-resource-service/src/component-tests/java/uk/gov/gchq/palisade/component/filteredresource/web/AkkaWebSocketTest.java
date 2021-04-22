@@ -148,7 +148,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void testWebSocketManyPings() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketManyPings() {
         // **
         // Given - the client will send 'n' PING messages and collect the responses to a list
         // **
@@ -161,7 +161,7 @@ class AkkaWebSocketTest {
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource);
 
-        assertThat(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS))
+        assertThat(sinkFuture.join())
                 .as("Check that the number of response messages matches the number of requests")
                 .hasSize(N_MESSAGES)
                 // Assert PING -> PONG
@@ -176,7 +176,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void testWebSocketCTSReadResources() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketCTSReadResources() {
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -194,7 +194,7 @@ class AkkaWebSocketTest {
         // **
 
         // Get the result of the client sink, a list of (WebSocket) responses
-        LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
+        LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.join());
         assertThat(results)
                 .as("Check that the number of response messages matches the number of requests")
                 .hasSize(N_MESSAGES);
@@ -231,7 +231,7 @@ class AkkaWebSocketTest {
 
 
     @Test
-    void testWebSocketInterleavedCTSAndPings() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketInterleavedCTSAndPings() {
         // **
         // Given - the client will send 'n' PING-followed-by-CTS message pairs and collect the responses to a list
         // **
@@ -252,7 +252,7 @@ class AkkaWebSocketTest {
         // **
 
         // Get the result of the client sink, a list of (WebSocket) responses
-        List<WebSocketMessage> results = sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS);
+        List<WebSocketMessage> results = sinkFuture.join();
         assertThat(results)
                 .as("Check that the number of response messages matches the number of requests")
                 .hasSize(N_MESSAGES * 2);
