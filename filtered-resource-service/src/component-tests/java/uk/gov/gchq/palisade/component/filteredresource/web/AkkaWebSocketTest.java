@@ -159,7 +159,7 @@ class AkkaWebSocketTest {
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.PING).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMESSAGES).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource);
 
         assertThat(sinkFuture.get(nMESSAGES, TimeUnit.SECONDS))
                 .as("Check that the number of response messages matches the number of requests")
@@ -187,7 +187,7 @@ class AkkaWebSocketTest {
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMESSAGES).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource);
 
         // **
         // Then - check all returned server responses are as expected
@@ -245,7 +245,7 @@ class AkkaWebSocketTest {
         Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(nMESSAGES).map(this::writeTextMessage);
         // Interleave PINGs and CTSes
         Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource);
 
         // **
         // Then - check all returned server responses are as expected
@@ -321,7 +321,7 @@ class AkkaWebSocketTest {
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMessages).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource);
 
         // **
         // Then - check all returned server responses are as expected
@@ -378,7 +378,7 @@ class AkkaWebSocketTest {
      * @throws InterruptedException – if the current thread was interrupted while waiting
      * @throws TimeoutException     – if the wait timed out
      */
-    private CompletableFuture<List<WebSocketMessage>> sendAndRecieveMessages(final Source<Message, NotUsed> wsMsgSource) throws InterruptedException, ExecutionException, TimeoutException {
+    private CompletableFuture<List<WebSocketMessage>> sendAndReceiveMessages(final Source<Message, NotUsed> wsMsgSource) throws InterruptedException, ExecutionException, TimeoutException {
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
         Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
