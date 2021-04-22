@@ -106,6 +106,18 @@
                 <license.skipAggregateDownloadLicenses>true</license.skipAggregateDownloadLicenses>
             </properties>
         </profile>
+        <profile>
+            <id>dockerbuild</id>
+            <properties>
+                <maven.install.skip>true</maven.install.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+                <license.skipAggregateAddThirdParty>true</license.skipAggregateAddThirdParty>
+                <license.skipAggregateDownloadLicenses>true</license.skipAggregateDownloadLicenses>
+                <assembly.skipAssembly>true</assembly.skipAssembly>
+            </properties>
+        </profile>
     </profiles>
 
     <dependencyManagement>
