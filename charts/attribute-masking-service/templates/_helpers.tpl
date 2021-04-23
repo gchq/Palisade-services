@@ -74,7 +74,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "attribute-masking-service.deployment.path" }}
-{{- printf "%s/%s" (include "attribute-masking-service.classpathJars.mount") (include "attribute-masking-service.deployment.revision" .) }}
+{{- printf "%s/%s" (include "attribute-masking-service.classpathJars.mount" .) (include "attribute-masking-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
