@@ -373,6 +373,7 @@ class AkkaWebSocketTest {
      * The main test code used to send requests and retrieve messages from the service via a WebSocket
      *
      * @param wsMsgSource A source containing the number of webSocketMessages and the type of messages to send
+     * @param takeN       the expected number of messages to receive
      * @return a CompletableFuture of a List of messages that have been returned from the service
      */
     private CompletableFuture<List<WebSocketMessage>> sendAndReceiveMessages(final Source<WebSocketMessage, NotUsed> wsMsgSource, final int takeN) {
