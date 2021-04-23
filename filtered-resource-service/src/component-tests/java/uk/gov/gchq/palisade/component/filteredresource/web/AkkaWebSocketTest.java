@@ -123,13 +123,13 @@ class AkkaWebSocketTest {
     final AuditServiceSinkFactory sinkFactory = token -> Flow.<AuditableWebSocketMessage>create()
             .filter(message -> message.getCommittable() != null) // Similar to the service implementation, only 'audit' things that are committable
             .toMat(listSink, Keep.right());
-    // Finally, create the websocketEventService from its parts
+    // Finally, create the WebSocketEventService from its parts
     final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, errorMessageController, sinkFactory, sourceFactory);
 
     // WebSocket endpoint to be tested
     final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
     // Akka runtime
-    final ActorSystem system = ActorSystem.create("websocket-test");
+    final ActorSystem system = ActorSystem.create("WebSocket-test");
     final Materializer materializer = Materializer.createMaterializer(system);
 
     // Server will be torn down and recreated for each test, thus not final
@@ -388,6 +388,7 @@ class AkkaWebSocketTest {
      * The main test code used to send requests and retrieve messages from the service via a WebSocket
      *
      * @param wsMsgSource A source containing the number of webSocketMessages and the type of messages to send
+     * @param collectInto A list that will be used to collect the WebSocketMessage objects
      * @return a CompletableFuture of a List of messages that have been returned from the service
      */
     private CompletableFuture<Done> sendAndReceiveMessages(final Source<Message, NotUsed> wsMsgSource, final List<WebSocketMessage> collectInto) {
@@ -401,7 +402,7 @@ class AkkaWebSocketTest {
                 clientFlow,
                 materializer);
 
-        // Get the (HTTP) response, a websocket upgrade
+        // Get the (HTTP) response, a WebSocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first()
                 .toCompletableFuture().join();
         LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());

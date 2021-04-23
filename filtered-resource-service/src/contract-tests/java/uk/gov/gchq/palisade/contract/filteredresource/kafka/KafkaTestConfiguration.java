@@ -75,7 +75,7 @@ public class KafkaTestConfiguration {
     @Bean
     KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
         final KafkaContainer container = new KafkaContainer("5.5.1")
-                .withReuse(false)
+                .withReuse(true)
                 .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
