@@ -40,6 +40,7 @@ import org.testcontainers.containers.KafkaContainer;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,7 @@ public class KafkaTestConfiguration {
     KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
         final KafkaContainer container = new KafkaContainer("5.5.1")
                 .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
                 .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
