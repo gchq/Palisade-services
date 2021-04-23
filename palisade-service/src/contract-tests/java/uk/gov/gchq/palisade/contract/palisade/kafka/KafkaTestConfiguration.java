@@ -67,6 +67,7 @@ public class KafkaTestConfiguration {
         final KafkaContainer container = new KafkaContainer("5.5.1")
                 .withReuse(true)
                 .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3)
                 .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
