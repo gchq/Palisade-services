@@ -74,20 +74,14 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "attribute-masking-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- else }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- end }}
+{{- printf "%s/%s" (include "attribute-masking-service.classpathJars.mount") (include "attribute-masking-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
 Calculate the service config location
 */}}
 {{- define "attribute-masking-service.config.path" }}
-{{- printf "/usr/share/%s/config/" .Chart.Name }}
+{{- printf "/usr/share/%s/config" .Chart.Name }}
 {{- end }}
 
 {{/*
@@ -100,12 +94,8 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{/*
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "attribute-masking-service.classpathJars.mounts" }}
-{{- if eq .Values.global.hosting "local" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath (include "attribute-masking-service.deployment.revision" .) }}
-{{- else if eq .Values.global.hosting "aws" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath (include "attribute-masking-service.deployment.revision" .) }}
-{{- end }}
+{{- define "attribute-masking-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
 {{- end }}
 
 {{/*

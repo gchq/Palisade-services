@@ -45,12 +45,12 @@ spec:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
   {{- if eq $sc "hostpath" }}
   hostPath:
-    path: {{ include "palisade.classpathJars.mounts" . }}
+    path: {{ required "A valid local hostpath must be specified" .Values.global.persistence.classpathJars.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ include "palisade.classpathJars.mounts" . }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ required "A valid AWS EFS volume path must be specified" .Values.global.persistence.classpathJars.aws.volumePath }}
   {{- end }}
 {{- end }}
