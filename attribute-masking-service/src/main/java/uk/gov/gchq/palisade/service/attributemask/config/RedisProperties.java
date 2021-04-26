@@ -28,9 +28,10 @@ import java.util.Map;
  * Spring configuration for redis keyspace ttl properties - duration in seconds per keyspace name.
  */
 @ConfigurationProperties("spring.data.redis.repositories")
-public class RedisTtlProperties {
+public class RedisProperties {
     private static final Duration DEFAULT_TTL = Duration.ofDays(1);
     private Map<String, Duration> timeToLive = new HashMap<>();
+    private String keyPrefix = "";
 
     @Generated
     public Map<String, Duration> getTimeToLive() {
@@ -45,5 +46,15 @@ public class RedisTtlProperties {
     @Generated
     public void setTimeToLive(final Map<String, Duration> timeToLive) {
         this.timeToLive = timeToLive;
+    }
+
+    @Generated
+    public String getKeyPrefix() {
+        return keyPrefix;
+    }
+
+    @Generated
+    public void setKeyPrefix(final String keyPrefix) {
+        this.keyPrefix = keyPrefix;
     }
 }

@@ -21,12 +21,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
+import org.springframework.data.redis.core.convert.KeyspaceConfiguration;
+import org.springframework.data.redis.core.convert.MappingConfiguration;
+import org.springframework.data.redis.core.index.IndexConfiguration;
+import org.springframework.data.redis.core.mapping.RedisMappingContext;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.lang.NonNull;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Additional Redis configuration to set time-to-live on a per-keyspace basis.
@@ -39,9 +47,27 @@ import java.util.concurrent.ConcurrentHashMap;
         havingValue = "true"
 )
 @EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP, basePackageClasses = {AttributeMaskingApplication.class})
-@EnableConfigurationProperties(RedisTtlProperties.class)
-public class RedisTtlConfiguration {
+@EnableConfigurationProperties(RedisProperties.class)
+public class RedisConfiguration {
     protected static final Map<String, Long> KEYSPACE_TTL = new ConcurrentHashMap<>();
+    protected static final List<Class<?>> REDIS_KEYSPACE = List.of(AuthorisedRequestEntity.class);
+
+    /**
+     * Configure a key prefix for redis entities
+     */
+    KeyspaceConfiguration getKeyspaceConfiguration(final String prefix) {
+        // There's some aspect on the initialConfiguration that makes it execute before the constructor
+        // Create a class instance and return like a factory instead (closure on 'prefix')
+        return new KeyspaceConfiguration() {
+            @Override
+            @NonNull
+            public Iterable<KeyspaceSettings> initialConfiguration() {
+                return REDIS_KEYSPACE.stream()
+                        .map(type -> new KeyspaceSettings(type, prefix + type.getSimpleName()))
+                        .collect(Collectors.toList());
+            }
+        };
+    }
 
     /**
      * Get the time-to-live in seconds for a given keyspace name
@@ -50,16 +76,19 @@ public class RedisTtlConfiguration {
      * @return the configured time-to-live value for that keyspace in seconds
      */
     public static Long getTimeToLiveSeconds(final String keyspace) {
-        return KEYSPACE_TTL.getOrDefault(keyspace, RedisTtlProperties.getDefaultTtl().toSeconds());
+        return KEYSPACE_TTL.getOrDefault(keyspace, RedisProperties.getDefaultTtl().toSeconds());
+    }
+
+
+    @Bean
+    RedisMappingContext keyValueMappingContext(final RedisProperties properties) {
+        IndexConfiguration indexConfiguration = new IndexConfiguration();
+        KeyspaceConfiguration keyspaceConfiguration = getKeyspaceConfiguration(properties.getKeyPrefix());
+        return new RedisMappingContext(new MappingConfiguration(indexConfiguration, keyspaceConfiguration));
     }
 
     @Bean
-    RedisTtlProperties additionalProperties() {
-        return new RedisTtlProperties();
-    }
-
-    @Bean
-    Map<String, Long> redisTimeToLive(final RedisTtlProperties additionalProperties) {
+    Map<String, Long> redisTimeToLive(final RedisProperties additionalProperties) {
         additionalProperties.getTimeToLive().forEach((key, value) -> KEYSPACE_TTL.put(key, value.toSeconds()));
         return KEYSPACE_TTL;
     }

@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {RedisPersistenceContractTest.class, AttributeMaskingApplication.class},
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"spring.data.redis.repositories.timeToLive.AuthorisedRequestEntity=1s", "akka.discovery.config.services.kafka.from-config=false"}
+        properties = {"spring.data.redis.repositories.timeToLive.AuthorisedRequestEntity=1s", "akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"}
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitializer.class})
@@ -82,7 +82,7 @@ class RedisPersistenceContractTest {
         service.storeAuthorisedRequest(token, request).join();
 
         // Then the request is persisted in redis
-        final String redisKey = "AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
+        final String redisKey = "test:AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
         assertThat(redisTemplate.keys(redisKey)).hasSize(1);
 
         // Values for the entity are correct
@@ -102,7 +102,7 @@ class RedisPersistenceContractTest {
         service.storeAuthorisedRequest(token, request).join();
         TimeUnit.SECONDS.sleep(2);
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId())).isEmpty();
+        assertThat(redisTemplate.keys("test:AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId())).isEmpty();
     }
 
 }

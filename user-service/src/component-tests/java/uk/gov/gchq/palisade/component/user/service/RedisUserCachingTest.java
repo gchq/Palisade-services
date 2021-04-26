@@ -47,15 +47,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s"}
+        properties = {"spring.cache.redis.timeToLive=1s", "spring.cache.redis.keyPrefix=test"}
 )
 @EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})
 @Import(RedisAutoConfiguration.class)
 @ActiveProfiles({"redis"})
 class RedisUserCachingTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisUserCachingTest.class);
 
     @Autowired
     private UserServiceCachingProxy cacheProxy;

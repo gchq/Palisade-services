@@ -19,7 +19,6 @@ List of third-party dependencies grouped by their license type
 * akka-stream-typed ([com.typesafe.akka:akka-stream-typed_2.13:2.6.10](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.10](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
-* event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
 * Reactive Relational Database Connectivity - H2 ([io.r2dbc:r2dbc-h2:0.8.4.RELEASE](https://github.com/r2dbc/r2dbc-h2))
 * spring-boot-starter ([org.springframework.boot:spring-boot-starter:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter-actuator ([org.springframework.boot:spring-boot-starter-actuator:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
