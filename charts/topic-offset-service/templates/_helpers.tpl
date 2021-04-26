@@ -88,7 +88,7 @@ Calculate the service config location
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "topic-offset-service.classpathJars.name" }}
-{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "topic-offset-service.deployment.revision" .) (include "palisade.namespace" .) | replace "/" "-"}}
+{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "topic-offset-service.deployment.revision" .) | replace "/" "-"}}
 {{- end }}
 
 {{/*
