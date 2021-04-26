@@ -81,7 +81,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "filtered-resource-service.classpathJars.name" . }}
-          mountPath: {{ include "filtered-resource-service.deployment.path" . }}
+          mountPath: {{ include "filtered-resource-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "filtered-resource-service.config.path" . }}
       volumes:

@@ -73,7 +73,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "data-service.classpathJars.name" . }}
-          mountPath: {{ include "data-service.deployment.path" . }}
+          mountPath: {{ include "data-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "data-service.config.path" . }}
         {{- range $name, $value := .Values.global.persistence.dataStores }}

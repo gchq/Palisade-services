@@ -88,7 +88,7 @@ Calculate the service config location
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "attribute-masking-service.classpathJars.name" }}
-{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "attribute-masking-service.deployment.revision" .) (include "palisade.namespace" .) | replace "/" "-"}}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*

@@ -84,7 +84,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "audit-service.classpathJars.name" . }}
-          mountPath: {{ include "audit-service.deployment.path" . }}
+          mountPath: {{ include "audit-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "audit-service.config.path" . }}
       volumes:

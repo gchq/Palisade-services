@@ -43,7 +43,7 @@ If release name contains chart name it will be used as a full name.
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "palisade.classpathJars.name" }}
-{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "palisade.deployment.revision" .) (include "palisade.namespace" .) | replace "/" "-"}}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*

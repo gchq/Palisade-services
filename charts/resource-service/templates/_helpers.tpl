@@ -75,13 +75,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "resource-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- else }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- end }}
+{{- printf "%s/%s" (include "resource-service.classpathJars.mount" .) (include "resource-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
@@ -95,18 +89,14 @@ Calculate the service config location
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "resource-service.classpathJars.name" }}
-{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name (include "resource-service.deployment.revision" .) (include "palisade.namespace" .) | replace "/" "-"}}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "resource-service.classpathJars.mounts" }}
-{{- if eq .Values.global.hosting "local" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath (include "resource-service.deployment.revision" .) }}
-{{- else if eq .Values.global.hosting "aws" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath (include "resource-service.deployment.revision" .) }}
-{{- end }}
+{{- define "resource-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
 {{- end }}
 
 {{/*

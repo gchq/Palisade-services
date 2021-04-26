@@ -82,7 +82,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "topic-offset-service.classpathJars.name" . }}
-          mountPath: {{ include "topic-offset-service.deployment.path" . }}
+          mountPath: {{ include "topic-offset-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "topic-offset-service.config.path" . }}
       volumes:

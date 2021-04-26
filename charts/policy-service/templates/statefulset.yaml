@@ -82,7 +82,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "policy-service.classpathJars.name" . }}
-          mountPath: {{ include "policy-service.deployment.path" . }}
+          mountPath: {{ include "policy-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "policy-service.config.path" . }}
       volumes:
