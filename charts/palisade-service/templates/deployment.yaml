@@ -72,7 +72,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: {{ include "palisade-service.classpathJars.name" . }}
-          mountPath: {{ include "palisade-service.deployment.path" . }}
+          mountPath: {{ include "palisade-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "palisade-service.config.path" . }}
       volumes:
