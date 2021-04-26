@@ -24,6 +24,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -48,6 +49,10 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
  * require access to various objects to support access to Kafka/Akka
  */
 @Configuration
+@ConditionalOnProperty(
+        value = "akka.discovery.config.services.kafka.from-config",
+        havingValue = "false"
+)
 public class KafkaTestConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTestConfiguration.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
