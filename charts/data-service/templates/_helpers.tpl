@@ -99,7 +99,7 @@ Calculate the service config location
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "data-service.classpathJars.name" }}
-{{- printf "%s-%s-%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
