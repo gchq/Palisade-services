@@ -81,7 +81,7 @@ Calculate a storage path based on the code release artifact id or the supplied v
 Calculate the service config location
 */}}
 {{- define "attribute-masking-service.config.path" }}
-{{- printf "/usr/share/%s/config" .Chart.Name }}
+{{- printf "/usr/share/%s/config/" .Chart.Name }}
 {{- end }}
 
 {{/*
