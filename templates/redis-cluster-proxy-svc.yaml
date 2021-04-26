@@ -27,9 +27,9 @@ metadata:
 spec:
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
-  # FQDN can be shortened inside current namespace, and inside current cluster
+  # Docs suggest FQDN can be shortened inside current namespace, and inside current cluster, but this doesn't work in AWS
   {{- if eq .Values.global.hosting "aws" }}
-  externalName: redis-cluster.palisade-shared
+  externalName: redis-cluster.palisade-shared.svc.cluster.local
   {{- else }}
   externalName: palisade-redis-cluster.{{ include "palisade.namespace" . }}
   {{- end }}
