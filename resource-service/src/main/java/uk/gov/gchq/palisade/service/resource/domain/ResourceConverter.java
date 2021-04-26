@@ -40,9 +40,8 @@ public final class ResourceConverter {
     static {
         // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
         // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
-        RESOURCE_MAPPER = JsonMapper.builder()
-                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class)
-                .build();
+        RESOURCE_MAPPER = new ObjectMapper()
+                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class);
     }
 
     private ResourceConverter() {
