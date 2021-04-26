@@ -75,7 +75,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "user-service.deployment.path" }}
-{{- printf "%s/%s" (include "user-service.classpathJars.mount") (include "user-service.deployment.revision" .) }}
+{{- printf "%s/%s" (include "user-service.classpathJars.mount" .) (include "user-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
