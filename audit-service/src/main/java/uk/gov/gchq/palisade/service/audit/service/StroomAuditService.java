@@ -15,6 +15,8 @@
  */
 
 package uk.gov.gchq.palisade.service.audit.service;
+// Stroom dependencies no longer available. Commented out class
+/*
 
 import avro.shaded.com.google.common.annotations.VisibleForTesting;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,18 +45,22 @@ import java.sql.Date;
 
 import static java.util.Objects.requireNonNull;
 
+*/
 /**
  * A StroomAuditService is a simple implementation of an {@link AuditService} that simply constructs a message and logs
  * it using the Stroom EventLoggingService.
- */
+ *//*
+
 public class StroomAuditService implements AuditService {
 
-    /**
+    */
+/**
      * The configuration key for property "audit.implementations". This property is
      * used to decide which service implementation Spring will inject.
      *
      * @see ApplicationConfiguration
-     */
+     *//*
+
     public static final String CONFIG_KEY = "stroom";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
@@ -73,12 +79,14 @@ public class StroomAuditService implements AuditService {
 
     private final DefaultEventLoggingService eventLogger;
 
-    /**
+    */
+/**
      * Create a new StroomAuditService, which will take in an {@link AuditMessage} and produce events from the
      * request to be logged to an {@link event.logging.EventLoggingService}
      *
      * @param eventLoggingService the target {@link event.logging.EventLoggingService} for all created events
-     */
+     *//*
+
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
         eventLogger = eventLoggingService;
         LOGGER.debug("StroomAuditService called and the defaultEventLoggingService is: {}", eventLoggingService);
@@ -212,14 +220,16 @@ public class StroomAuditService implements AuditService {
         LOGGER.debug("Error Message authorisationEvent is {}", exceptionEvent);
     }
 
-    /**
+    */
+/**
      * Sets the new system name from which the audit service is receiving an audit
      * message
      *
      * @param systemName the name of the system
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code systemName} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService systemName(final String systemName) {
         requireNonNull(systemName, "The system name cannot be null.");
@@ -228,35 +238,41 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the system name
      *
      * @return the system name
-     */
+     *//*
+
     @Generated
     public String getSystemName() {
         return SYSTEM.getName();
     }
 
-    /**
+    */
+/**
      * Sets the new system name from which the audit service is receiving audit logs
      * from
      *
      * @param systemName the name of the system
      * @throws NullPointerException if {@code systemName} is null
-     */
+     *//*
+
     @Generated
     public void setSystemName(final String systemName) {
         systemName(systemName);
     }
 
-    /**
+    */
+/**
      * Sets the new organisation
      *
      * @param organisation the organisation that the system belongs too
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code organisation} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService organisation(final String organisation) {
         requireNonNull(organisation, "The organisation cannot be null.");
@@ -265,36 +281,42 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the organisation
      *
      * @return the organisation
-     */
+     *//*
+
     @Generated
     public String getOrganisation() {
         LOGGER.debug(ORGANISATION, SYSTEM.getOrganisation());
         return SYSTEM.getOrganisation();
     }
 
-    /**
+    */
+/**
      * Sets the new organisation
      *
      * @param organisation the organisation that the system belongs too
      * @throws NullPointerException if {@code organisation} is null
-     */
+     *//*
+
     @Generated
     public void setOrganisation(final String organisation) {
         LOGGER.debug(ORGANISATION, organisation);
         organisation(organisation);
     }
 
-    /**
+    */
+/**
      * Sets the new system environment of this deployment, e.g prod, ref, test
      *
      * @param systemEnv the system environment
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code systemEnv} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService systemEnv(final String systemEnv) {
         requireNonNull(systemEnv, "The env cannot be null.");
@@ -303,35 +325,41 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the system environment
      *
      * @return the system environment
-     */
+     *//*
+
     @Generated
     public String getSystemEnv() {
         return SYSTEM.getEnvironment();
     }
 
-    /**
+    */
+/**
      * Sets the new system environment of this deployment, e.g prod, ref, test
      *
      * @param systemEnv the system environment
      * @throws NullPointerException if {@code env} is null
-     */
+     *//*
+
     @Generated
     public void setSystemEnv(final String systemEnv) {
         systemEnv(systemEnv);
     }
 
-    /**
+    */
+/**
      * Sets the new system description from which the audit service is receiving
      * audit logs from
      *
      * @param description the system description
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code description} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService systemDescription(final String description) {
         requireNonNull(description, "The description cannot be null.");
@@ -340,35 +368,41 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the system description
      *
      * @return the system description
-     */
+     *//*
+
     @Generated
     public String getSystemDescription() {
         return SYSTEM.getDescription();
     }
 
-    /**
+    */
+/**
      * Sets the new system description from which the audit service is receiving
      * audit logs from
      *
      * @param description the system description
      * @throws NullPointerException if {@code description} is null
-     */
+     *//*
+
     @Generated
     public void setSystemDescription(final String description) {
         systemDescription(description);
     }
 
-    /**
+    */
+/**
      * Sets the new system version of this deployment, v1, v1.0.2, v2, etc
      *
      * @param systemVersion the system version
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code systemVersion} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService systemVersion(final String systemVersion) {
         requireNonNull(systemVersion, "The systemVersion cannot be null.");
@@ -376,35 +410,41 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the system version
      *
      * @return the system version
-     */
+     *//*
+
     @Generated
     public String getSystemVersion() {
         return SYSTEM.getVersion();
     }
 
-    /**
+    */
+/**
      * Sets the new system version of this deployment, v1, v1.0.2, v2, etc
      *
      * @param systemVersion the system version
      * @throws NullPointerException if {@code systemVersion} is null
-     */
+     *//*
+
     @Generated
     public void setSystemVersion(final String systemVersion) {
         systemVersion(systemVersion);
     }
 
-    /**
+    */
+/**
      * Sets the new system classification of the system from which the audit service
      * is receiving audit logs from
      *
      * @param systemClassification the new system classification
      * @return {@link StroomAuditService}
      * @throws NullPointerException if {@code systemClassification} is null
-     */
+     *//*
+
     @Generated
     public StroomAuditService systemClassification(final String systemClassification) {
         requireNonNull(systemClassification, "The systemClassification cannot be null.");
@@ -415,24 +455,28 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
-    /**
+    */
+/**
      * Returns the system classification
      *
      * @return the system classification
-     */
+     *//*
+
     @Generated
     public String getSystemClassification() {
         LOGGER.debug(SYSTEM_CLASSIFICATION, SYSTEM.getClassification().getText());
         return SYSTEM.getClassification().getText();
     }
 
-    /**
+    */
+/**
      * Sets the new system classification of the system from which the audit service
      * is receiving audit logs from
      *
      * @param systemClassification the new system classification
      * @throws NullPointerException if {@code systemClassification} is null
-     */
+     *//*
+
     @Generated
     public void setSystemClassification(final String systemClassification) {
         LOGGER.debug(SYSTEM_CLASSIFICATION, systemClassification);
@@ -462,3 +506,4 @@ public class StroomAuditService implements AuditService {
     }
 
 }
+*/

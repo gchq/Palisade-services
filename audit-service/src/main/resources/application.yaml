@@ -49,7 +49,8 @@ management:
 
 audit:
   implementations:
-    stroom:
+    # Stroom dependencies no longer available. Commented out implementation
+    #stroom:
     logger:
     simple:
   errorDirectory: "."

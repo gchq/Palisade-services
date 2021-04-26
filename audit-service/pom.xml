@@ -92,12 +92,12 @@
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
-        <dependency>
-            <!-- Stroom -->
+        <!--<dependency>
+            &lt;!&ndash; Stroom &ndash;&gt;
             <groupId>event-logging</groupId>
             <artifactId>event-logging</artifactId>
             <version>${event-logging.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <!-- JAXB API implementation for Stroom -->
             <groupId>org.glassfish.jaxb</groupId>

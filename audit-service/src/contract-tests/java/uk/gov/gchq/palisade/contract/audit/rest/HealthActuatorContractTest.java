@@ -47,8 +47,8 @@ class HealthActuatorContractTest {
     @Test
     void testContextLoads(@Autowired final Map<String, AuditService> serviceMap) {
         assertThat(serviceMap)
-                .as("Check the Audit Service loads three different implementations of the Audit Service")
-                .containsOnlyKeys("simple", "stroom", "logger");
+                .as("Check the Audit Service loads two different implementations of the Audit Service")
+                .containsOnlyKeys("simple", "logger");
     }
 
     @Test

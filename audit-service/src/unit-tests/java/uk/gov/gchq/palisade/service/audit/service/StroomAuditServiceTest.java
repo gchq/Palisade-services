@@ -15,6 +15,8 @@
  */
 
 package uk.gov.gchq.palisade.service.audit.service;
+// Stroom dependencies no longer available. Commented out class
+/*
 
 import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
@@ -235,3 +237,4 @@ class StroomAuditServiceTest {
         );
     }
 }
+*/
