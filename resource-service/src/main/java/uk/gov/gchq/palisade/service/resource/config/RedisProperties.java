@@ -20,10 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Spring configuration for redis properties.
  */
