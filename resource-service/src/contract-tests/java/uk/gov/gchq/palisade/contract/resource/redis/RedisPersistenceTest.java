@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {RedisPersistenceTest.class, ResourceApplication.class},
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"akka.discovery.config.services.kafka.from-config=false"}
+        properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"}
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitializer.class})
@@ -120,7 +120,7 @@ class RedisPersistenceTest {
     void setup() {
         // Wipe all keys from Redis
         redisTemplate.execute(conn -> conn.keyCommands()
-                .keys(ByteBuffer.wrap("*".getBytes()))
+                .keys(ByteBuffer.wrap("test:*".getBytes()))
                 .flux()
                 .flatMap(keys -> Flux.fromIterable(keys)
                         .flatMap(keyBb -> conn.keyCommands().del(keyBb))))
