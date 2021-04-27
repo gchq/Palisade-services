@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
+import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
 import java.util.Map;
 
@@ -41,7 +42,7 @@ class ApplicationConfigurationTest {
             .extracting(as -> (Class) as.getClass())
             .containsExactlyInAnyOrder(
                 LoggerAuditService.class,
-                //StroomAuditService.class,
+                StroomAuditService.class,
                 SimpleAuditService.class);
     }
 }
