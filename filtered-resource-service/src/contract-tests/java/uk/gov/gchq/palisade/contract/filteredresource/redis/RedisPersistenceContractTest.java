@@ -102,7 +102,7 @@ class RedisPersistenceContractTest {
         TimeUnit.SECONDS.sleep(1);
 
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("TokenOffsetEntity:" + token)).isEmpty();
+        assertThat(redisTemplate.keys("test:TokenOffsetEntity:" + token)).isEmpty();
     }
 
 }
