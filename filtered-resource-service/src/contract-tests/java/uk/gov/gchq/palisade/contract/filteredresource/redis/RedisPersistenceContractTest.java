@@ -81,7 +81,7 @@ class RedisPersistenceContractTest {
         service.storeTokenOffset(token, request.commitOffset).join();
 
         // Then the offset is persisted in redis
-        final String redisKey = "TokenOffsetEntity:" + token;
+        final String redisKey = "test:TokenOffsetEntity:" + token;
         assertThat(redisTemplate.keys(redisKey)).hasSize(1);
 
         // Values for the entity are correct
