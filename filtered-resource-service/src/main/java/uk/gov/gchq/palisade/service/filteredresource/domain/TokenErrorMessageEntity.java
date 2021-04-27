@@ -21,7 +21,7 @@ import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import javax.persistence.Column;
@@ -83,7 +83,7 @@ public class TokenErrorMessageEntity implements Serializable {
         this.token = token;
         this.serviceName = serviceName;
         this.error = error;
-        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenErrorMessageEntity");
+        this.timeToLive = RedisConfiguration.getTimeToLiveSeconds("TokenErrorMessageEntity");
     }
 
     @Generated

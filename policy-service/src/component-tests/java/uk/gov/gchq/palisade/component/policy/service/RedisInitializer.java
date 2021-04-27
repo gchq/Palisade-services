@@ -17,6 +17,8 @@
 package uk.gov.gchq.palisade.component.policy.service;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -24,6 +26,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 
 public class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    static final Logger LOGGER = LoggerFactory.getLogger(RedisInitializer.class);
 
     private static final int REDIS_PORT = 6379;
 
@@ -42,7 +45,7 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
         String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
         // Configure the testcontainer random port
         String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-        RedisPolicyCachingTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
+        LOGGER.info("Starting Redis with {}", redisContainerPort);
         // Override the configuration at runtime
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
     }

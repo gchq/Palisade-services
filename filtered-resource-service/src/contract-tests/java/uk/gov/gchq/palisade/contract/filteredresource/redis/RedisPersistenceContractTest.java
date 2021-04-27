@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
-import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"})
 @ContextConfiguration(
-        classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisTtlConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
+        classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
         initializers = RedisInitializer.class
 )
 @EnableAutoConfiguration

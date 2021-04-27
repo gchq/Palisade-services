@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.component.policy.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -53,14 +51,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s"}
+        properties = {"spring.cache.redis.timeToLive=1s", "spring.cache.redis.keyPrefix=test"}
 )
 @EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})
 @Import(RedisAutoConfiguration.class)
 @ActiveProfiles({"redis"})
 class RedisPolicyCachingTest extends PolicyTestCommon {
-    static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyCachingTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
