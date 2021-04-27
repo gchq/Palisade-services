@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s", "spring.cache.redis.keyPrefix=test"}
+        properties = {"spring.cache.redis.timeToLive=1s", "spring.cache.redis.keyPrefix=test:"}
 )
 @EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})

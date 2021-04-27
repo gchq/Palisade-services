@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"})
+@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s", "spring.data.redis.repositories.key-prefix=test:"})
 @ContextConfiguration(
         classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
         initializers = RedisInitializer.class

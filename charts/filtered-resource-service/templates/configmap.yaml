@@ -44,7 +44,7 @@ data:
   application-redis.yaml: |
     spring:
       {{- if .Values.global.topicPrefix }}
-      cache:
+      data:
         redis:
           key-prefix: {{ printf "%s:" .Values.global.topicPrefix | quote }}
       {{ end }}

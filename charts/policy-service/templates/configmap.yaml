@@ -40,7 +40,7 @@ data:
   application-redis.yaml: |
     spring:
       {{- if .Values.global.topicPrefix }}
-      data:
+      cache:
         redis:
           repositories:
             key-prefix: {{ printf "%s:" .Values.global.topicPrefix | quote }}
