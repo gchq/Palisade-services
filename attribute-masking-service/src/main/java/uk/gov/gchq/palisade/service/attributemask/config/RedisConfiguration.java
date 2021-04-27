@@ -54,6 +54,9 @@ public class RedisConfiguration {
 
     /**
      * Configure a key prefix for redis entities
+     *
+     * @param prefix the value to be used for the entity prefix
+     * @return a {@code KeyspaceConfiguration} object
      */
     KeyspaceConfiguration getKeyspaceConfiguration(final String prefix) {
         // There's some aspect on the initialConfiguration that makes it execute before the constructor
