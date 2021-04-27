@@ -40,11 +40,12 @@ class PalisadeServiceTest extends CommonTestData {
     final Materializer materialiser = Materializer.createMaterializer(ActorSystem.create());
     final PalisadeService service = new MockedPalisadeService(materialiser);
     LinkedList<TokenRequestPair> sinkCollection;
+    Sink<TokenRequestPair, CompletionStage<Done>> sink;
 
     @BeforeEach
     void setUp() {
         sinkCollection = new LinkedList<>();
-        Sink<TokenRequestPair, CompletionStage<Done>> sink = Sink.foreach((TokenRequestPair x) -> sinkCollection.addLast(x));
+        sink = Sink.foreach((TokenRequestPair x) -> sinkCollection.addLast(x));
         service.registerRequestSink(sink);
     }
 
