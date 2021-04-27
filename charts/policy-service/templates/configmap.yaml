@@ -42,8 +42,7 @@ data:
       {{- if .Values.global.topicPrefix }}
       cache:
         redis:
-          repositories:
-            key-prefix: {{ printf "%s:" .Values.global.topicPrefix | quote }}
+          key-prefix: {{ printf "%s:" .Values.global.topicPrefix | quote }}
       {{ end }}
       {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
         {{- fail "Cannot install Redis (master/worker) and Redis Cluster at the same time" }}

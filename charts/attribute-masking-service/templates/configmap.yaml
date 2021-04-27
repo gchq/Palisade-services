@@ -65,4 +65,4 @@ data:
       redis:
         host: {{ $masterFullname }}
         port: {{ $masterPort }}
-    {{- end }}
+      {{- end }}
