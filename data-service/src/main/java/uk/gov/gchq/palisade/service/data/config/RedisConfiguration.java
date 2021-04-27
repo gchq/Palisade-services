@@ -82,7 +82,6 @@ public class RedisConfiguration {
         return KEYSPACE_TTL.getOrDefault(keyspace, RedisProperties.getDefaultTtl().toSeconds());
     }
 
-
     @Bean
     RedisMappingContext keyValueMappingContext(final RedisProperties properties) {
         IndexConfiguration indexConfiguration = new IndexConfiguration();

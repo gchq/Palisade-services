@@ -45,7 +45,7 @@ import java.util.StringJoiner;
                 @Index(name = "token", columnList = "token")
         }
 )
-@RedisHash(value = "TokenErrorMessageEntity", timeToLive = 6000L)
+@RedisHash(timeToLive = 6000L)
 public class TokenErrorMessageEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 

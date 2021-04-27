@@ -42,7 +42,7 @@ import java.util.Objects;
                 @Index(name = "message_token", columnList = "message_token", unique = true)
         }
 )
-@RedisHash(value = "TokenOffsetEntity", timeToLive = 6000L)
+@RedisHash(timeToLive = 6000L)
 public class TokenOffsetEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 

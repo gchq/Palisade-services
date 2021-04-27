@@ -49,7 +49,7 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
-@RedisHash("AuthorisedRequestEntity")
+@RedisHash()
 public class AuthorisedRequestEntity {
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
