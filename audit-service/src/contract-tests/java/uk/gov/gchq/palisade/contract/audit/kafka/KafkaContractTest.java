@@ -151,7 +151,7 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(3000).times(3)).audit(anyString(), any());
+        verify(auditService, timeout(10000).times(3)).audit(anyString(), any());
     }
 
     @Test
