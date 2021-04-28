@@ -31,8 +31,8 @@ import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.PolicyConfiguration;
-import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.policy.config.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.policy.config.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
@@ -64,11 +64,11 @@ public class PolicyApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param runners        collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer   the Akka {@link Materializer} configured to be used
-     * @param service        specifically policyServiceCachingProxy used for pre-population
-     * @param policyConfig   resourceConfig used to create the policy object used in pre-population
-     * @param executor       an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param service      specifically policyServiceCachingProxy used for pre-population
+     * @param policyConfig resourceConfig used to create the policy object used in pre-population
+     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,

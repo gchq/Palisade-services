@@ -25,10 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.reader.HadoopDataReader;
-import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
+import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
@@ -37,11 +34,10 @@ import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
 public class ApplicationConfiguration {
@@ -51,7 +47,7 @@ public class ApplicationConfiguration {
 
     /**
      * Bean for the {@link JpaPersistenceLayer}.
-     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests
+     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests.
      *
      * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
      * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
@@ -87,26 +83,16 @@ public class ApplicationConfiguration {
         return new AuditMessageService(materializer);
     }
 
-    /**
-     * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
-     *
-     * @return a new instance of {@link HadoopDataReader}
-     * @throws IOException ioException
-     */
-    @Bean
-    DataReader hadoopDataReader() throws IOException {
-        return new HadoopDataReader();
-    }
 
     /**
-     * Default JSON to Java seraialiser/deserialiser
+     * Default JSON to Java seraialiser/deserialiser.
      *
      * @return a new {@link ObjectMapper} with some additional configuration
      */
     @Bean
     @Primary
     ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
     @Bean("threadPoolTaskExecutor")

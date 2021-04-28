@@ -46,7 +46,7 @@ akka:
       topics:
         output-topic:
           name: request
-          partitions: 3
+          partitions: 1
         error-topic:
           name: error
           partitions: 1

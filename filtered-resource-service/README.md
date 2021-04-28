@@ -131,7 +131,7 @@ The Filtered Resource Service will send audit messages, specifically an `AuditEr
          "id": "file:/file/resource.1",
          "attributes": {},
          "connectionDetail": {
-            "class": "uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+            "class": "uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
             "serviceName": "data-service"
          },
          "parent": {
@@ -158,7 +158,7 @@ Using a preferred WebSocket command-line tool (using [ws](https://github.com/has
 ```bash
 ws ws://filtered-resource-service/resource/test-token
 > {"type":"CTS","headers":{},"body":null}
-< {"type":"RESOURCE","headers":{"X-Request-Token":"test-token"},"body":{"class":"uk.gov.gchq.palisade.resource.impl.FileResource","id":"file:/file/resource.1","attributes":{},"connectionDetail":{"class":"uk.gov.gchq.palisade.service.SimpleConnectionDetail","serviceName":"data-service"},"parent":{"class":"uk.gov.gchq.palisade.resource.impl.SystemResource","id":"file:/file/"},"serialisedFormat":"fmt","type":"type"}}
+< {"type":"RESOURCE","headers":{"X-Request-Token":"test-token"},"body":{"class":"uk.gov.gchq.palisade.resource.impl.FileResource","id":"file:/file/resource.1","attributes":{},"connectionDetail":{"class":"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail","serviceName":"data-service"},"parent":{"class":"uk.gov.gchq.palisade.resource.impl.SystemResource","id":"file:/file/"},"serialisedFormat":"fmt","type":"type"}}
 > {"type":"CTS","headers":{},"body":null}
 < {"type":"COMPLETE","headers":{"X-Request-Token":"test-token"}}
 ```

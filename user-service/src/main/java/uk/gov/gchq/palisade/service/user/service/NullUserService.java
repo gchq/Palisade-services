@@ -15,8 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.user.service;
 
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.user.User;
 
 /**
  * A default do-nothing User Service designed to work with the Caching and Hierarchy layers.

@@ -17,8 +17,7 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link UserConfiguration} that uses Spring to configure a list of users from a yaml file
- * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+ * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link User}s
  * These users will be used for pre-populating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
  */
 public class StdUserConfiguration implements UserConfiguration {

@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.component.attributemask.service;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,11 +29,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.component.attributemask.repository.ExecutorTestConfiguration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -50,6 +45,7 @@ import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingAspect;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -65,7 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
 class AttributeMaskingServiceErrorTest {
 
-    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
+    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"@class\":\"uk.gov.gchq.palisade.user.User\"},\"resource\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"@class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
 
     private final Function<Integer, JsonNode> requestFactoryNode = i -> {
         try {
@@ -133,7 +129,7 @@ class AttributeMaskingServiceErrorTest {
         // With invalid JSON in the context
         JsonNode stub;
         try {
-           stub = this.mapper.readTree("{ \"value\": \"content\" }");
+            stub = this.mapper.readTree("{ \"value\": \"content\" }");
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
@@ -150,7 +146,7 @@ class AttributeMaskingServiceErrorTest {
         // hen the service suppresses exception and populates Audit object
         assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property 'class'\n at [Source: UNKNOWN; line: -1, column: -1]");
+                .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property '@class'\n at [Source: UNKNOWN; line: -1, column: -1]");
     }
 
     @Configuration
@@ -195,24 +191,6 @@ class AttributeMaskingServiceErrorTest {
         public CompletableFuture<AttributeMaskingRequest> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
             throw new RuntimeException("Cannot persist");
         }
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private static class Stub {
-
-        public String getValue() {
-            return value;
-        }
-
-        @JsonProperty("value")
-        private String value;
-
-        @JsonGetter("class")
-        @Generated
-        public String getClassName() {
-            return getClass().getName();
-        }
-
     }
 
 }

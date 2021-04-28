@@ -128,8 +128,14 @@ nodeSelector: {}
 ## Readiness probe config.
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
 ##
+livenessProbe:
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
 readinessProbe:
-  initialDelaySeconds: 30
+  initialDelaySeconds: 90
   periodSeconds: 10
   timeoutSeconds: 5
   successThreshold: 1

@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The TopicOffsetResponse is the output for topic-offset-service.  It will only be created if the request message was
- * found to be the start of the messages for a specific client request.  It will will contain the offset in the message
+ * The TopicOffsetResponse is the output for topic-offset-service. It will only be created if the request message was
+ * found to be the start of the messages for a specific client request. It will will contain the offset in the message
  * queue for this first message. This is forwarded to the masked-resource-offset stream where it is used to prepare for
  * the client request to retrieve the data.
  */

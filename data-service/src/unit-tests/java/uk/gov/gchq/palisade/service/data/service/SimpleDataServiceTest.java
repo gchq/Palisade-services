@@ -20,10 +20,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
+import uk.gov.gchq.palisade.service.data.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.ByteArrayOutputStream;
@@ -117,9 +118,11 @@ class SimpleDataServiceTest {
      * Test for {@link SimpleDataService#read(AuthorisedDataRequest, OutputStream, AtomicLong, AtomicLong)}.
      * The method will return {@code OutputStream} linked to the input provided by the {@code DataReader} and supply
      * the requested data.
+     *
+     * @throws NoCapacityException if the reader fails
      */
     @Test
-    void testAuthoriseRequestWithARead() {
+    void testAuthoriseRequestWithARead() throws NoCapacityException {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // Given

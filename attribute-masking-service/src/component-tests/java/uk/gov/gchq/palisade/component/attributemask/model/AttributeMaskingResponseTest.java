@@ -26,8 +26,8 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 
 import java.io.IOException;

@@ -31,7 +31,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Objects;
 
 /**
- * WebMVC configuration class used to create a executor bean when launching the service
+ * WebMVC configuration class used to create a executor bean when launching the service.
  */
 @Configuration
 @EnableAsync

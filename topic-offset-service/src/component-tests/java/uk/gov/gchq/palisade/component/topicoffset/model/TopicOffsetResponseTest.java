@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
@@ -28,10 +26,9 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Tests for the evaluating the TopicOffsetResponse and the related seralising to a JSON string
+ * Tests for the evaluating the TopicOffsetResponse and the related serialising to a JSON string
  * and deseralising back to an object.
  */
 @JsonTest
@@ -43,11 +40,12 @@ class TopicOffsetResponseTest {
 
     @Test
     void testContextLoads() {
-        assertThat(jsonTester).isNotNull();
+        assertThat(jsonTester)
+                .as("Check that the jsonTester has been started correctly")
+                .isNotNull();
     }
 
     /**
-     * Grouped assertion test
      * Create the object with the constructor and then convert to the Json equivalent.
      * Takes the JSON Object, deserialise and tests against the original Object
      *
@@ -55,16 +53,21 @@ class TopicOffsetResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
-        TopicOffsetResponse originalTopicOffsetResponse = TopicOffsetResponse.Builder.create().withOffset(101L);
+    void testTopicOffsetResponseSerialisingAndDeserialising() throws IOException {
+        var topicOffsetResponse = TopicOffsetResponse.Builder.create().withOffset(101L);
 
-        JsonContent<TopicOffsetResponse> topicOffsetResponseJsonContent = jsonTester.write(originalTopicOffsetResponse);
-        ObjectContent<TopicOffsetResponse> offsetResponseObjectContent = jsonTester.parse(topicOffsetResponseJsonContent.getJson());
-        TopicOffsetResponse topicOffsetResponse = offsetResponseObjectContent.getObject();
+        var topicOffsetResponseJsonContent = jsonTester.write(topicOffsetResponse);
+        var offsetResponseObjectContent = jsonTester.parse(topicOffsetResponseJsonContent.getJson());
+        var topicOffsetResponseObject = offsetResponseObjectContent.getObject();
 
-        assertAll("SerialisingDeseralisingAndComparison",
-                () -> assertThat(topicOffsetResponseJsonContent).extractingJsonPathNumberValue("$.commitOffset").isEqualTo(101),
-                () -> assertThat(topicOffsetResponse.getCommitOffset()).isEqualTo(originalTopicOffsetResponse.getCommitOffset()),
-                () -> assertThat(topicOffsetResponse).isEqualTo(originalTopicOffsetResponse));
+        assertThat(topicOffsetResponse)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(topicOffsetResponseObject);
+
+        assertThat(topicOffsetResponse)
+                .as("Check %s using recursion that the serialised and deseralised objects are the same", topicOffsetResponse.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(topicOffsetResponseObject);
+
     }
 }

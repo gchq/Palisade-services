@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.resource.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -40,9 +39,8 @@ public final class ResourceConverter {
     static {
         // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
         // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
-        RESOURCE_MAPPER = JsonMapper.builder()
-                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class)
-                .build();
+        RESOURCE_MAPPER = new ObjectMapper()
+                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class);
     }
 
     private ResourceConverter() {

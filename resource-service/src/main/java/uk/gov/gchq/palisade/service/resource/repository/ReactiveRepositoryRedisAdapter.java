@@ -223,9 +223,10 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
          * {@link CompletenessRepositoryAdapter} constructor that takes a redis template
          *
          * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link CompletenessEntity}
+         * @param keyPrefix     a prefix to the table 'namespace'
          */
-        public CompletenessRepositoryAdapter(final ReactiveRedisTemplate<String, CompletenessEntity> redisTemplate) {
-            super(redisTemplate, reflectTableAnnotation(CompletenessEntity.class).value());
+        public CompletenessRepositoryAdapter(final ReactiveRedisTemplate<String, CompletenessEntity> redisTemplate, final String keyPrefix) {
+            super(redisTemplate, keyPrefix + reflectTableAnnotation(CompletenessEntity.class).value());
         }
 
         @Override
@@ -255,9 +256,10 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
          *
          * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link ResourceEntity}
+         * @param keyPrefix     a prefix to the table 'namespace'
          */
-        public ResourceRepositoryAdapter(final ReactiveRedisTemplate<String, ResourceEntity> redisTemplate) {
-            super(redisTemplate, reflectTableAnnotation(ResourceEntity.class).value());
+        public ResourceRepositoryAdapter(final ReactiveRedisTemplate<String, ResourceEntity> redisTemplate, final String keyPrefix) {
+            super(redisTemplate, keyPrefix + reflectTableAnnotation(ResourceEntity.class).value());
         }
 
         @Override
@@ -296,9 +298,10 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
          *
          * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link SerialisedFormatEntity}
+         * @param keyPrefix     a prefix to the table 'namespace'
          */
-        public SerialisedFormatRepositoryAdapter(final ReactiveRedisTemplate<String, SerialisedFormatEntity> redisTemplate) {
-            super(redisTemplate, reflectTableAnnotation(SerialisedFormatEntity.class).value());
+        public SerialisedFormatRepositoryAdapter(final ReactiveRedisTemplate<String, SerialisedFormatEntity> redisTemplate, final String keyPrefix) {
+            super(redisTemplate, keyPrefix + reflectTableAnnotation(SerialisedFormatEntity.class).value());
         }
 
         @Override
@@ -337,9 +340,10 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
          *
          * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link TypeEntity}
+         * @param keyPrefix     a prefix to the table 'namespace'
          */
-        public TypeRepositoryAdapter(final ReactiveRedisTemplate<String, TypeEntity> redisTemplate) {
-            super(redisTemplate, reflectTableAnnotation(TypeEntity.class).value());
+        public TypeRepositoryAdapter(final ReactiveRedisTemplate<String, TypeEntity> redisTemplate, final String keyPrefix) {
+            super(redisTemplate, keyPrefix + reflectTableAnnotation(TypeEntity.class).value());
         }
 
         @Override

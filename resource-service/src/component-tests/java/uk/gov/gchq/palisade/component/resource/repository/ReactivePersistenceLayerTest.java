@@ -33,11 +33,10 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
-import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
@@ -49,15 +48,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class, R2dbcConfiguration.class, AkkaSystemConfig.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest"})
+@ActiveProfiles({"db-test"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class ReactivePersistenceLayerTest {
+
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
-    private ResourceRepository resourceRepository;
-    @Autowired
     private Materializer materializer;
+
     private LeafResource resource;
 
     @BeforeEach
@@ -73,7 +72,8 @@ class ReactivePersistenceLayerTest {
                 .via(persistenceLayer.withPersistenceById(resource.getId()))
                 .via(persistenceLayer.withPersistenceByType(resource.getType()))
                 .via(persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat()))
-                .runWith(Sink.ignore(), materializer);
+                .runWith(Sink.ignore(), materializer)
+                .toCompletableFuture().join();
 
         TimeUnit.SECONDS.sleep(1);
     }
@@ -81,8 +81,9 @@ class ReactivePersistenceLayerTest {
     @Test
     void testSpringDiscoversPersistenceLayer() {
         // When the spring application is started
-        // Then
-        assertThat(persistenceLayer).isNotNull();
+        assertThat(persistenceLayer)
+                .as("Check the persistenceLayer has been autowired successfully")
+                .isNotNull();
     }
 
     @Test
@@ -92,17 +93,23 @@ class ReactivePersistenceLayerTest {
         // When getting a non-existent resourceId
         var persistenceIdResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID").join();
         // Then the list should be empty
-        assertThat(persistenceIdResponse).isEmpty();
+        assertThat(persistenceIdResponse)
+                .as("Check that no resources are returned for a non existent resourceId")
+                .isEmpty();
 
         // When getting a non-existent resource type
         var persistenceTypeResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE").join();
         // Then the list should be empty
-        assertThat(persistenceTypeResponse).isEmpty();
+        assertThat(persistenceTypeResponse)
+                .as("Check that no resources are returned for a non existent resource type")
+                .isEmpty();
 
         // When getting a non-existent resource serialised format
         var persistenceFormatResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT").join();
         // Then the list should be empty
-        assertThat(persistenceFormatResponse).isEmpty();
+        assertThat(persistenceFormatResponse)
+                .as("Check that no resources are returned for a non existent resource format")
+                .isEmpty();
     }
 
     @Test
@@ -115,8 +122,9 @@ class ReactivePersistenceLayerTest {
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
-        assertThat(idResult).hasSize(1)
-                .allSatisfy(leafResource -> assertThat(leafResource.getId()).isEqualTo(resource.getId()));
+        assertThat(idResult)
+                .as("Check that when getting a resource by its Id, the correct resource is returned")
+                .containsOnly(resource);
 
         // When getting a resource from the persistence layer by type
         var typeResult = persistenceLayer.getResourcesByType(resource.getType())
@@ -124,8 +132,9 @@ class ReactivePersistenceLayerTest {
                 .toMat(Sink.seq(), Keep.right()).run(materializer)
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
-        assertThat(typeResult).hasSize(1)
-                .allSatisfy(leafResource -> assertThat(leafResource.getId()).isEqualTo(resource.getId()));
+        assertThat(typeResult)
+                .as("Check that when getting the resource by its type, the correct resource is returned")
+                .containsOnly(resource);
 
         // When getting a resource from the persistence layer by serialised format
         var formatResult = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
@@ -134,7 +143,7 @@ class ReactivePersistenceLayerTest {
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
         assertThat(formatResult)
-                .hasSize(1)
-                .allSatisfy(leafResource -> assertThat(leafResource.getId()).isEqualTo(resource.getId()));
+                .as("Check that when geting the resource by its format, the correct resource is returned")
+                .containsOnly(resource);
     }
 }
