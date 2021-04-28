@@ -40,7 +40,7 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * This class means that the only places where the structure of the data needs
  * to be known is in the serialisers, rules and client code. Therefore you only
- * need to implement a DataService for
+ * need to implement a Data Service for
  * each data storage technology and data format combination, rather than also
  * having to add the data structure into the mix.
  * <p>
@@ -157,7 +157,7 @@ public abstract class SerialisedDataReader implements DataReader {
     }
 
     /**
-     * Adds all the serialiser mappings to the current map of serialisers.Any existing mappings for a given {@link DataFlavour}
+     * Adds all the serialiser mappings to the current map of serialisers. Any existing mappings for a given {@link DataFlavour}
      * are replaced.
      *
      * @param mergingSerialisers the new serialisers to merge

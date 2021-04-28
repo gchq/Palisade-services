@@ -30,7 +30,7 @@ import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 @Configuration
 public class DefaultConfiguration {
     /**
-     * The simplest implementation of a policy service, allows unit tests and small services to use a lightweight policy service
+     * The simplest implementation of a Policy service, allows unit tests and small services to use a lightweight Policy service
      *
      * @return a new instance of the nullPolicyService
      */

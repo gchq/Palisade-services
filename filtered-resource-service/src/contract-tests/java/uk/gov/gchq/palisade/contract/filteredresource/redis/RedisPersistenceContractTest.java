@@ -82,11 +82,14 @@ class RedisPersistenceContractTest {
 
         // Then the offset is persisted in redis
         final String redisKey = "test:TokenOffsetEntity:" + token;
-        assertThat(redisTemplate.keys(redisKey)).hasSize(1);
+        assertThat(redisTemplate.keys(redisKey))
+                .as("Check that the value is stored in redis")
+                .hasSize(1);
 
         // Values for the entity are correct
         final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
+                .as("Check the returned redis hash contains the expected token and offset values")
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
                 .containsEntry("offset", ContractTestData.TOPIC_OFFSET_MESSAGE.commitOffset.toString());
     }
@@ -102,7 +105,9 @@ class RedisPersistenceContractTest {
         TimeUnit.SECONDS.sleep(1);
 
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("test:TokenOffsetEntity:" + token)).isEmpty();
+        assertThat(redisTemplate.keys("test:TokenOffsetEntity:" + token))
+                .as("Check the stored value has been removed after TTL period")
+                .isEmpty();
     }
 
 }

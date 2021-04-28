@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.data.exception;
 import java.io.IOException;
 
 /**
- * An exception thrown when a request is made to a data-service via a ReadRequest
+ * An exception thrown when a request is made to a Data Service via a ReadRequest
  * or to a {@link uk.gov.gchq.palisade.service.data.reader.DataReader} via a {@link uk.gov.gchq.palisade.service.data.model.DataReaderRequest}
  * for a resource that cannot currently be served due to a lack of capacity to serve the request.
  */

@@ -24,7 +24,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * In Palisade, to process a resource, e.g. to de-serialise it, we must know its data type (what type of object the resource
+ * In Palisade, to process a resource, e.g. to deserialise it, we must know its data type (what type of object the resource
  * contains, e.g. employee records) and its serialised format (how it is stored, e.g. Avro). A {@code DataFlavour} is the combination
  * of these two features.
  */

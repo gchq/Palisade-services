@@ -58,8 +58,8 @@ public class KafkaTestConfiguration {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final List<NewTopic> topics = List.of(
-            new NewTopic("request", 3, (short) 1),
-            new NewTopic("error", 3, (short) 1));
+            new NewTopic("request", 1, (short) 1),
+            new NewTopic("error", 1, (short) 1));
 
     @Bean
     @ConditionalOnMissingBean

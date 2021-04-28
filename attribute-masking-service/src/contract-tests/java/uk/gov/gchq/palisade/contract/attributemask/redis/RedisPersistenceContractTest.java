@@ -83,11 +83,14 @@ class RedisPersistenceContractTest {
 
         // Then the request is persisted in redis
         final String redisKey = "test:AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
-        assertThat(redisTemplate.keys(redisKey)).hasSize(1);
+        assertThat(redisTemplate.keys(redisKey))
+                .as("Check that the value is stored in redis")
+                .hasSize(1);
 
         // Values for the entity are correct
         final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
+                .as("Check the returned redis hash contains the expected token and resourceId values")
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
                 .containsEntry("resourceId", ContractTestData.REQUEST_OBJ.getResource().getId());
     }
@@ -102,7 +105,10 @@ class RedisPersistenceContractTest {
         service.storeAuthorisedRequest(token, request).join();
         TimeUnit.SECONDS.sleep(2);
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("test:AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId())).isEmpty();
+        assertThat(redisTemplate.keys("test:AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId())
+                .getUniqueId()))
+                .as("Check the stored value has been removed after TTL period")
+                .isEmpty();
     }
 
 }

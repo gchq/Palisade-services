@@ -387,7 +387,6 @@ class AkkaWebSocketTest {
                 .run(materializer);
 
         var connectComplete = request.first().second();
-        // var clientComplete = request.first().first();
         var serverComplete = request.second();
 
         // Get the (HTTP) response, a websocket upgrade
