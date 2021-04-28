@@ -41,3 +41,6 @@ List of third-party dependencies grouped by their license type
 
 ### [Mozilla Public License 2.0 or Eclipse Public License 1.0](./licenses/mpl_2.0_or_epl_1.0.html):
 * H2 Database Engine ([com.h2database:h2:1.4.200](https://h2database.com))
+
+### [The Apache License, Version 2.0](./licenses/not recognised):
+* event-logging ([uk.gov.gchq.eventlogging:event-logging:4.0.8_schema-v3.2.4](https://github.com/gchq/event-logging))
