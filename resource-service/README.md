@@ -136,13 +136,6 @@ It may be that some example resources may need to be added to the backing store 
 using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
 [test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the backing store when the service starts up.
 
-## Hadoop and Windows
-
-Windows users will have problems with Hadoop integration testing. Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries.
-
-To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
-the `HadoopResourceServiceTest` to run correctly.
-
 ## Database Entities and Structuring
 
 ```
