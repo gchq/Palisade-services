@@ -74,14 +74,14 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Starter method for the Builder class that uses the {@link AuditableAuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
-           *
-         * @param auditableAuthorisedDataRequest   information from the authorising data request
+         *
+         * @param auditableAuthorisedDataRequest information from the authorising data request
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
-            DataRequest dataRequest =  auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedDataRequest authorisedDataRequest =  auditableAuthorisedDataRequest.getAuthorisedDataRequest();
+            DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
+            AuthorisedDataRequest authorisedDataRequest = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())

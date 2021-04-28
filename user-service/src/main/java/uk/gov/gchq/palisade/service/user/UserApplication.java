@@ -29,12 +29,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.event.EventListener;
 
-import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.config.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.config.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -64,7 +65,7 @@ public class UserApplication {
      * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
      * @param materialiser  the Akka {@link Materializer} configured to be used
      * @param service       the specific {@link UserService} implementation
-     * @param configuration the {@link UserConfiguration} required for loading {@link uk.gov.gchq.palisade.User}s into the service
+     * @param configuration the {@link UserConfiguration} required for loading {@link User}s into the service
      * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public UserApplication(

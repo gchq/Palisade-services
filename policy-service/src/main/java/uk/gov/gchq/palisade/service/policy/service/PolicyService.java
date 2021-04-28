@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.service;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.Service;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -31,7 +30,7 @@ import java.util.Optional;
  * Note that a resource could be a file, stream, directory or even the system
  * resource (policies added to the system resource would be applied globally).
  */
-public interface PolicyService extends Service {
+public interface PolicyService {
 
     /**
      * GetResourceRules is used by the service to get any resource rules that could be applied against the resource.
@@ -55,7 +54,7 @@ public interface PolicyService extends Service {
      * This method sets the resource rules against the resource for which the user will eventually request
      *
      * @param resourceId the id of the {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
-     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     * @param rules      {@link Rules} object, which contains the list of rules to be applied to the resource.
      * @return an Optional Rules for LeafResource object that contains the returned map of resource rules for each resource
      */
     Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules);
@@ -64,7 +63,7 @@ public interface PolicyService extends Service {
      * This method sets the record rules against the resource for which the user will eventually request
      *
      * @param resourceId the id of the {@link Resource} the user wants to apply rules against
-     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     * @param rules      {@link Rules} object, which contains the list of rules to be applied to the resource.
      * @return an Optional Serializable rules object that contains the returned map of record rules for each resource
      */
     Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules);

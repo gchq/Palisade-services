@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.resource.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -40,8 +41,7 @@ import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisA
 import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter.TypeRepositoryAdapter;
 
 /**
- * Additional Redis configuration to set time-to-live on a per-keyspace basis.
- * This must still be enabled in the domain entity with the {@link org.springframework.data.redis.core.TimeToLive} annotation.
+ * Additional Redis configuration to set key prefixes and serialisation context.
  */
 @Configuration
 @ConditionalOnProperty(
@@ -49,6 +49,7 @@ import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisA
         name = "enabled",
         havingValue = "true"
 )
+@EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisConfiguration.class);
     private final ReactiveRedisConnectionFactory factory;
@@ -86,34 +87,34 @@ public class RedisConfiguration {
 
     @Primary
     @Bean
-    CompletenessRepositoryAdapter completenessRepositoryAdapter() {
+    CompletenessRepositoryAdapter completenessRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<Integer> kSerde = new Jackson2JsonRedisSerializer<>(Integer.class);
         RedisSerializer<CompletenessEntity> vSerde = new Jackson2JsonRedisSerializer<>(CompletenessEntity.class);
-        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
+        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
     }
 
     @Primary
     @Bean
-    ResourceRepositoryAdapter resourceRepositoryAdapter() {
+    ResourceRepositoryAdapter resourceRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         Jackson2JsonRedisSerializer<ResourceEntity> vSerde = new Jackson2JsonRedisSerializer<>(ResourceEntity.class);
         vSerde.setObjectMapper(ResourceConverter.RESOURCE_MAPPER);
-        return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
+        return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
     }
 
     @Primary
     @Bean
-    TypeRepositoryAdapter typeRepositoryAdapter() {
+    TypeRepositoryAdapter typeRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         RedisSerializer<TypeEntity> vSerde = new Jackson2JsonRedisSerializer<>(TypeEntity.class);
-        return new TypeRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
+        return new TypeRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
     }
 
     @Primary
     @Bean
-    SerialisedFormatRepositoryAdapter serialisedFormatRepositoryAdapter() {
+    SerialisedFormatRepositoryAdapter serialisedFormatRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         RedisSerializer<SerialisedFormatEntity> vSerde = new Jackson2JsonRedisSerializer<>(SerialisedFormatEntity.class);
-        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
+        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
     }
 }

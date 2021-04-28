@@ -23,7 +23,6 @@ import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -81,6 +80,7 @@ public class AuditMessage {
     private final String leafResourceId;  //leafResource ID for the resource
 
     @JsonCreator
+    @SuppressWarnings("java:S112") // Suppress generic exception smell
     protected AuditMessage(
             @Nullable final @JsonProperty("userId") String userId,
             @Nullable final @JsonProperty("resourceId") String resourceId,
@@ -103,7 +103,7 @@ public class AuditMessage {
             this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
-            throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
+            throw new RuntimeException("Failed to get server host and IP address", e);
         }
     }
 

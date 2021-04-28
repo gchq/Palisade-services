@@ -19,8 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import java.io.IOException;
 

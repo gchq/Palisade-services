@@ -20,17 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
@@ -44,45 +40,6 @@ import java.util.concurrent.Executor;
 @Configuration
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-    /**
-     * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating Policies
-     * These wil be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
-     * These policies will be used for prepopulating the {@link PolicyService}
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory}s
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdPolicyConfiguration policyConfiguration() {
-        return new StdPolicyConfiguration();
-    }
-
-    /**
-     * A factory for a map of {@link uk.gov.gchq.palisade.rule.Rules} to a resourceId, using:
-     * - a {@link String} value of the resourceId
-     * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
-     * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory} capable of building a Policy from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
-    public StdPolicyPrepopulationFactory policyPrepopulationFactory() {
-        return new StdPolicyPrepopulationFactory();
-    }
-
-    /**
-     * The simplest implementation of a policy service, allows unit tests and small services to use a lightweight policy service
-     *
-     * @return a new instance of the nullPolicyService
-     */
-    @Bean
-    public PolicyService nullPolicyService() {
-        LOGGER.debug("Instantiated nullPolicyService");
-        return new NullPolicyService();
-    }
 
     /**
      * An implementation of the policy service that allows caching to take place, either using Redis or Caffeine
@@ -134,7 +91,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     @Primary
     ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
     @Override

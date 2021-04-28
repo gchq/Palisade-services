@@ -64,7 +64,7 @@ public class PolicyServiceCachingProxy {
      * Using the resourceId as the key, adds the resource, and any resource rules against that resource, to the cache
      *
      * @param resourceId the resourceId the user wants to apply resource rules to
-     * @param rules    the resource rules that apply to this resource
+     * @param rules      the resource rules that apply to this resource
      * @return the resource rules that apply to this LeafResource
      */
     @CachePut(value = "resourceRules", key = "#resourceId")
@@ -91,7 +91,7 @@ public class PolicyServiceCachingProxy {
      * Using the resourceId as the key, adds the resource, and any record rules against that resource, to the cache
      *
      * @param resourceId the resourceId the user wants to apply record rules to
-     * @param rules    the record rules that apply to this resource
+     * @param rules      the record rules that apply to this resource
      * @return the record rules that apply to this LeafResource
      */
     @CachePut(value = "recordRules", key = "#resourceId")

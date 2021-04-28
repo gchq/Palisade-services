@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import akka.Done;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -28,6 +29,7 @@ import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Service for registering a data request. The service is expecting a unique token to identify this data request and
@@ -40,7 +42,7 @@ public abstract class PalisadeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
 
     private final Materializer materialiser;
-    private final CompletableFuture<Sink<TokenRequestPair, ?>> futureSink;
+    private final CompletableFuture<Sink<TokenRequestPair, CompletionStage<Done>>> futureSink;
 
     /**
      * Instantiates a new Palisade Service.
@@ -77,14 +79,14 @@ public abstract class PalisadeService {
         // Sends the information to the "request" topic
         String token = this.createToken(request);
 
-        return futureSink.thenApply((Sink<TokenRequestPair, ?> sink) -> {
+        return futureSink.thenCompose((Sink<TokenRequestPair, CompletionStage<Done>> sink) -> {
             AuditablePalisadeSystemResponse auditableRequest = AuditablePalisadeSystemResponse.Builder.create()
                     .withPalisadeRequest(request);
             TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
-            Source.single(requestPair)
-                    .runWith(sink, materialiser);
             LOGGER.debug("registerDataRequest returning with token {} for request {}", token, request);
-            return token;
+            return Source.single(requestPair)
+                    .runWith(sink, materialiser)
+                    .toCompletableFuture().thenApply(ignored -> token);
         });
     }
 
@@ -101,7 +103,7 @@ public abstract class PalisadeService {
      * @param error      the error encountered
      * @return a future completing once the error has been sent to the sink
      */
-    public CompletableFuture<Void> errorMessage(final PalisadeClientRequest request, final String token,
+    public CompletableFuture<Done> errorMessage(final PalisadeClientRequest request, final String token,
                                                 final Map<String, Object> attributes, final Throwable error) {
         // Sends the information to the "error" topic
         // We need to include the token, the PalisadeClientRequest information and the Error that occurred.
@@ -109,7 +111,9 @@ public abstract class PalisadeService {
         AuditablePalisadeSystemResponse auditableRequest = AuditablePalisadeSystemResponse.Builder.create().withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
 
-        return futureSink.thenAccept(sink -> Source.single(requestPair).runWith(sink, materialiser));
+        return futureSink.thenCompose(sink -> Source.single(requestPair)
+                .runWith(sink, materialiser)
+                .toCompletableFuture());
     }
 
     /**
@@ -117,7 +121,7 @@ public abstract class PalisadeService {
      *
      * @param sink the sink
      */
-    public void registerRequestSink(final Sink<TokenRequestPair, ?> sink) {
+    public void registerRequestSink(final Sink<TokenRequestPair, CompletionStage<Done>> sink) {
         this.futureSink.complete(sink);
     }
 }

@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
@@ -72,7 +72,8 @@ class ReactivePersistenceLayerTest {
                 .via(persistenceLayer.withPersistenceById(resource.getId()))
                 .via(persistenceLayer.withPersistenceByType(resource.getType()))
                 .via(persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat()))
-                .runWith(Sink.ignore(), materializer);
+                .runWith(Sink.ignore(), materializer)
+                .toCompletableFuture().join();
 
         TimeUnit.SECONDS.sleep(1);
     }

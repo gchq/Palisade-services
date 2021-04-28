@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.filteredresource.domain;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
-import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +27,7 @@ class TokenOffsetEntityTest {
     /**
      * Expose a setter for the internal KEYSPACE_TTL {@link java.util.Map}
      */
-    static class RedisTtlConfigurationProxy extends RedisTtlConfiguration {
+    static class RedisConfigurationProxy extends RedisConfiguration {
         static void setTimeToLiveSeconds(final String keyspace, final Long ttlSeconds) {
             KEYSPACE_TTL.put(keyspace, ttlSeconds);
         }
@@ -37,7 +37,7 @@ class TokenOffsetEntityTest {
     void testEntityAcquiresRedisTtl() {
         // Given
         long entityTtl = 123L;
-        RedisTtlConfigurationProxy.setTimeToLiveSeconds("TokenOffsetEntity", entityTtl);
+        RedisConfigurationProxy.setTimeToLiveSeconds("TokenOffsetEntity", entityTtl);
 
         // When
         TokenOffsetEntity entity = new TokenOffsetEntity(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.OFFSET);

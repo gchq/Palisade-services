@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade;
 
+import akka.Done;
 import akka.NotUsed;
 import akka.stream.Materializer;
 import akka.stream.javadsl.RunnableGraph;
@@ -31,6 +32,8 @@ import org.springframework.context.event.EventListener;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Loads the Palisade Service.  This  will provide a RESTful service for clients to register a data request.
@@ -81,7 +84,8 @@ public class PalisadeApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        palisadeService.registerRequestSink(runner.run(materialiser));
+        palisadeService.registerRequestSink(runner.run(materialiser)
+                .mapMaterializedValue(notUsed -> CompletableFuture.completedFuture(Done.done())));
     }
 }
 

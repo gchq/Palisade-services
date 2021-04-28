@@ -102,7 +102,7 @@ curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "
     "auths": [
       "auths"
     ],
-    "class": "uk.gov.gchq.palisade.User"
+    "class": "uk.gov.gchq.palisade.user.User"
   }
 }'
 ```

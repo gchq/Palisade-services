@@ -21,7 +21,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
+    - match: PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
       kind: Rule
       services:
         - name: {{ include "palisade-service.name" . }}

@@ -69,7 +69,7 @@ public class AuditableDataService {
      * is used in the construction of the audit message for this request.
      *
      * @param auditableAuthorisedDataRequest provides the reference to the authorised data request
-     * @param outputStream         is used to provide the requested data to be forwarded to the client
+     * @param outputStream                   is used to provide the requested data to be forwarded to the client
      * @return information on the resources that have been provided
      */
     public CompletableFuture<AuditableDataResponse> read(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest, final OutputStream outputStream) {

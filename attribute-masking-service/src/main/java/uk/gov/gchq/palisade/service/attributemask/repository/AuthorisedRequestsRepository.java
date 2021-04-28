@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.attributemask.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.user.User;
 
 /**
  * Persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.

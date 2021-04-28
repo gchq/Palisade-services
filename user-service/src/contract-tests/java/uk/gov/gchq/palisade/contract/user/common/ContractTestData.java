@@ -48,8 +48,8 @@ public class ContractTestData {
     public static final JsonNode NO_USER_ID_REQUEST_NODE;
     public static final UserRequest REQUEST_OBJ;
     public static final UserRequest NO_USER_ID_REQUEST_OBJ;
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
-    public static final String NO_USER_JSON = "{\"userId\":\"invalid-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    public static final String NO_USER_JSON = "{\"userId\":\"invalid-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
 
 
     static {

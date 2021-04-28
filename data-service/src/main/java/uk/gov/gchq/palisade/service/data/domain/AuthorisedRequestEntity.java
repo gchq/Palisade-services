@@ -21,9 +21,9 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.user.User;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -49,7 +49,7 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
-@RedisHash("AuthorisedRequestEntity")
+@RedisHash(timeToLive = 86400)
 public class AuthorisedRequestEntity {
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")

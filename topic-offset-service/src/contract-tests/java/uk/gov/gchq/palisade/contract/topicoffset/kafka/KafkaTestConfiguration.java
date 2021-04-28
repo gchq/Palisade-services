@@ -18,8 +18,13 @@ package uk.gov.gchq.palisade.contract.topicoffset.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,10 +35,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.serializer.support.SerializationFailedException;
 import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.service.topicoffset.stream.PropertiesConfigurer;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +51,10 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
+/**
+ * Configuration providing the test beans to be injected into test classes that
+ * require access to various objects to support access to Kafka/Akka
+ */
 @Configuration
 @ConditionalOnProperty(
         value = "akka.discovery.config.services.kafka.from-config",
@@ -50,11 +62,12 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 )
 public class KafkaTestConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTestConfiguration.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final List<NewTopic> topics = List.of(
-            new NewTopic("masked-resource", 3, (short) 1),
-            new NewTopic("masked-resource-offset", 3, (short) 1),
-            new NewTopic("error", 3, (short) 1));
+            new NewTopic("masked-resource", 1, (short) 1),
+            new NewTopic("masked-resource-offset", 1, (short) 1),
+            new NewTopic("error", 1, (short) 1));
 
     @Bean
     @ConditionalOnMissingBean
@@ -64,7 +77,11 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws Exception {
-        final KafkaContainer container = new KafkaContainer("5.5.1");
+        final KafkaContainer container = new KafkaContainer("5.5.1")
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3)
+                .withNetworkMode("host");
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         container.start();
@@ -76,7 +93,7 @@ public class KafkaTestConfiguration {
 
     @Bean
     @Primary
-    Materializer getMaterializer(final ActorSystem system) {
+    Materializer getMaterialiser(final ActorSystem system) {
         return Materializer.createMaterializer(system);
     }
 
@@ -102,5 +119,29 @@ public class KafkaTestConfiguration {
         String brokers = String.format("%s:%d", "localhost", mappedPort);
         LOGGER.info("brokers: " + brokers);
         return brokers;
+    }
+
+    // Serialiser for upstream test input
+    static class RequestSerializer implements Serializer<JsonNode> {
+        @Override
+        public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
+            try {
+                return MAPPER.writeValueAsBytes(topicOffsetRequest);
+            } catch (JsonProcessingException e) {
+                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test output
+    static class ResponseDeserializer implements Deserializer<JsonNode> {
+        @Override
+        public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
+            try {
+                return MAPPER.readTree(topicOffsetResponse);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
+            }
+        }
     }
 }

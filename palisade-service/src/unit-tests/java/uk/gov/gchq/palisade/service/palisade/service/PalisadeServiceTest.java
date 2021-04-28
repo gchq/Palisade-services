@@ -40,11 +40,12 @@ class PalisadeServiceTest extends CommonTestData {
     final Materializer materialiser = Materializer.createMaterializer(ActorSystem.create());
     final PalisadeService service = new MockedPalisadeService(materialiser);
     LinkedList<TokenRequestPair> sinkCollection;
+    Sink<TokenRequestPair, CompletionStage<Done>> sink;
 
     @BeforeEach
     void setUp() {
         sinkCollection = new LinkedList<>();
-        Sink<TokenRequestPair, CompletionStage<Done>> sink = Sink.foreach((TokenRequestPair x) -> sinkCollection.addLast(x));
+        sink = Sink.foreach((TokenRequestPair x) -> sinkCollection.addLast(x));
         service.registerRequestSink(sink);
     }
 
@@ -72,7 +73,7 @@ class PalisadeServiceTest extends CommonTestData {
         // When we make a request to the client
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
         // And then force an error to be returned, signifying a rejected request
-        service.errorMessage(PALISADE_REQUEST, token.join(), Map.of("messages", "10"), ERROR);
+        service.errorMessage(PALISADE_REQUEST, token.join(), Map.of("messages", "10"), ERROR).join();
 
         // Then the response is valid and contains all the information we require
         assertAll(

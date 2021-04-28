@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.resource.exception;
 
 /**
  * A {@code NoSuchResourceException} is a {@link RuntimeException} thrown by a
- * {@link uk.gov.gchq.palisade.service.ResourceService} implementation to
+ * {@link uk.gov.gchq.palisade.service.resource.service.ResourceService} implementation to
  * indicate that the requested {@link uk.gov.gchq.palisade.resource.LeafResource} doesn't exist,
  * or is not known to that {@code Service} instance.
  */
