@@ -19,9 +19,9 @@ package uk.gov.gchq.palisade.service.user.service;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 

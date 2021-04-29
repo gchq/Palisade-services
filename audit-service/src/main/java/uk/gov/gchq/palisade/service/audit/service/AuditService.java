@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 /**
@@ -28,7 +27,7 @@ import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
  * receiver - aggregator - storage. It means that if we don't want to aggregate audit records then we just remove the
  * aggregator implementation when building that micro-service.
  */
-public interface AuditService extends Service {
+public interface AuditService {
 
     /**
      * This method applies the functionality that the implementation of the Audit Service needs to apply, whether that

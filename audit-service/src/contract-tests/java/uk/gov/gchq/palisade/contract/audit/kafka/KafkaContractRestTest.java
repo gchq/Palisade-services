@@ -31,7 +31,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
@@ -69,8 +68,7 @@ import static uk.gov.gchq.palisade.service.audit.model.Token.HEADER;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"akka-test"})
 class KafkaContractRestTest {
 

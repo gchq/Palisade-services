@@ -27,14 +27,15 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.StubResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.policy.config.DefaultConfiguration;
+import uk.gov.gchq.palisade.service.policy.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
 import java.util.Arrays;
@@ -47,7 +48,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
+        classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
         properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
@@ -138,10 +139,10 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheMaxSize() {
         /// Given - the cache is overfilled
-        Function<Integer, Resource> makeResource = i -> new StubResource(
-                i.toString(), i.toString(), i.toString(),
-                new SimpleConnectionDetail().serviceName(i.toString())
-        );
+        Function<Integer, Resource> makeResource = i -> new FileResource()
+                .id(i.toString()).type(i.toString()).serialisedFormat(i.toString())
+                .connectionDetail(new SimpleConnectionDetail().serviceName(i.toString()))
+                .parent(new SystemResource().id(i.toString()));
         Function<Integer, Rules<LeafResource>> makeRule = i -> new Rules<LeafResource>().addRule(i.toString(), new PassThroughRule<>());
         for (int count = 0; count <= 100; ++count) {
             policyService.setResourceRules(makeResource.apply(count).getId(), makeRule.apply(count));

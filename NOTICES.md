@@ -3,7 +3,6 @@ List of third-party dependencies grouped by their license type
 ### [Apache Software License 2.0](./licenses/apache_software_license_2.0.txt):
 * jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.11.0](http://github.com/FasterXML/jackson))
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
-* Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * akka-actor-testkit-typed ([com.typesafe.akka:akka-actor-testkit-typed_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
@@ -20,9 +19,7 @@ List of third-party dependencies grouped by their license type
 * akka-stream-typed ([com.typesafe.akka:akka-stream-typed_2.13:2.6.10](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.10](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
-* event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
 * Reactive Relational Database Connectivity - H2 ([io.r2dbc:r2dbc-h2:0.8.4.RELEASE](https://github.com/r2dbc/r2dbc-h2))
-* Apache Hadoop Common ([org.apache.hadoop:hadoop-common:3.2.1](no url defined))
 * spring-boot-starter ([org.springframework.boot:spring-boot-starter:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter-actuator ([org.springframework.boot:spring-boot-starter-actuator:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter-cache ([org.springframework.boot:spring-boot-starter-cache:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
@@ -34,8 +31,6 @@ List of third-party dependencies grouped by their license type
 * spring-boot-starter-web ([org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * common ([uk.gov.gchq.palisade:common:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
-* hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
-* hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
 
 ### [Common Development and Distribution License (CDDL) 1.1](./licenses/cddl_gpl_1.1.txt):
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.0-b170127.1453](http://jaxb.java.net/jaxb-runtime-parent/jaxb-runtime))
@@ -46,3 +41,6 @@ List of third-party dependencies grouped by their license type
 
 ### [Mozilla Public License 2.0 or Eclipse Public License 1.0](./licenses/mpl_2.0_or_epl_1.0.html):
 * H2 Database Engine ([com.h2database:h2:1.4.200](https://h2database.com))
+
+### [The Apache License, Version 2.0](./licenses/not recognised):
+* event-logging ([uk.gov.gchq.eventlogging:event-logging:4.0.8_schema-v3.2.4](https://github.com/gchq/event-logging))

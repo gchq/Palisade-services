@@ -25,10 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.reader.HadoopDataReader;
-import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
+import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
@@ -37,7 +34,6 @@ import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /**
@@ -87,16 +83,6 @@ public class ApplicationConfiguration {
         return new AuditMessageService(materializer);
     }
 
-    /**
-     * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
-     *
-     * @return a new instance of {@link HadoopDataReader}
-     * @throws IOException ioException
-     */
-    @Bean
-    DataReader hadoopDataReader() throws IOException {
-        return new HadoopDataReader();
-    }
 
     /**
      * Default JSON to Java seraialiser/deserialiser.
@@ -106,7 +92,7 @@ public class ApplicationConfiguration {
     @Bean
     @Primary
     ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
     @Bean("threadPoolTaskExecutor")

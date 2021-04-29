@@ -75,13 +75,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "palisade-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- else }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- end }}
+{{- printf "%s/%s" (include "palisade-service.classpathJars.mount" .) (include "palisade-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
@@ -92,15 +86,23 @@ Calculate the service config location
 {{- end }}
 
 {{/*
-Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade-service.deployment.name" }}
-{{- include "palisade-service.deployment.path" . | base }}
+{{- define "palisade-service.classpathJars.name" }}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade-service.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "palisade-service.deployment.name" . }}
+{{- define "palisade-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
+{{- end }}
+
+{{/*
+Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "palisade-service.deployment.revision" }}
+{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}

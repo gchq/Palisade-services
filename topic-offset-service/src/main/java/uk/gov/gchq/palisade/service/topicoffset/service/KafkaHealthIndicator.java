@@ -28,7 +28,9 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -80,6 +82,12 @@ public class KafkaHealthIndicator implements HealthIndicator {
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
+            // While we perform additional checks on the STABLE state, take any of the below to mean 'healthy'
+            Set<ConsumerGroupState> healthyStates = EnumSet.of(
+                    ConsumerGroupState.COMPLETING_REBALANCE,
+                    ConsumerGroupState.PREPARING_REBALANCE,
+                    ConsumerGroupState.EMPTY);
+
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
@@ -87,6 +95,13 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     LOGGER.error("Failed to find kafka topic-partition assignments");
                 }
                 return assignedGroupPartition;
+
+            } else if (healthyStates.contains(consumerGroupDescription.state())) {
+                LOGGER.debug("Accepted non-STABLE state as healthy because it was found in the healthy set: {}", healthyStates);
+                return true;
+            } else {
+                LOGGER.error("No STABLE state identified, marking service as unhealthy");
+                return false;
             }
 
         } catch (InterruptedException e) {

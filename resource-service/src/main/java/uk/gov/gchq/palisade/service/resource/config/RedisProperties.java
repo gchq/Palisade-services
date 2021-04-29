@@ -14,36 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.config;
+package uk.gov.gchq.palisade.service.resource.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Spring configuration for redis keyspace ttl properties - duration in seconds per keyspace name.
+ * Spring configuration for redis properties.
  */
 @ConfigurationProperties("spring.data.redis.repositories")
-public class RedisTtlProperties {
-    private static final Duration DEFAULT_TTL = Duration.ofDays(1);
-    private Map<String, Duration> timeToLive = new HashMap<>();
+public class RedisProperties {
+    private String keyPrefix = "";
 
     @Generated
-    public Map<String, Duration> getTimeToLive() {
-        return timeToLive;
+    public String getKeyPrefix() {
+        return keyPrefix;
     }
 
     @Generated
-    public static Duration getDefaultTtl() {
-        return DEFAULT_TTL;
-    }
-
-    @Generated
-    public void setTimeToLive(final Map<String, Duration> timeToLive) {
-        this.timeToLive = timeToLive;
+    public void setKeyPrefix(final String keyPrefix) {
+        this.keyPrefix = keyPrefix;
     }
 }

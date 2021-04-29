@@ -14,30 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.component.filteredresource.repository;
+package uk.gov.gchq.palisade.contract.filteredresource.redis;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.redis.AutoConfigureDataRedis;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
 
-import uk.gov.gchq.palisade.component.filteredresource.repository.RedisPersistenceComponentTest.Initializer;
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
-import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
@@ -48,40 +40,18 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"})
+@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s", "spring.data.redis.repositories.key-prefix=test:"})
 @ContextConfiguration(
-        classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisTtlConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
-        initializers = Initializer.class
+        classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
+        initializers = RedisInitializer.class
 )
 @EnableAutoConfiguration
 @AutoConfigureDataRedis
-@AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("redis")
-class RedisPersistenceComponentTest {
-
-    private static final int REDIS_PORT = 6379;
+class RedisPersistenceContractTest {
 
     protected void cleanCache() {
         requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
-    }
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NonNull final ConfigurableApplicationContext context) {
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
     }
 
     @AfterEach
@@ -111,12 +81,15 @@ class RedisPersistenceComponentTest {
         service.storeTokenOffset(token, request.commitOffset).join();
 
         // Then the offset is persisted in redis
-        final String redisKey = "TokenOffsetEntity:" + token;
-        assertThat(redisTemplate.keys(redisKey)).hasSize(1);
+        final String redisKey = "test:TokenOffsetEntity:" + token;
+        assertThat(redisTemplate.keys(redisKey))
+                .as("Check that the value is stored in redis")
+                .hasSize(1);
 
         // Values for the entity are correct
         final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
+                .as("Check the returned redis hash contains the expected token and offset values")
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
                 .containsEntry("offset", ContractTestData.TOPIC_OFFSET_MESSAGE.commitOffset.toString());
     }
@@ -132,7 +105,9 @@ class RedisPersistenceComponentTest {
         TimeUnit.SECONDS.sleep(1);
 
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("TokenOffsetEntity:" + token)).isEmpty();
+        assertThat(redisTemplate.keys("test:TokenOffsetEntity:" + token))
+                .as("Check the stored value has been removed after TTL period")
+                .isEmpty();
     }
 
 }
