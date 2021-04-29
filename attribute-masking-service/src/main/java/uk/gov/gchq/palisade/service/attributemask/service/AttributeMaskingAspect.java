@@ -53,6 +53,7 @@ public class AttributeMaskingAspect {
 
     /**
      * Around aspect for method calls, handle and swallow exceptions
+     *
      * @param pjp method call metadata
      * @return audit object and method return value container
      */
@@ -83,20 +84,20 @@ public class AttributeMaskingAspect {
         AttributeMaskingRequest request = (AttributeMaskingRequest) args[0];
         return AuditableAttributeMaskingResponse.Builder.create().withAttributeMaskingResponse(null)
                 .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())
-                .withResourceId(request.getResourceId())
-                .withContextNode(request.getContextNode())
-                .withAttributes(Collections.singletonMap("method", MRA))
-                .withError(reason));
+                        .withResourceId(request.getResourceId())
+                        .withContextNode(request.getContextNode())
+                        .withAttributes(Collections.singletonMap("method", MRA))
+                        .withError(reason));
     }
 
     private static AuditableAttributeMaskingRequest auditStorageException(final @NonNull Object[] args, final @NonNull Throwable reason) {
         AttributeMaskingRequest request = (AttributeMaskingRequest) args[1];
         return AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null)
                 .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())
-                .withResourceId(request.getResourceId())
-                .withContextNode(request.getContextNode())
-                .withAttributes(Collections.singletonMap("method", SAR))
-                .withError(reason));
+                        .withResourceId(request.getResourceId())
+                        .withContextNode(request.getContextNode())
+                        .withAttributes(Collections.singletonMap("method", SAR))
+                        .withError(reason));
     }
 
 }

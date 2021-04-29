@@ -119,7 +119,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    }
 }
 ```
@@ -146,7 +146,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    },
    "resource":{
       "class":"uk.gov.gchq.palisade.resource.impl.FileResource",
@@ -155,7 +155,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
          
       },
       "connectionDetail":{
-         "class":"uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+         "class":"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
          "serviceName":"data-service"
       },
       "parent":{
@@ -227,7 +227,7 @@ This is all achieved in non-blocking reactive streams, allowing for large datase
 
 It may be that some example resources may need to be added to the backing store before a test run of the Palisade system gets performed.
 This is done by using Spring to add resource(s) to the implementation using data sourced from a yaml profile.
-An example of this can be seen in this [testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
+An example of this can be seen in this [test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the backing store when the service starts up.
 
 
 ## License

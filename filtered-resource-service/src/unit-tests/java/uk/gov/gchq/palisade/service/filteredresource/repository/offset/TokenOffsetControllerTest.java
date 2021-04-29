@@ -65,7 +65,7 @@ class TokenOffsetControllerTest {
 
         // When a spawn command is sent
         actorSystem.tell(spawnCommand);
-        TimeUnit.MILLISECONDS.sleep(50);
+        TimeUnit.SECONDS.sleep(1);
 
         // Then a worker actor for our request is spawned
         Optional<ActorRef> workerRef = actorSystem.classicSystem()
@@ -78,7 +78,7 @@ class TokenOffsetControllerTest {
 
         // When a tell command is sent
         actorSystem.tell(ackTellCommand);
-        TimeUnit.MILLISECONDS.sleep(50);
+        TimeUnit.SECONDS.sleep(1);
 
         // When the actor-system is drained and shut-down
         TestKit.shutdownActorSystem(actorSystem.classicSystem());
@@ -98,11 +98,11 @@ class TokenOffsetControllerTest {
     void testCorrectCommandOrderWithPersistence() throws InterruptedException {
         // Given we have an actor-system running
         // Given the offset is in persistence
-        persistenceLayer.overwriteOffset(spawnCommand.getOffset.token, setCommand.offset);
+        persistenceLayer.overwriteOffset(spawnCommand.getOffset.token, setCommand.offset).join();
 
         // When a spawn command is sent
         actorSystem.tell(spawnCommand);
-        TimeUnit.MILLISECONDS.sleep(50);
+        TimeUnit.SECONDS.sleep(1);
 
         // When the actor-system is drained and shut-down
         TestKit.shutdownActorSystem(actorSystem.classicSystem());

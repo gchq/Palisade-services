@@ -21,9 +21,9 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.user.User;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -39,7 +39,7 @@ import java.util.StringJoiner;
  * An entity for access to a single leafResource with a set of rules (and user/context to apply)
  * to be persisted in a repository/database. A (unique) key is created from the concatenation of
  * the token and leafResource id, which is used for indexing. This will later be retrieved by the
- * data-service to assert the client's access has been authorised and the rules for such access.
+ * Data Service to assert the client's access has been authorised and the rules for such access.
  */
 @Entity
 @Table(
@@ -49,7 +49,7 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
-@RedisHash("AuthorisedRequestEntity")
+@RedisHash(timeToLive = 86400)
 public class AuthorisedRequestEntity {
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
@@ -88,7 +88,7 @@ public class AuthorisedRequestEntity {
 
     /**
      * Constructor for an AuthorisedRequestEntity to be persisted in a repository/database.
-     * A (unique) key is created from the concatenation of the token and leafResource id, which is used for indexing
+     * A (unique) key is created from the concatenation of the token and leafResource id, which is used for indexing.
      *
      * @param token        the token {@link String} for the client request as a whole, created by the palisade-service
      * @param user         the {@link User} as authorised and returned by the user-service
@@ -183,14 +183,14 @@ public class AuthorisedRequestEntity {
     }
 
     /**
-     * Helper class for mapping tokens and resourceIds to a (unique) product of the two
+     * Helper class for mapping tokens and resourceIds to a (unique) product of the two.
      */
     public static class AuthorisedRequestEntityId {
         private final String token;
         private final String resourceId;
 
         /**
-         * Basic constructor taking in the pair of non-unique keys
+         * Basic constructor taking in the pair of non-unique keys.
          *
          * @param token      the token of the request - unique per each new client request
          * @param resourceId the resource id for this response - unique per resource and
@@ -202,8 +202,8 @@ public class AuthorisedRequestEntity {
         }
 
         /**
-         * Create a unique product of the token and resourceId
-         * Concatenate the two strings with a separator that shouldn't appear in either String
+         * Create a unique product of the token and resourceId.
+         * Concatenate the two strings with a separator that shouldn't appear in either String.
          *
          * @return a unique id for indexing the entity on
          */

@@ -39,6 +39,7 @@ public final class AuditablePolicyRecordResponse {
 
     /**
      * Chain any errors from previous stream elements
+     *
      * @param audit the previous audit or null
      * @return a new instance of this object
      */
@@ -66,6 +67,7 @@ public final class AuditablePolicyRecordResponse {
 
         /**
          * The creator function
+         *
          * @return the composed immutable object
          */
         public static IPolicyResponse create() {
@@ -78,6 +80,7 @@ public final class AuditablePolicyRecordResponse {
         public interface IPolicyResponse {
             /**
              * Compose value
+             *
              * @param response value or null
              * @return value object
              */
@@ -90,6 +93,7 @@ public final class AuditablePolicyRecordResponse {
         public interface IAuditErrorMessage {
             /**
              * Compose value
+             *
              * @param audit value or null
              * @return value object
              */

@@ -30,7 +30,7 @@ class AuthorisedDataRequestTest {
      * compares it to the original object.
      */
     @Test
-    void testDataRequestReaderBuilder()  {
+    void testDataRequestReaderBuilder() {
         AuthorisedDataRequest authorisedDataObjectContentObject = AuthorisedDataRequest.Builder.create()
                 .withResource(AUTHORISED_DATA.getResource())
                 .withUser(AUTHORISED_DATA.getUser())

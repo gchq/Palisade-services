@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 
@@ -34,19 +33,19 @@ import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 public class ApplicationConfiguration {
 
     @Bean
-    PalisadeService palisadeService(final Materializer materializer) {
-        return new UUIDPalisadeService(materializer);
+    PalisadeService palisadeService(final Materializer materialiser) {
+        return new UUIDPalisadeService(materialiser);
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return a new instance of the ObjectMapper
      */
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
 }

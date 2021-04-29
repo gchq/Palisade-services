@@ -16,12 +16,10 @@
 
 package uk.gov.gchq.palisade.contract.policy.common;
 
-import org.apache.commons.io.FilenameUtils;
-
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Objects;
 
@@ -45,6 +43,6 @@ public class SerialisedFormatRule implements Rule<Resource> {
     }
 
     public String getExtension(final String filename) {
-        return FilenameUtils.getExtension(filename);
+        return filename.substring(filename.lastIndexOf(".") + 1);
     }
 }

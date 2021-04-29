@@ -22,8 +22,8 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
+import uk.gov.gchq.palisade.user.User;
 
 import java.io.IOException;
 
@@ -38,10 +38,10 @@ class UserResponseTest {
 
     /**
      * Tests the creation of the message type, UserResponse using the builder
-     * plus tests the serializing to a Json string and deserialising to an object.
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
      * @throws IOException throws if the {@link UserResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialize or deserialize the Json string.
+     *                     This equates to a failure to serialise or deserialise the Json string.
      */
     @Test
     void testUserResponseSerialisingAndDeserialising() throws IOException {

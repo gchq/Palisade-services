@@ -22,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface the the persistence store containing all requests for resources that have been authorised
- * by Palisade. This has been populated by some external service (attribute-masking-service) with tokens
- * and leafResources, along with the User, LeafResource, Rules and Context that must be applied before
+ * by Palisade. This has been populated by some external service (Attribute-Masking Service) with tokens
+ * and leafResourceIds, along with the User, LeafResource, Rules and Context that must be applied before
  * returning data to the client.
  */
 public interface PersistenceLayer {
@@ -31,7 +31,7 @@ public interface PersistenceLayer {
     /**
      * Asynchronously retrieve the details for the given leaf resource and client token.
      *
-     * @param token the client's request token
+     * @param token          the client's request token
      * @param leafResourceId the leaf resource requested by the client
      * @return a {@link CompletableFuture} of the persistence access, itself returning an {@link Optional}
      * of whether such an authorisation was found and the rules to apply.

@@ -47,17 +47,17 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/health
             port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
@@ -72,8 +72,8 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "data-service.deployment.fullname" . }}
-          mountPath: {{ include "data-service.deployment.path" . }}
+        - name: {{ include "data-service.classpathJars.name" . }}
+          mountPath: {{ include "data-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "data-service.config.path" . }}
         {{- range $name, $value := .Values.global.persistence.dataStores }}
@@ -81,9 +81,9 @@ spec:
           mountPath: {{ $value.mountPath }}
         {{- end }}
       volumes:
-      - name: {{ include "data-service.deployment.fullname" . }}
+      - name: {{ include "data-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "data-service.deployment.fullname" . }}
+          claimName: {{ include "data-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:
@@ -91,7 +91,7 @@ spec:
       {{- range $name, $_ := .Values.global.persistence.dataStores }}
       - name: {{ $name }}
         persistentVolumeClaim:
-          claimName: {{ $name }}
+          claimName: {{ $name }}-{{ include "palisade.namespace" $ }}
           readOnly: true
       {{- end }}
       {{- with .Values.nodeSelector }}

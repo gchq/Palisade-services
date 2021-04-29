@@ -23,7 +23,6 @@ import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,11 +36,11 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that is to be
+ * This is the parent class for Audit information. It represents the common component of the data that is to be
  * sent to Audit Service.  Note this version of {@code AuditMessage} is unique in comparison to the {@code AuditMessage}
- * from the other service in that it will include the {@code leafResourceId}.  In addition the {@code userID},
- * {@code resourceID} and {@code context} can be null.  This can occur when this message represents an error for a
- * request that is not authorised to access the data.
+ * from the other service in that it will include the {@code leafResourceId}. In addition, it is possible that the
+ * the {@code userId}, {@code resourceId} and {@code context} can be null. This can occur when this message represents
+ * an error for a request that is not authorised to access the data.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
@@ -81,6 +80,7 @@ public class AuditMessage {
     private final String leafResourceId;  //leafResource ID for the resource
 
     @JsonCreator
+    @SuppressWarnings("java:S112") // Suppress generic exception smell
     protected AuditMessage(
             @Nullable final @JsonProperty("userId") String userId,
             @Nullable final @JsonProperty("resourceId") String resourceId,
@@ -103,7 +103,7 @@ public class AuditMessage {
             this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
-            throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
+            throw new RuntimeException("Failed to get server host and IP address", e);
         }
     }
 

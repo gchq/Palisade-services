@@ -16,21 +16,18 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
- * The core API for the audit service. This service is responsible for logging audit messages, whether that is locally
- * or to a centralised repository. Implementations of the audit service may include proxies to forward the messages to
- * another audit service, aggregator's to reduce the volumes of logging to be stored as well as implementations that
+ * The core API for the Audit Service. This service is responsible for logging audit messages, whether that is locally
+ * or to a centralised repository. Implementations of the Audit Service may include proxies to forward the messages to
+ * another Audit Service, aggregator's to reduce the volumes of logging to be stored as well as implementations that
  * actually write the logs to storage. By splitting the functionality of the audit components in this way, where they
  * all implement this interface but do some small processing before passing to the next component, for example proxy -
  * receiver - aggregator - storage. It means that if we don't want to aggregate audit records then we just remove the
  * aggregator implementation when building that micro-service.
  */
-public interface AuditService extends Service {
+public interface AuditService {
 
     /**
      * This method applies the functionality that the implementation of the Audit Service needs to apply, whether that
@@ -39,7 +36,7 @@ public interface AuditService extends Service {
      *
      * @param token   the token value for the request that is passing the message
      * @param request an {@link AuditMessage} object that contains the details required to create an audit log.
-     * @return a  {@link CompletableFuture} giving a boolean value indicating the success of this audit request
+     * @return a {@link Boolean} value indicating the success of this audit request
      */
     Boolean audit(final String token, final AuditMessage request);
 

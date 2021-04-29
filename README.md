@@ -80,7 +80,7 @@ Kafka and redis persistence is mounted using the `/tmp` directory by default.
 An example second deployment may want to use traefik to enable access into the cluster.
 This can be done by adding the additional flag:
 ```
-  --set trefik.install=true
+  --set traefik.install=true
 ```
 This will deploy the traefik ingress controller - the application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
 

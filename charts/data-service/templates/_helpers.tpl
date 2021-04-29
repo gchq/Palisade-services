@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 
-{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
@@ -86,13 +85,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "data-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- else }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- end }}
+{{- printf "%s/%s" (include "data-service.classpathJars.mount" .) (include "data-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
@@ -103,15 +96,23 @@ Calculate the service config location
 {{- end }}
 
 {{/*
-Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "data-service.deployment.name" }}
-{{- include "data-service.deployment.path" . | base }}
+{{- define "data-service.classpathJars.name" }}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "data-service.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "data-service.deployment.name" . }}
+{{- define "data-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
+{{- end }}
+
+{{/*
+Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "data-service.deployment.revision" }}
+{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}

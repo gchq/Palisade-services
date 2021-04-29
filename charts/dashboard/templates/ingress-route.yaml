@@ -21,7 +21,7 @@ spec:
   entryPoints:
     - tls
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`/kubernetes`)
+    - match: PathPrefix(`/kubernetes`)
       kind: Rule
       services:
         - name: kubernetes-dashboard

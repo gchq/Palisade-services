@@ -26,10 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>policy-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/policy-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -117,14 +117,6 @@
         <!--
         ~ Test Dependencies
         -->
-        <dependency>
-            <!-- Palisade test rules -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <!-- SpringBootTest -->
             <groupId>org.springframework.boot</groupId>

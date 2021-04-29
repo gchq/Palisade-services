@@ -44,13 +44,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.resource.ContractTestData;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaTestConfiguration.RequestSerialiser;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaTestConfiguration.ResponseDeserialiser;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
@@ -84,13 +84,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class})
-@ActiveProfiles({"dbtest", "akkatest", "testresource"})
+@Import(KafkaTestConfiguration.class)
+@ActiveProfiles({"db-test", "akka-test", "test-resource"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class KafkaContractTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -104,7 +106,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testRequestSet() {
         // Only 1 request will be received by the resource-service
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
@@ -116,8 +118,8 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -126,11 +128,12 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
@@ -143,9 +146,11 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check that the correct amount of messages are returned")
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
+                        .as("Check the message contains the correct headers")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
@@ -154,17 +159,19 @@ class KafkaContractTest {
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the start header contains all the correct information")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check that the end header contains all the correct information")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-
         assertThat(results)
+                .as("Check that the response has all the correct Resource information")
                 .extracting(ConsumerRecord::value)
                 .extracting(result -> result.get("resource"))
                 .allSatisfy(resource -> {
@@ -188,8 +195,8 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output and error topics
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -202,11 +209,12 @@ class KafkaContractTest {
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
 
         // When - results are pulled from the output stream
@@ -218,7 +226,7 @@ class KafkaContractTest {
         // Then - the results are as expected
         assertAll(
                 () -> assertThat(results)
-                        .as("The 'output' topic has 2 messages")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(2),
 
                 () -> assertThat(results)
@@ -256,7 +264,7 @@ class KafkaContractTest {
         assertAll("Asserting on the error topic",
                 // One error is produced
                 () -> assertThat(errorResults)
-                        .as("The 'error' topic has 1 message")
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 // The error has the relevant headers, including the token
@@ -266,7 +274,6 @@ class KafkaContractTest {
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .as("Check the exception message")
                         .startsWith("Failed to walk path " + File.separator + "not" + File.separator + "a" + File.separator + "resource")
@@ -280,7 +287,7 @@ class KafkaContractTest {
         ConsumerSettings<String, ResourceRequest> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.userKeyDeserializer(), SerDesConfig.userValueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, ResourceRequest>> probe = Consumer
@@ -305,14 +312,17 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check the correct number of messages are returned")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .as("Check that the token is in the header")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
-
                             assertThat(result.value())
+                                    .as("Check the request returned is correct")
+                                    .usingRecursiveComparison()
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );

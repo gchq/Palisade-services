@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.resource.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.resource.ParentResource;
 
@@ -26,6 +27,7 @@ import uk.gov.gchq.palisade.resource.ParentResource;
  * Erase parent when storing JSON, it will be rebuilt using the repository.
  */
 // Must be abstract class, not interface, to be used as mixin
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @SuppressWarnings("java:S1610")
 public abstract class OrphanedChildJsonMixin {
     /**

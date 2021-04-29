@@ -47,10 +47,11 @@ management:
     kafka:
       enabled: true
 
+policy:
+  implementation: "null"
+
 population:
   policyProvider: std
-  userProvider: std
-  resourceProvider: std
 
 logging:
   level:
