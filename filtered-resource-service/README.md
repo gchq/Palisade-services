@@ -88,6 +88,9 @@ The client and server communicate using the following protocol:
 | CTS            | RESOURCE, ERROR, COMPLETE      | A client's clear-to-send message is met with either a RESOURCE from the server (id, type, format, connection-detail) or an ERROR (message-details). Once all RESOURCEs and ERRORs are exhausted, then a COMPLETE message is returned.
 
 In particular, the Filtered-Resource Service checks for errors *twice* - once before any resources and once after.
+This means 'early' errors that came in *before* the client connected (eg. from the User Service) are delivered to the client sooner, and they may choose to re-register a request.
+'Late' errors, those which arrived *after* the client connected are then delivered only after all resources have been delivered, alerting the client that their result set may be incomplete, allowing them to choose whether to re-register their request or continue.
+This minimises the number of queries to the error persistence store per client, while also providing prompt notification of errors.
 
 ### Akka Web Server
 
