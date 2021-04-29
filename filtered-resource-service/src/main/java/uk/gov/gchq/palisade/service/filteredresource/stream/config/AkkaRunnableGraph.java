@@ -56,7 +56,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController.TokenErrorMessageCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;

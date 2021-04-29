@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
+package uk.gov.gchq.palisade.service.filteredresource.repository.error;
 
 import akka.NotUsed;
 import akka.actor.typed.ActorRef;
@@ -28,19 +28,19 @@ import akka.stream.javadsl.Flow;
 import akka.stream.typed.javadsl.ActorFlow;
 
 import uk.gov.gchq.palisade.service.filteredresource.model.TokenErrorMessagePersistenceResponse;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.GetAllExceptions;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.ReportError;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.SetAuditErrorMessages;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.WorkerCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.WorkerResponse;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController.TokenErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.GetAllErrors;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.ReportError;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.SetAuditErrorMessages;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.WorkerCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.WorkerResponse;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand.SpawnWorker;
+import static uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController.TokenErrorMessageCommand.SpawnWorker;
 
 /**
  * Manages getting from the persistence layer such that requests will wait until AuditErrorMessages arrive.
@@ -50,25 +50,25 @@ import static uk.gov.gchq.palisade.service.filteredresource.repository.exception
 public final class TokenErrorMessageController extends AbstractBehavior<TokenErrorMessageCommand> {
 
     /**
-     * Command to the ActorSystem. This can either be a request to spawn a new worker, which will
-     * acquire a AuditErrorMessage for a token and reply back, or a request to tell running workers about
-     * a newly-discovered AuditErrorMessage for a given token.
+     * Command to the ActorSystem
      */
     public interface TokenErrorMessageCommand extends WorkerCommand {
         /**
-         * A request to spawn a new worker, which will acquire a AuditErrorMessage for a token and reply back
+         * A request to spawn a new worker, which will acquire a list of all current AuditErrorMessages in
+         * persistence for a token and reply back with them. These are deleted from persistence upon being
+         * returned.
          */
         class SpawnWorker implements TokenErrorMessageCommand {
-            protected final GetAllExceptions getAllExceptions;
+            protected final GetAllErrors getAllErrors;
 
             /**
-             * A request to spawn a new worker, which will acquire a AuditErrorMessage for a token and reply back
+             * A request to spawn a new worker, which will acquire a List of AuditErrorMessages for a token and reply back
              *
              * @param token   the unique token for the request
-             * @param replyTo the {@link ActorRef} to reply to once a AuditErrorMessage is found
+             * @param replyTo the {@link ActorRef} to reply to once the AuditErrorMessages are found
              */
             public SpawnWorker(final String token, final ActorRef<WorkerResponse> replyTo) {
-                this.getAllExceptions = new GetAllExceptions(token, replyTo);
+                this.getAllErrors = new GetAllErrors(token, replyTo);
             }
         }
     }
@@ -79,7 +79,6 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
     private static final Duration TIMEOUT = Duration.of(Integer.MAX_VALUE / 100, ChronoUnit.SECONDS);
 
     private final TokenErrorMessagePersistenceLayer persistenceLayer;
-    // Map from Tokens to TokenOffsetWorker actors
 
     private TokenErrorMessageController(final ActorContext<TokenErrorMessageCommand> context, final TokenErrorMessagePersistenceLayer persistenceLayer) {
         super(context);
@@ -101,26 +100,26 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
      * Create a {@link Flow} that will ask the given actor with each of the elements, spawning a worker to retrieve AuditErrorMessages for a token.
      *
      * @param actorSystem an {@link ActorRef} to the {@link ActorSystem} created by the {@link TokenErrorMessageController#create(TokenErrorMessagePersistenceLayer)} method
-     * @return a {@link Flow} from tokens to {@link Pair}s of tokens and their AuditErrorMessages
-     * @implNote The {@link Flow} remains strictly ordered, so a long-blocking first element will delay all subsequent elements.
+     * @return a {@link Flow} from tokens to {@link Pair}s of tokens and their AuditErrorMessage Lists
      */
     public static Flow<String, TokenErrorMessagePersistenceResponse, NotUsed> asGetterFlow(final ActorRef<TokenErrorMessageCommand> actorSystem) {
         return ActorFlow.ask(actorSystem, TIMEOUT, SpawnWorker::new)
                 .map((WorkerResponse workerResponse) -> {
 
-                    //If there are TokenErrorMessageEntities retrieved from persistence for the token
                     if (workerResponse instanceof SetAuditErrorMessages) {
+                        // If there are TokenErrorMessageEntities retrieved from persistence for the token
                         SetAuditErrorMessages setAuditErrorMessages = (SetAuditErrorMessages) workerResponse;
                         return TokenErrorMessagePersistenceResponse.Builder.create()
                                 .withToken(setAuditErrorMessages.token)
                                 .withMessageEntities(setAuditErrorMessages.messageEntities);
 
-                        // If there was an issue retrieving the message from persistence then report an error
                     } else if (workerResponse instanceof ReportError) {
+                        // If there was an issue retrieving the message from persistence then report an error
                         ReportError reportError = (ReportError) workerResponse;
                         return TokenErrorMessagePersistenceResponse.Builder.create()
                                 .withToken(reportError.token)
                                 .withException(reportError.exception);
+
                     } else {
                         // This can only occur if the WorkerResponse subclasses are extended and not accounted for here
                         // Entirely developer error, and provides a return from this if statement
@@ -144,9 +143,9 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
     }
 
     /**
-     * The {@link SpawnWorker} command will spawn a {@link TokenErrorMessageWorker} and pass it the command's token, ({@link Pair#first()}).
-     * After the worker has been spawned, it is added to the getAllExceptions and told to look for AuditErrorMessages that link to a token.
-     * They are given a UUID to remain unique.
+     * The {@link SpawnWorker} command will spawn a {@link TokenErrorMessageWorker} and pass it the command's token.
+     * After the worker has been spawned, it looks for all AuditErrorMessages that link to a token.
+     * The actor is given a UUID to remain unique, as there may be multiple requests for errors for a single token.
      * The command's {@code replyTo} will later {@link ActorRef#tell} the AuditErrorMessages for that token.
      *
      * @param spawnWorker the {@link SpawnWorker} command to handle
@@ -156,10 +155,9 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
         // Spawn a new worker, passing it the persistenceLayer to query
         Behavior<WorkerCommand> workerBehavior = TokenErrorMessageWorker.create(this.persistenceLayer);
         ActorRef<WorkerCommand> workerRef = this.getContext()
-                .spawn(workerBehavior, spawnWorker.getAllExceptions.token + "_" + UUID.randomUUID());
+                .spawn(workerBehavior, spawnWorker.getAllErrors.token + "_" + UUID.randomUUID());
         // Tell our worker to 'start-up' (check persistence)
-        workerRef.tell(new GetAllExceptions(spawnWorker.getAllExceptions.token, spawnWorker.getAllExceptions.replyTo));
+        workerRef.tell(new GetAllErrors(spawnWorker.getAllErrors.token, spawnWorker.getAllErrors.replyTo));
         return this;
     }
-
 }

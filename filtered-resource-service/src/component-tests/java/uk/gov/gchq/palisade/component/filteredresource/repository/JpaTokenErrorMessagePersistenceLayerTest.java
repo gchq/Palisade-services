@@ -31,8 +31,8 @@ import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenErrorMessagePersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.JpaTokenErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageRepository;
 
 import java.util.List;
 

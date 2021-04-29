@@ -25,11 +25,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenErrorMessagePersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageController.TokenErrorMessageCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.JpaTokenErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController.TokenErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageRepository;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;

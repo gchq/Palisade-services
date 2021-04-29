@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
+package uk.gov.gchq.palisade.service.filteredresource.repository.error;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -23,12 +23,13 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessageWorker.WorkerCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageController.TokenErrorMessageCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessageWorker.WorkerCommand;
 
 import java.util.List;
 
 /**
- * A worker to carry-out a client request for a list of error messages (from kafka "error" topic or redis persistence)
+ * A worker to carry-out a client request for a list of error messages (from redis persistence)
  * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
  */
 final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
@@ -44,13 +45,14 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 
     /**
      * A request to get all error messages for a unique token.
-     * The worker will {@link ActorRef#tell} the replyTo actor the error messages once found.
+     * The worker will {@link ActorRef#tell} the {@code replyTo} actor the error messages, using
+     * the {@link SetAuditErrorMessages} class, once found in persistence.
      */
-    protected static class GetAllExceptions implements WorkerCommand {
+    protected static class GetAllErrors implements WorkerCommand {
         protected final String token;
         protected final ActorRef<WorkerResponse> replyTo;
 
-        protected GetAllExceptions(final String token, final ActorRef<WorkerResponse> replyTo) {
+        protected GetAllErrors(final String token, final ActorRef<WorkerResponse> replyTo) {
             this.token = token;
             this.replyTo = replyTo;
         }
@@ -58,7 +60,7 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
 
     /**
      * A response for this actor to send to its {@code replyTo} actor.
-     * This is received by the worker when appropriate error messages are found and output from the system using a {@link WorkerResponse}
+     * This is sent by the worker when appropriate error messages are found and output from the system.
      */
     protected static class SetAuditErrorMessages implements WorkerResponse {
         protected final String token;
@@ -71,7 +73,7 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
     }
 
     /**
-     * A response for this actor to send to its {@code replyTo} actor.
+     * A response for this actor to send to its guardian actor system.
      * This indicates an exception was thrown by the worker while processing the request.
      *
      * @implNote This is currently only caused by the persistence store throwing an exception.
@@ -98,6 +100,11 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
         return Behaviors.setup(ctx -> new TokenErrorMessageWorker(ctx, persistenceLayer));
     }
 
+    /**
+     * Default (initial) behaviour for this actor to assume.
+     *
+     * @return a behaviour that accepts all {@link TokenErrorMessageCommand}s (this actor does not 'become' any other behaviour)
+     */
     @Override
     public Receive<WorkerCommand> createReceive() {
         return this.onGetExceptions();
@@ -106,18 +113,19 @@ final class TokenErrorMessageWorker extends AbstractBehavior<WorkerCommand> {
     private Receive<WorkerCommand> onGetExceptions() {
         return newReceiveBuilder()
 
-                // Start off in Getting mode
-                .onMessage(GetAllExceptions.class, (GetAllExceptions getCmd) -> this.persistenceLayer
+                // When messaged to get all errors for a given token
+                .onMessage(GetAllErrors.class, (GetAllErrors getCmd) -> this.persistenceLayer
                         // Get from persistence
                         .getAllErrorMessages(getCmd.token)
-                        // If present tell self (if not, will be told in the future)
+                        // If present emit error message entities to replyTo flow
                         .thenApply((List<TokenErrorMessageEntity> listOfEntities) -> {
                             getCmd.replyTo.tell(new SetAuditErrorMessages(getCmd.token, listOfEntities));
                             return listOfEntities;
                         })
+                        // Delete each entity that was returned (so they are not returned again)
                         .thenCompose(this.persistenceLayer::deleteAll)
+                        // Stop the actor once done, a new actor will be spawned for any future requests
                         .<Behavior<WorkerCommand>>thenApply(ignored -> Behaviors.stopped())
-
                         // If an exception is thrown reading from persistence, report the exception
                         .exceptionally((Throwable ex) -> {
                             getCmd.replyTo.tell(new ReportError(getCmd.token, ex));

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
+package uk.gov.gchq.palisade.service.filteredresource.repository.error;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
