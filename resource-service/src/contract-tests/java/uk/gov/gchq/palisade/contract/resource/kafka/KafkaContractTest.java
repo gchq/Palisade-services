@@ -44,13 +44,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.resource.ContractTestData;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.RequestSerialiser;
-import uk.gov.gchq.palisade.contract.resource.kafka.KafkaInitializer.ResponseDeserialiser;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaTestConfiguration.RequestSerialiser;
+import uk.gov.gchq.palisade.contract.resource.kafka.KafkaTestConfiguration.ResponseDeserialiser;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
@@ -84,13 +84,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"db-test", "akka-test", "test-resource"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class KafkaContractTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -117,7 +119,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -127,10 +129,11 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
@@ -193,7 +196,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output and error topics
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -207,10 +210,11 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
 
         // When - results are pulled from the output stream
@@ -283,7 +287,7 @@ class KafkaContractTest {
         ConsumerSettings<String, ResourceRequest> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.userKeyDeserializer(), SerDesConfig.userValueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, ResourceRequest>> probe = Consumer

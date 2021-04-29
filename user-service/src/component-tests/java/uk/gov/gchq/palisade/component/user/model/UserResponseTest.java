@@ -22,8 +22,8 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
+import uk.gov.gchq.palisade.user.User;
 
 import java.io.IOException;
 

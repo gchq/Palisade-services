@@ -31,7 +31,7 @@ public interface PersistenceLayer {
     /**
      * Asynchronously retrieve the details for the given leaf resource and client token.
      *
-     * @param token the client's request token
+     * @param token          the client's request token
      * @param leafResourceId the leaf resource requested by the client
      * @return a {@link CompletableFuture} of the persistence access, itself returning an {@link Optional}
      * of whether such an authorisation was found and the rules to apply.

@@ -25,14 +25,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <repositories>
-        <repository>
-            <id>event-logging</id>
-            <name>stroom event-logging repo</name>
-            <url>https://dl.bintray.com/stroom/event-logging</url>
-        </repository>
-    </repositories>
-
     <!--  *********** Artifact ID ***********    -->
     <artifactId>audit-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
@@ -46,7 +38,7 @@
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
+        <event-logging.version>4.0.8_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
@@ -94,7 +86,7 @@
         </dependency>
         <dependency>
             <!-- Stroom -->
-            <groupId>event-logging</groupId>
+            <groupId>uk.gov.gchq.eventlogging</groupId>
             <artifactId>event-logging</artifactId>
             <version>${event-logging.version}</version>
         </dependency>

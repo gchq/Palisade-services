@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
@@ -52,7 +51,7 @@ public class ResourceServicePersistenceProxy {
     private final ResourceService delegate;
 
     /**
-     * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
+     * Construct a new instance of the proxy
      *
      * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate    a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
@@ -192,7 +191,7 @@ public class ResourceServicePersistenceProxy {
 
     private Flow<AuditableResourceResponse, AuditableResourceResponse, NotUsed> getResourceResponseFlow(final ResourceRequest request) {
         return Flow
-            .<AuditableResourceResponse>create()
+                .<AuditableResourceResponse>create()
                 // Add the returned result to the persistence
                 // If it wasn't an error, get the leaf resource
                 .map(AuditableResourceResponse::getResourceResponse)

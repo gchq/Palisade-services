@@ -45,8 +45,8 @@ public class ContractTestData {
     }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
-    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@class\":\"uk.gov.gchq.palisade.user.User\"}}";
+    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"@class\":\"uk.gov.gchq.palisade.user.User\"}}";
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_REQUEST_NODE;
     public static final ResourceRequest REQUEST_OBJ;

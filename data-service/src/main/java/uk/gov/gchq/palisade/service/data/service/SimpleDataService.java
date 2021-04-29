@@ -19,13 +19,14 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.IOException;
@@ -93,15 +94,15 @@ public class SimpleDataService implements DataService {
 
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.debug("Reading from reader with request {}", authorisedDataRequest);
-            var readerRequest = new DataReaderRequest()
+            DataReaderRequest readerRequest = new DataReaderRequest()
                     .context(authorisedDataRequest.getContext())
                     .user(authorisedDataRequest.getUser())
                     .resource(authorisedDataRequest.getResource())
                     .rules(authorisedDataRequest.getRules());
-            var readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
-            LOGGER.debug("Writing reader response {} to output stream", readerResponse);
             try {
+                DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
+                LOGGER.debug("Writing reader response {} to output stream", readerResponse);
                 readerResponse.getWriter().write(out);
                 out.close();
             } catch (IOException ex) {

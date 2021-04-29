@@ -17,10 +17,10 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link UserPrepopulationFactory} that uses Spring to configure a user from a yaml file
- * A factory for {@link User} objects, using a userId, a list of authorizations and a list of roles.
+ * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles.
  */
 public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
@@ -57,8 +57,8 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      */
     public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
-        this.auths = auths;
-        this.roles = roles;
+        this.auths = new HashSet<>(auths);
+        this.roles = new HashSet<>(roles);
     }
 
     @Generated
@@ -73,25 +73,25 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     @Generated
     public Set<String> getAuths() {
-        return auths;
+        return new HashSet<>(auths);
     }
 
     @Generated
     public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
-        this.auths = auths;
+        this.auths = new HashSet<>(auths);
         return this;
     }
 
     @Generated
     public Set<String> getRoles() {
-        return roles;
+        return new HashSet<>(roles);
     }
 
     @Generated
     public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
-        this.roles = roles;
+        this.roles = new HashSet<>(roles);
         return this;
     }
 

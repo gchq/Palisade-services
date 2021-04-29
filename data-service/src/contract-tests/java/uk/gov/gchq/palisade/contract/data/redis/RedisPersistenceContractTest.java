@@ -20,59 +20,41 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
-import uk.gov.gchq.palisade.contract.data.redis.RedisPersistenceContractTest.Initializer;
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.reader.common.rule.Rules;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.contract.data.kafka.KafkaTestConfiguration;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
+import uk.gov.gchq.palisade.user.User;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(
+        classes = DataApplication.class,
+        webEnvironment = WebEnvironment.DEFINED_PORT,
+        properties = {"spring.cache.redis.timeToLive=1s", "akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"})
+@Import({KafkaTestConfiguration.class})
 @ActiveProfiles({"redis"})
 @EnableRedisRepositories
-@ContextConfiguration(initializers = Initializer.class)
+@ContextConfiguration(initializers = RedisInitializer.class)
 class RedisPersistenceContractTest {
-    private static final int REDIS_PORT = 6379;
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NonNull final ConfigurableApplicationContext context) {
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
 
     @Autowired
     private DataService service;
@@ -90,7 +72,7 @@ class RedisPersistenceContractTest {
         // Given
         String token = "token";
 
-        var readerRequest = new DataReaderRequest()
+        DataReaderRequest readerRequest = new DataReaderRequest()
                 .user(new User().userId("test-user"))
                 .resource(new FileResource().id("/resource/id")
                         .serialisedFormat("avro")
@@ -100,7 +82,7 @@ class RedisPersistenceContractTest {
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
 
-        var authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
+        AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
                 .serialisedFormat("avro")
                 .type(Employee.class.getTypeName())
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
@@ -117,11 +99,11 @@ class RedisPersistenceContractTest {
         ));
 
         // When
-        var dataRequest = DataRequest.Builder.create()
+        DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
                 .withLeafResourceId(readerRequest.getResource().getId());
-        var futureDataResponse = service.authoriseRequest(dataRequest);
-        var authorisedDataFromResource = futureDataResponse.join();
+        CompletableFuture<AuthorisedDataRequest> futureDataResponse = service.authoriseRequest(dataRequest);
+        AuthorisedDataRequest authorisedDataFromResource = futureDataResponse.join();
         // Then
         assertAll("ObjectComparison",
                 () -> assertThat(authorisedDataFromResource)

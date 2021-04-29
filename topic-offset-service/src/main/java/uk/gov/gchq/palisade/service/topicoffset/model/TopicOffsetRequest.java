@@ -28,7 +28,9 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * The TopicOffsetRequest is the input for topic-offset-service.  This is used to optimise the later retrieval of the
@@ -109,7 +111,7 @@ public final class TopicOffsetRequest {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context ->  resource ->
+            return userId -> resourceId -> context -> resource ->
                     new TopicOffsetRequest(userId, resourceId, context, resource);
         }
 
@@ -186,7 +188,38 @@ public final class TopicOffsetRequest {
              */
             TopicOffsetRequest withResourceNode(JsonNode resource);
         }
+    }
 
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", TopicOffsetRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("resource=" + resource)
+                .toString();
+    }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final TopicOffsetRequest that = (TopicOffsetRequest) o;
+        return Objects.equals(userId, that.userId) &&
+                Objects.equals(resourceId, that.resourceId) &&
+                Objects.equals(context, that.context) &&
+                Objects.equals(resource, that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, resource);
     }
 }

@@ -24,12 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-
 
 /**
  * This data represents the output for User Service which will include the User identified by the service.

@@ -100,7 +100,7 @@ public class AkkaRunnableGraph {
                         .thenApply(modifiedAuditable -> Pair.create(messageAndRequest.first(), modifiedAuditable)))
 
                 // Get the record level rules for all resources that weren't course grain filtered
-                .mapAsync(PARALLELISM,  messageAndModifiedRequest ->
+                .mapAsync(PARALLELISM, messageAndModifiedRequest ->
                         service.getRecordRules(messageAndModifiedRequest.second())
                                 //check to see if the first service request threw an exception and if so deal with it
                                 .thenApply(modifiedResource -> modifiedResource.chain(messageAndModifiedRequest.second().getAuditErrorMessage()))
@@ -110,7 +110,7 @@ public class AkkaRunnableGraph {
                 // Build producer message, copying the partition, keeping track of original message
                 .map((Pair<CommittableMessage<String, PolicyRequest>, AuditablePolicyRecordResponse> messageAndResponse) -> {
                     ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
-                    Committable committable =  messageAndResponse.first().committableOffset();
+                    Committable committable = messageAndResponse.first().committableOffset();
                     return Optional.ofNullable(messageAndResponse.second().getAuditErrorMessage())
                             // Found an application error, produce an error message to be sent to the Audit service
                             .map(audit -> ProducerMessage.single(

@@ -36,7 +36,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
@@ -46,6 +45,7 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -66,7 +66,7 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
  * An external requirement of the service is to connect to a pair of upstream kafka topics.
  * <ol>
  *     <li>The "error" topic can be written to by any service that encounters an error when processing a request</li>
- *     <li>The "success" topic should only be written to by the filtered-resource-service or the data-service</li>
+ *     <li>The "success" topic should only be written to by the Filtered-Resource Service or the Data Service</li>
  * </ol>
  * This service does not write to a downstream topic
  */
@@ -75,12 +75,12 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import(KafkaInitializer.Config.class)
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"akka-test"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
+    private static final int MOCKITO_TIMEOUT_MILLIS = 10_000;
 
     @Autowired
     Serializer<String> keySerialiser;
@@ -91,7 +91,7 @@ class KafkaContractTest {
     @Autowired
     Materializer akkaMaterialiser;
     @Autowired
-    KafkaContainer kafka;
+    KafkaContainer kafkaContainer;
     @Autowired
     AuditServiceConfigProperties auditServiceConfigProperties;
 
@@ -106,7 +106,7 @@ class KafkaContractTest {
     @BeforeEach
     void setup() {
         fileCount = (final String prefix) -> Arrays
-                .stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .stream(Objects.requireNonNull(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles()))
                 .filter(file -> file.getName().startsWith(prefix))
                 .collect(Collectors.toSet())
                 .size();
@@ -117,10 +117,10 @@ class KafkaContractTest {
 
     @AfterEach
     void tearDown() {
-        Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-            .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
-            .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
-            .forEach(File::deleteOnExit);
+        Arrays.stream(Objects.requireNonNull(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles()))
+                .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
+                .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
+                .forEach(File::deleteOnExit);
     }
 
     @Test
@@ -137,7 +137,7 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(3000).times(3)).audit(anyString(), any());
+        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -153,7 +153,7 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(3000).times(3)).audit(anyString(), any());
+        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -167,13 +167,13 @@ class KafkaContractTest {
                 GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L),
                 BAD_SUCCESS_RECORD_NODE_FACTORY.get().limit(2L),
                 GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L))
-            .flatMap(Function.identity());
+                .flatMap(Function.identity());
 
         // WHEN - we write to the input
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        verify(auditService, timeout(3000).times(2)).audit(anyString(), any());
+        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any());
     }
 
     @Test
@@ -193,8 +193,8 @@ class KafkaContractTest {
         // THEN - check an "Error-..." file has been created
         var actualErrorCount = currentErrorCount.get();
         assertThat(actualErrorCount)
-            .as("Check exactly 1 'Error' file has been created")
-            .isEqualTo(expectedErrorCount);
+                .as("Check exactly 1 'Error' file has been created")
+                .isEqualTo(expectedErrorCount);
     }
 
     @Test
@@ -213,23 +213,23 @@ class KafkaContractTest {
         // Then check a "Success-..." file has been created
         var actualSuccessCount = currentSuccessCount.get();
         assertThat(actualSuccessCount)
-            .as("Check exactly 1 'Success' file has been created")
-            .isEqualTo(expectedSuccessCount);
+                .as("Check exactly 1 'Success' file has been created")
+                .isEqualTo(expectedSuccessCount);
 
     }
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
 
-        var bootstrapServers = kafka.getBootstrapServers();
+        var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-            .create(akkaActorSystem, keySerialiser, valueSerialiser)
-            .withBootstrapServers(bootstrapServers);
+                .create(akkaActorSystem, keySerialiser, valueSerialiser)
+                .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-            .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
-            .toCompletableFuture().join();
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
+                .toCompletableFuture().join();
 
         waitForService();
 

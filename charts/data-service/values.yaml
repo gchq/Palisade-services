@@ -21,7 +21,7 @@ service:
 image:
   name: data-service
   base: jre
-  tag: SNAPSHOT-e38cdcc
+  tag: SNAPSHOT-6876df3
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

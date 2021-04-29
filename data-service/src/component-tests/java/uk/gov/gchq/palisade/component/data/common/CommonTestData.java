@@ -15,13 +15,12 @@
  */
 package uk.gov.gchq.palisade.component.data.common;
 
-import uk.gov.gchq.palisade.reader.common.Context;
-import uk.gov.gchq.palisade.reader.common.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.reader.common.User;
-import uk.gov.gchq.palisade.reader.common.resource.LeafResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.FileResource;
-import uk.gov.gchq.palisade.reader.common.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.reader.common.rule.Rules;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -31,6 +30,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.Map;
@@ -51,6 +51,7 @@ public class CommonTestData {
 
     public static final Context CONTEXT = new Context().purpose("testContext");
     public static final String USER_ID = "testUserId";
+    public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "test resource id";
 
     public static final LeafResource RESOURCE = new FileResource().id(LEAF_RESOURCE_ID)
@@ -60,6 +61,7 @@ public class CommonTestData {
             .parent(new SystemResource().id("/test"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
+
     public static final Map<String, Object> ATTRIBUTES = Collections.singletonMap("test key", "test value");
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
@@ -87,7 +89,7 @@ public class CommonTestData {
 
     public static final AuthorisedDataRequest AUTHORISED_DATA = AuthorisedDataRequest.Builder.create()
             .withResource(RESOURCE)
-            .withUser(new User().userId(USER_ID))
+            .withUser(USER)
             .withContext(CONTEXT)
             .withRules(RULES);
 
@@ -107,7 +109,11 @@ public class CommonTestData {
     public static final AuthorisedRequestEntity ENTITY1 = new AuthorisedRequestEntity(
             TOKEN + "1",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
+            new FileResource().id(RESOURCE_ID + "1")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );
@@ -115,7 +121,11 @@ public class CommonTestData {
     public static final AuthorisedRequestEntity ENTITY2 = new AuthorisedRequestEntity(
             TOKEN + "2",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "1"),
+            new FileResource().id(RESOURCE_ID + "1")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );
@@ -123,7 +133,11 @@ public class CommonTestData {
     public static final AuthorisedRequestEntity ENTITY3 = new AuthorisedRequestEntity(
             TOKEN + "1",
             new User().userId("user-id"),
-            new FileResource().id(RESOURCE_ID + "3"),
+            new FileResource().id(RESOURCE_ID + "3")
+                    .type("type")
+                    .serialisedFormat("fmt")
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
+                    .parent(new SystemResource().id("system")),
             new Context(),
             new Rules<>()
     );

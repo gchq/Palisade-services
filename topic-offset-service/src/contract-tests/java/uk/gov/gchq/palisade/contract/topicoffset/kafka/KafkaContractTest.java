@@ -26,14 +26,10 @@ import akka.stream.Materializer;
 import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.Test;
@@ -46,7 +42,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +52,9 @@ import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.topicoffset.ContractTestData;
+import uk.gov.gchq.palisade.contract.topicoffset.kafka.KafkaTestConfiguration.RequestSerializer;
+import uk.gov.gchq.palisade.contract.topicoffset.kafka.KafkaTestConfiguration.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
-import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
@@ -67,7 +63,6 @@ import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguratio
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.SerDesConfig;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -89,48 +84,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * The downstream "masked-resource-offset" topic is written to by this service and read by the Filtered-Resource-Service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
-@SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
+@SpringBootTest(
+        classes = TopicOffsetApplication.class,
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"akka.discovery.config.services.kafka.from-config=false"}
+)
 @Import(KafkaTestConfiguration.class)
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
-        @Override
-        public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
-            try {
-                return MAPPER.writeValueAsBytes(topicOffsetRequest);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
-        @Override
-        public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
-            try {
-                return MAPPER.readTree(topicOffsetResponse);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
-        @Override
-        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
-            try {
-                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
-            }
-        }
-    }
 
     @SpyBean
     private TopicOffsetService service;
@@ -180,7 +141,8 @@ class KafkaContractTest {
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);

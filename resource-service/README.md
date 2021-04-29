@@ -80,7 +80,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    }
 }
 ```
@@ -107,7 +107,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
       "auths":[
          "auth"
       ],
-      "class":"uk.gov.gchq.palisade.User"
+      "class":"uk.gov.gchq.palisade.user.User"
    },
    "resource":{
       "class":"uk.gov.gchq.palisade.resource.impl.FileResource",
@@ -116,7 +116,7 @@ curl -X POST api/resource -H "content-type: application/json" --data \
          
       },
       "connectionDetail":{
-         "class":"uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+         "class":"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
          "serviceName":"data-service"
       },
       "parent":{
@@ -135,13 +135,6 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
 using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
 [test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the backing store when the service starts up.
-
-## Hadoop and Windows
-
-Windows users will have problems with Hadoop integration testing. Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries.
-
-To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
-the `HadoopResourceServiceTest` to run correctly.
 
 ## Database Entities and Structuring
 

@@ -74,8 +74,7 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "attribute-masking-service.deployment.path" }}
-{{- $revision := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name .Values.global.deployment $revision }}
+{{- printf "%s/%s" (include "attribute-masking-service.classpathJars.mount" .) (include "attribute-masking-service.deployment.revision" .) }}
 {{- end }}
 
 {{/*
@@ -86,15 +85,23 @@ Calculate the service config location
 {{- end }}
 
 {{/*
-Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "attribute-masking-service.deployment.name" }}
-{{- include "attribute-masking-service.deployment.path" . | base }}
+{{- define "attribute-masking-service.classpathJars.name" }}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "attribute-masking-service.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "attribute-masking-service.deployment.name" . }}
+{{- define "attribute-masking-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
+{{- end }}
+
+{{/*
+Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "attribute-masking-service.deployment.revision" }}
+{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}

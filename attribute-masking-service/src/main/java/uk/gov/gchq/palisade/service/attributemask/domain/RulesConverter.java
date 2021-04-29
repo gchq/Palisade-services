@@ -34,6 +34,7 @@ public class RulesConverter implements AttributeConverter<Rules<?>, String> {
 
     /**
      * Default constructor specifying the object mapper for (de)serializing objects
+     *
      * @param objectMapper the object mapper for reading and writing columns and objects
      */
     public RulesConverter(final ObjectMapper objectMapper) {

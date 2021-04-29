@@ -46,6 +46,9 @@ management:
       exposure:
         include: "*"
 
+data:
+  implementation: simple
+
 population:
   serialiserProvder: std
 

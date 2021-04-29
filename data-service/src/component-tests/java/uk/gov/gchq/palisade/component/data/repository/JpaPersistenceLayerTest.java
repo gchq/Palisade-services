@@ -26,6 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.data.config.DefaultConfiguration;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
@@ -46,7 +47,7 @@ import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY2;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.ENTITY3;
 
 @DataJpaTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, DefaultConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
@@ -80,8 +81,7 @@ class JpaPersistenceLayerTest {
     }
 
     /**
-     * @implNote
-     * Because of the CompletableFuture, we will be scheduling a job in Spring-managed test within the scope of a Spring transaction.
+     * @implNote Because of the CompletableFuture, we will be scheduling a job in Spring-managed test within the scope of a Spring transaction.
      * Therefore the transaction will never be committed, and the external scheduler and worker threads won't see the new job record in the database.
      * To fix this, for this specific case (synchronous save, then asynchronous find), we must disable the test transaction.
      * Similar tests (asynchronous save, then synchronous find) are unaffected by this quirk (eg. the dual to this data store in the Attribute-Masking Service).

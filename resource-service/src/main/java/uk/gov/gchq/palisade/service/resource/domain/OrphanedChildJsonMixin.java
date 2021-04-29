@@ -17,10 +17,12 @@
 package uk.gov.gchq.palisade.service.resource.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.resource.ParentResource;
 
 // Erase parent when storing entity clob, it will be rebuilt
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public abstract class OrphanedChildJsonMixin {
     @JsonIgnore
     abstract ParentResource getParent();

@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.component.user.common;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
+import uk.gov.gchq.palisade.user.UserId;
 
 /**
  * Common test data for all classes
