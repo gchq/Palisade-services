@@ -17,15 +17,15 @@
 package uk.gov.gchq.palisade.service.filteredresource;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
+import uk.gov.gchq.palisade.user.UserId;
 
 public final class ApplicationTestData {
     /**

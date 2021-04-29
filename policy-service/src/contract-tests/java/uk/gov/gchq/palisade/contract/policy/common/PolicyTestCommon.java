@@ -15,14 +15,14 @@
  */
 package uk.gov.gchq.palisade.contract.policy.common;
 
-import uk.gov.gchq.palisade.policy.IsTextResourceRule;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.rule.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.policy.rule.PassThroughRule;
+import uk.gov.gchq.palisade.service.policy.rule.PredicateRule;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,7 +62,7 @@ public class PolicyTestCommon {
     public static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret").parent(TXT_SYSTEM);
     public static final Rules<LeafResource> SECRET_POLICY = new Rules<LeafResource>()
             .addRule("Check user has 'Secret' auth", (PredicateRule<LeafResource>) (resource, user, context) -> user.getAuths().contains("Secret"))
-            .addPredicateRule("Redact all with 'Testing' purpose", (record, user, context) -> !context.getPurpose().equals("Testing"));
+            .addRule("Redact all with 'Testing' purpose", (PredicateRule<LeafResource>) (record, user, context) -> !context.getPurpose().equals("Testing"));
 
     // A secret file - accessible only to the secret user
     public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);

@@ -52,6 +52,7 @@ public final class AuditableAttributeMaskingRequest {
         public interface IAttributeMaskingRequest {
             /**
              * Compose value
+             *
              * @param request or null
              * @return value object
              */
@@ -64,6 +65,7 @@ public final class AuditableAttributeMaskingRequest {
         public interface IAuditErrorMessage {
             /**
              * Compose value
+             *
              * @param audit or null
              * @return value object
              */
@@ -71,6 +73,7 @@ public final class AuditableAttributeMaskingRequest {
 
             /**
              * Without error audit
+             *
              * @return the composed immutable object
              */
             default AuditableAttributeMaskingRequest withNoError() {
@@ -80,6 +83,7 @@ public final class AuditableAttributeMaskingRequest {
 
         /**
          * The creator function
+         *
          * @return the composed immutable object
          */
         public static IAttributeMaskingRequest create() {

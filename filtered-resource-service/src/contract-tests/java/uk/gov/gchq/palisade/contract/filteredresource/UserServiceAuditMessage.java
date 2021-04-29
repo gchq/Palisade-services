@@ -26,7 +26,6 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -94,7 +93,7 @@ public class UserServiceAuditMessage {
             this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
-            throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
+            throw new RuntimeException("Failed to get server host and IP address", e);
         }
 
     }

@@ -50,7 +50,7 @@ public final class AuditableAttributeMaskingResponse {
         return Optional.ofNullable(audit).map(message -> AuditableAttributeMaskingResponse.Builder.create()
                 .withAttributeMaskingResponse(this.attributeMaskingResponse)
                 .withAuditErrorMessage(message))
-                    .orElse(this);
+                .orElse(this);
     }
 
     /**
@@ -64,6 +64,8 @@ public final class AuditableAttributeMaskingResponse {
         public interface IAttributeMaskingResponse {
             /**
              * Compose value.
+             * Compose value
+             *
              * @param response value or null
              * @return value object
              */

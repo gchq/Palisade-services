@@ -43,14 +43,13 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.ErrorDeserializer;
-import uk.gov.gchq.palisade.contract.attributemask.KafkaInitializer.RequestSerializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaTestConfiguration.ErrorDeserializer;
+import uk.gov.gchq.palisade.contract.attributemask.kafka.KafkaTestConfiguration.RequestSerializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
@@ -63,6 +62,7 @@ import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingAspect
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
@@ -85,12 +85,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = "akka.discovery.config.services.kafka.from-config=false"
 )
-@Import({KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class},
-        classes = {KafkaErrorContractTest.Config.class})
+@Import({KafkaTestConfiguration.class})
+@ContextConfiguration(classes = {KafkaErrorContractTest.Config.class})
 @ActiveProfiles({"dbtest", "akkatest"})
 class KafkaErrorContractTest {
 
+    @Autowired
+    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -111,7 +112,7 @@ class KafkaErrorContractTest {
         // Given - we are already listening to the errors
         ConsumerSettings<String, AuditErrorMessage> errorConsumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
@@ -121,10 +122,11 @@ class KafkaErrorContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // When - errors are pulled from the error stream, pulling the number of errors thrown
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorSeq = errorProbe.request(1);

@@ -44,17 +44,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.contract.user.common.StreamMarker;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.Config;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.RequestSerializer;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration.RequestSerialiser;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration.ResponseDeserialiser;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.Token;
@@ -62,6 +59,8 @@ import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.SerDesConfig;
+import uk.gov.gchq.palisade.user.User;
+import uk.gov.gchq.palisade.user.UserId;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -95,17 +94,18 @@ import static uk.gov.gchq.palisade.service.user.stream.SerDesConfig.responseValu
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
-@Import({Config.class})
-@ContextConfiguration(initializers = {KafkaInitializer.class})
+@Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"caffeine", "akka-test", "pre-population"})
 class KafkaContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
+    private KafkaContainer kafkaContainer;
+    @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
-    private Materializer akkaMaterializer;
+    private Materializer akkaMaterialiser;
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
     @Autowired
@@ -125,21 +125,22 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
+                .toCompletableFuture().join();
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
@@ -206,24 +207,25 @@ class KafkaContractTest {
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
         Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
+                .toCompletableFuture().join();
 
 
         // When - results are pulled from the output stream
@@ -281,14 +283,14 @@ class KafkaContractTest {
     void testRestEndpoint() {
         // Given - we are already listening to the service input
         ConsumerSettings<String, UserRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.requestKeyDeserializer(), SerDesConfig.requestValueDeserializer())
+                .create(akkaActorSystem, SerDesConfig.requestKeyDeserialiser(), SerDesConfig.requestValueDeserialiser())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, UserRequest>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(REQUEST_TOKEN));

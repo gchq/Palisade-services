@@ -47,8 +47,8 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -68,6 +68,7 @@ import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -77,7 +78,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 class AkkaWebSocketTest {
     static final Logger LOGGER = LoggerFactory.getLogger(AkkaWebSocketTest.class);
@@ -85,7 +85,7 @@ class AkkaWebSocketTest {
     static final String HOST = "localhost";
     static final int PORT = 18080;
     // The tests (and server) will send N messages (additionally, the server will be given N - 1 resources to return, which will be followed by 1 COMPLETE message)
-    static int nMESSAGES = 100;
+    static final int N_MESSAGES = 100;
 
     // Test data
     final String token = "test-token";
@@ -108,7 +108,7 @@ class AkkaWebSocketTest {
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
     final ActorRef<TokenErrorMessageCommand> errorMessageController = TokenErrorMessageController.create(errorPersistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
-            .take(nMESSAGES - 1)
+            .take(N_MESSAGES - 1)
             .mapMaterializedValue(notUsed -> Consumer.createNoopControl());
 
     // This reference is updated by our audit service and wiped clean in the setUp() method before each test
@@ -158,12 +158,12 @@ class AkkaWebSocketTest {
 
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.PING).noHeaders().noBody();
-        Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMESSAGES).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        Source<WebSocketMessage, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(N_MESSAGES);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource, N_MESSAGES);
 
-        assertThat(sinkFuture.get(nMESSAGES, TimeUnit.SECONDS))
+        assertThat(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS))
                 .as("Check that the number of response messages matches the number of requests")
-                .hasSize(nMESSAGES)
+                .hasSize(N_MESSAGES)
                 // Assert PING -> PONG
                 .allSatisfy(message -> assertThat(message)
                         .as("All PING messages should be replied to with a PONG")
@@ -186,18 +186,18 @@ class AkkaWebSocketTest {
 
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-        Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMESSAGES).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        Source<WebSocketMessage, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(N_MESSAGES);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource, N_MESSAGES);
 
         // **
         // Then - check all returned server responses are as expected
         // **
 
         // Get the result of the client sink, a list of (WebSocket) responses
-        LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(nMESSAGES, TimeUnit.SECONDS));
+        LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
         assertThat(results)
                 .as("Check that the number of response messages matches the number of requests")
-                .hasSize(nMESSAGES);
+                .hasSize(N_MESSAGES);
 
         // Assert CTS -> COMPLETE for last messages
         assertThat(results.getLast())
@@ -223,7 +223,7 @@ class AkkaWebSocketTest {
         // Each request should have been audited
         assertThat(auditedResources.get())
                 .as("Check that the number of audit success messages matches the number of resources returned")
-                .hasSize(nMESSAGES - 1) // excluding COMPLETE
+                .hasSize(N_MESSAGES - 1) // excluding COMPLETE
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
                         .extracting(FilteredResourceRequest::getResourceNode)
                         .isEqualTo(MAPPER.valueToTree(testResource)));
@@ -241,21 +241,21 @@ class AkkaWebSocketTest {
         // Create payload test messages
         WebSocketMessage pingMsg = WebSocketMessage.Builder.create().withType(MessageType.PING).noHeaders().noBody();
         WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-        Source<Message, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(nMESSAGES).map(this::writeTextMessage);
-        Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(nMESSAGES).map(this::writeTextMessage);
+        Source<WebSocketMessage, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(N_MESSAGES);
+        Source<WebSocketMessage, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(N_MESSAGES);
         // Interleave PINGs and CTSes
-        Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        Source<WebSocketMessage, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource, N_MESSAGES * 2);
 
         // **
         // Then - check all returned server responses are as expected
         // **
 
         // Get the result of the client sink, a list of (WebSocket) responses
-        List<WebSocketMessage> results = sinkFuture.get(nMESSAGES, TimeUnit.SECONDS);
+        List<WebSocketMessage> results = sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS);
         assertThat(results)
                 .as("Check that the number of response messages matches the number of requests")
-                .hasSize(nMESSAGES * 2);
+                .hasSize(N_MESSAGES * 2);
 
         // De-interleave the two lists
         // There is no guarantee that messages of different types are strictly ordered compared to one another, but messages of the same type are
@@ -269,7 +269,7 @@ class AkkaWebSocketTest {
 
         assertThat(pongMessages)
                 .as("All PINGs should be responded to with PONGs")
-                .hasSize(nMESSAGES)
+                .hasSize(N_MESSAGES)
                 .allSatisfy(message -> assertThat(message)
                         .extracting(WebSocketMessage::getType)
                         .isEqualTo(MessageType.PONG));
@@ -293,8 +293,8 @@ class AkkaWebSocketTest {
 
         assertThat(auditedResources.get())
                 .as("Each request should have been audited")
-                .hasSize(nMESSAGES - 1) // excluding COMPLETE
-                .as("Check that %s messages are returned, and the RESOURCE returned should be the one expected", nMESSAGES - 1)
+                .hasSize(N_MESSAGES - 1) // excluding COMPLETE
+                .as("Check that %s messages are returned, and the RESOURCE returned should be the one expected", N_MESSAGES - 1)
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
                         .extracting(FilteredResourceRequest::getResourceNode)
                         .isEqualTo(MAPPER.valueToTree(testResource)));
@@ -320,8 +320,8 @@ class AkkaWebSocketTest {
         persistenceLayer.overwriteOffset(token, 1L);
         // Create the payload data
         WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-        Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMessages).map(this::writeTextMessage);
-        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndRecieveMessages(wsMsgSource);
+        Source<WebSocketMessage, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(nMessages);
+        CompletableFuture<List<WebSocketMessage>> sinkFuture = sendAndReceiveMessages(wsMsgSource, nMessages);
 
         // **
         // Then - check all returned server responses are as expected
@@ -373,34 +373,28 @@ class AkkaWebSocketTest {
      * The main test code used to send requests and retrieve messages from the service via a WebSocket
      *
      * @param wsMsgSource A source containing the number of webSocketMessages and the type of messages to send
+     * @param takeN       the expected number of messages to receive
      * @return a CompletableFuture of a List of messages that have been returned from the service
-     * @throws ExecutionException   – if this future completed exceptionally
-     * @throws InterruptedException – if the current thread was interrupted while waiting
-     * @throws TimeoutException     – if the wait timed out
      */
-    private CompletableFuture<List<WebSocketMessage>> sendAndRecieveMessages(final Source<Message, NotUsed> wsMsgSource) throws InterruptedException, ExecutionException, TimeoutException {
+    private CompletableFuture<List<WebSocketMessage>> sendAndReceiveMessages(final Source<WebSocketMessage, NotUsed> wsMsgSource, final int takeN) {
+        Source<Message, CompletableFuture<Optional<Message>>> nonClosingSource = wsMsgSource.map(this::writeTextMessage).concatMat(Source.maybe(), Keep.right());
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
-        // Create client Sink/Source Flow (send the payload, collect the responses)
-        Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
 
-        // **
-        // When - the client submits these websocket messages to the server
-        // **
+        Pair<Pair<CompletableFuture<Optional<Message>>, CompletionStage<WebSocketUpgradeResponse>>, CompletionStage<List<WebSocketMessage>>> request = nonClosingSource
+                .viaMat(Http.get(system).webSocketClientFlow(WebSocketRequest.create(String.format("ws://%s:%d/resource/" + token, HOST, PORT))), Keep.both())
+                .take(takeN)
+                .toMat(listSink, Keep.both())
+                .run(materializer);
 
-        // Make the websocket connection request, sending the payload in the clientFlow
-        Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = Http.get(system).singleWebSocketRequest(
-                WebSocketRequest.create(String.format("ws://%s:%d/resource/" + token, HOST, PORT)),
-                clientFlow,
-                materializer);
+        var connectComplete = request.first().second();
+        var serverComplete = request.second();
 
         // Get the (HTTP) response, a websocket upgrade
-        WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
-                .get(1, TimeUnit.SECONDS);
+        WebSocketUpgradeResponse wsUpgrade = connectComplete.toCompletableFuture().join();
         LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
         // Get the result of the client sink, a list of (WebSocket) responses
-        return request.second().toCompletableFuture()
-                .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
+        return serverComplete.toCompletableFuture();
     }
 
     // Handle deserialising JSON TextMessages to WebSocketMessages

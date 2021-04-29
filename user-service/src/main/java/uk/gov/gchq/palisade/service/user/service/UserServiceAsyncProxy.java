@@ -19,11 +19,11 @@ package uk.gov.gchq.palisade.service.user.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.AuditableUserResponse;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;

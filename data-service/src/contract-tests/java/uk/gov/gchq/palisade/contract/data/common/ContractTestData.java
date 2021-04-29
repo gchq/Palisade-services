@@ -21,12 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
@@ -34,6 +33,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.Map;

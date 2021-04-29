@@ -17,7 +17,7 @@ fullnameOverride: palisade-services
 
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
-  install: false
+  install: true
 metrics-server:
   # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
@@ -43,8 +43,8 @@ global:
       nameOverride: "kafka-proxy"
 
   zookeeper:
-    exports: {}
-    nameOverride: "zookeeper-proxy"
+    exports:
+      nameOverride: "zookeeper-proxy"
 
   redis:
     # install: install redis persistence and caching data storage platform
@@ -106,6 +106,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
+        # When in AWS, ebs cannot be shared, and efs cannot be dynamically provisioned
         aws: efs-sc
       # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
@@ -114,7 +115,7 @@ global:
         aws: static
       # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
       mode:
-        _default: ReadWriteOnce
+        _default: ReadWriteMany
         local: ReadWriteMany
         aws: ReadWriteMany
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
@@ -146,7 +147,7 @@ global:
           local: static
           aws: static
         mode:
-          _default: ReadWriteOnce
+          _default: ReadWriteMany
           local: ReadWriteMany
           aws: ReadWriteMany
         mountPath: "/data/local-data-store"

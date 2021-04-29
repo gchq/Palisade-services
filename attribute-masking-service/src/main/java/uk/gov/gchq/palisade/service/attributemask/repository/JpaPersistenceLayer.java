@@ -19,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.user.User;
 
 import javax.transaction.Transactional;
 
@@ -60,11 +60,11 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return CompletableFuture.supplyAsync(() -> {
             this.authorisedRequestsRepository.save(token, user, resource, context, rules);
             return AttributeMaskingRequest.Builder.create().withUserId(user.getUserId().getId())
-                        .withResourceId(resource.getId())
-                        .withContext(context)
-                        .withUser(user)
-                        .withResource(resource)
-                        .withRules(rules);
+                    .withResourceId(resource.getId())
+                    .withContext(context)
+                    .withUser(user)
+                    .withResource(resource)
+                    .withRules(rules);
         }, this.executor);
     }
 }

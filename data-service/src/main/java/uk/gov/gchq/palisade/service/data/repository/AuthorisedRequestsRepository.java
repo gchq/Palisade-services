@@ -24,7 +24,7 @@ import java.util.Optional;
 
 /**
  * Read-only repository interface for reading the details of an authorised request using its token and leaf resource id.
- * This database is written to by the attribute-masking-service.
+ * This database is written to by the Attribute-Masking Service.
  */
 public interface AuthorisedRequestsRepository extends CrudRepository<AuthorisedRequestEntity, String> {
 

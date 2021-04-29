@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = PolicyApplication.class,
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"management.health.kafka.enabled=false" }
+        properties = {"management.health.kafka.enabled=false"}
 )
 @ActiveProfiles("akka-test")
 class HealthActuatorContractTest {

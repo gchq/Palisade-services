@@ -26,10 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>data-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
 
     <properties>
         <!-- Dependency versions -->
@@ -112,27 +112,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        <!--
-        ~ Palisade Readers
-        ~
-        ~ Because of the overlapping imports for gson vs jackson serialisers, dependency order matters
-        ~ Order must be Jackson (Spring) > GSON > Hadoop-Reader
-        -->
-        <dependency>
-            <!-- Spring automatically picks up either gson or jackson
-               ~ Hadoop (shade-hadoop-client) already bundles gson, but an out-of-date version
-               ~ Import something that will work with Spring and Hadoop -->
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Data-reader for Hadoop HDFS -->
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>hadoop-reader</artifactId>
-            <version>0.5.0-${readers.revision}</version>
-        </dependency>
-
 
         <!--
           Testing dependencies

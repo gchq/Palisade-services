@@ -98,8 +98,8 @@ public class AkkaRunnableGraph {
 
                 // Store authorised request in persistence, keeping track of original message and token
                 .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, AttributeMaskingRequest>, String> messageAndToken) ->
-                    service.storeAuthorisedRequest(messageAndToken.second(), messageAndToken.first().record().value())
-                            .thenApply(auditable -> Pair.create(messageAndToken.first(), auditable))
+                        service.storeAuthorisedRequest(messageAndToken.second(), messageAndToken.first().record().value())
+                                .thenApply(auditable -> Pair.create(messageAndToken.first(), auditable))
                 )
 
                 // Mask resource attributes, keeping track of original message
@@ -110,17 +110,17 @@ public class AkkaRunnableGraph {
                 .map((Pair<CommittableMessage<String, AttributeMaskingRequest>, AuditableAttributeMaskingResponse> response) -> {
                     ConsumerRecord<String, AttributeMaskingRequest> requestRecord = response.first().record();
                     return Optional.ofNullable(response.second().getAuditErrorMessage()).map(audit ->
-                        // Produce Audit Message
-                        ProducerMessage.single(
-                            new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                    SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
-                                (Committable) response.first().committableOffset()))
-                    .orElseGet(() ->
-                        // Produce Masked Response
-                        ProducerMessage.single(
-                            new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                    SerDesConfig.maskedResourceValueSerializer().serialize(null, response.second().getAttributeMaskingResponse()), requestRecord.headers()),
-                                (Committable) response.first().committableOffset()));
+                            // Produce Audit Message
+                            ProducerMessage.single(
+                                    new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                    (Committable) response.first().committableOffset()))
+                            .orElseGet(() ->
+                                    // Produce Masked Response
+                                    ProducerMessage.single(
+                                            new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                                    SerDesConfig.maskedResourceValueSerializer().serialize(null, response.second().getAttributeMaskingResponse()), requestRecord.headers()),
+                                            (Committable) response.first().committableOffset()));
                 })
 
                 // Supervise, commit & produce to sink

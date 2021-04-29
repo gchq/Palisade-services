@@ -17,20 +17,20 @@
 package uk.gov.gchq.palisade.service.data;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.reader.common.ResponseWriter;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.reader.ResponseWriter;
+import uk.gov.gchq.palisade.user.User;
+import uk.gov.gchq.palisade.user.UserId;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

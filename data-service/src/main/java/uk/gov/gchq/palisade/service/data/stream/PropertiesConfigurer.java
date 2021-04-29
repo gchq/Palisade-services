@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Parse and convert Spring maps and lists to Akka configs
+ * Parse and convert Spring maps and lists to Akka configs.
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
@@ -121,7 +121,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
 
     public Map<String, String> getAllActiveProperties() {
         return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
-                .filter(ps -> ps instanceof EnumerablePropertySource).map(ps -> (EnumerablePropertySource<?>) ps)
+                .filter(ps -> ps instanceof EnumerablePropertySource).map(EnumerablePropertySource.class::cast)
                 .map(EnumerablePropertySource::getPropertyNames)
                 .flatMap(Arrays::stream)
                 .distinct()

@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
@@ -71,7 +70,7 @@ public class ApplicationConfiguration {
     @Bean
     @Primary
     ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 
 }

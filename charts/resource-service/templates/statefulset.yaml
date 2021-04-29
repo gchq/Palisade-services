@@ -56,17 +56,17 @@ spec:
           httpGet:
             path: /actuator/health
             port: {{ .Values.service.internalPort }}
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/health
             port: {{ .Values.service.internalPort }}
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
@@ -81,14 +81,14 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "resource-service.deployment.fullname" . }}
-          mountPath: {{ include "resource-service.deployment.path" . }}
+        - name: {{ include "resource-service.classpathJars.name" . }}
+          mountPath: {{ include "resource-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "resource-service.config.path" . }}
       volumes:
-      - name: {{ include "resource-service.deployment.fullname" . }}
+      - name: {{ include "resource-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "resource-service.deployment.fullname" . }}
+          claimName: {{ include "resource-service.classpathJars.name" . }}
           readOnly: true
       - name: config-volume
         configMap:

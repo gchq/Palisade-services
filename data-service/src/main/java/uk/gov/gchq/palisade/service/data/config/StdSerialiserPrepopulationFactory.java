@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.data.config;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserConstructorNotFoundException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationException;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
+import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -32,7 +32,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * A {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file.
  * A factory for {@link Serialiser} objects, using:
  * - A {@link String} value of the serialised format of a file
  * - A {@link String} value of the fully qualified class that will be the file type
@@ -45,7 +45,7 @@ public class StdSerialiserPrepopulationFactory {
     private String serialiserClass;
 
     /**
-     * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object
+     * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object.
      */
     public StdSerialiserPrepopulationFactory() {
         flavourFormat = "";
@@ -54,7 +54,7 @@ public class StdSerialiserPrepopulationFactory {
     }
 
     /**
-     * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument
+     * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument.
      *
      * @param flavourFormat   a {@link String} value of the serialised format for a {@link DataFlavour}
      * @param flavourType     a {@link String} value of the fully qualified type for a {@link DataFlavour}
@@ -100,7 +100,7 @@ public class StdSerialiserPrepopulationFactory {
     }
 
     /**
-     * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a {@link StdSerialiserPrepopulationFactory}
+     * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a {@link StdSerialiserPrepopulationFactory}.
      *
      * @return an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */

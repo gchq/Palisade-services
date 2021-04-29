@@ -87,14 +87,14 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
     },
     "roles": [],
     "auths": [],
-    "class": "uk.gov.gchq.palisade.User"
+    "class": "uk.gov.gchq.palisade.user.User"
   },
   "resource": {
     "class": "uk.gov.gchq.palisade.resource.impl.FileResource",
     "id": "/test/resourceId",
     "attributes": {},
     "connectionDetail": {
-      "class": "uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+      "class": "uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
       "serviceName": "test-data-service"
     },
     "parent": {
@@ -126,7 +126,7 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
     "id": "/test/resourceId",
     "attributes": {},
     "connectionDetail": {
-      "class": "uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+      "class": "uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail",
       "serviceName": "test-data-service"
     },
     "parent": {

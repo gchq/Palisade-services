@@ -62,8 +62,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, UserRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.requestKeySerializer(),
-                SerDesConfig.requestValueSerializer());
+                SerDesConfig.requestKeySerialiser(),
+                SerDesConfig.requestValueSerialiser());
 
         return INPUT_COMPONENTS.plainProducer(producerSettings);
     }
@@ -72,8 +72,8 @@ public class AkkaComponentsConfig {
     Source<CommittableMessage<String, UserRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, UserRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.requestKeyDeserializer(),
-                SerDesConfig.requestValueDeserializer());
+                SerDesConfig.requestKeyDeserialiser(),
+                SerDesConfig.requestValueDeserialiser());
 
         Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
@@ -87,8 +87,8 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.userKeySerializer(),
-                SerDesConfig.passthroughValueSerializer());
+                SerDesConfig.userKeySerialiser(),
+                SerDesConfig.passthroughValueSerialiser());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);

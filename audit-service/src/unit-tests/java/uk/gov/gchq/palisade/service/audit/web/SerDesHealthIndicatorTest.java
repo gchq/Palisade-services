@@ -30,6 +30,7 @@ class SerDesHealthIndicatorTest {
     @BeforeEach
     void setup() {
         healthIndicator = new SerDesHealthIndicator();
+        SerDesHealthIndicator.SER_DES_EXCEPTIONS.clear();
     }
 
     @AfterEach
@@ -40,8 +41,8 @@ class SerDesHealthIndicatorTest {
     @Test
     void testHealthUp() {
         assertThat(healthIndicator.health().getStatus())
-            .as("Check health status is UP")
-            .isEqualTo(Status.UP);
+                .as("Check health status is UP")
+                .isEqualTo(Status.UP);
     }
 
     @Test
@@ -49,10 +50,10 @@ class SerDesHealthIndicatorTest {
         // Given the service has encountered at least 1 serialisation exception
         SerDesHealthIndicator.addSerDesExceptions(new Exception("This is a test"));
         assertThat(healthIndicator.health().getStatus())
-            .as("Check health status as DOWN")
-            .isEqualTo(Status.DOWN);
+                .as("Check health status as DOWN")
+                .isEqualTo(Status.DOWN);
         assertThat(healthIndicator.health().getDetails())
-            .as("Check health status has some details")
-            .isNotEmpty();
+                .as("Check health status has some details")
+                .isNotEmpty();
     }
 }

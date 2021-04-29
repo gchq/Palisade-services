@@ -24,8 +24,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.Serializable;
@@ -38,7 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * Implementation of a {@link PolicyPrepopulationFactory} that uses Spring to configure a resource from a yaml file
  * A factory for objects, using:
  * - a String reference of a {@link uk.gov.gchq.palisade.resource.Resource} resource
  * - a map of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
