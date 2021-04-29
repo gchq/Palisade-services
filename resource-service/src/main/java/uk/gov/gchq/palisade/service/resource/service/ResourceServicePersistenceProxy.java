@@ -97,15 +97,20 @@ public class ResourceServicePersistenceProxy {
                         )
                         // If persistence is empty, a "cache miss"
                         .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
+                                // Persist newly-discovered resources before they are returned, return errors without persisting
                                 .via(ConditionalGraph.map((AuditableResourceResponse response) -> {
                                     if (response.getAuditErrorMessage() != null) {
+                                        // If we get an error from the service, don't persist the error response
                                         return 0;
                                     } else {
+                                        // If we get a resource from the service, do persist
                                         return 1;
                                     }
                                 }, Map.of(
+                                        // Errors are untouched and returned for auditing
                                         0, Flow.create(),
-                                        1, getResourceResponseFlow(request)
+                                        // Resources are persisted
+                                        1, persistNewResources(request)
                                 )))
                         )
                 )
@@ -189,7 +194,7 @@ public class ResourceServicePersistenceProxy {
 
     }
 
-    private Flow<AuditableResourceResponse, AuditableResourceResponse, NotUsed> getResourceResponseFlow(final ResourceRequest request) {
+    private Flow<AuditableResourceResponse, AuditableResourceResponse, NotUsed> persistNewResources(final ResourceRequest request) {
         return Flow
                 .<AuditableResourceResponse>create()
                 // Add the returned result to the persistence

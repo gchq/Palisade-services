@@ -58,6 +58,7 @@ public class SimpleResourceService implements ResourceService {
         this.resourceType = resourceType;
     }
 
+    @SuppressWarnings("java:S2095") // resource is closed
     private static FunctionalIterator<File> filesOf(final Path path) {
         try {
             Stream<Path> filesWalk = Files.walk(path);
@@ -115,6 +116,7 @@ public class SimpleResourceService implements ResourceService {
         try {
             return new File(fileString).getCanonicalFile().toURI();
         } catch (IOException ex) {
+            LOGGER.warn("Failed to get canonical file for {}, falling back to absolute file", fileString, ex);
             return new File(fileString).getAbsoluteFile().toURI();
         }
     }
