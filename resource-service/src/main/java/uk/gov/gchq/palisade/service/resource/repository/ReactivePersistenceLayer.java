@@ -616,6 +616,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         );
 
         return Flow.completionStageFlow(isResourceIdComplete(rootResourceId)
+                // First save this root resource as complete
                 .thenCompose((Boolean idAlreadyComplete) -> {
                     if (idAlreadyComplete.equals(Boolean.FALSE)) {
                         return completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).thenApply(ignored -> null);
@@ -623,10 +624,13 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         return CompletableFuture.completedFuture(null);
                     }
                 })
+                // Then return each child LeafResource as they are persisted
                 .thenApply(ignored -> flow))
                 .mapMaterializedValue(future -> NotUsed.notUsed());
     }
 
+    // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given type
+    // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceByType(final String type) {
         LOGGER.info("Persistence add for resources by type '{}'", type);

@@ -19,6 +19,17 @@ limitations under the License.
 The diagrams presented are compiled from .drawio files.
 See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image from the provided diagram files.
 
-See [filtered-resource-service.drawio](./filtered-resource-service.drawio) for the source for this diagram:
+---
 
-![Filtered Resource Service diagram](./filtered-resource-service.png)
+### [Filtered-Resource-Service-HL.drawio](./Filtered-Resource-Service-HL.drawio)
+![filtered-resource-service.drawio](./Filtered-Resource-Service-HL.png)
+
+---
+
+### [Filtered-Resource-Service-ML.drawio](./Filtered-Resource-Service-ML.drawio)
+![filtered-resource-service.drawio](./Filtered-Resource-Service-ML.png)
+
+---
+
+### [Filtered-Resource-Service-LL.drawio](./Filtered-Resource-Service-LL.drawio)
+![filtered-resource-service.drawio](./Filtered-Resource-Service-LL.png)
