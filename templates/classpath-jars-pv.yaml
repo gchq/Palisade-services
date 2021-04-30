@@ -28,7 +28,7 @@ kind: PersistentVolume
 metadata:
   name: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
   labels:
-    selectorFilter: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
+    selectorFilter: {{ include "palisade.classpathJars.name" . }}
     {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
     {{- else if eq $sc "efs-sc" }}
