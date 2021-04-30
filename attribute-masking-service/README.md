@@ -110,7 +110,7 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }'
 ```
-## Example JSON Response
+## Expected Kafka 'masked-resource' Message
 ```
 {
   "userId": "test-user-id",
