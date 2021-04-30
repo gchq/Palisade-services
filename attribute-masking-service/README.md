@@ -46,10 +46,10 @@ If at any time during the processing of a message, an error occurs, an error mes
 *token is in the message header's metadata
 
 The service reads a message in from the `rule` Kafka topic as an [AttributeMaskingRequest](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingRequest.java).
-This request is first persisted in a store as an [AuthorisedRequestEntity](src/main/java/uk/gov/gchq/palisade/service/attributemask/domain/AuthorisedRequestEntity.java).
+This request is first persisted in a store as an`AuthorisedRequestEntity`.
 The `LeafResource` in the request holds metadata for the resources that are being requested.
 If any of this metadata is classed as restricted data for the request, the metadata is then redacted or removed producing a masked version of the `LeafResource`.
-The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditableAttributeMaskingResponse.java) ready to be forwarded onto the `masked-resource` Kafka topic.
+The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingResponse.java) ready to be forwarded onto the `masked-resource` Kafka topic.
 Start and end markers are forwarded to the same topic.
 Like the masked resource messages, the start and end markers will have the token (`x-request-token`) in the header, but are different in that they will have an empty message body.
 Any error that may occur during the processing of a message, is used to create an error message, `AuditErrorMessage` and sent to the `error` Kafka topic where they are processed by the Audit Service.
@@ -112,9 +112,7 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }'
 ```
-
-
-## Example JSON Response
+## Expected Kafka 'masked-resource' Message
 ```
 {
   "userId": "test-user-id",
