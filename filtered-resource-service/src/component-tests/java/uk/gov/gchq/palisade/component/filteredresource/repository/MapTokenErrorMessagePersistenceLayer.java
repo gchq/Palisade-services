@@ -17,7 +17,7 @@
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessagePersistenceLayer;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -33,6 +33,7 @@ import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -83,7 +84,10 @@ public class ResourceEntity implements Serializable, Persistable<String> {
     public ResourceEntity(final Resource resource) {
         this(
                 resource.getId(),
-                resource instanceof ChildResource ? ((ChildResource) resource).getParent().getId() : null,
+                Optional.of(resource)
+                        .filter(rsc -> rsc instanceof ChildResource)
+                        .map(rsc -> ((ChildResource) rsc).getParent().getId())
+                        .orElse(null),
                 resource,
                 true
         );
