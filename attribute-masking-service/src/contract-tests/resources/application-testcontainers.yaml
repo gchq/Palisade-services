@@ -14,5 +14,7 @@
 
 # Substitute maven properties for testcontainers image names
 testcontainers:
-  redis.image: @testcontainers.redis.image@
-  kafka.image: @testcontainers.kafka.image@
+  redis.image: "@testcontainers.redis.image@"
+  redis.default.image: "redis:6-alpine"
+  kafka.image: "@testcontainers.kafka.image@"
+  kafka.default.image: "confluentinc/cp-kafka:5.5.1"

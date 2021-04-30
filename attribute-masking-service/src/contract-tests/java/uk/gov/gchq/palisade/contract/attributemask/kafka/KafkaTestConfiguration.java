@@ -73,6 +73,8 @@ public class KafkaTestConfiguration {
 
     @Value("${testcontainers.kafka.image}")
     private String fullImageName;
+    @Value("${testcontainers.kafka.default.image}")
+    private String defaultImageName;
 
     @Bean
     @ConditionalOnMissingBean
@@ -82,8 +84,15 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-        final DockerImageName kafkaImageName = DockerImageName.parse(fullImageName)
-                .asCompatibleSubstituteFor("confluentinc/cp-kafka:5.5.1");
+        DockerImageName kafkaImageName;
+        try {
+            kafkaImageName = DockerImageName.parse(fullImageName)
+                    .asCompatibleSubstituteFor(defaultImageName);
+            kafkaImageName.assertValid();
+        } catch (IllegalArgumentException ex) {
+            LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
+            kafkaImageName = DockerImageName.parse(defaultImageName);
+        }
         final KafkaContainer container = new KafkaContainer(kafkaImageName)
                 .withReuse(true)
                 .withStartupTimeout(Duration.ofMinutes(1))
