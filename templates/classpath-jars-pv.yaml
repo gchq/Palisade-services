@@ -26,7 +26,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.classpathJars.name" . }}
+  name: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
   labels:
     selectorFilter: {{ include "palisade.classpathJars.name" . }}
     {{- if eq $sc "ebs-sc" }}

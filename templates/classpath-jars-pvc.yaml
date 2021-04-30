@@ -50,5 +50,5 @@ spec:
   {{- if eq $provisioning "static" }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.classpathJars.name" . }}
+      selectorFilter: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
   {{- end }}
