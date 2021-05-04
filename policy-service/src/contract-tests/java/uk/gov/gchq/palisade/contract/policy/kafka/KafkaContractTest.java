@@ -86,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=2m, maximumSize=100"}
 )
 @Import({KafkaTestConfiguration.class})
-@ActiveProfiles({"caffeine", "akka-test", "pre-population"})
+@ActiveProfiles({"caffeine", "akka-test", "pre-population", "testcontainers"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);

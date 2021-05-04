@@ -46,10 +46,10 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
             redisImageName = DockerImageName.parse(defaultImageName);
         }
         final GenericContainer<?> redis = new GenericContainer<>(redisImageName)
-            .withExposedPorts(REDIS_PORT)
-            .withReuse(true)
-            .withStartupTimeout(Duration.ofMinutes(1))
-            .withStartupAttempts(3);
+                .withExposedPorts(REDIS_PORT)
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3);
 
         // Start container
         redis.start();
@@ -58,7 +58,7 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
         String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
         // Configure the testcontainer random port
         String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
-        RedisPersistenceContractTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
+        LOGGER.info("Starting Redis with {}", redisContainerPort);
         // Override the configuration at runtime
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
     }

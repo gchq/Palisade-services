@@ -21,8 +21,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -60,9 +58,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitializer.class})
-@ActiveProfiles({"redis", "akka-test"})
+@ActiveProfiles({"redis", "akka-test", "testcontainers"})
 class RedisPersistenceTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceTest.class);
 
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;

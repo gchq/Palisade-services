@@ -34,7 +34,7 @@
         <!-- Dependency versions -->
         <scala.version>2.13</scala.version>
         <akka.version>2.6.10</akka.version>
-        <alpakka.version>2.1.0-M1</alpakka.version>
+        <alpakka.kafka.version>2.1.0-M1</alpakka.kafka.version>
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.15.3</testcontainers.version>
@@ -71,7 +71,7 @@
             <!-- Alpakka Kafka connectors -->
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-stream-kafka_${scala.version}</artifactId>
-            <version>${alpakka.version}</version>
+            <version>${alpakka.kafka.version}</version>
         </dependency>
         <dependency>
             <!-- Akka/SLF4j logging connector -->
@@ -141,7 +141,7 @@
             <!-- Akka Kafka testing -->
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
-            <version>${alpakka.version}</version>
+            <version>${alpakka.kafka.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
