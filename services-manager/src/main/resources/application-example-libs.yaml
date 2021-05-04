@@ -34,8 +34,7 @@ example:
   version: '@examples.app.version@'
   path: ../Palisade-examples
   libs: &libraries
-    - ${example.path}/example-library/target/example-library-*.jar
-    - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
+    - ${example.path}/example-library/target/example-library-${example.version}.jar
   service-profiles: &profiles
     - static
     - example
