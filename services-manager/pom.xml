@@ -31,6 +31,10 @@
     <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
     <!--  *********** Artifact ID ***********    -->
 
+    <properties>
+        <examples.app.version>0.5.0-SNAPSHOT</examples.app.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
