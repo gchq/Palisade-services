@@ -69,7 +69,7 @@ import static uk.gov.gchq.palisade.service.audit.model.Token.HEADER;
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles({"akka-test"})
+@ActiveProfiles({"akka-test", "testcontainers"})
 class KafkaContractRestTest {
 
     static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractRestTest.class);
