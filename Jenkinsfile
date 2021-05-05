@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Library('jenkinsfile-lib@feature/pal-1041-update-docker-image')_
+@Library('jenkinsfile-lib')_
 
 timestamps {
     services()
