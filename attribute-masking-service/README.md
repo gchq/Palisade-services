@@ -72,6 +72,7 @@ List of message endpoints [AttributeMaskingRestController.maskAttributesMulti](s
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
 
 ## Example JSON Request
+
 ```
 curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
 '{
@@ -112,7 +113,9 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }'
 ```
+
 ## Expected Kafka 'masked-resource' Message
+
 ```
 {
   "userId": "test-user-id",
@@ -140,5 +143,7 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }
 ```
+
 ## License
+
 Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
