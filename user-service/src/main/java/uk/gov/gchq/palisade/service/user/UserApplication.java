@@ -37,6 +37,8 @@ import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.user.User;
 
+import javax.annotation.PreDestroy;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +60,7 @@ public class UserApplication {
     private final Executor executor;
     private final UserServiceCachingProxy service;
     private final UserConfiguration userConfig;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -107,11 +110,19 @@ public class UserApplication {
                 .peek(user -> LOGGER.debug(user.toString()))
                 .forEach(service::addUser);
 
-        // Then start up kafka
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+        // Then start up all runnables
+        runnerThreads.addAll(runners.stream()
                 .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materializer.system().terminate();
     }
 }
