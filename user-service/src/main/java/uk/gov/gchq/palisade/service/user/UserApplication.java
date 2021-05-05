@@ -118,6 +118,9 @@ public class UserApplication {
         runnerThreads.forEach(CompletableFuture::join);
     }
 
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
     @PreDestroy
     public void onExit() {
         LOGGER.info("Cancelling running futures");
