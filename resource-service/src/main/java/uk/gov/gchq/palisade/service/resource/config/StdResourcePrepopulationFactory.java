@@ -116,7 +116,7 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
         Resource rootResource = ResourceBuilder.create(rootId);
         String resourceURIid = ResourceBuilder.create(resourceId).getId();
-        LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceURIid, attributes))
+        LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceURIid))
                 .connectionDetail(simpleConnectionDetail)
                 .type(type)
                 .serialisedFormat(serialisedFormat);

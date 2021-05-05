@@ -73,7 +73,7 @@ class SimpleResourceServiceTest {
                 .usingRecursiveComparison()
                 .isEqualTo(leafResource);
 
-        // When we get the resource by its seralised format
+        // When we get the resource by its serialised format
         FunctionalIterator<LeafResource> resourcesByFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(leafResource.getSerialisedFormat()))
                 .filter(resource -> resource.getId().equals(leafResource.getId()));
 
