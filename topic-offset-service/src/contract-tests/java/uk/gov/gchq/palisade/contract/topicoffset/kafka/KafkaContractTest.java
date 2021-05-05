@@ -90,7 +90,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles("akka-test")
+@ActiveProfiles({"akka-test", "testcontainers"})
 class KafkaContractTest {
 
     @SpyBean

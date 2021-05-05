@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @EnableAutoConfiguration
 @AutoConfigureDataRedis
-@ActiveProfiles("redis")
+@ActiveProfiles({"redis", "testcontainers"})
 class RedisPersistenceContractTest {
 
     protected void cleanCache() {
