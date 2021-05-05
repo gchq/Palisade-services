@@ -17,12 +17,12 @@
 package uk.gov.gchq.palisade.service.filteredresource.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.actuate.context.ShutdownEndpoint;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.availability.ApplicationAvailability;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -104,13 +104,13 @@ public class EndpointConfiguration {
      * Route for "/health[/|/liveliness|/readiness|/{component}]" to the Spring {@link HealthEndpoint}
      * or {@link ApplicationAvailability} objects
      *
-     * @param springHealthEndpoint    Spring internal default health endpoints
+     * @param healthEndpoint          Spring internal default health endpoint
      * @param applicationAvailability Spring internal default application readiness and liveliness indicator
      * @return the spring health router
      */
     @Bean
-    SpringHealthRouter springHealthRouter(final HealthEndpoint springHealthEndpoint, final ApplicationAvailability applicationAvailability) {
-        return new SpringHealthRouter(springHealthEndpoint, applicationAvailability);
+    SpringHealthRouter springHealthRouter(final HealthEndpoint healthEndpoint, final ApplicationAvailability applicationAvailability) {
+        return new SpringHealthRouter(healthEndpoint, applicationAvailability);
     }
 
     /**
@@ -127,11 +127,11 @@ public class EndpointConfiguration {
     /**
      * Route for "/shutdown" to the Spring {@link org.springframework.context.ApplicationContext} for exiting the application
      *
-     * @param applicationContext Spring application context
-     * @return the spring loggers router
+     * @param shutdownEndpoint Spring internal default shutdown endpoint
+     * @return the spring shutdown router
      */
     @Bean
-    SpringShutdownRouter springShutdownRouter(final ApplicationContext applicationContext) {
-        return new SpringShutdownRouter(applicationContext);
+    SpringShutdownRouter springShutdownRouter(final ShutdownEndpoint shutdownEndpoint) {
+        return new SpringShutdownRouter(shutdownEndpoint);
     }
 }

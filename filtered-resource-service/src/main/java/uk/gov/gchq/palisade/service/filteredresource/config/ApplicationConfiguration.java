@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -105,7 +106,7 @@ public class ApplicationConfiguration {
      * {@link akka.stream.javadsl.Flow} or {@link akka.stream.javadsl.Sink} respectively.
      */
     @Bean
-    ActorRef<TokenOffsetCommand> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
+    ActorSystem<TokenOffsetCommand> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
         return TokenOffsetController.create(persistenceLayer);
     }
 
@@ -118,7 +119,7 @@ public class ApplicationConfiguration {
      * @return a (running) ActorSystem for {@link TokenErrorMessageCommand}s
      */
     @Bean
-    ActorRef<TokenErrorMessageCommand> tokenErrorController(final TokenErrorMessagePersistenceLayer persistenceLayer) {
+    ActorSystem<TokenErrorMessageCommand> tokenErrorController(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         return TokenErrorMessageController.create(persistenceLayer);
     }
 

@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource;
 
-import akka.actor.ActorSystem;
+import akka.actor.typed.ActorSystem;
 import akka.stream.Materializer;
 import akka.stream.javadsl.RunnableGraph;
 import org.slf4j.Logger;
@@ -50,8 +50,9 @@ public class FilteredResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteredResourceApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
+    private final Set<ActorSystem<?>> actorSystems;
     private final AkkaHttpServer server;
-    private final ActorSystem system;
+    private final akka.actor.ActorSystem system;
     private final Materializer materialiser;
     private final Executor executor;
     private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
@@ -60,22 +61,23 @@ public class FilteredResourceApplication {
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param actorSystems collection of all Akka {@link ActorSystem}s discovered for the application
      * @param system       the default akka actor system
      * @param server       the http server to start (in replacement of spring-boot-starter-web)
-     * @param materialiser the Akka {@link Materializer} configured to be used
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public FilteredResourceApplication(
             final Collection<RunnableGraph<?>> runners,
+            final Collection<ActorSystem<?>> actorSystems,
             final AkkaHttpServer server,
-            final ActorSystem system,
-            final Materializer materialiser,
+            final akka.actor.ActorSystem system,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
+        this.actorSystems = new HashSet<>(actorSystems);
         this.server = server;
         this.system = system;
-        this.materialiser = materialiser;
         this.executor = executor;
+        this.materialiser = Materializer.createMaterializer(system);
     }
 
     /**
@@ -101,7 +103,7 @@ public class FilteredResourceApplication {
                 .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
 
-        this.server.serveForever(this.system);
+        server.serveForever(system);
 
         runnerThreads.forEach(CompletableFuture::join);
     }
@@ -111,9 +113,13 @@ public class FilteredResourceApplication {
      */
     @PreDestroy
     public void onExit() {
+        LOGGER.info("Terminating (persistence controller) actor systems");
+        actorSystems.forEach(ActorSystem::terminate);
         LOGGER.info("Cancelling running futures");
         runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Shutting down HTTP server");
+        server.terminate();
         LOGGER.info("Terminating actor system");
-        materialiser.system().terminate();
+        system.terminate();
     }
 }

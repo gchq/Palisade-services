@@ -91,7 +91,7 @@ public final class TokenErrorMessageController extends AbstractBehavior<TokenErr
      * @param persistenceLayer a reference to the persistence, used to retrieve AuditErrorMessages for the unique token
      * @return an {@link ActorRef} to a running {@link ActorSystem} that accepts {@link TokenErrorMessageCommand}
      */
-    public static ActorRef<TokenErrorMessageCommand> create(final TokenErrorMessagePersistenceLayer persistenceLayer) {
+    public static ActorSystem<TokenErrorMessageCommand> create(final TokenErrorMessagePersistenceLayer persistenceLayer) {
         Behavior<TokenErrorMessageCommand> behavior = Behaviors.setup(ctx -> new TokenErrorMessageController(ctx, persistenceLayer));
         return ActorSystem.create(behavior, TokenErrorMessageController.class.getSimpleName());
     }

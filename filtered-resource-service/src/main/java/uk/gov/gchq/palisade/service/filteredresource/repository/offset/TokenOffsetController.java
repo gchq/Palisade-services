@@ -121,7 +121,7 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
      *                         not found)
      * @return an {@link ActorRef} to a running {@link ActorSystem} that accepts {@link TokenOffsetCommand}s
      */
-    public static ActorRef<TokenOffsetCommand> create(final TokenOffsetPersistenceLayer persistenceLayer) {
+    public static ActorSystem<TokenOffsetCommand> create(final TokenOffsetPersistenceLayer persistenceLayer) {
         Behavior<TokenOffsetCommand> behavior = Behaviors.setup(ctx -> new TokenOffsetController(ctx, persistenceLayer));
         return ActorSystem.create(behavior, TokenOffsetController.class.getSimpleName());
     }
