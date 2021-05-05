@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})
 @Import(RedisAutoConfiguration.class)
-@ActiveProfiles({"redis"})
+@ActiveProfiles({"redis", "testcontainers"})
 class RedisUserCachingTest {
 
     @Autowired

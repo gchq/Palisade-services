@@ -76,7 +76,7 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles({"akka-test"})
+@ActiveProfiles({"akka-test", "testcontainers"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);

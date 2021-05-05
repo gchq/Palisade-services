@@ -45,7 +45,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.assertj.core.util.TriFunction;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,6 +57,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.serializer.support.SerializationFailedException;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
@@ -109,7 +109,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitializer.class})
-@ActiveProfiles({"k8s", "akka"})
+@ActiveProfiles({"k8s", "akka-test", "testcontainers"})
 class KafkaRestWebSocketContractTest {
     private static final String HOST = "localhost";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -134,7 +134,7 @@ class KafkaRestWebSocketContractTest {
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
 
-    @NotNull
+    @NonNull
     private static TriFunction<String, String, String, WebSocketMessage> getErrorBuilder() {
         return (token, serviceName, errorMessage) -> WebSocketMessage.Builder.create()
                 .withType(MessageType.ERROR)
@@ -143,7 +143,7 @@ class KafkaRestWebSocketContractTest {
                 .withBody(errorMessage);
     }
 
-    @NotNull
+    @NonNull
     private static BiFunction<String, LeafResource, WebSocketMessage> getResponseBuilder() {
         return (token, leafResource) -> WebSocketMessage.Builder.create()
                 .withType(MessageType.RESOURCE)
@@ -152,7 +152,7 @@ class KafkaRestWebSocketContractTest {
                 .withBody(leafResource);
     }
 
-    @NotNull
+    @NonNull
     private static Function<String, FilteredResourceRequest> getResourceBuilder() {
         return resourceId -> FilteredResourceRequest.Builder.create()
                 .withUserId("userId")
@@ -167,7 +167,7 @@ class KafkaRestWebSocketContractTest {
                         .parent(new SystemResource().id("file:/file/")));
     }
 
-    @NotNull
+    @NonNull
     private static Function<String, WebSocketMessage> getCompleteMsgBuilder() {
         return (token) -> WebSocketMessage.Builder.create()
                 .withType(MessageType.COMPLETE)

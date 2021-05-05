@@ -75,7 +75,7 @@ import static org.mockito.ArgumentMatchers.any;
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import({KafkaTestConfiguration.class})
-@ActiveProfiles("akka-test")
+@ActiveProfiles({"akka-test", "testcontainers"})
 class KafkaContractTest {
     public static final String REGISTER_DATA_REQUEST = "/api/registerDataRequest";
 
