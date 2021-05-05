@@ -56,7 +56,7 @@ public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final Executor executor;
     private final UserServiceCachingProxy service;
     private final UserConfiguration userConfig;
@@ -80,7 +80,7 @@ public class UserApplication {
         this.service = service;
         this.userConfig = configuration;
         this.runners = new HashSet<>(runners);
-        this.materializer = materialiser;
+        this.materialiser = materialiser;
         this.executor = executor;
     }
 
@@ -110,9 +110,9 @@ public class UserApplication {
                 .peek(user -> LOGGER.debug(user.toString()))
                 .forEach(service::addUser);
 
-        // Then start up all runnables
+        // Then start up all runners
         runnerThreads.addAll(runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
                 .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
@@ -126,6 +126,6 @@ public class UserApplication {
         LOGGER.info("Cancelling running futures");
         runnerThreads.forEach(thread -> thread.cancel(true));
         LOGGER.info("Terminating actor system");
-        materializer.system().terminate();
+        materialiser.system().terminate();
     }
 }

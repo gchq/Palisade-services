@@ -37,6 +37,8 @@ import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 
+import javax.annotation.PreDestroy;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,28 +58,29 @@ public class PolicyApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final Executor executor;
     private final PolicyServiceCachingProxy service;
     private final PolicyConfiguration policyConfig;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param materialiser the Akka {@link Materializer} configured to be used
      * @param service      specifically policyServiceCachingProxy used for pre-population
      * @param policyConfig resourceConfig used to create the policy object used in pre-population
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
-            final Materializer materializer,
+            final Materializer materialiser,
             final PolicyServiceCachingProxy service,
             final PolicyConfiguration policyConfig,
             @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
-        this.materializer = materializer;
+        this.materialiser = materialiser;
         this.service = service;
         this.policyConfig = policyConfig;
         this.executor = executor;
@@ -113,11 +116,22 @@ public class PolicyApplication {
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
                 });
 
-        //Then start up kafka
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
+        //Then start up all runners
+        runnerThreads.addAll(runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
+                .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }
