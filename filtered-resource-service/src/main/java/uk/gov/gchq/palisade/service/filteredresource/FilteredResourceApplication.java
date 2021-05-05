@@ -119,7 +119,7 @@ public class FilteredResourceApplication {
         runnerThreads.forEach(thread -> thread.cancel(true));
         LOGGER.info("Shutting down HTTP server");
         server.terminate();
-        LOGGER.info("Terminating actor system");
+        LOGGER.info("Terminating (root) actor system");
         system.terminate();
     }
 }
