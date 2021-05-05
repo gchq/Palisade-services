@@ -31,7 +31,6 @@ List of third-party dependencies grouped by their license type
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.0-b170127.1453](http://jaxb.java.net/jaxb-runtime-parent/jaxb-runtime))
 
 ### [MIT License](./licenses/mit_license.html):
-* Testcontainers :: Kafka ([org.testcontainers:kafka:1.14.3](https://testcontainers.org))
 * Testcontainers :: Kafka ([org.testcontainers:kafka:1.15.3](https://testcontainers.org))
 * Testcontainers Core ([org.testcontainers:testcontainers:1.15.3](https://testcontainers.org))
 
