@@ -38,9 +38,12 @@ class SimpleResourceServiceTest {
     void testJavaFilesInUnitTest() throws IOException {
         // Given we create a file and add it to the service
         DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
+
         LeafResource resource = (LeafResource) ResourceBuilder.create(
                 new File("./src/unit-tests/java/uk/gov/gchq/palisade/service/resource/ApplicationTestData.java").getCanonicalFile().toURI());
-        resource.type("java.lang.String").serialisedFormat("java").connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
+        resource.type("java.lang.String")
+                .serialisedFormat("java")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
         Set<LeafResource> testFiles = new HashSet<>();
 
         // When we get the file by the ID of the directory
