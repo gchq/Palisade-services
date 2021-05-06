@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s", "spring.data.redis.repositories.key-prefix=test:"})
+@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=5s", "spring.data.redis.repositories.key-prefix=test:"})
 @ContextConfiguration(
         classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
         initializers = RedisInitializer.class
@@ -102,7 +102,7 @@ class RedisPersistenceContractTest {
 
         // When a request is made to store the topic offset for a given token
         service.storeTokenOffset(token, request.commitOffset).join();
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(5);
 
         // Then the offset is persisted in redis
         assertThat(redisTemplate.keys("test:TokenOffsetEntity:" + token))
