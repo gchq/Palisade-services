@@ -196,17 +196,9 @@ class KafkaContractTest {
             var actualErrorCount = currentErrorCount.get();
 
             // THEN - check an "Error-..." file has been created
-            try {
-                assertThat(actualErrorCount)
-                        .as("Check exactly 1 'Error' file has been created")
-                        .isEqualTo(expectedErrorCount);
-            } catch (AssertionError e) {
-                LOGGER.info("There was an assertion error on attempt {}", i);
-                if (i == N_RUNS) {
-                    throw e;
-                }
-            }
-            TimeUnit.SECONDS.sleep(BACKOFF);
+            tryAssertWithBackoff(() -> assertThat(actualErrorCount)
+                    .as("Check exactly 1 'Error' file has been created")
+                    .isEqualTo(expectedErrorCount), i);
         }
     }
 
@@ -227,17 +219,9 @@ class KafkaContractTest {
             var actualSuccessCount = currentSuccessCount.get();
 
             // Then check a "Success-..." file has been created
-            try {
-                assertThat(actualSuccessCount)
-                        .as("Check exactly 1 'Success' file has been created")
-                        .isEqualTo(expectedSuccessCount);
-            } catch (AssertionError e) {
-                LOGGER.info("There was an assertion error on attempt {}", i);
-                if (i == N_RUNS) {
-                    throw e;
-                }
-            }
-            TimeUnit.SECONDS.sleep(BACKOFF);
+            tryAssertWithBackoff(() ->assertThat(actualSuccessCount)
+                    .as("Check exactly 1 'Success' file has been created")
+                    .isEqualTo(expectedSuccessCount), i);
         }
     }
 
@@ -262,4 +246,15 @@ class KafkaContractTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
+    private void tryAssertWithBackoff(final Runnable runnable, final int i) throws InterruptedException {
+        try {
+            runnable.run();
+        } catch (AssertionError e) {
+            LOGGER.info("There was an assertion error on attempt {}", i);
+            if (i == N_RUNS) {
+                throw e;
+            }
+        }
+        TimeUnit.SECONDS.sleep(BACKOFF);
+    }
 }
