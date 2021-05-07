@@ -192,14 +192,11 @@ class KafkaContractTest {
         // WHEN - we write to the input and wait
         runStreamOf(requests);
 
-        for (int i = 1; i <= N_RUNS; i++) {
-            var actualErrorCount = currentErrorCount.get();
-
-            // THEN - check an "Error-..." file has been created
-            tryAssertWithBackoff(() -> assertThat(actualErrorCount)
-                    .as("Check exactly 1 'Error' file has been created")
-                    .isEqualTo(expectedErrorCount), i);
-        }
+        // THEN - check an "Error-..." file has been created
+        var actualErrorCount = currentErrorCount.get();
+        tryAssertWithBackoff(() -> assertThat(actualErrorCount)
+                .as("Check exactly 1 'Error' file has been created")
+                .isEqualTo(expectedErrorCount));
     }
 
     @Test
@@ -215,14 +212,11 @@ class KafkaContractTest {
         // When - we write to the input
         runStreamOf(requests);
 
-        for (int i = 1; i <= N_RUNS; i++) {
-            var actualSuccessCount = currentSuccessCount.get();
-
-            // Then check a "Success-..." file has been created
-            tryAssertWithBackoff(() ->assertThat(actualSuccessCount)
-                    .as("Check exactly 1 'Success' file has been created")
-                    .isEqualTo(expectedSuccessCount), i);
-        }
+        // Then check a "Success-..." file has been created
+        var actualSuccessCount = currentSuccessCount.get();
+        tryAssertWithBackoff(() ->assertThat(actualSuccessCount)
+                .as("Check exactly 1 'Success' file has been created")
+                .isEqualTo(expectedSuccessCount));
     }
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
@@ -246,15 +240,18 @@ class KafkaContractTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
-    private void tryAssertWithBackoff(final Runnable runnable, final int i) throws InterruptedException {
-        try {
-            runnable.run();
-        } catch (AssertionError e) {
-            LOGGER.info("There was an assertion error on attempt {}", i);
-            if (i == N_RUNS) {
-                throw e;
+    private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
+
+        for (int i = 1; i <= N_RUNS; i++) {
+            try {
+                runnable.run();
+            } catch (AssertionError e) {
+                LOGGER.info("There was an assertion error on attempt {}", i);
+                if (i == N_RUNS) {
+                    throw e;
+                }
             }
+            TimeUnit.SECONDS.sleep(BACKOFF);
         }
-        TimeUnit.SECONDS.sleep(BACKOFF);
     }
 }
