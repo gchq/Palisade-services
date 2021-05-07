@@ -81,6 +81,8 @@ class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final int MOCKITO_TIMEOUT_MILLIS = 10_000;
+    private static final int N_RUNS = 5;
+    private static final int BACKOFF = 2;
 
     @Autowired
     Serializer<String> keySerialiser;
@@ -190,11 +192,22 @@ class KafkaContractTest {
         // WHEN - we write to the input and wait
         runStreamOf(requests);
 
-        // THEN - check an "Error-..." file has been created
-        var actualErrorCount = currentErrorCount.get();
-        assertThat(actualErrorCount)
-                .as("Check exactly 1 'Error' file has been created")
-                .isEqualTo(expectedErrorCount);
+        for (int i = 1; i <= N_RUNS; i++) {
+            TimeUnit.SECONDS.sleep(BACKOFF);
+            var actualErrorCount = currentErrorCount.get();
+
+            // THEN - check an "Error-..." file has been created
+            try {
+                LOGGER.info("i = {}", i);
+                assertThat(actualErrorCount)
+                        .as("Check exactly 1 'Error' file has been created")
+                        .isEqualTo(expectedErrorCount);
+            } catch (AssertionError e) {
+                if (i == N_RUNS) {
+                    throw e;
+                }
+            }
+        }
     }
 
     @Test
