@@ -193,8 +193,7 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check an "Error-..." file has been created
-        var actualErrorCount = currentErrorCount.get();
-        tryAssertWithBackoff(() -> assertThat(actualErrorCount)
+        tryAssertWithBackoff(() -> assertThat(currentErrorCount.get())
                 .as("Check exactly 1 'Error' file has been created")
                 .isEqualTo(expectedErrorCount));
     }
@@ -213,14 +212,12 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // Then check a "Success-..." file has been created
-        var actualSuccessCount = currentSuccessCount.get();
-        tryAssertWithBackoff(() -> assertThat(actualSuccessCount)
+        tryAssertWithBackoff(() -> assertThat(currentSuccessCount.get())
                 .as("Check exactly 1 'Success' file has been created")
                 .isEqualTo(expectedSuccessCount));
     }
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
-
         var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
@@ -231,13 +228,6 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
-
-        waitForService();
-
-    }
-
-    private void waitForService() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(2);
     }
 
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
