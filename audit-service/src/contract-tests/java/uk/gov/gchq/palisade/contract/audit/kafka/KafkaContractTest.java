@@ -223,12 +223,12 @@ class KafkaContractTest {
         var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
-        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+        var producerSettings = ProducerSettings
                 .create(akkaActorSystem, keySerialiser, valueSerialiser)
                 .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
 
         waitForService();
