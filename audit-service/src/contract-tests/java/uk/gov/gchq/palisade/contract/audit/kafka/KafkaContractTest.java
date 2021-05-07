@@ -81,6 +81,8 @@ class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final int MOCKITO_TIMEOUT_MILLIS = 10_000;
+    private static final int N_RUNS = 5;
+    private static final int BACKOFF = 2;
 
     @Autowired
     Serializer<String> keySerialiser;
@@ -192,9 +194,9 @@ class KafkaContractTest {
 
         // THEN - check an "Error-..." file has been created
         var actualErrorCount = currentErrorCount.get();
-        assertThat(actualErrorCount)
+        tryAssertWithBackoff(() -> assertThat(actualErrorCount)
                 .as("Check exactly 1 'Error' file has been created")
-                .isEqualTo(expectedErrorCount);
+                .isEqualTo(expectedErrorCount));
     }
 
     @Test
@@ -212,10 +214,9 @@ class KafkaContractTest {
 
         // Then check a "Success-..." file has been created
         var actualSuccessCount = currentSuccessCount.get();
-        assertThat(actualSuccessCount)
+        tryAssertWithBackoff(() -> assertThat(actualSuccessCount)
                 .as("Check exactly 1 'Success' file has been created")
-                .isEqualTo(expectedSuccessCount);
-
+                .isEqualTo(expectedSuccessCount));
     }
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
@@ -223,12 +224,12 @@ class KafkaContractTest {
         var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
-        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+        var producerSettings = ProducerSettings
                 .create(akkaActorSystem, keySerialiser, valueSerialiser)
                 .withBootstrapServers(bootstrapServers);
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.<String, JsonNode>plainSink(producerSettings), akkaMaterialiser)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
 
         waitForService();
@@ -239,4 +240,18 @@ class KafkaContractTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
+    private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
+
+        for (int i = 1; i <= N_RUNS; i++) {
+            try {
+                runnable.run();
+            } catch (AssertionError e) {
+                LOGGER.info("There was an assertion error on attempt {}", i);
+                if (i == N_RUNS) {
+                    throw e;
+                }
+            }
+            TimeUnit.SECONDS.sleep(BACKOFF);
+        }
+    }
 }
