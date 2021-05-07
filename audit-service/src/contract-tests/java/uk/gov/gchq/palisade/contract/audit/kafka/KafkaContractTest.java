@@ -223,12 +223,21 @@ class KafkaContractTest {
         // When - we write to the input
         runStreamOf(requests);
 
-        // Then check a "Success-..." file has been created
-        var actualSuccessCount = currentSuccessCount.get();
-        assertThat(actualSuccessCount)
-                .as("Check exactly 1 'Success' file has been created")
-                .isEqualTo(expectedSuccessCount);
+        for (int i =1; i <= N_RUNS; i++) {
+            TimeUnit.SECONDS.sleep(BACKOFF);
+            var actualSuccessCount = currentSuccessCount.get();
 
+            // Then check a "Success-..." file has been created
+            try {
+                assertThat(actualSuccessCount)
+                        .as("Check exactly 1 'Success' file has been created")
+                        .isEqualTo(expectedSuccessCount);
+            } catch (AssertionError e) {
+                if (i == N_RUNS) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
