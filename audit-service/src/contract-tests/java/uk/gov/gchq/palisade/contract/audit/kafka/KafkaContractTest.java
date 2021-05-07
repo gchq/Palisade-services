@@ -223,7 +223,7 @@ class KafkaContractTest {
         // When - we write to the input
         runStreamOf(requests);
 
-        for (int i =1; i <= N_RUNS; i++) {
+        for (int i = 1; i <= N_RUNS; i++) {
             TimeUnit.SECONDS.sleep(BACKOFF);
             var actualSuccessCount = currentSuccessCount.get();
 
