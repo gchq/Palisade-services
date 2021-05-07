@@ -193,20 +193,20 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         for (int i = 1; i <= N_RUNS; i++) {
-            TimeUnit.SECONDS.sleep(BACKOFF);
             var actualErrorCount = currentErrorCount.get();
 
             // THEN - check an "Error-..." file has been created
             try {
-                LOGGER.info("i = {}", i);
                 assertThat(actualErrorCount)
                         .as("Check exactly 1 'Error' file has been created")
                         .isEqualTo(expectedErrorCount);
             } catch (AssertionError e) {
+                LOGGER.info("There was an assertion error on attempt {}", i);
                 if (i == N_RUNS) {
                     throw e;
                 }
             }
+            TimeUnit.SECONDS.sleep(BACKOFF);
         }
     }
 
@@ -224,7 +224,6 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         for (int i = 1; i <= N_RUNS; i++) {
-            TimeUnit.SECONDS.sleep(BACKOFF);
             var actualSuccessCount = currentSuccessCount.get();
 
             // Then check a "Success-..." file has been created
@@ -233,10 +232,12 @@ class KafkaContractTest {
                         .as("Check exactly 1 'Success' file has been created")
                         .isEqualTo(expectedSuccessCount);
             } catch (AssertionError e) {
+                LOGGER.info("There was an assertion error on attempt {}", i);
                 if (i == N_RUNS) {
                     throw e;
                 }
             }
+            TimeUnit.SECONDS.sleep(BACKOFF);
         }
     }
 
