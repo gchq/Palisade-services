@@ -23,6 +23,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import uk.gov.gchq.palisade.service.palisade.stream.PropertiesConfigurer;
 
@@ -61,6 +63,11 @@ public class KafkaTestConfiguration {
             new NewTopic("request", 1, (short) 1),
             new NewTopic("error", 1, (short) 1));
 
+    @Value("${testcontainers.kafka.image}")
+    private String fullImageName;
+    @Value("${testcontainers.kafka.default.image}")
+    private String defaultImageName;
+
     @Bean
     @ConditionalOnMissingBean
     static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
@@ -69,11 +76,19 @@ public class KafkaTestConfiguration {
 
     @Bean
     KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-        final KafkaContainer container = new KafkaContainer("5.5.1")
-                .withReuse(true)
-                .withStartupTimeout(Duration.ofMinutes(1))
-                .withStartupAttempts(3)
-                .withNetworkMode("host");
+        DockerImageName kafkaImageName;
+        try {
+            kafkaImageName = DockerImageName.parse(fullImageName)
+                .asCompatibleSubstituteFor(defaultImageName);
+            kafkaImageName.assertValid();
+        } catch (IllegalArgumentException ex) {
+            LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
+            kafkaImageName = DockerImageName.parse(defaultImageName);
+        }
+        final KafkaContainer container = new KafkaContainer(kafkaImageName)
+            .withReuse(true)
+            .withStartupTimeout(Duration.ofMinutes(1))
+            .withStartupAttempts(3);
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         container.start();

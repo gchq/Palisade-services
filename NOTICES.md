@@ -5,20 +5,14 @@ List of third-party dependencies grouped by their license type
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * akka-actor-testkit-typed ([com.typesafe.akka:akka-actor-testkit-typed_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.10](https://akka.io/))
-* akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
 * akka-http-jackson ([com.typesafe.akka:akka-http-jackson_2.13:10.2.1](https://akka.io))
 * akka-http ([com.typesafe.akka:akka-http_2.13:10.2.1](https://akka.io))
 * akka-slf4j ([com.typesafe.akka:akka-slf4j_2.13:2.6.10](https://akka.io/))
-* akka-slf4j ([com.typesafe.akka:akka-slf4j_2.13:2.6.8](https://akka.io/))
-* akka-stream-kafka-testkit ([com.typesafe.akka:akka-stream-kafka-testkit_2.13:2.0.4](https://doc.akka.io/docs/alpakka-kafka/current))
 * akka-stream-kafka-testkit ([com.typesafe.akka:akka-stream-kafka-testkit_2.13:2.1.0-M1](https://doc.akka.io/docs/alpakka-kafka/current))
-* akka-stream-kafka ([com.typesafe.akka:akka-stream-kafka_2.13:2.0.4](https://doc.akka.io/docs/alpakka-kafka/current))
 * akka-stream-kafka ([com.typesafe.akka:akka-stream-kafka_2.13:2.1.0-M1](https://doc.akka.io/docs/alpakka-kafka/current))
 * akka-stream-testkit ([com.typesafe.akka:akka-stream-testkit_2.13:2.6.10](https://akka.io/))
-* akka-stream-testkit ([com.typesafe.akka:akka-stream-testkit_2.13:2.6.8](https://akka.io/))
 * akka-stream-typed ([com.typesafe.akka:akka-stream-typed_2.13:2.6.10](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.10](https://akka.io/))
-* akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
 * Reactive Relational Database Connectivity - H2 ([io.r2dbc:r2dbc-h2:0.8.4.RELEASE](https://github.com/r2dbc/r2dbc-h2))
 * spring-boot-starter ([org.springframework.boot:spring-boot-starter:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter-actuator ([org.springframework.boot:spring-boot-starter-actuator:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
@@ -37,8 +31,8 @@ List of third-party dependencies grouped by their license type
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.0-b170127.1453](http://jaxb.java.net/jaxb-runtime-parent/jaxb-runtime))
 
 ### [MIT License](./licenses/mit_license.html):
-* Testcontainers :: Kafka ([org.testcontainers:kafka:1.14.3](https://testcontainers.org))
-* Testcontainers Core ([org.testcontainers:testcontainers:1.14.3](https://testcontainers.org))
+* Testcontainers :: Kafka ([org.testcontainers:kafka:1.15.3](https://testcontainers.org))
+* Testcontainers Core ([org.testcontainers:testcontainers:1.15.3](https://testcontainers.org))
 
 ### [Mozilla Public License 2.0 or Eclipse Public License 1.0](./licenses/mpl_2.0_or_epl_1.0.html):
 * H2 Database Engine ([com.h2database:h2:1.4.200](https://h2database.com))

@@ -95,7 +95,7 @@ import static uk.gov.gchq.palisade.service.user.stream.SerDesConfig.responseValu
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles({"caffeine", "akka-test", "pre-population"})
+@ActiveProfiles({"caffeine", "akka-test", "pre-population", "testcontainers"})
 class KafkaContractTest {
 
     @Autowired

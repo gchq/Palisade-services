@@ -85,7 +85,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         properties = "akka.discovery.config.services.kafka.from-config=false"
 )
 @Import({KafkaTestConfiguration.class})
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"dbtest", "akkatest", "testcontainers"})
 class KafkaContractTest {
 
     @Autowired

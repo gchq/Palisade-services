@@ -16,23 +16,41 @@
 
 package uk.gov.gchq.palisade.contract.attributemask.redis;
 
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import java.time.Duration;
 
 public class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisInitializer.class);
     private static final int REDIS_PORT = 6379;
 
-    static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
-            .withExposedPorts(REDIS_PORT)
-            .withReuse(true);
-
     @Override
-    public void initialize(@NotNull final ConfigurableApplicationContext context) {
-        context.getEnvironment().setActiveProfiles("redis", "akkatest");
+    public void initialize(@NonNull final ConfigurableApplicationContext context) {
+        final String fullImageName = context.getEnvironment().getRequiredProperty("testcontainers.redis.image");
+        final String defaultImageName = context.getEnvironment().getRequiredProperty("testcontainers.redis.default.image");
+
+        DockerImageName redisImageName;
+        try {
+            redisImageName = DockerImageName.parse(fullImageName)
+                    .asCompatibleSubstituteFor(defaultImageName);
+            redisImageName.assertValid();
+        } catch (IllegalArgumentException ex) {
+            LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
+            redisImageName = DockerImageName.parse(defaultImageName);
+        }
+        final GenericContainer<?> redis = new GenericContainer<>(redisImageName)
+                .withExposedPorts(REDIS_PORT)
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3);
+
         // Start container
         redis.start();
 
@@ -40,7 +58,7 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
         String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
         // Configure the testcontainer random port
         String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
-        RedisPersistenceContractTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
+        LOGGER.info("Starting Redis with {}", redisContainerPort);
         // Override the configuration at runtime
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
     }

@@ -87,7 +87,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(classes = {KafkaErrorContractTest.Config.class})
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"dbtest", "akkatest", "testcontainers"})
 class KafkaErrorContractTest {
 
     @Autowired
