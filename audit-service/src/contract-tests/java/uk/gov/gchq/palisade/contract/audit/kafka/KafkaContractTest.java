@@ -214,7 +214,7 @@ class KafkaContractTest {
 
         // Then check a "Success-..." file has been created
         var actualSuccessCount = currentSuccessCount.get();
-        tryAssertWithBackoff(() ->assertThat(actualSuccessCount)
+        tryAssertWithBackoff(() -> assertThat(actualSuccessCount)
                 .as("Check exactly 1 'Success' file has been created")
                 .isEqualTo(expectedSuccessCount));
     }
