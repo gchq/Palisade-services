@@ -137,6 +137,7 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
         verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
@@ -153,6 +154,7 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
         verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
@@ -173,6 +175,7 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
         verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any());
@@ -217,7 +220,7 @@ class KafkaContractTest {
                 .isEqualTo(expectedSuccessCount));
     }
 
-    private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
+    private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) {
         var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
@@ -228,6 +231,10 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
+    }
+
+    private void waitForService() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(2);
     }
 
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
