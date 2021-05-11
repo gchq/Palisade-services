@@ -42,8 +42,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * Common test data for all classes
- * This cements the expected JSON input and output, providing an external contract for the service
+ * Common test data for all classes.
+ * This cements the expected JSON input and output, providing an external contract for the service.
  */
 public class ContractTestData {
 

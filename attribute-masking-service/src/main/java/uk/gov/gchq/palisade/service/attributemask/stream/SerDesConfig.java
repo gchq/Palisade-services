@@ -32,10 +32,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * Static configuration for kafka key/value serialisers/deserialisers
- * - Each input has a pair of key/value deserialisers
- * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * Static configuration for kafka key/value serialisers/deserialisers:
+ * - Each input has a pair of key/value deserialisers;
+ * - Each output has a pair of key/value serialisers.
+ * In general, the keys are not used so the choice of serialiser is not important.
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -47,8 +47,8 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key serialiser for upstream messages coming in as input
-     * Used by the Rest Controller to insert requests onto the topic
+     * Kafka key serialiser for upstream messages coming in as input.
+     * Used by the Rest Controller to insert requests onto the topic.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -57,8 +57,8 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for upstream messages coming in as input
-     * Used by the Rest Controller to insert requests onto the topic
+     * Kafka value serialiser for upstream messages coming in as input.
+     * Used by the Rest Controller to insert requests onto the topic.
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingRequest)
      */
@@ -73,7 +73,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key deserialiser for upstream messages coming in as input
+     * Kafka key deserialiser for upstream messages coming in as input.
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
@@ -97,7 +97,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key serialiser for downstream messages going out as output
+     * Kafka key serialiser for downstream messages going out as output.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -106,7 +106,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as output
+     * Kafka value serialiser for downstream messages going out as output.
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
      */
@@ -121,7 +121,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as output
+     * Kafka value serialiser for downstream messages going out as output.
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
      */
@@ -130,7 +130,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key serialiser for downstream messages going out as errors
+     * Kafka key serialiser for downstream messages going out as errors.
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -139,7 +139,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as errors
+     * Kafka value serialiser for downstream messages going out as errors.
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
