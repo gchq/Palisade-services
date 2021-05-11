@@ -18,11 +18,18 @@ limitations under the License.
 
 # Palisade Attribute-Masking-Service
 
-The attribute-masking-service is the final transformation the palisade system applies to resources before they are returned.
-The service performs two functions:
-* Store the full details of the authorised request in a persistence store, to be later retrieved by the data-service
-* Mask the leafResource, removing any sensitive information
+## Flow of Control
 
+![Attribute-Masking Service Diagram](doc/attribute-masking-service.png)
+
+The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is sent, via Kafka, to the Topic-Offset Service and Filtered-Resource Service.
+This is an interim service on the Palisade stream pipeline that reads each messages sent from the Policy Service.
+It will take each of these messages, ascertain if it is a "start" or "end" marker for the set of records (has a token, but the message body is empty of content).
+If it is, no further processing is done.
+For messages that represent records, these are persisted as authorised requests.
+A version of the record message is then prepared with the restricted information redacted or removed which is then forwarded to the next services.
+Both types of messages (markers and records) are forwarded to both the Topic-Offset Service and the Filtered-Resource Service.
+If at any time during the processing of a message, an error occurs, an error message is produced and sent to the Audit Service.
 
 ## Message Model and Database Domain
 
@@ -35,38 +42,37 @@ The service performs two functions:
 | user                    | maskedLeafResource       | exception         | user
 | leafResource            |                          | serverMetadata    | leafResource
 | rules                   |                          |                   | rules
-(fields marked with * are acquired from headers metadata)
 
-The service takes in an `AttributeMaskingRequest` and a request `Token`.
-This request is persisted in a store as an `AuthorisedRequestEntity`.
-The `LeafResource` attached to the request is then masked, removing any excessive or sensitive metadata which a client may be prohibited from accessing.
-The resulting masked `LeafResource` is then attached to an `AttributeMaskingResponse` and outputted from the service.
+*token is in the message header's metadata
 
-### Future Enhancements
-The masking operation may in the future apply attribute-level `Rule`s using the `User` and `Context` for fine-grained control over client metadata access.
-
+The service reads a message in from the `rule` Kafka topic as an [AttributeMaskingRequest](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingRequest.java).
+This request is first persisted in a store as an [AuthorisedRequestEntity](src/main/java/uk/gov/gchq/palisade/service/attributemask/domain/AuthorisedRequestEntity.java).
+The `LeafResource` in the request holds metadata for the resources that are being requested.
+If any of this metadata is classed as restricted data for the request, the metadata is then redacted or removed producing a masked version of the `LeafResource`.
+The resulting masked `LeafResource` is then used to create an [AttributeMaskingResponse](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AttributeMaskingResponse.java) ready to be forwarded onto the `masked-resource` Kafka topic.
+Start and end markers are forwarded to the same topic.
+Like the masked resource messages, the start and end markers will have the token (`x-request-token`) in the header, but are different in that they will have an empty message body.
+Any error that may occur during the processing of a message is used to create an error message, [AuditErrorMessage](src/main/java/uk/gov/gchq/palisade/service/attributemask/model/AuditErrorMessage.java), and sent to the `error` Kafka topic where they are processed by the Audit Service.
 
 ## REST Interface
 
-The application exposes two REST endpoints:
-* `POST /api/mask`
+The application provides two service endpoints in the Controller [AttributeMaskingRestController](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java).
+These are to be used for testing and debugging only.
+They mimic the Kafka API to the service by processing POST requests into a messages that is put on the upstream topic for the service.
+These messages will then later be read by the service.
+
+Single message endpoint [AttributeMaskingRestController.maskAttributes](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java):
+`POST /api/mask`
   - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and body to kafka
-  
-* `POST /api/mask/multi`
+
+List of message endpoints [AttributeMaskingRestController.maskAttributesMulti](src/main/java/uk/gov/gchq/palisade/service/attributemask/web/AttributeMaskingRestController.java):
+`POST /api/mask/multi`
   - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
 
-
-## Kafka Interface
-
-The application takes messages from the upstream Kafka `rule` topic and reads them as `AttributeMaskingRequest`s.
-These are then processed into `AttributeMaskingResponse`s and written to the downstream Kafka `masked-resource` topic.
-The `x-request-token` is sent in the Kafka headers.
-In case of errors, the original request and thrown exception are both captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
-
-
 ## Example JSON Request
+
 ```
 curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
 '{
@@ -108,8 +114,8 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
 }'
 ```
 
+## Expected Kafka 'masked-resource' Message
 
-## Example JSON Response
 ```
 {
   "userId": "test-user-id",
@@ -137,7 +143,6 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
   }
 }
 ```
-
 
 ## License
 
