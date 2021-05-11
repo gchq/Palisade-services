@@ -42,7 +42,7 @@ public final class AuditableAttributeMaskingResponse {
     }
 
     /**
-     * Chain any errors from previous stream elements
+     * Chain any errors from previous stream elements.
      *
      * @param audit the previous audit or null
      * @return a new instance of this object
@@ -55,16 +55,16 @@ public final class AuditableAttributeMaskingResponse {
     }
 
     /**
-     * The static builder
+     * The static builder.
      */
     public static class Builder {
 
         /**
-         * Compose with {@code AttributeMaskingResponse}
+         * Compose with {@code AttributeMaskingResponse}.
          */
         public interface IAttributeMaskingResponse {
             /**
-             * Compose value
+             * Compose value.
              *
              * @param response value or null
              * @return value object
@@ -73,11 +73,11 @@ public final class AuditableAttributeMaskingResponse {
         }
 
         /**
-         * Compose with {@code AuditErrorMessage}
+         * Compose with {@code AuditErrorMessage}.
          */
         public interface IAuditErrorMessage {
             /**
-             * Compose value
+             * Compose value.
              *
              * @param audit value or null
              * @return value object
@@ -86,7 +86,7 @@ public final class AuditableAttributeMaskingResponse {
         }
 
         /**
-         * The creator function
+         * The creator function.
          *
          * @return the composed immutable object
          */

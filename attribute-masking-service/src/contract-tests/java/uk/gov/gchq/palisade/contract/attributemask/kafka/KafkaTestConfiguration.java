@@ -54,8 +54,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
- * Configuration providing the test beans to be injected into test classes that
- * require access to various objects to support access to Kafka/Akka
+ * Common test file used configure Kafka for use in the KafkaContractTests.
  */
 @Configuration
 @ConditionalOnProperty(
