@@ -53,7 +53,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests to verify the handling of exceptions and the population of audit objects during stream processing
+ * Tests to verify the handling of exceptions and the population of audit objects during stream processing.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = {ExecutorTestConfiguration.class, AttributeMaskingServiceErrorTest.Config.class})

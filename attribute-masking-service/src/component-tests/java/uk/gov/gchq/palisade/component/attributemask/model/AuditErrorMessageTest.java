@@ -46,9 +46,8 @@ class AuditErrorMessageTest {
     }
 
     /**
-     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original Object.
      *
      * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
