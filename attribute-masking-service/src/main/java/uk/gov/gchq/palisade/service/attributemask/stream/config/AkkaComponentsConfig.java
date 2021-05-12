@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
- * Configuration for all kafka connections for the application
+ * Configuration for all kafka connections for the application.
  */
 @Configuration
 public class AkkaComponentsConfig {

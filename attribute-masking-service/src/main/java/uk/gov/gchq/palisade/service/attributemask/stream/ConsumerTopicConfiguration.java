@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Configuration for Akka Kafka consumer
+ * Configuration for Akka Kafka consumer.
  */
 @ConfigurationProperties("akka.kafka.consumer")
 public class ConsumerTopicConfiguration {
