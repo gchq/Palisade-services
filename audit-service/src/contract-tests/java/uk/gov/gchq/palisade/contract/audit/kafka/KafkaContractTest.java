@@ -41,7 +41,7 @@ import org.testcontainers.containers.KafkaContainer;
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
-import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -98,7 +98,7 @@ class KafkaContractTest {
     AuditServiceConfigProperties auditServiceConfigProperties;
 
     @SpyBean
-    AuditServiceAsyncProxy auditService;
+    AuditService auditService;
 
     private Function<String, Integer> fileCount;
 
