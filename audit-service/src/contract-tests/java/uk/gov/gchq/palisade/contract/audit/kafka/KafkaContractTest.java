@@ -41,7 +41,7 @@ import org.testcontainers.containers.KafkaContainer;
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
-import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_ERROR_MESSAGE_NODE_FACTORY;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_SUCCESS_RECORD_NODE_FACTORY;
@@ -98,7 +98,7 @@ class KafkaContractTest {
     AuditServiceConfigProperties auditServiceConfigProperties;
 
     @SpyBean
-    AuditServiceAsyncProxy auditService;
+    AuditService auditService;
 
     private Function<String, Integer> fileCount;
 
@@ -139,7 +139,8 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -155,7 +156,8 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -175,7 +177,8 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(2))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -217,7 +220,7 @@ class KafkaContractTest {
                 .isEqualTo(expectedSuccessCount));
     }
 
-    private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) throws InterruptedException {
+    private void runStreamOf(final Stream<ProducerRecord<String, JsonNode>> requests) {
         var bootstrapServers = kafkaContainer.getBootstrapServers();
 
         // When - we write to the input
