@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Library('jenkinsfile-lib@bug/maven-httpd-bind-addr-in-use')_
+@Library('jenkinsfile-lib')_
 
 timestamps {
     services()
