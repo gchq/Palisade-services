@@ -175,10 +175,9 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        waitForService();
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any()));
     }
 
     @Test
