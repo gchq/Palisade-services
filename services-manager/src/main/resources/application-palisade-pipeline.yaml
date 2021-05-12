@@ -1,0 +1,74 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# The manager creates a number of commands to execute for each service in manager.services
+# All fields are *technically* optional but the jar is required to actually do anything
+
+# Extract the project version (x.y.z-REVISION etc.)
+app:
+  version: '@project.version@'
+
+manager:
+  schedule:
+    - palisade-task
+
+  tasks:
+    palisade-task:
+      - attribute-masking-service
+      - audit-service
+      - data-service
+      - filtered-resource-service
+      - palisade-service
+      - policy-service
+      - resource-service
+      - topic-offset-service
+      - user-service
+
+  services:
+    attribute-masking-service:
+      jar: jvm-jars/attribute-masking-service-${app.version}-exec.jar
+      log: attribute-masking-service.log
+
+    audit-service:
+      jar: jvm-jars/audit-service-${app.version}-exec.jar
+      log: audit-service.log
+
+    data-service:
+      jar: jvm-jars/data-service-${app.version}-exec.jar
+      log: data-service.log
+
+    filtered-resource-service:
+      jar: jvm-jars/filtered-resource-service-${app.version}-exec.jar
+      log: filtered-resource-service.log
+
+    palisade-service:
+      jar: jvm-jars/palisade-service-${app.version}-exec.jar
+      log: palisade-service.log
+
+    policy-service:
+      jar: jvm-jars/policy-service-${app.version}-exec.jar
+      log: policy-service.log
+
+    resource-service:
+      jar: jvm-jars/resource-service-${app.version}-exec.jar
+      log: resource-service.log
+
+    topic-offset-service:
+      jar: jvm-jars/topic-offset-service-${app.version}-exec.jar
+      log: topic-offset-service.log
+
+    user-service:
+      jar: jvm-jars/user-service-${app.version}-exec.jar
+      log: user-service.log

@@ -1,0 +1,97 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+spring:
+  profiles:
+    include:
+      - static
+      - example-libs-pipeline-config
+
+# Spring profile dependency resolution forces this two-profile setup
+# `example` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
+# So, include `example-libs-config` along with dependencies and force correct override order to happen there
+---
+
+spring:
+  profiles: example-libs-pipeline-config
+
+# Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+# example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
+# While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
+example:
+  version: '@examples.app.version@'
+  libs: &libraries
+    - jvm-jars/example-library-${example.version}-jar-with-dependencies.jar
+  service-profiles: &profiles
+    - static
+    - example
+
+manager:
+  mode: run
+
+  services:
+    attribute-masking-service:
+      paths: *libraries
+      profiles: *profiles
+      log: attribute-masking-service-example.log
+      err: attribute-masking-service-example.err
+
+    audit-service:
+      paths: *libraries
+      profiles: *profiles
+      log: audit-service-example.log
+      err: audit-service-example.err
+
+    data-service:
+      paths: *libraries
+      profiles: *profiles
+      log: data-service-example.log
+      err: data-service-example.err
+
+    filtered-resource-service:
+      paths: *libraries
+      profiles: *profiles
+      log: filtered-resource-service-example.log
+      err: filtered-resource-service-example.err
+
+    palisade-service:
+      paths: *libraries
+      profiles: *profiles
+      log: palisade-service-example.log
+      err: palisade-service-example.err
+
+    policy-service:
+      paths: *libraries
+      profiles: *profiles
+      log: policy-service-example.log
+      err: policy-service-example.err
+
+    resource-service:
+      paths: *libraries
+      profiles: *profiles
+      log: resource-service-example.log
+      err: resource-service-example.err
+
+    topic-offset-service:
+      paths: *libraries
+      profiles: *profiles
+      log: topic-offset-service-example.log
+      err: topic-offset-service-example.err
+
+    user-service:
+      paths: *libraries
+      profiles: *profiles
+      log: user-service-example.log
+      err: user-service-example.err
