@@ -119,8 +119,7 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceIdUri))
                 .connectionDetail(simpleConnectionDetail)
                 .type(type)
-                .serialisedFormat(serialisedFormat)
-                .attributes(attributes);
+                .serialisedFormat(serialisedFormat);
         return new SimpleImmutableEntry<>(rootResource, leafResource);
     }
 
