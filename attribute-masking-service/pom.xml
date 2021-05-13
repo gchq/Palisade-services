@@ -28,6 +28,10 @@
     <!--  *********** Artifact ID ***********    -->
     <artifactId>attribute-masking-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/attribute-masking-service</url>
+    <name>GCHQ Palisade - Attribute-Masking Service</name>
+    <description>
+        The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is sent, via Kafka, to the Topic-Offset Service and Filtered-Resource Service.
+    </description>
     <!--  *********** Artifact ID ***********    -->
 
     <properties>
@@ -187,6 +191,76 @@
                 <dockerfile.base.image>openjdk@sha256:c1c4bcec5505761f98034d17d0fbfd00b44b79cb472def03d9f1e231f150dc6d</dockerfile.base.image>
                 <dockerfile.base.tag>jdk</dockerfile.base.tag>
             </properties>
+        </profile>
+        <profile>
+            <id>release</id>
+            <properties>
+                <!-- Release configuration -->
+                <releases.repository.id>ossrh</releases.repository.id>
+                <releases.repository.name>Sonatype Nexus release repository</releases.repository.name>
+                <releases.repository.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</releases.repository.url>
+                <snapshots.repository.id>ossrh</snapshots.repository.id>
+                <snapshots.repository.name>Sonatype Nexus snapshot repository</snapshots.repository.name>
+                <snapshots.repository.url>https://oss.sonatype.org/content/repositories/snapshots</snapshots.repository.url>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>${releases.repository.id}</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <keepStagingRepositoryOnCloseRuleFailure>true
+                            </keepStagingRepositoryOnCloseRuleFailure>
+                            <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${source.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${javadoc.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${gpg.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
