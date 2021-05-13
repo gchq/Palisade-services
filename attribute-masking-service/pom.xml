@@ -408,7 +408,7 @@
                 <version>1.4.10</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>post-integration-test</phase>
                         <id>cache</id>
                         <goals>
                             <goal>build</goal>
@@ -418,7 +418,6 @@
                         <phase>deploy</phase>
                         <id>ar</id>
                         <goals>
-                            <goal>build</goal>
                             <goal>push</goal>
                         </goals>
                     </execution>
