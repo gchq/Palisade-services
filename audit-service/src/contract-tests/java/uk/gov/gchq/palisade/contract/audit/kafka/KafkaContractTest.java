@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_ERROR_MESSAGE_NODE_FACTORY;
 import static uk.gov.gchq.palisade.contract.audit.ContractTestData.BAD_SUCCESS_RECORD_NODE_FACTORY;
@@ -137,10 +137,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -154,10 +154,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -177,7 +177,8 @@ class KafkaContractTest {
         runStreamOf(requests);
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        tryAssertWithBackoff(() -> verify(auditService, timeout(MOCKITO_TIMEOUT_MILLIS).times(2)).audit(anyString(), any()));
+        tryAssertWithBackoff(() -> verify(auditService, times(2))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -230,10 +231,6 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
-    }
-
-    private void waitForService() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(2);
     }
 
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
