@@ -37,6 +37,10 @@
     <!--  *********** Artifact ID ***********    -->
     <artifactId>data-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
+    <name>GCHQ Palisade - Data Service</name>
+    <description>
+        The Data Service accepts client requests to retrieve, read, redact and return resources that have been registered through the palisade system.
+    </description>
     <!--  *********** Artifact ID ***********    -->
 
     <scm>
@@ -213,6 +217,81 @@
                 <dockerfile.base.tag>jdk</dockerfile.base.tag>
             </properties>
         </profile>
+        <profile>
+            <id>release</id>
+            <properties>
+                <!-- Release configuration -->
+                <releases.repository.id>ossrh</releases.repository.id>
+                <releases.repository.name>Sonatype Nexus release repository</releases.repository.name>
+                <releases.repository.url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</releases.repository.url>
+                <snapshots.repository.id>ossrh</snapshots.repository.id>
+                <snapshots.repository.name>Sonatype Nexus snapshot repository</snapshots.repository.name>
+                <snapshots.repository.url>https://oss.sonatype.org/content/repositories/snapshots</snapshots.repository.url>
+                <!-- Build configuration for release -->
+                <image.repository>gchq/palisade-</image.repository>
+                <revision>RELEASE</revision>
+                <maven.test.skip>true</maven.test.skip>
+                <dockerfile.push.skip>true</dockerfile.push.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>${releases.repository.id}</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <keepStagingRepositoryOnCloseRuleFailure>true
+                            </keepStagingRepositoryOnCloseRuleFailure>
+                            <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${source.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${javadoc.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${gpg.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -343,7 +422,7 @@
                 <version>1.4.10</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>post-integration-test</phase>
                         <id>cache</id>
                         <goals>
                             <goal>build</goal>
@@ -353,12 +432,10 @@
                         <phase>deploy</phase>
                         <id>ar</id>
                         <goals>
-                            <goal>build</goal>
                             <goal>push</goal>
                         </goals>
                     </execution>
                 </executions>
-
                 <configuration>
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>

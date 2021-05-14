@@ -29,6 +29,10 @@
     <!--  *********** Artifact ID ***********    -->
     <artifactId>create-kafka-queues</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/create-kafka-queues</url>
+    <name>GCHQ Palisade - Create Kafka Queues</name>
+    <description>
+        A simple container to create some topics on kafka on helm install.
+    </description>
     <!--  *********** Artifact ID ***********    -->
 
     <properties>
