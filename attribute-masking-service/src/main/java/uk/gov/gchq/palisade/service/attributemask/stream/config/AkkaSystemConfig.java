@@ -34,7 +34,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 import java.util.Map.Entry;
 
 /**
- * Convert Spring YAML configuration to Akka HOCON configuration and provide core Akka beans
+ * Convert Spring YAML configuration to Akka HOCON configuration and provide core Akka beans.
  */
 @Configuration
 @ConditionalOnProperty(

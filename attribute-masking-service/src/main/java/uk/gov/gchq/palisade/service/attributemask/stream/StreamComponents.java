@@ -38,8 +38,8 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Default boilerplate templates for creating Akka {@link Sink}s and {@link Source}s
- * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
+ * Default boilerplate templates for creating Akka {@link Sink}s and {@link Source}s.
+ * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...).
  *
  * @param <K> generic Key type
  * @param <V> generic Value type
@@ -47,7 +47,7 @@ import java.util.concurrent.CompletionStage;
 public class StreamComponents<K, V> {
 
     /**
-     * Construct an Akka Kafka ProducerSettings from the given config and serialisers
+     * Construct an Akka Kafka ProducerSettings from the given config and serialisers.
      *
      * @param system          the application's actor system to use to load config values
      * @param keySerializer   the stream's key serialiser
@@ -61,7 +61,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct an Akka Kafka ConsumerSettings from the given config and deserialisers
+     * Construct an Akka Kafka ConsumerSettings from the given config and deserialisers.
      *
      * @param system            the application's actor system to use to load config values
      * @param keyDeserializer   the stream's key deserialiser
@@ -76,7 +76,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct an Akka Kafka CommitterSettings from the given config
+     * Construct an Akka Kafka CommitterSettings from the given config.
      *
      * @param system the application's actor system to use to load config values
      * @return a {@link CommitterSettings} object for controlling Kafka commits
@@ -87,7 +87,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct a Kafka Committable Sink for Akka streams
+     * Construct a Kafka Committable Sink for Akka streams.
      *
      * @param producerSettings  the producer settings for kafka
      * @param committerSettings the committer settings for kafka
@@ -100,7 +100,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct a Kafka Plain Sink for Akka streams (no control over Kafka commits)
+     * Construct a Kafka Plain Sink for Akka streams (no control over Kafka commits).
      *
      * @param producerSettings the producer settings for kafka
      * @return a Kafka-connected Sink for Akka streams
@@ -111,7 +111,7 @@ public class StreamComponents<K, V> {
     }
 
     /**
-     * Construct a Kafka Committable Source for Akka streams (no need for committer settings)
+     * Construct a Kafka Committable Source for Akka streams (no need for committer settings).
      *
      * @param consumerSettings the committer settings for kafka
      * @param subscription     the topic name (and partitions) to subscribe to

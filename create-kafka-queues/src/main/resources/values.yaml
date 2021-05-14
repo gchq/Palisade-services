@@ -51,11 +51,12 @@ waitForServices:
   tpl: "palisade.zookeeper.fullname"
   port: 2181
 
-
 image:
   name: @artifactId@
+  base: @dockerfile.base.tag@
   tag: @revision@-@git.commit.id.abbrev@
   pullPolicy: IfNotPresent
+  codeRelease: @project.parent.version@
 
 resources:
   limits:

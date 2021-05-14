@@ -26,15 +26,14 @@ import javax.persistence.AttributeConverter;
 import java.util.Optional;
 
 /**
- * Convert between Java {@link Context} objects and serialised {@link String}s stored in a database
- * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s
+ * Convert between Java {@link Context} objects and serialised {@link String}s stored in a database.
+ * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s.
  */
 public class ContextConverter implements AttributeConverter<Context, String> {
     private final ObjectMapper objectMapper;
 
     /**
-     * Default constructor specifying the object mapper for (de)serializing objects
-     *
+     * Default constructor specifying the object mapper for (de)serializing objects.
      * @param objectMapper the object mapper for reading and writing columns and objects
      */
     public ContextConverter(final ObjectMapper objectMapper) {

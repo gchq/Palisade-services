@@ -73,7 +73,7 @@ public class RedisConfiguration {
     }
 
     /**
-     * Get the time-to-live in seconds for a given keyspace name
+     * Get the time-to-live in seconds for a given keyspace name.
      *
      * @param keyspace the name of the redis keyspace
      * @return the configured time-to-live value for that keyspace in seconds
