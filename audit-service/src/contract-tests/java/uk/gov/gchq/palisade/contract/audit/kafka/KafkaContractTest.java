@@ -137,10 +137,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        tryAssertWithBackoff(() -> verify(auditService, times(3))
-                .audit(anyString(), any()));
+        verify(auditService, times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -154,10 +154,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        tryAssertWithBackoff(() -> verify(auditService, times(3))
-                .audit(anyString(), any()));
+        verify(auditService, times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -175,10 +175,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        waitForService();
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        tryAssertWithBackoff(() -> verify(auditService, times(2))
-                .audit(anyString(), any()));
+        verify(auditService, times(2)).audit(anyString(), any());
     }
 
     @Test
@@ -233,10 +233,13 @@ class KafkaContractTest {
                 .toCompletableFuture().join();
     }
 
+    private void waitForService() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(BACKOFF);
+    }
+
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
 
         for (int i = 1; i <= N_RUNS; i++) {
-            TimeUnit.SECONDS.sleep(BACKOFF);
             try {
                 runnable.run();
             } catch (AssertionError e) {
@@ -245,6 +248,7 @@ class KafkaContractTest {
                     throw e;
                 }
             }
+            TimeUnit.SECONDS.sleep(BACKOFF);
         }
     }
 }
