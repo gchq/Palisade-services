@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
