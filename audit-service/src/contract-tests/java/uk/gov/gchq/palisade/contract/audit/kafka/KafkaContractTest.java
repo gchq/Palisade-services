@@ -82,7 +82,7 @@ class KafkaContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final int MOCKITO_TIMEOUT_MILLIS = 10_000;
     private static final int N_RUNS = 5;
-    private static final int BACKOFF = 2;
+    private static final int BACKOFF = 3;
 
     @Autowired
     Serializer<String> keySerialiser;
