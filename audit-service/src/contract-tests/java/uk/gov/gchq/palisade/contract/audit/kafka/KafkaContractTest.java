@@ -234,9 +234,9 @@ class KafkaContractTest {
     }
 
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
-        TimeUnit.SECONDS.sleep(BACKOFF);
 
         for (int i = 1; i <= N_RUNS; i++) {
+            TimeUnit.SECONDS.sleep(BACKOFF);
             try {
                 runnable.run();
             } catch (AssertionError e) {
@@ -245,7 +245,6 @@ class KafkaContractTest {
                     throw e;
                 }
             }
-            TimeUnit.SECONDS.sleep(BACKOFF);
         }
     }
 }
