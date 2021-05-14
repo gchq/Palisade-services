@@ -153,8 +153,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        LOGGER.info("Wait for the service to complete");
         waitForService();
 
+        LOGGER.info("Verify the audit method for an Audit Service implementation has been invoked");
         // THEN - check the audit service has invoked the audit method 3 times
         verify(auditService, times(3)).audit(anyString(), any());
     }
@@ -174,10 +176,8 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        LOGGER.info("Wait for the service to complete");
         waitForService();
 
-        LOGGER.info("Verify the audit method for an Audit Service implementation has been invoked");
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
         verify(auditService, times(2)).audit(anyString(), any());
     }
