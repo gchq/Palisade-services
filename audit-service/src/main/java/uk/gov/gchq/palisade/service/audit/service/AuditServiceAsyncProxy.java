@@ -54,7 +54,7 @@ public class AuditServiceAsyncProxy {
      */
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {
         LOGGER.info("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
-        LOGGER.info("Service implementations: {}", services.keySet().size());
+        LOGGER.info("Total service implementations: {}", services.keySet().size());
         return CompletableFuture.supplyAsync(() -> services.values().stream()
                 .map((final AuditService auditService) -> {
                     if (message instanceof AuditSuccessMessage) {
