@@ -99,7 +99,7 @@ public class LoggerAuditService implements AuditService {
 
     @Override
     public Boolean audit(final String token, final AuditMessage message) {
-        LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
+        LOGGER.info("LoggerAuditService received an audit request for token '{}'", token);
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
             if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {

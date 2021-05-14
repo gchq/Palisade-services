@@ -131,7 +131,7 @@ public class StroomAuditService implements AuditService {
 
     private static void auditSuccessMessage(final String token, final DefaultEventLoggingService loggingService, final AuditSuccessMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
-        LOGGER.debug("auditErrorMessage called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, message);
+        LOGGER.info("auditSuccessMessage called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, message);
         LOGGER.debug(ERROR_MESSAGE_FROM, message.getServiceName());
         // Authorisation successful
         Event successEvent = generateNewGenericEvent(token, loggingService, message);
@@ -175,7 +175,7 @@ public class StroomAuditService implements AuditService {
 
     private static void auditErrorMessage(final String token, final DefaultEventLoggingService loggingService, final AuditErrorMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
-        LOGGER.debug("auditErrorMessage called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, message);
+        LOGGER.info("auditErrorMessage called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, message);
         LOGGER.debug(ERROR_MESSAGE_FROM, message.getServiceName());
         // Authorisation exception
         Event exceptionEvent = generateNewGenericEvent(token, loggingService, message);
