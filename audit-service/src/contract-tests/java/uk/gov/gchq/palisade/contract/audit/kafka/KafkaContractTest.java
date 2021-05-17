@@ -81,7 +81,7 @@ class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final int N_RUNS = 5;
-    private static final int BACKOFF = 5;
+    private static final int BACKOFF = 2;
 
     @Autowired
     Serializer<String> keySerialiser;
@@ -137,10 +137,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -154,13 +154,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        LOGGER.info("Audit Service Config Properties: {}", auditServiceConfigProperties.getImplementations());
-        LOGGER.info("Wait for the service to complete");
-        waitForService();
 
-        LOGGER.info("Verify the audit method for an Audit Service implementation has been invoked");
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, times(3)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(3))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -178,10 +175,10 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
-        waitForService();
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        verify(auditService, times(2)).audit(anyString(), any());
+        tryAssertWithBackoff(() -> verify(auditService, times(2))
+                .audit(anyString(), any()));
     }
 
     @Test
@@ -238,15 +235,13 @@ class KafkaContractTest {
                 .toCompletableFuture().join();
     }
 
-    private void waitForService() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(BACKOFF);
-    }
-
     private void tryAssertWithBackoff(final Runnable runnable) throws InterruptedException {
 
         for (int i = 1; i <= N_RUNS; i++) {
             try {
+                LOGGER.info("Assertion attempt {}", i);
                 runnable.run();
+                break;
             } catch (AssertionError e) {
                 LOGGER.info("There was an assertion error on attempt {}", i);
                 if (i == N_RUNS) {
