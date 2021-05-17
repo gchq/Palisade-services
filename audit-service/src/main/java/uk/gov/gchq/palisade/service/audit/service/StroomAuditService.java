@@ -108,7 +108,7 @@ public class StroomAuditService implements AuditService {
     }
 
     private static Event generateNewGenericEvent(final String token, final DefaultEventLoggingService loggingService, final AuditMessage request) {
-        LOGGER.info("generateNewGenericEvent called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, request);
+        LOGGER.debug("generateNewGenericEvent called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, request);
         Event event = loggingService.createEvent();
         // set the event time
         Event.EventTime eventTime = EventLoggingUtil.createEventTime(Date.valueOf(request.getTimestamp()));
@@ -125,7 +125,7 @@ public class StroomAuditService implements AuditService {
         eventSource.setGenerator(EVENT_GENERATOR);
         eventSource.setDevice(DeviceUtil.createDevice(request.getServerHostname(), request.getServerIP()));
         event.setEventSource(eventSource);
-        LOGGER.info("generateNewGenericEvent returned {}", event);
+        LOGGER.debug("generateNewGenericEvent returned {}", event);
         return event;
     }
 
@@ -176,56 +176,38 @@ public class StroomAuditService implements AuditService {
     private static void auditErrorMessage(final String token, final DefaultEventLoggingService loggingService, final AuditErrorMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
         LOGGER.debug("auditErrorMessage called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, message);
-        LOGGER.info(ERROR_MESSAGE_FROM, message.getServiceName());
+        LOGGER.debug(ERROR_MESSAGE_FROM, message.getServiceName());
         // Authorisation exception
         Event exceptionEvent = generateNewGenericEvent(token, loggingService, message);
-        LOGGER.info("Created generic Event values");
         Event.EventDetail exceptionEventDetail = new Event.EventDetail();
         exceptionEvent.setEventDetail(exceptionEventDetail);
-        LOGGER.info("Created and set Event.EventDetail value");
         // Log the user
         addUserToEvent(exceptionEvent, message.getUserId());
-        LOGGER.info("User {} added to the Event", message.getUserId());
         // Log the purpose that was supplied with the request
         try {
             addPurposeToEvent(exceptionEvent, message.getContext());
-            LOGGER.info("Purpose {} added to the Event", message.getContext());
         } catch (JsonProcessingException ex) {
             LOGGER.error(JSON_SERIALISING_ERROR, "context", ex.getMessage());
         }
         Event.EventDetail.Authorise authorise = new Event.EventDetail.Authorise();
-        LOGGER.info("Event.EventDetail.Authorise created");
         // Log the resource
         event.logging.Object stroomResource = new event.logging.Object();
-        LOGGER.info("event.logging.Object created");
         stroomResource.setId(message.getResourceId());
-        LOGGER.info("Object ID value set");
         authorise.getObjects().add(stroomResource);
-        LOGGER.info("Object added to Authorise");
         // Log the exception
         Outcome outcome = createOutcome(false);
-        LOGGER.info("Outcome created and set to false");
         exceptionEventDetail.setTypeId(message.getServiceName());
-        LOGGER.info("Added service name to exception event detail");
         exceptionEventDetail.setDescription(message.getErrorNode().get("stackTrace").get(0).get("className").textValue());
-        LOGGER.info("Description set on exception event detail");
         outcome.setDescription(message.getErrorNode().get("message").textValue());
-        LOGGER.info("Description set on outcome");
         // Log the attributes
         Data data = new Data();
         data.setName("attributes");
         data.setValue(message.getAttributesNode().asText());
-        LOGGER.info("Data created and attributes added");
         outcome.getData().add(data);
-        LOGGER.info("Data added to outcome");
         authorise.setOutcome(outcome);
-        LOGGER.info("Outcome set on Authorise");
         authorise.setAction(Authorisation.REQUEST);
-        LOGGER.info("Action set on Authorise");
         exceptionEventDetail.setAuthorise(authorise);
-        LOGGER.info("Authorise set on exception event detail");
         // Send to Stroom
-        LOGGER.info("Exception event: {}", exceptionEvent);
         loggingService.log(exceptionEvent);
         LOGGER.debug("Error Message authorisationEvent is {}", exceptionEvent);
     }

@@ -53,14 +53,12 @@ public class AuditServiceAsyncProxy {
      * @return a {@link CompletableFuture} containing a {@link List} of {@link Boolean} values.
      */
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {
-        LOGGER.info("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
-        LOGGER.info("Audit service implementations: {}", services.keySet());
+        LOGGER.debug("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
         return CompletableFuture.supplyAsync(() -> services.values().stream()
                 .map((final AuditService auditService) -> {
                     LOGGER.info("Logging message in the {}", auditService.getClass().getSimpleName());
                     if (message instanceof AuditSuccessMessage) {
                         AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-                        LOGGER.info("The {} will be logged in the {}", message.getClass().getSimpleName(), auditService.getClass().getSimpleName());
                         if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                             auditService.audit(token, successMessage);
                             return true;
@@ -69,7 +67,6 @@ public class AuditServiceAsyncProxy {
                                 message.getServiceName());
                         return false;
                     } else if (message instanceof AuditErrorMessage) {
-                        LOGGER.info("The {} will be logged in the {}", message.getClass().getSimpleName(), auditService.getClass().getSimpleName());
                         AuditErrorMessage errorMessage = (AuditErrorMessage) message;
                         auditService.audit(token, errorMessage);
                         return true;
