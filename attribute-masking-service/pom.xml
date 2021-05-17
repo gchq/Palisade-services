@@ -222,6 +222,7 @@
                 <revision>RELEASE</revision>
                 <maven.test.skip>true</maven.test.skip>
                 <dockerfile.push.skip>true</dockerfile.push.skip>
+                <image.tag>${project.version}</image.tag>
             </properties>
             <build>
                 <plugins>
