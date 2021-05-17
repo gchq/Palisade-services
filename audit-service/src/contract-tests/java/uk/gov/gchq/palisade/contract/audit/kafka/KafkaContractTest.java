@@ -41,7 +41,9 @@ import org.testcontainers.containers.KafkaContainer;
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
+import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
+import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -97,7 +99,12 @@ class KafkaContractTest {
     AuditServiceConfigProperties auditServiceConfigProperties;
 
     @SpyBean
-    AuditService auditService;
+    SimpleAuditService simpleAuditService;
+    @SpyBean
+    LoggerAuditService loggerAuditService;
+    @SpyBean
+    StroomAuditService stroomAuditService;
+
 
     private Function<String, Integer> fileCount;
 
@@ -139,7 +146,9 @@ class KafkaContractTest {
         waitForService();
 
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, times(3)).audit(anyString(), any());
+        verify(simpleAuditService, times(3)).audit(anyString(), any());
+        verify(loggerAuditService, times(3)).audit(anyString(), any());
+        verify(stroomAuditService, times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -153,12 +162,15 @@ class KafkaContractTest {
 
         // WHEN - we write to the input
         runStreamOf(requests);
+        LOGGER.info("Audit Service Config Properties: {}", auditServiceConfigProperties.getImplementations());
         LOGGER.info("Wait for the service to complete");
         waitForService();
 
         LOGGER.info("Verify the audit method for an Audit Service implementation has been invoked");
         // THEN - check the audit service has invoked the audit method 3 times
-        verify(auditService, times(3)).audit(anyString(), any());
+        verify(simpleAuditService, times(3)).audit(anyString(), any());
+        verify(loggerAuditService, times(3)).audit(anyString(), any());
+        verify(stroomAuditService, times(3)).audit(anyString(), any());
     }
 
     @Test
@@ -179,7 +191,9 @@ class KafkaContractTest {
         waitForService();
 
         // THEN - check the audit service has invoked the audit method for the 2 `Good` requests
-        verify(auditService, times(2)).audit(anyString(), any());
+        verify(simpleAuditService, times(2)).audit(anyString(), any());
+        verify(loggerAuditService, times(2)).audit(anyString(), any());
+        verify(stroomAuditService, times(2)).audit(anyString(), any());
     }
 
     @Test
