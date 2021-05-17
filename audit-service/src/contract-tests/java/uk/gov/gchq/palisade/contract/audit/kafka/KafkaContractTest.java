@@ -128,6 +128,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testErrorRequestSet() throws Exception {
+        LOGGER.info("Testing AuditErrorMessage messages");
 
         // GIVEN
         // Add some messages on the error topic
@@ -146,6 +147,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testGoodSuccessRequestSet() throws Exception {
+        LOGGER.info("Testing AuditSuccessMessage messages");
 
         // GIVEN
         // Add some messages on the success topic
@@ -166,6 +168,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testGoodAndBadSuccessRequestSet() throws Exception {
+        LOGGER.info("Testing Good and Bad AuditSuccessMessage messages");
 
         // GIVEN
         // Add 2 `Good` and 2 `Bad` success messages to the success topic
@@ -187,6 +190,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testFailedErrorDeserialisation() throws Exception {
+        LOGGER.info("Testing failed serialisation for AuditErrorMessage messages");
 
         // GIVEN
         // Add a message to the 'error' topic
@@ -207,6 +211,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testFailedSuccessDeserialisation() throws Exception {
+        LOGGER.info("Testing failed serialisation for AuditSuccessMessage messages");
 
         // GIVEN
         // Add a message to the 'success' topic
