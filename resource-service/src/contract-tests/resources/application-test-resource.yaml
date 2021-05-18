@@ -15,7 +15,7 @@
 
 # Not interpreted by any java code, simply used by reference in the population.resources section
 default:
-  rootId: /test/resourceId
+  rootId: file:/test/resourceId
   connectionDetail: data-service
   type: type
   format: txt

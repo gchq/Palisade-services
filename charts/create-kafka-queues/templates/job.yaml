@@ -38,7 +38,7 @@ spec:
       restartPolicy: Never
       initContainers:
       - name: init-wait-for-services
-        image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
+        image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.base}}-{{.Values.image.tag}}"
         command: ["/bin/bash", "/bin/wait-for-services.sh"]
         args:
         {{- range $index, $service := .Values.waitForServices }}

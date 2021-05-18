@@ -92,6 +92,11 @@
         <dependency>
             <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-loader</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
