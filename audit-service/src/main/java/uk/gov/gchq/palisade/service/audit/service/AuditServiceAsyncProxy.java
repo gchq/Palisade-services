@@ -56,6 +56,7 @@ public class AuditServiceAsyncProxy {
         LOGGER.debug("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
         return CompletableFuture.supplyAsync(() -> services.values().stream()
                 .map((final AuditService auditService) -> {
+                    LOGGER.info("Logging message in the {}", auditService.getClass().getSimpleName());
                     if (message instanceof AuditSuccessMessage) {
                         AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
                         if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
