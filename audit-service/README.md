@@ -18,11 +18,10 @@ limitations under the License.
 
 # Audit Service
 
-The Audit Service can have multiple implementations, configured in the [application.yaml](src/main/resources/application.yaml), 
-but simply, all implementations receive, and log Audit Messages from the other Palisade services
+The Audit Service can have multiple implementations, configured in the [application.yaml](src/main/resources/application.yaml), but simply, all implementations receive, and log Audit Messages from the other Palisade services
 
-The service accepts incoming messages on the `error` and `success` Kafka topics. These messages contain information about the original request and, depending on the message type, will contain either of the following:
-
+The service accepts incoming messages on the `error` and `success` Kafka topics.
+These messages contain information about the original request and, depending on the message type, will contain either of the following:
 1. In the case of an error message, all the details of the error. 
 1. In the case of a success message, the id value of the returned resource.
 
@@ -60,7 +59,7 @@ See audit-service/doc/audit-service-flow.drawio for the source of this diagram
 | attributes          | attributes        |
 | leafResourceId      | error             |
 
-*The token value come from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
+*The token value comes from the headers of the Kafka message that the service receives. This links the audit message to the original request that was made.
 
 If an error has occurred while Palisade is processing a client request then an AuditErrorMessage will be added to the `error` Kafka topic by the service that encountered the issue. 
 This type of message can be sent from any of the Palisade services.

@@ -31,7 +31,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties = {"audit.implementations.simple", "audit.implementations.stroom", "audit.implementations.logger"})
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 class ApplicationConfigurationTest {
 
