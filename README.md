@@ -16,9 +16,43 @@ limitations under the License.
 
 # <img src="logos/logo.svg" width="180">
 
-## Scalable Data Access Policy Management and Enforcement
+### A Tool for Complex and Scalable Data Access Policy Enforcement
 
-### Project Build
+## Overview
+
+From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
+This reference can then be used to view the data after it has been retrieved and possibly redacted based on the context of the query and the permissions for the user making the request.
+Under the hood, the request involves sending a message that is processed sequentially by a set of the micro-services starting first with Palisade Service.
+This message is then forwarded onto each of services in the sequence with each modifying the message towards the end goal of producing resources ready to be viewed to the client.
+This initial sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
+In the subsequent request to the Data Service, the Filtered-Resource is requested to then proceed with passing this data to the client.
+The following diagram shows in a high level the services and their relative relationships with each other.
+
+For a more detailed description of the services, and their related workflow see  
+[Appendix I Palisade Flow Diagram](#appendix-i-palisade-flow-diagram) and for a more detailed technical description of each of the services, select the related links below.
+
+
+
+
+
+![Service Sequence diagram ](doc/services.png)
+
+[Palisade Service](palisade-service/readme.md) takes client resource requests and starts the process.  
+[User Service](user-service/readme.md) identifies the user in the context of the Palisade service.  
+[Resource Service](resource-service/readme.md) identifies the resources that have been requested.  
+[Policy Service](policy-service/readme.md) provides the policy that are to be applied to the data.  
+[Attribute-Masking Service](attribute-masking-service/readme.md) creates a redacted version of the rescue.  
+[Topic-Offset Service](topic-offset-service/readme.md) identifies the start and end of the resources for a request.  
+[Filtered-Resource Service](filtered-resource-service/readme.md) readies the resources and later handles passing the data to the client.  
+[Data Service](data-service/readme.md) initiates the process of passing the resources to the client.  
+[Audit Service](audit-service/readme.md) operates in the background providing an audit record of the process.  
+
+
+### Kafka Streaming
+
+
+
+## Project Build
 
 This is a classic multi-module maven java project with a Spring Boot Parent.
 Each module defines an individual service endpoint within Palisade (except for the services-manager module).
@@ -168,3 +202,8 @@ kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-s
 ```
 
 Use the `-h` flag to see usage instructions.
+
+#Appendix I Palisade Flow Diagram
+
+![Palisade Flow Diagram ](doc/palisade_flow_diagram.png)
+
