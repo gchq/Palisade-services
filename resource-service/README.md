@@ -18,8 +18,10 @@ limitations under the License.
 
 # Resource Service
 
-The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories). The service will then query the backing store to see if the requested resourceId has been stored. If this is not the case then the request will be passed onto the local implementation of the Resource Service. All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by
-the Policy Service.
+The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories).
+The service will then query the backing store to see if the requested resourceId has been stored.
+If this is not the case then the request will be passed onto the local implementation of the Resource Service.
+All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy Service.
 
 ## Message Model and Database Domain
 

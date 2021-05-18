@@ -18,8 +18,8 @@ limitations under the License.
 
 # Palisade Service
 
-The Palisade Service is the entry point into the rest of the Palisade Services, it accepts a request from the client, containing the userId of the user requesting access, 
-the resource the user wants access to, and a reason as to why they require access. 
+The Palisade Service is the entry point into the rest of the Palisade Services.
+It accepts a request from the client, containing the userId of the user requesting access, the resource the user wants access to, and the context as to why they require access. 
 The Palisade Service then creates a token, currently via the UUIDPalisadeService, but this can be extended in the future for specific token requirements. 
 The token is attached to the message in the form of a `PalisadeSystemResponse` to be sent to the User Service on the `user` kafka topic. 
 It is also sent back to the client directly as part of a `PalisadeClientResponse` so that the client can connect to the Filtered Resource Service to retrieve the processed data.
