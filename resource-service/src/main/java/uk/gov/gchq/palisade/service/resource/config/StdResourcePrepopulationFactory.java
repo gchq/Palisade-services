@@ -115,8 +115,8 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         String serialisedFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
         ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
         Resource rootResource = ResourceBuilder.create(rootId);
-        String resourceURIid = ResourceBuilder.create(resourceId).getId();
-        LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceURIid, attributes))
+        String resourceIdUri = ResourceBuilder.create(this.resourceId).getId();
+        LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceIdUri))
                 .connectionDetail(simpleConnectionDetail)
                 .type(type)
                 .serialisedFormat(serialisedFormat);
