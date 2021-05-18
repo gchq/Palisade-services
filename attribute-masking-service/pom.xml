@@ -25,10 +25,29 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <developers>
+        <developer>
+            <name>PalisadeDevelopers</name>
+            <organization>GCHQ</organization>
+            <organizationUrl>https://github.com/gchq</organizationUrl>
+        </developer>
+    </developers>
+
     <!--  *********** Artifact ID ***********    -->
     <artifactId>attribute-masking-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/attribute-masking-service</url>
+    <name>GCHQ Palisade - Attribute-Masking Service</name>
+    <description>
+        The Attribute-Masking Service will persist authorised requests for later use by the Data Service and modify the request that is sent, via Kafka, to the Topic-Offset Service and Filtered-Resource Service.
+    </description>
     <!--  *********** Artifact ID ***********    -->
+
+    <scm>
+        <url>${scm.url}</url>
+        <connection>${scm.connection}</connection>
+        <developerConnection>${scm.developer.connection}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <!-- Dependency versions -->
@@ -319,7 +338,7 @@
                 <version>1.4.10</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>post-integration-test</phase>
                         <id>cache</id>
                         <goals>
                             <goal>build</goal>
@@ -329,7 +348,6 @@
                         <phase>deploy</phase>
                         <id>ar</id>
                         <goals>
-                            <goal>build</goal>
                             <goal>push</goal>
                         </goals>
                     </execution>
@@ -411,5 +429,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
