@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Library('jenkinsfile-lib@feature/pal-1049-add-revision-param')_
+@Library('jenkinsfile-lib@feature/PAL-1049-fix-pipeline')_
 
 timestamps {
     services()
