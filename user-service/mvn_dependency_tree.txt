@@ -27,7 +27,6 @@ uk.gov.gchq.palisade:user-service:jar:0.5.0-SNAPSHOT
 +- com.typesafe.akka:akka-slf4j_2.13:jar:2.6.10:compile
 |  \- org.slf4j:slf4j-api:jar:1.7.30:compile
 +- com.typesafe.akka:akka-discovery_2.13:jar:2.6.10:compile
-+- org.springframework.boot:spring-boot-loader:jar:2.3.1.RELEASE:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot:jar:2.3.1.RELEASE:compile

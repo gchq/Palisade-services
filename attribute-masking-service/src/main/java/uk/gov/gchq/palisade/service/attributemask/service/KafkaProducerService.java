@@ -50,7 +50,7 @@ public class KafkaProducerService {
     private final Materializer materializer;
 
     /**
-     * Autowired constructor for the rest controller
+     * Autowired constructor for the rest controller.
      *
      * @param upstreamSink   a sink to the upstream topic
      * @param upstreamConfig the config for the topic (name, partitions, ...)

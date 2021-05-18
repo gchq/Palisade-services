@@ -75,8 +75,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "rule" topic is written to by the policy-service and read by this service.
- * The downstream "filtered-resource" topic is written to by this service and read by the filtered-resource-service.
+ * The upstream "rule" topic is written to by the Policy Service and read by this service.
+ * The downstream "filtered-resource" topic is written to by this service and read by the Filtered-Resource Service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(

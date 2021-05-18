@@ -39,7 +39,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
- * Application entrypoint and main process runner
+ * Application entrypoint and main process runner.
  */
 @SpringBootApplication
 @EnableAspectJAutoProxy
@@ -52,7 +52,7 @@ public class AttributeMaskingApplication {
     private final Executor executor;
 
     /**
-     * Autowire Akka objects in constructor for application ready event
+     * Autowire Akka objects in constructor for application ready event.
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
      * @param materializer the Akka {@link Materializer} configured to be used
@@ -68,7 +68,7 @@ public class AttributeMaskingApplication {
     }
 
     /**
-     * Application entrypoint, creates and runs a spring application, passing in the given command-line args
+     * Application entrypoint, creates and runs a spring application, passing in the given command-line args.
      *
      * @param args command-line arguments passed to the application
      */

@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link PersistenceLayer} for the attribute-masking-service.
+ * Java JPA implementation of a {@link PersistenceLayer} for the Attribute-Masking Service.
  * Delegates to a CrudRepository save method.
  */
 public class JpaPersistenceLayer implements PersistenceLayer {
@@ -41,7 +41,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private final Executor executor;
 
     /**
-     * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
+     * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...).
      *
      * @param authorisedRequestsRepository the appropriate CrudRepository implementation
      * @param executor                     an async executor for running the put request
