@@ -80,7 +80,6 @@ import static uk.gov.gchq.palisade.contract.audit.ContractTestData.GOOD_SUCCESS_
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
-    private static final int MOCKITO_TIMEOUT_MILLIS = 10_000;
     private static final int N_RUNS = 5;
     private static final int BACKOFF = 2;
 
@@ -99,6 +98,7 @@ class KafkaContractTest {
 
     @SpyBean
     AuditService auditService;
+
 
     private Function<String, Integer> fileCount;
 
@@ -184,6 +184,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testFailedErrorDeserialisation() throws Exception {
+        LOGGER.info("Testing failed serialisation for AuditErrorMessage messages");
 
         // GIVEN
         // Add a message to the 'error' topic
@@ -204,6 +205,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testFailedSuccessDeserialisation() throws Exception {
+        LOGGER.info("Testing failed serialisation for AuditSuccessMessage messages");
 
         // GIVEN
         // Add a message to the 'success' topic
@@ -237,7 +239,9 @@ class KafkaContractTest {
 
         for (int i = 1; i <= N_RUNS; i++) {
             try {
+                LOGGER.info("Assertion attempt {}", i);
                 runnable.run();
+                break;
             } catch (AssertionError e) {
                 LOGGER.info("There was an assertion error on attempt {}", i);
                 if (i == N_RUNS) {

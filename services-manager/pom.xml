@@ -29,7 +29,18 @@
     <!--  *********** Artifact ID ***********    -->
     <artifactId>services-manager</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
+    <name>GCHQ Palisade - Services Manager</name>
+    <description>
+        The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs.
+    </description>
     <!--  *********** Artifact ID ***********    -->
+
+    <scm>
+        <url>${scm.url}</url>
+        <connection>${scm.connection}</connection>
+        <developerConnection>${scm.developer.connection}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
         <dependency>
