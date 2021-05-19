@@ -23,6 +23,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
+  {{- if .Values.global.additionalConfigMaps }}
+  {{- toYaml .Values.global.additionalConfigMaps | indent 2 }}
+  {{- end }}
   application-akka.yaml: |
     akka:
       kafka:
