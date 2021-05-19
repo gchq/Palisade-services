@@ -22,19 +22,23 @@ limitations under the License.
 
 From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
 This reference can then be used to view the data after it has been retrieved and possibly redacted based on the context of the query and the permissions for the user making the request.
+
 Under the hood, the request involves sending a message that is processed sequentially by a set of the micro-services starting first with Palisade Service.
-This message is then forwarded onto each of services in the sequence with each modifying the message towards the end goal of producing resources ready to be viewed to the client.
+This message is then forwarded onto each service in the sequence with each modifying the message towards the end goal of producing resources ready to be viewed by the client.
 This initial sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
-In the subsequent request to the Data Service, the Filtered-Resource is requested to then proceed with passing this data to the client.
+In the subsequent request by the client to the Data Service, the Filtered-Resource is requested to then proceed with passing this data to the client.
 The following diagram shows in a high level the services and their relative relationships with each other.
 
-For a more detailed description of the services, and their related workflow see  
-[Appendix I Palisade Flow Diagram](#appendix-i-palisade-flow-diagram) and for a more detailed technical description of each of the services, select the related links below.
+For a detailed description of the services' workflow see  
+<!--- 
+See doc/user-service.drawio for the source of this diagram
+--->
+[Appendix I Palisade Flow Diagram](#appendix-i-palisade-flow-diagram).  
+For a more technical description of each of the services, follow the related links below.
 
-
-
-
-
+<!--- 
+See doc/services.drawio for the source of this diagram
+--->
 ![Service Sequence diagram ](doc/services.png)
 
 [Palisade Service](palisade-service/readme.md) takes client resource requests and starts the process.  
