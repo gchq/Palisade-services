@@ -29,7 +29,6 @@ public class SerialisedFormatRule implements Rule<Resource> {
     }
 
     public Resource apply(final Resource resource, final User user, final Context context) {
-
         Objects.requireNonNull(user);
         Objects.requireNonNull(context);
         String fileId = resource.getId();

@@ -44,7 +44,7 @@ See user-service/doc/user-service.drawio for the source of this diagram
 | context         | context          | context           |
 |                 | User             | exception         |
 |                 |                  | serverMetadata    |
-  
+
 (fields marked with * are acquired from headers metadata)
 
 The service accepts a `UserRequest` and a token, then checks if the User is in the cache; the technology of which is chosen in the User Services application.yaml 

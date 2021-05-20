@@ -75,7 +75,7 @@ public class PolicyRestController {
 
     /**
      * REST endpoint for debugging the service, mimicking the Kafka API.
-     * Takes a list of requests and processes each of them with the given headers
+     * Takes a list of requests and processes each of them with the given headers.
      *
      * @param headers  a multi-value map of http request headers
      * @param requests a list of Policy Requests

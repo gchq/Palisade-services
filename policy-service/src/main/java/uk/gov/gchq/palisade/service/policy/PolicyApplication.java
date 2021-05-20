@@ -65,19 +65,17 @@ public class PolicyApplication {
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param materialiser the Akka {@link Materializer} configured to be used
      * @param service      specifically policyServiceCachingProxy used for pre-population
      * @param policyConfig resourceConfig used to create the policy object used in pre-population
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public PolicyApplication(
-            final Collection<RunnableGraph<?>> runners,
-            final Materializer materializer,
-            final PolicyServiceCachingProxy service,
-            final PolicyConfiguration policyConfig,
+            final Collection<RunnableGraph<?>> runners, final Materializer materialiser,
+            final PolicyServiceCachingProxy service, final PolicyConfiguration policyConfig,
             @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
-        this.materializer = materializer;
+        this.materializer = materialiser;
         this.service = service;
         this.policyConfig = policyConfig;
         this.executor = executor;
@@ -100,7 +98,7 @@ public class PolicyApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        //Prepopulate the cache
+        //Pre-populate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
         policyConfig.getPolicies()
                 .forEach((PolicyPrepopulationFactory factory) -> {

@@ -29,7 +29,7 @@ public interface PolicyConfiguration {
      *
      * @return a {@link List} of the objects that have implemented {@link PolicyPrepopulationFactory}.
      */
-    @SuppressWarnings("java:S1452")
+    @SuppressWarnings("java:S1452") // Allow generics wildcard
     List<? extends PolicyPrepopulationFactory> getPolicies();
 
 }

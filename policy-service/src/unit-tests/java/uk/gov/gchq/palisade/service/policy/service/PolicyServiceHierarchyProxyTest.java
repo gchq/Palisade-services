@@ -86,9 +86,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned (and include all those of the parent directory)
         assertThat(secretFileRules)
-                .as("The returned rules should not be null")
-                .isNotNull()
-                .as("Recursively check the returned rules")
+                .as("Recursively check the returned rules are equal to the pass through policy")
                 .usingRecursiveComparison()
                 .isEqualTo(PASS_THROUGH_POLICY);
     }
@@ -98,10 +96,10 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         // Given - there are no policies for the requested resource
         // NEW_FILE
 
-        //When - a policy is requested on a resource
-        Exception noSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
+        // When - a policy is requested on a resource
+        var noSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
 
-        //Then an error is thrown
+        // Then an error is thrown
         assertThat(noSuchPolicy.getMessage())
                 .as("The message of the error should be %s", "No Resource Rules found for the resource")
                 .isEqualTo("No Record Rules found for the resource: " + NEW_FILE.getId());
@@ -117,12 +115,12 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             // When - access to the resource is queried
             Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
-            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
-            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, ACCESSIBLE_JSON_TXT_FILE, CONTEXT, rules);
+            var rules = HIERARCHY_POLICY.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+            var resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, ACCESSIBLE_JSON_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("The returned resource should not be null")
-                    .isNotNull();
+                    .as("The returned resource should be accessible and therefore not modified")
+                    .isEqualTo(ACCESSIBLE_JSON_TXT_FILE);
         }
 
 
@@ -134,8 +132,8 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SENSITIVE_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("The returned resource should not be null")
-                    .isNotNull();
+                    .as("The returned resource should be accessible and therefore not modified")
+                    .isEqualTo(SENSITIVE_TXT_FILE);
         }
 
         for (User accessingUser : Collections.singletonList(SECRET_USER)) {
@@ -146,15 +144,15 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SECRET_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
             assertThat(resource)
-                    .as("The returned resource should not be null")
-                    .isNotNull();
+                    .as("The returned resource should be accessible and therefore not modified")
+                    .isEqualTo(SECRET_TXT_FILE);
 
         }
     }
 
     @Test
     void testCannotAccessRedactedResources() {
-        HashSet<FileResource> files = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, INACCESSIBLE_JSON_AVRO_FILE, INACCESSIBLE_PICKLE_TXT_FILE, SENSITIVE_TXT_FILE, SENSITIVE_CSV_FILE, SECRET_TXT_FILE));
+        var files = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, INACCESSIBLE_JSON_AVRO_FILE, INACCESSIBLE_PICKLE_TXT_FILE, SENSITIVE_TXT_FILE, SENSITIVE_CSV_FILE, SECRET_TXT_FILE));
 
         // Given - there are inaccessible resources
         // everything but ACCESSIBLE_JSON_TXT_FILE for user
@@ -165,9 +163,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(USER, fileResource, CONTEXT, HIERARCHY_POLICY.getResourceRules(fileResource));
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("The returned resource should not be null")
-                    .isNotNull()
-                    .as("Recursively check the returned resource")
+                    .as("Recursively check the returned resource is equal to a fileResource")
                     .usingRecursiveComparison()
                     .isEqualTo(fileResource);
         }
@@ -184,7 +180,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("The returned resource should be null")
+                    .as("The returned resource should be redacted and therefore not be accessible")
                     .isNull();
         }
 
@@ -199,7 +195,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
             assertThat(resource)
-                    .as("The returned resource should be null")
+                    .as("The returned resource should be redacted and therefore not be accessible")
                     .isNull();
         }
     }

@@ -35,11 +35,11 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The PolicyRequest is the input for policy-service to identify the Policy associated with the given Resource and User.
+ * The PolicyRequest is the input for Policy Service to identify the Policy associated with the given Resource and User.
  * PolicyResponse is the output for this service which will include the Rules to implement with this Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
- * uk.gov.gchq.palisade.service.policy.model.PolicyRequest is the input for the policy-service.
+ * uk.gov.gchq.palisade.service.resource.model.ResourceResponse is the output from the Resource Service.
+ * {@link PolicyRequest} is the input to the Policy Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PolicyRequest {
@@ -157,12 +157,12 @@ public final class PolicyRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the PolicyRequest. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * PolicyRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.
@@ -226,7 +226,7 @@ public final class PolicyRequest {
          */
         public interface IUser {
             /**
-             * Adds the user user information.
+             * Adds the user information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
@@ -236,7 +236,7 @@ public final class PolicyRequest {
             }
 
             /**
-             * Adds the user user information.  Uses a JsonNode string form of the information.
+             * Adds the user information. Uses a JsonNode string form of the information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
@@ -259,7 +259,7 @@ public final class PolicyRequest {
             }
 
             /**
-             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             * Adds the resource that has been requested to access. Uses a JsonNode string form of the information.
              *
              * @param resource that is requested to access
              * @return class {@link PolicyRequest} for the completed class from the builder.

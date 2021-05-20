@@ -98,5 +98,4 @@ public class ContractTestData {
 
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> REDACTED_RESOURCE_RULES_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
-
 }
