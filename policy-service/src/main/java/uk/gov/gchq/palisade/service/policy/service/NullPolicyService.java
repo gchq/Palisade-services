@@ -24,9 +24,9 @@ import java.util.Optional;
 
 /**
  * A default do-nothing Policy Service designed to work with the Caching and Hierarchy layers.
- * Within cache TTL and cache size, the set...Rules methods will add to the cache, get...Rules will get from the cache
+ * Within the cache TTL and cache size, the set...Rules methods will add to the cache, get...Rules will get from the cache,
  * and the service will declare all Resources available unless Policy dictates otherwise.
- * After cache TTL timeout, the service will effectively be reset and empty
+ * After the cache TTL timeout, the service will effectively be reset and emptied.
  */
 public class NullPolicyService implements PolicyService {
 

@@ -50,7 +50,7 @@ public class PolicyTestCommon {
      * ..../txt/sensitive/salary.csv - an inaccessible csv file (breaks /txt rule)
      * ../txt/secret - only users with secret auth can view, a purpose of testing will redact all record-level info
      * ..../txt/secret/secrets.txt - an accessible (to secret auths) txt file
-     * /new - a directory to be added with a pass-thru policy (do nothing)
+     * /new - a directory to be added with a pass-through policy (do nothing)
      * ../new/file.exe - an accessible executable (not under /txt policy)
      **/
 

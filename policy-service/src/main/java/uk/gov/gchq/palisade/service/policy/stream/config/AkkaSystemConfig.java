@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.stream.config;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +56,7 @@ public class AkkaSystemConfig {
         propertiesConfigurer.getAllActiveProperties()
                 .entrySet().stream().sorted(Entry.comparingByKey())
                 .forEach(entry -> LOGGER.debug("{} = {}", entry.getKey(), entry.getValue()));
-        Config config = propertiesConfigurer
+        var config = propertiesConfigurer
                 .toHoconConfig(propertiesConfigurer.getAllActiveProperties())
                 .withFallback(ConfigFactory.load());
         return ActorSystem.create("SpringAkkaStreamsSystem", config);
@@ -65,7 +64,7 @@ public class AkkaSystemConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    Materializer getMaterializer(final ActorSystem system) {
+    Materializer getMaterialiser(final ActorSystem system) {
         return Materializer.createMaterializer(system);
     }
 

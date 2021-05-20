@@ -97,6 +97,7 @@ public class ApplicationTestData {
 
     public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create()
             .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors().withNoModifiedResource();
+
     public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create()
             .withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoModifiedResource();
 
@@ -104,7 +105,6 @@ public class ApplicationTestData {
     /**
      * Common test data for all classes
      */
-
     private ApplicationTestData() {
         // hide the constructor, this is just a collection of static objects
     }

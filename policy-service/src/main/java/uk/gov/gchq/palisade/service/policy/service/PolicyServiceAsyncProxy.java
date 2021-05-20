@@ -61,7 +61,7 @@ public class PolicyServiceAsyncProxy {
      * Given a nullable request, unwrap and store the request if it is non-null, ignore it if it is null
      * Async call to the {@link PolicyServiceHierarchyProxy#getResourceRules(LeafResource)} takes a resource to
      * return the rules applied against the resource. This will be wrapped in the container
-     * {@link AuditablePolicyResourceRules} to be used to filter the resources
+     * {@link AuditablePolicyResourceRules} to be used to filter the resources.
      *
      * @param nullableRequest the resource the user wants access to
      * @return the rules for the LeafResource, if null then an exception will be thrown
@@ -69,17 +69,23 @@ public class PolicyServiceAsyncProxy {
     public CompletableFuture<AuditablePolicyResourceRules> getResourceRules(final @Nullable PolicyRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map(request ->
+                        // Find the resource rules for this resource
                         CompletableFuture.supplyAsync(() -> service.getResourceRules(request.getResource()), executor)
+                                // Then build a AuditablePolicyResourceRules message, with no errors
                                 .thenApply(rules -> AuditablePolicyResourceRules.Builder.create()
                                         .withPolicyRequest(request)
                                         .withRules(rules)
                                         .withNoErrors())
+
+                                // If an error was thrown in the service, catch it, and build an AuditablePolicyResourceRules message with an AuditErrorMessage
                                 .exceptionally(e -> AuditablePolicyResourceRules.Builder.create()
                                         .withPolicyRequest(request)
                                         .withRules(null)
-                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e))
+                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap())
+                                                .withError(e))
                                 )
                 )
+                // Otherwise, return a AuditablePolicyResourceRules message with a null PolicyRequest, Rules and AuditErrorMessage
                 .orElse(CompletableFuture.completedFuture(AuditablePolicyResourceRules.Builder.create()
                         .withPolicyRequest(null)
                         .withRules(null)
@@ -94,19 +100,26 @@ public class PolicyServiceAsyncProxy {
      * @return the record rules for the LeafResource, if null then an exception will be thrown
      */
     public CompletableFuture<AuditablePolicyRecordResponse> getRecordRules(final AuditablePolicyResourceResponse modifiedAuditable) {
-        PolicyRequest nullableRequest = modifiedAuditable.getPolicyRequest();
+        var nullableRequest = modifiedAuditable.getPolicyRequest();
         return Optional.ofNullable(nullableRequest)
                 .map(request ->
+                        // Find the record rules for this resource
                         CompletableFuture.supplyAsync(() -> service.getRecordRules(request.getResource()))
+                                // Then build a AuditablePolicyRecordResponse message, with no errors
                                 .thenApply(rules -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
                                                 .withRules(rules))
                                         .withNoErrors())
+
+                                // If an error was thrown in the service, catch it, and build an AuditablePolicyRecordResponse message with an AuditErrorMessage
                                 .exceptionally(e -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
                                                 .withRules(new Rules<>()))
-                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e)))
+                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap())
+                                                .withError(e)))
                 )
+
+                // Otherwise, return a AuditablePolicyRecordResponse message with a null PolicyRequest, Rules and AuditErrorMessage
                 .orElse(CompletableFuture.completedFuture(AuditablePolicyRecordResponse.Builder.create()
                         .withPolicyResponse(null)
                         .withNoErrors()));
@@ -120,10 +133,10 @@ public class PolicyServiceAsyncProxy {
      */
     public static AuditablePolicyResourceResponse applyRulesToResource(final AuditablePolicyResourceRules auditablePolicyResourceRules) {
         Rules<LeafResource> rules = auditablePolicyResourceRules.getRules();
-        PolicyRequest policyRequest = auditablePolicyResourceRules.getPolicyRequest();
+        var policyRequest = auditablePolicyResourceRules.getPolicyRequest();
         if (!Objects.isNull(rules)) {
-            //apply the rules to the resource - a coarse grain filtering
-            Resource resource = PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules);
+            // Apply the rules to the resource - a coarse grain filtering
+            var resource = PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules);
             return AuditablePolicyResourceResponse.Builder.create(auditablePolicyResourceRules).withModifiedResource(resource);
         } else {
             // do nothing and return
