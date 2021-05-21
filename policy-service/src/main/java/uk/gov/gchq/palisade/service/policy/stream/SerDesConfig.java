@@ -35,12 +35,12 @@ import java.nio.charset.Charset;
  * Static configuration for kafka key/value serialisers/deserialisers
  * - Each input has a pair of key/value deserialisers
  * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -52,7 +52,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> resourceKeySerializer() {
+    public static Serializer<String> resourceKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -62,12 +62,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (PolicyRequest)
      */
-    public static Serializer<PolicyRequest> resourceValueSerializer() {
+    public static Serializer<PolicyRequest> resourceValueSerialiser() {
         return (String ignored, PolicyRequest policyRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(policyRequest);
             } catch (IOException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + policyRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + policyRequest.toString(), e);
             }
         };
     }
@@ -77,7 +77,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> resourceKeyDeserializer() {
+    public static Deserializer<String> resourceKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -86,12 +86,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (PolicyRequest)
      */
-    public static Deserializer<PolicyRequest> resourceValueDeserializer() {
+    public static Deserializer<PolicyRequest> resourceValueDeserialiser() {
         return (String ignored, byte[] policyRequest) -> {
             try {
                 return MAPPER.readValue(policyRequest, PolicyRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(policyRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(policyRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -101,7 +101,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> ruleKeySerializer() {
+    public static Serializer<String> ruleKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -110,12 +110,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (PolicyResponse)
      */
-    public static Serializer<PolicyResponse> ruleValueSerializer() {
+    public static Serializer<PolicyResponse> ruleValueSerialiser() {
         return (String ignored, PolicyResponse policyResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(policyResponse);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + policyResponse.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + policyResponse.toString(), e);
             }
         };
     }
@@ -125,17 +125,8 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (PolicyResponse)
      */
-    public static Serializer<byte[]> passthroughValueSerializer() {
+    public static Serializer<byte[]> passThroughValueSerialiser() {
         return (String ignored, byte[] bytes) -> bytes;
-    }
-
-    /**
-     * Kafka key serialiser for downstream messages going out as errors
-     *
-     * @return an appropriate key serialiser for the topic's message content
-     */
-    public static Serializer<String> errorKeySerializer() {
-        return new StringSerializer();
     }
 
     /**
@@ -143,12 +134,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AuditMessage)
      */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+    public static Serializer<AuditErrorMessage> errorValueSerialiser() {
         return (String ignored, AuditErrorMessage auditErrorMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
             }
         };
     }

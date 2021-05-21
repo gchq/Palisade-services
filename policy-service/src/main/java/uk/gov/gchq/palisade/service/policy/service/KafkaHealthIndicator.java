@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
+ * Kafka health indicator. Check the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
 @Component("kafka")
@@ -77,7 +77,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .all()
                     .get(1, TimeUnit.SECONDS);
 
-            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
+            var consumerGroupDescription = groupDescriptionMap.get(this.groupId);
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {

@@ -28,7 +28,6 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -55,15 +54,15 @@ public class KafkaProducerService {
      *
      * @param upstreamSink   a sink to the upstream topic
      * @param upstreamConfig the config for the topic (name, partitions, ...)
-     * @param materializer   the akka system materializer
+     * @param materialiser   the akka system materialiser responsible for turning a stream blueprint into a running stream.
      */
     public KafkaProducerService(
             final Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> upstreamSink,
             final ConsumerTopicConfiguration upstreamConfig,
-            final Materializer materializer) {
+            final Materializer materialiser) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
-        this.materializer = materializer;
+        this.materializer = materialiser;
     }
 
     /**
@@ -80,7 +79,7 @@ public class KafkaProducerService {
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
 
         // Get topic and calculate partition, unless this service has been assigned a partition
-        Topic topic = this.upstreamConfig.getTopics().get("input-topic");
+        var topic = this.upstreamConfig.getTopics().get("input-topic");
         int partition = Optional.ofNullable(topic.getAssignment())
                 .orElseGet(() -> Token.toPartition(token, topic.getPartitions()));
 

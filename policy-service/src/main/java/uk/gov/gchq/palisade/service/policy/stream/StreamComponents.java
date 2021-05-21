@@ -29,7 +29,6 @@ import akka.kafka.javadsl.DiscoverySupport;
 import akka.kafka.javadsl.Producer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import com.typesafe.config.Config;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -49,28 +48,28 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka ProducerSettings from the given config and serialisers
      *
-     * @param system          the application's actor system to use to load config values
-     * @param keySerializer   the stream's key serialiser
-     * @param valueSerializer the stream's value serialiser
+     * @param system          the application's actor system used to load config values
+     * @param keySerialiser   the stream's key serialiser
+     * @param valueSerialiser the stream's value serialiser
      * @return a {@link ProducerSettings} object for creating Akka {@link Sink}s
      */
-    public ProducerSettings<K, V> producerSettings(final ActorSystem system, final Serializer<K> keySerializer, final Serializer<V> valueSerializer) {
-        Config config = system.settings().config().getConfig("akka.kafka.producer");
-        return ProducerSettings.create(config, keySerializer, valueSerializer)
+    public ProducerSettings<K, V> producerSettings(final ActorSystem system, final Serializer<K> keySerialiser, final Serializer<V> valueSerialiser) {
+        var config = system.settings().config().getConfig("akka.kafka.producer");
+        return ProducerSettings.create(config, keySerialiser, valueSerialiser)
                 .withEnrichCompletionStage(DiscoverySupport.producerBootstrapServers(config, system));
     }
 
     /**
      * Construct an Akka Kafka ConsumerSettings from the given config and deserialisers
      *
-     * @param system            the application's actor system to use to load config values
-     * @param keyDeserializer   the stream's key deserialiser
-     * @param valueDeserializer the stream's value deserialiser
+     * @param system            the application's actor system used to load config values
+     * @param keyDeserialiser   the stream's key deserialiser
+     * @param valueDeserialiser the stream's value deserialiser
      * @return a {@link ProducerSettings} object for creating Akka {@link Source}s
      */
-    public ConsumerSettings<K, V> consumerSettings(final ActorSystem system, final Deserializer<K> keyDeserializer, final Deserializer<V> valueDeserializer) {
-        Config config = system.settings().config().getConfig("akka.kafka.consumer");
-        return ConsumerSettings.create(config, keyDeserializer, valueDeserializer)
+    public ConsumerSettings<K, V> consumerSettings(final ActorSystem system, final Deserializer<K> keyDeserialiser, final Deserializer<V> valueDeserialiser) {
+        var config = system.settings().config().getConfig("akka.kafka.consumer");
+        return ConsumerSettings.create(config, keyDeserialiser, valueDeserialiser)
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 .withEnrichCompletionStage(DiscoverySupport.consumerBootstrapServers(config, system));
     }
@@ -78,11 +77,11 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka CommitterSettings from the given config
      *
-     * @param system the application's actor system to use to load config values
+     * @param system the application's actor system used to load config values
      * @return a {@link CommitterSettings} object for controlling Kafka commits
      */
     public CommitterSettings committerSettings(final ActorSystem system) {
-        Config config = system.settings().config().getConfig("akka.kafka.committer");
+        var config = system.settings().config().getConfig("akka.kafka.committer");
         return CommitterSettings.create(config);
     }
 

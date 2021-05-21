@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Map.Entry;
 
 /**
- * This class defines the top level of the cache prepopulation.
+ * This class defines the top-level of the cache pre-population.
  * <p>
  * The only requirement is that there is a build method, used to create the object
  */
@@ -33,7 +33,7 @@ public interface PolicyPrepopulationFactory {
      * Creates a {@link Rules} of type {@link LeafResource} that is associated to a resourceId using the
      * data within an implementation of the {@link PolicyPrepopulationFactory}
      *
-     * @return an {@link Entry} value that consists of a resourceId and the created {@link Rules} of type {@link LeafResource}.
+     * @return an {@link Entry} value that consists of a resourceId, and the created {@link Rules} of type {@link LeafResource}.
      */
     Entry<String, Rules<LeafResource>> buildResourceRules();
 
@@ -41,7 +41,7 @@ public interface PolicyPrepopulationFactory {
      * Creates a {@link Rules} of type {@link Serializable} that is associated to a resourceId using the
      * data within an implementation of the {@link PolicyPrepopulationFactory}.
      *
-     * @return an {@link Entry} value that consists of a resourceId and the created {@link Rules} of type {@link Serializable}.
+     * @return an {@link Entry} value that consists of a resourceId, and the created {@link Rules} of type {@link Serializable}.
      */
     Entry<String, Rules<Serializable>> buildRecordRules();
 

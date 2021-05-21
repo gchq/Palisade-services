@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.stream.config;
 
 import akka.Done;
 import akka.actor.ActorSystem;
-import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
@@ -38,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.policy.stream.StreamComponents;
 
@@ -62,11 +60,11 @@ public class AkkaComponentsConfig {
     Source<CommittableMessage<String, PolicyRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, PolicyRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.resourceKeyDeserializer(),
-                SerDesConfig.resourceValueDeserializer());
+                SerDesConfig.resourceKeyDeserialiser(),
+                SerDesConfig.resourceValueDeserialiser());
 
-        Topic topic = configuration.getTopics().get("input-topic");
-        Subscription subscription = Optional.ofNullable(topic.getAssignment())
+        var topic = configuration.getTopics().get("input-topic");
+        var subscription = Optional.ofNullable(topic.getAssignment())
                 .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
                 .orElse(Subscriptions.topics(topic.getName()));
 
@@ -77,8 +75,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, PolicyRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.resourceKeySerializer(),
-                SerDesConfig.resourceValueSerializer());
+                SerDesConfig.resourceKeySerialiser(),
+                SerDesConfig.resourceValueSerialiser());
 
         return INPUT_COMPONENTS.plainProducer(producerSettings);
     }
@@ -87,10 +85,10 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.ruleKeySerializer(),
-                SerDesConfig.passthroughValueSerializer());
+                SerDesConfig.ruleKeySerialiser(),
+                SerDesConfig.passThroughValueSerialiser());
 
-        CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
+        var committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
     }
 
