@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
@@ -31,7 +29,6 @@ import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE;
 
 @JsonTest
@@ -42,82 +39,71 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
     private JacksonTester<AuditablePolicyRecordResponse> jsonTester;
 
     /**
-     * Grouped assertion test for a {@link AuditablePolicyRecordResponse} which holds a PolicyResponse and no exception.
-     * This is the scenario where the object represents a standard message that is to be passed onto the next service.
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserializes and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyRecordResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testAuditablePolicyRecordResponseSerializingAndDeserializing() throws IOException {
+    void testAuditablePolicyRecordResponseSerialisingAndDeserialising() throws IOException {
+        var jsonContent = jsonTester.write(POLICY_RECORD_RESPONSE);
+        var objectContent = jsonTester.parse(jsonContent.getJson());
+        var messageObject = objectContent.getObject();
 
-        JsonContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseJsonContent = jsonTester.write(POLICY_RECORD_RESPONSE);
-        ObjectContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseObjectContent = jsonTester.parse(auditablePolicyRecordResponseJsonContent.getJson());
-        AuditablePolicyRecordResponse auditablePolicyRecordResponseMessageObject = auditablePolicyRecordResponseObjectContent.getObject();
+        assertThat(messageObject)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(POLICY_RECORD_RESPONSE);
 
-        assertAll("AuditablePolicyRecordResponse serializing and deserializing comparison",
-                () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("The serialized and deserialized object should match the original")
-                        .isEqualTo(POLICY_RECORD_RESPONSE),
-
-                () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("The serialized and deserialized object should have the same values as the original")
-                        .usingRecursiveComparison()
-                        .isEqualTo(POLICY_RECORD_RESPONSE)
-        );
+        assertThat(messageObject)
+                .as("Check %s using recursion", POLICY_RECORD_RESPONSE.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(POLICY_RECORD_RESPONSE);
     }
 
     /**
-     * Grouped assertion test for a {@link AuditablePolicyRecordResponse} which holds an exception an no policy response
-     * This is the scenario where the object represents a error that is to be passed onto the audit service.
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserializes and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyRecordResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testAuditablePolicyRecordResponseExceptionSerializingAndDeserializing() throws IOException {
+    void testAuditablePolicyRecordResponseExceptionSerialisingAndDeserialising() throws IOException {
+        var jsonContent = jsonTester.write(POLICY_RECORD_RESPONSE_ERROR);
+        var objectContent = jsonTester.parse(jsonContent.getJson());
+        var messageObject = objectContent.getObject();
 
-        JsonContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseJsonContent = jsonTester.write(POLICY_RECORD_RESPONSE_ERROR);
-        ObjectContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseObjectContent = jsonTester.parse(auditablePolicyRecordResponseJsonContent.getJson());
-        AuditablePolicyRecordResponse auditablePolicyRecordResponseMessageObject = auditablePolicyRecordResponseObjectContent.getObject();
+        assertThat(messageObject)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(POLICY_RECORD_RESPONSE_ERROR);
 
-        assertAll("AuditablePolicyRecordResponse with error serializing and deserializing comparison",
-                () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .as("The serialized and deserialized object should match the original")
-                        .isEqualTo(POLICY_RECORD_RESPONSE_ERROR),
-
-                () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .usingRecursiveComparison()
-                        .ignoringFieldsOfTypes(Throwable.class)
-                        .as("The serialized and deserialized object should have the same values as the original, ignoring the Throwable value")
-                        .isEqualTo(POLICY_RECORD_RESPONSE_ERROR)
-        );
+        assertThat(messageObject)
+                .as("Check %s using recursion", POLICY_RECORD_RESPONSE_ERROR.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(POLICY_RECORD_RESPONSE_ERROR);
     }
 
     /**
-     * When there is no {@link AuditErrorMessage} the  {@link AuditablePolicyRecordResponse#chain(AuditErrorMessage)}
+     * When there is no {@link AuditErrorMessage} the {@link AuditablePolicyRecordResponse#chain(AuditErrorMessage)}
      * is expected to return the same object.
      */
     @Test
     void testChainWithoutAnException() {
         // When
-        AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
-        AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(null);
-        // Then
-        assertAll("AuditablePolicyRecordResponse comparison after chaining with 'null' error",
-                () -> assertThat(chainedResponse)
-                        .as("The updated object should match the original")
-                        .isEqualTo(auditablePolicyRecordResponse),
+        var auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create()
+                .withPolicyResponse(RESPONSE)
+                .withNoErrors();
+        var chainedResponse = auditablePolicyRecordResponse.chain(null);
 
-                () -> assertThat(chainedResponse)
-                        .usingRecursiveComparison()
-                        .as("The updated object should have the same values as the original")
-                        .isEqualTo(auditablePolicyRecordResponse)
-        );
+        assertThat(chainedResponse)
+                .as("Check that whilst using the objects toString method, the objects are the same")
+                .isEqualTo(auditablePolicyRecordResponse);
+
+        assertThat(chainedResponse)
+                .as("Check %s using recursion", auditablePolicyRecordResponse.getClass().getSimpleName())
+                .usingRecursiveComparison()
+                .isEqualTo(auditablePolicyRecordResponse);
     }
 
     /**
@@ -126,28 +112,28 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
      */
     @Test
     void testChainWithAnException() {
-        // When
-        AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
-        AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
+        // When we create a AuditablePolicyRecordResponse with a response and no errors
+        var auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create()
+                .withPolicyResponse(RESPONSE)
+                .withNoErrors();
+        var chainedResponse = auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
         // Then
-        assertAll("AuditablePolicyRecordResponse comparison after chaining with an AuditErrorMessage",
-                () -> assertThat(chainedResponse)
-                        .usingRecursiveComparison()
-                        .as("The updated object should not match the original")
-                        .isNotEqualTo(auditablePolicyRecordResponse),
+        assertThat(chainedResponse)
+                .usingRecursiveComparison()
+                .as("The updated object should not match the original")
+                .isNotEqualTo(auditablePolicyRecordResponse);
 
-                () -> assertThat(chainedResponse.getAuditErrorMessage())
-                        .usingRecursiveComparison()
-                        .as("The AuditErrorMessage should have the expected values")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+        assertThat(chainedResponse.getAuditErrorMessage())
+                .usingRecursiveComparison()
+                .as("The AuditErrorMessage should have the expected values")
+                .isEqualTo(AUDIT_ERROR_MESSAGE);
 
-                () -> assertThat(chainedResponse.getAuditErrorMessage())
-                        .extracting(AuditErrorMessage::getError)
-                        .as("The exception cause should be 'NoSuchPolicyException'")
-                        .isInstanceOf(NoSuchPolicyException.class)
-                        .as("The exception should contain the message 'No rules found for the resource'")
-                        .extracting(Throwable::getMessage)
-                        .isEqualTo("No rules found for the resource")
-        );
+        assertThat(chainedResponse.getAuditErrorMessage())
+                .extracting(AuditErrorMessage::getError)
+                .as("The exception cause should be 'NoSuchPolicyException'")
+                .isInstanceOf(NoSuchPolicyException.class)
+                .as("The exception should contain the message 'No rules found for the resource'")
+                .extracting(Throwable::getMessage)
+                .isEqualTo("No rules found for the resource");
     }
 }

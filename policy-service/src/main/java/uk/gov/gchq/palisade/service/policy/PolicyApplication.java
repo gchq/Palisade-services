@@ -103,7 +103,7 @@ public class PolicyApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        //Prepopulate the cache
+        //Pre-populate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
         policyConfig.getPolicies()
                 .forEach((PolicyPrepopulationFactory factory) -> {

@@ -38,9 +38,9 @@ import java.util.Optional;
 /**
  * Implementation of a {@link PolicyPrepopulationFactory} that uses Spring to configure a resource from a yaml file
  * A factory for objects, using:
- * - a String reference of a {@link uk.gov.gchq.palisade.resource.Resource} resource
- * - a map of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
- * - a map of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
+ * - a String reference of a {@link Resource} resource
+ * - a map of {@link Rule} resource-level rules operating on a {@link Resource}
+ * - a map of {@link Rule} record-level rules operating on the type of a {@link LeafResource}
  */
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
@@ -63,7 +63,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
      *
      * @param resourceId    the id of the {@link Resource} to attach a policy to
      * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
-     * @param recordRules   the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
+     * @param recordRules   the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the Data Service
      */
     public StdPolicyPrepopulationFactory(final String resourceId, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.resourceId = resourceId;
@@ -71,6 +71,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         this.recordRules = recordRules;
     }
 
+    @SuppressWarnings({"java:S3740", "rawtypes"}) //Suppress parameterized type for generic class smell
     private static Rule createRule(final String rule) {
         try {
             LOGGER.debug("Adding rule {}", rule);
@@ -114,6 +115,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
                 .orElseThrow(() -> new IllegalArgumentException("recordRules cannot be null"));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Entry<String, Rules<LeafResource>> buildResourceRules() {
         Rules<LeafResource> rules = new Rules<>();
@@ -124,6 +126,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Entry<String, Rules<Serializable>> buildRecordRules() {
         Rules<Serializable> rules = new Rules<>();

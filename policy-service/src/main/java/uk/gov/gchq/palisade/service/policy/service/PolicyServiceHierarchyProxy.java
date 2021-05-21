@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.user.User;
@@ -33,8 +34,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * By having the policies stored in several key value stores we can attach policies
- * at either the resource or data type level.
+ * By having the policies stored in several key value stores we can attach policies at either the resource or data type level.
  * Each rule needs to be flagged as a resource level filter, or a record level filter/transform.
  * To get the rules for a file/stream resource, you need to get the rules for the given resource
  * followed by the rules of all its parents. Then you get the rules of the given resources data type.
@@ -47,7 +47,7 @@ public class PolicyServiceHierarchyProxy {
     private final PolicyServiceCachingProxy service;
 
     /**
-     * Instantiates a new Policy service hierarchy proxy taking a PolicyService as an argument.
+     * Instantiates a new Policy Service hierarchy proxy taking a PolicyService implementation as an argument.
      *
      * @param service {@link PolicyService} used to instantiate this class
      */
@@ -83,13 +83,13 @@ public class PolicyServiceHierarchyProxy {
 
 
     /**
-     * This is where any resource level access controls are enforced, taking the resource, user, context and rules.
+     * This is where any resource level access controls will be enforced, taking the resource, user, context and rules.
      *
-     * @param <R>      the type of resource (may be a supertype)
+     * @param <R>      the type of resource (which may be a supertype)
      * @param user     the {@link User} requesting the data
      * @param resource the {@link Resource} being queried for access
      * @param context  the query time {@link Context} containing environmental variables such as why they want the data
-     * @param rules    the {@link uk.gov.gchq.palisade.rule.Rule} that will be applied to the resource
+     * @param rules    the {@link Rule} that will be applied to the resource
      * @return an Optional {@link Resource} which is only present if the resource is accessible
      */
     public static <R extends Resource> R applyRulesToResource(final User user, final R resource, final Context context, final Rules<R> rules) {
@@ -101,7 +101,7 @@ public class PolicyServiceHierarchyProxy {
      * data type to extract and merge the policies at each stage of the hierarchy.
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
-     * @param <R>            the type of resource (may be a supertype)
+     * @param <R>            the type of resource (which may be a supertype)
      * @param rulesExtractor The rule type to extract from each policy
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
@@ -134,7 +134,7 @@ public class PolicyServiceHierarchyProxy {
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
      * @param rulesExtractor The rule type to extract from each policy
-     * @param <R>            the type of resource (may be a supertype)
+     * @param <R>            the type of resource (which may be a supertype)
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
      */

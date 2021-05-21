@@ -40,39 +40,41 @@ import java.util.concurrent.Executor;
 @Configuration
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final int THREAD_POOL = 6;
 
     /**
-     * An implementation of the policy service that allows caching to take place, either using Redis or Caffeine
+     * An implementation of the Policy Service that allows caching to take place, either using Redis or Caffeine
      *
-     * @param service the service that will be implemented
+     * @param service the service to be implemented
      * @return a new instance of the PolicyServiceCachingProxy
      */
     @Bean
     public PolicyServiceCachingProxy cachedPolicyService(final PolicyService service) {
-        PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
+        var policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
         LOGGER.debug("Instantiated CachedPolicyService");
         return policyServiceCachingProxy;
     }
 
     /**
-     * An implementation of the PolicyService that contains java code used to apply, get and set rules against resources
+     * An implementation of the Policy Service that contains java code used to apply, get and set rules against resources
      *
      * @param cache the cache layer that this service will implement
      * @return a new instance of the PolicyServiceHierarchyProxy
      */
     @Bean
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
-        PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
+        var policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
         LOGGER.debug("Instantiated HierarchicalPolicyService");
         return policyServiceHierarchyProxy;
     }
 
     /**
-     * AysncPolicyServiceProxy sits between akka and a caching layer,
+     * AsyncPolicyServiceProxy sits between akka, and a caching layer,
      * allowing akka to make async calls to a service and not have to wait for a response
      *
      * @param hierarchy {@link PolicyServiceHierarchyProxy} as the service performing the majority of the code manipulation
-     * @param executor  {@link Executor} This interface provides a way of decoupling task submission from the mechanics of how each task will be run, including details of thread use, scheduling, etc.
+     * @param executor  {@link Executor} This interface provides a way of decoupling task submission from the mechanics of how
+     *                  each task will be run, including details of thread use, scheduling, etc.
      * @return a new instance of a PolicyServiceAsyncProxy
      */
     @Bean
@@ -84,7 +86,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * ObjectMapper used in serializing and deserializing
+     * ObjectMapper used in serialising and deserialising
      *
      * @return a new instance of the ObjectMapper
      */
@@ -97,9 +99,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Override
     @Bean("threadPoolTaskExecutor")
     public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        var ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(6);
+        ex.setCorePoolSize(THREAD_POOL);
         LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         return ex;
     }
