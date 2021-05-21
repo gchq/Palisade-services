@@ -95,7 +95,7 @@ global:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "k8s"
 
-  additionalConfigMaps: {}
+  # additionalConfigMaps: {}
 
   # persistent-volume and associated claims configurations
   persistence:
