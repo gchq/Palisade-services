@@ -38,15 +38,14 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.config.DefaultConfiguration;
 import uk.gov.gchq.palisade.service.policy.rule.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.policy.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
-import java.io.Serializable;
-import java.util.Optional;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
@@ -93,15 +92,14 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Test
     void testContextLoads() {
-        assertAll(
-                () -> assertThat(cacheProxy)
-                        .as("The 'cacheProxy' should not be null")
-                        .isNotNull(),
+        assertThat(cacheProxy)
+                .as("The 'cacheProxy' should not be null")
+                .isNotNull();
 
-                () -> assertThat(redisTemplate)
-                        .as("The 'redisTemplate' should not be null")
-                        .isNotNull()
-        );
+        assertThat(redisTemplate)
+                .as("The 'redisTemplate' should not be null")
+                .isNotNull();
+
     }
 
     @Test
@@ -111,15 +109,19 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Rules<LeafResource>> resourceRules = cacheProxy.getResourceRules(resource.getId());
+            var resourceRules = cacheProxy.getResourceRules(resource.getId());
+            var expectedMap = new HashMap<>();
+            expectedMap.put("Does nothing", new PassThroughRule<>());
 
             // Then
             assertThat(resourceRules)
                     .as("The returned rules optional should have a value present")
                     .isPresent()
-                    .map(Rules::getRules)
-                    .as("The rules inside the optional should not be null")
-                    .isNotNull();
+                    .get()
+                    .as("Check that the rules returned contain the correct key and value")
+                    .extracting(Rules::getRules)
+                    .usingRecursiveComparison()
+                    .isEqualTo(expectedMap);
         }
     }
 
@@ -128,7 +130,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Rules<Serializable>> recordRules = cacheProxy.getRecordRules("does not exist");
+        var recordRules = cacheProxy.getRecordRules("does not exist");
 
         // Then
         assertThat(recordRules)
@@ -144,26 +146,24 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
                 .addRule("Resource serialised format is txt", new IsTextResourceRule());
         cacheProxy.setResourceRules(systemResource.getId(), policy);
 
-        //Then I update the Policies resourceLevelRules
+        // Then I update the Policies resourceLevelRules
         final Rules<LeafResource> newPolicy = new Rules<LeafResource>()
                 .addRule("NewSerialisedFormat", new IsTextResourceRule());
         cacheProxy.setResourceRules(systemResource.getId(), newPolicy);
 
         // When
-        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(systemResource.getId());
+        var recordRules = cacheProxy.getResourceRules(systemResource.getId());
 
         // Then the returned policy should have the updated resource rules
-        assertAll(
-                () -> assertThat(recordRules)
-                        .as("The returned rules optional should have a value present")
-                        .isPresent(),
+        assertThat(recordRules)
+                .as("The returned rules optional should have a value present")
+                .isPresent()
+                .get()
+                .as("Check that the rules returned contain the correct key and value")
+                .extracting(Rules::getRules)
+                .usingRecursiveComparison()
+                .isEqualTo(newPolicy.getRules());
 
-                () -> assertThat(recordRules).isPresent().get()
-                        .extracting("rules")
-                        .usingRecursiveComparison()
-                        .as("Recursively check the returned rules")
-                        .isEqualTo(newPolicy.getRules())
-        );
     }
 
     @Test
@@ -175,13 +175,11 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         TimeUnit.SECONDS.sleep(1);
 
         // When - an old entry is requested
-        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
+        var recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
         assertThat(recordRules)
                 .as("The returned rules optional should not have a value")
                 .isEmpty();
     }
-
-
 }

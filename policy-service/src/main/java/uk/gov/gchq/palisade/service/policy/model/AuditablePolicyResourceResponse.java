@@ -24,9 +24,9 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class represents the resource have been modified by applying the rules.  This class is a container for
- * {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream processing.  Under normal
- * conditions {@code PolicyRequest} and {@code Rules} will be non-null, indicating successful process or
+ * The class represents the resource have been modified by applying the rules. This class is a container for
+ * {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream processing. Under normal
+ * conditions {@code PolicyRequest} and {@code Rules} will be non-null, indicating a successful process or
  * {@code AuditErrorMessage} when there has been an error in the process.
  */
 public final class AuditablePolicyResourceResponse {
@@ -36,18 +36,13 @@ public final class AuditablePolicyResourceResponse {
     private final AuditErrorMessage auditErrorMessage;
     private final Resource modifiedResource;
 
-
     private AuditablePolicyResourceResponse(
-            final PolicyRequest policyRequest,
-            final Rules<LeafResource> rules,
-            final AuditErrorMessage auditErrorMessage,
-            final Resource modifiedResource) {
-
+            final PolicyRequest policyRequest, final Rules<LeafResource> rules,
+            final AuditErrorMessage auditErrorMessage, final Resource modifiedResource) {
         this.policyRequest = policyRequest;
         this.rules = rules;
         this.auditErrorMessage = auditErrorMessage;
         this.modifiedResource = modifiedResource;
-
     }
 
     @Generated
@@ -71,21 +66,23 @@ public final class AuditablePolicyResourceResponse {
     }
 
     /**
-     * The static builder
+     * Builder class for the creation of instances of the AuditablePolicyRecordResponse.
+     * This is a variant of the Fluent Builder.
      */
     public static class Builder {
 
         /**
-         * The creator function
+         * Starter method for the Builder class. This method is called to start the process of creating the
+         * AuditablePolicyResourceResponse class.
          *
-         * @return the composed immutable object
+         * @return public interface {@link IPolicyRequest} for the next step in the build.
          */
         public static IPolicyRequest create() {
             return request -> rules -> audit -> modifiedResource -> new AuditablePolicyResourceResponse(request, rules, audit, modifiedResource);
         }
 
         /**
-         * Takes the data for the request, rules.  Is a partial constructor and is expecting the modified resources
+         * Takes the data for the request, rules. Is a partial constructor and is expecting the modified resources
          * to complete the build of the class.
          *
          * @param auditablePolicyResourceRules holds the data from the request and the related rules
@@ -98,47 +95,47 @@ public final class AuditablePolicyResourceResponse {
         }
 
         /**
-         * Compose with {@code PolicyRequest}
+         * Adds the {@link PolicyRequest} to the message.
          */
         public interface IPolicyRequest {
             /**
-             * Compose value
+             * Adds the {@link PolicyRequest} to the message.
              *
-             * @param policyRequest or null
-             * @return value object
+             * @param policyRequest or null if there was an issue processing the request
+             * @return interface {@link IRules} for the next step in the build
              */
             IRules withPolicyRequest(PolicyRequest policyRequest);
         }
 
         /**
-         * Compose with {@code Rules}
+         * Adds the {@link Rules} to the message.
          */
         public interface IRules {
             /**
-             * Compose value
+             * Adds the {@link Rules} to the message.
              *
-             * @param rules or null
-             * @return value object
+             * @param rules or null if there was an issue finding rules for the resource
+             * @return interface {@link IAuditErrorMessage} for the next step in the build
              */
             IAuditErrorMessage withRules(Rules<LeafResource> rules);
         }
 
         /**
-         * Compose with {@code AuditErrorMessage}
+         * Adds the {@link AuditErrorMessage} to the message.
          */
         public interface IAuditErrorMessage {
             /**
-             * Compose value
+             * Adds the {@link AuditErrorMessage} to the message.
              *
-             * @param audit or null
-             * @return value object
+             * @param audit or null if the request was processed successfully
+             * @return interface {@link IModifiedResource} for the next step in the build
              */
             IModifiedResource withAuditErrorMessage(AuditErrorMessage audit);
 
             /**
-             * Without error audit
+             * By default, add a null AuditErrorMessage to the message, implying the resource was processed successfully
              *
-             * @return the composed immutable object
+             * @return interface {@link IModifiedResource} for the next step in the build
              */
             default IModifiedResource withNoErrors() {
                 return this.withAuditErrorMessage(null);
@@ -146,21 +143,21 @@ public final class AuditablePolicyResourceResponse {
         }
 
         /**
-         * Compose with {@code AuditErrorMessage}
+         * Adds the {@link Resource} to the message.
          */
         public interface IModifiedResource {
             /**
-             * Compose value
+             * Adds the {@link Resource} to the message.
              *
-             * @param modifiedResource or null
-             * @return value object
+             * @param modifiedResource or null if there was an issue processing the request
+             * @return class {@link AuditablePolicyResourceResponse} for the completed class from the builder.
              */
             AuditablePolicyResourceResponse withModifiedResource(Resource modifiedResource);
 
             /**
-             * Without error audit
+             * By default, add a null modified resource to the request
              *
-             * @return the composed immutable object
+             * @return class {@link AuditablePolicyResourceResponse} for the completed class from the builder.
              */
             default AuditablePolicyResourceResponse withNoModifiedResource() {
                 return this.withModifiedResource(null);
