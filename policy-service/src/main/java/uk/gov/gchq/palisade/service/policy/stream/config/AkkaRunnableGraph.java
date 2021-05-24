@@ -40,20 +40,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
-import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.policy.PolicyApplication}
+ * Configuration for the Akka Runnable Graph used by the {@link PolicyApplication}
  * Configures the connection between Kafka, Akka and the service
  */
 @Configuration
@@ -85,24 +85,23 @@ public class AkkaRunnableGraph {
             final ProducerTopicConfiguration topicConfiguration,
             final PolicyServiceAsyncProxy service) {
         // Get output topic from config
-        Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
-        Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
+        var outputTopic = topicConfiguration.getTopics().get("output-topic");
+        var errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         // Read messages from the stream source
-        //  return source
+        // return source
         return source
                 .map(committableMessage -> new Pair<>(committableMessage, committableMessage.record().value()))
 
                 // Apply coarse-grained resource-level rules
                 .mapAsync(PARALLELISM, messageAndRequest -> service.getResourceRules(messageAndRequest.second())
-                        //need to change this only apply if we have rules and if we have a PolicyRequest
                         .thenApply(PolicyServiceAsyncProxy::applyRulesToResource)
                         .thenApply(modifiedAuditable -> Pair.create(messageAndRequest.first(), modifiedAuditable)))
 
                 // Get the record level rules for all resources that weren't course grain filtered
                 .mapAsync(PARALLELISM, messageAndModifiedRequest ->
                         service.getRecordRules(messageAndModifiedRequest.second())
-                                //check to see if the first service request threw an exception and if so deal with it
+                                // Check to see if the first service request threw an exception, and if so deal with it
                                 .thenApply(modifiedResource -> modifiedResource.chain(messageAndModifiedRequest.second().getAuditErrorMessage()))
                                 .thenApply(response -> Pair.create(messageAndModifiedRequest.first(), response))
                 )
@@ -112,23 +111,23 @@ public class AkkaRunnableGraph {
                     ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
                     Committable committable = messageAndResponse.first().committableOffset();
                     return Optional.ofNullable(messageAndResponse.second().getAuditErrorMessage())
-                            // Found an application error, produce an error message to be sent to the Audit service
+
+                            // Found an application error, produce an error message to be sent to the Audit Service
                             .map(audit -> ProducerMessage.single(
                                     new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                            SerDesConfig.errorValueSerialiser().serialize(null, audit), requestRecord.headers()),
                                     committable))
-                            //Found a response message, produce a policy message to be sent to the output
+                            // Found a response message, produce a policy message to be sent to the output topic
                             .orElse(ProducerMessage.single(
                                     new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                            SerDesConfig.ruleValueSerializer().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
+                                            SerDesConfig.ruleValueSerialiser().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
                                     committable));
 
                 })
                 // Send system errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
 
-                // Materialize the stream, sending messages to the sink
+                // Materialise the stream, sending messages to the sink
                 .toMat(sink, Consumer::createDrainingControl);
-
     }
 }

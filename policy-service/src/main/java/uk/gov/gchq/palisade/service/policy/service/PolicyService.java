@@ -23,18 +23,17 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * The core API for the policy service.
- * The responsibilities of the policy service is to provide the set of rules
- * (filters or transformations) that need to be applied to each resource that
- * has been requested, based the user and context.
- * Note that a resource could be a file, stream, directory or even the system
- * resource (policies added to the system resource would be applied globally).
+ * The core API for the Policy Service.
+ * The responsibilities of the Policy Service is to provide the set of rules (filters or transformations) that need to be applied to
+ * each resource that has been requested, based the User and Context.
+ * Note that a resource could be a file, stream, directory or even the system resource (policies added to the
+ * system resource would be applied globally).
  */
 public interface PolicyService {
 
     /**
      * GetResourceRules is used by the service to get any resource rules that could be applied against the resource.
-     * If no rules are applied then an exception will be thrown
+     * If no rules are applied then an exception will be thrown.
      * A resource rule may be applied at any point in the file tree, and could cause the record to be redacted.
      *
      * @param resourceId the id of the {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
@@ -43,7 +42,7 @@ public interface PolicyService {
     Optional<Rules<LeafResource>> getResourceRules(final String resourceId);
 
     /**
-     * GetRecordRules is used by the service to get any record rules that could be applied against the resource that the user has requested
+     * GetRecordRules is used by the service to get any record rules that could be applied against the resource that the user has requested.
      *
      * @param resourceId the id of the {@link Resource} to get rules for
      * @return An optional {@link Rules} object, which contains the list of rules found that need to be applied to the resource.
@@ -51,20 +50,20 @@ public interface PolicyService {
     Optional<Rules<Serializable>> getRecordRules(final String resourceId);
 
     /**
-     * This method sets the resource rules against the resource for which the user will eventually request
+     * This method sets the resource rules against the resource for which the user will eventually request.
      *
      * @param resourceId the id of the {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
      * @param rules      {@link Rules} object, which contains the list of rules to be applied to the resource.
-     * @return an Optional Rules for LeafResource object that contains the returned map of resource rules for each resource
+     * @return an Optional Rules for LeafResource object that contains the returned map of resource rules for each resource.
      */
     Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules);
 
     /**
-     * This method sets the record rules against the resource for which the user will eventually request
+     * This method sets the record rules against the resource for which the user will eventually request.
      *
      * @param resourceId the id of the {@link Resource} the user wants to apply rules against
      * @param rules      {@link Rules} object, which contains the list of rules to be applied to the resource.
-     * @return an Optional Serializable rules object that contains the returned map of record rules for each resource
+     * @return an Optional Serializable rules object that contains the returned map of record rules for each resource.
      */
     Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules);
 }

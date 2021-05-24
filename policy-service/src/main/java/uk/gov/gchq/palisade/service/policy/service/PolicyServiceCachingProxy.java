@@ -29,7 +29,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * This acts as a caching layer on top of an implementation of a policy service. This does not have any hierarchy logic
+ * This acts as a caching layer on top of an implementation of a Policy Service. This does not have any hierarchy logic
  * as that is handled before it reaches caching. In this way, a hierarchical traversal for policies is more
  * cache-friendly.
  */
@@ -48,8 +48,8 @@ public class PolicyServiceCachingProxy {
     }
 
     /**
-     * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesnt exist a message is sent to the logs
-     * and a {@link PolicyService} getResourceRules() is called
+     * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesn't exist a message will be sent to the logs
+     * and a {@link PolicyService#getResourceRules(String)} is called
      *
      * @param resourceId the resourceId the user wants resource rules against
      * @return the resource rules that apply to the resource
@@ -61,7 +61,7 @@ public class PolicyServiceCachingProxy {
     }
 
     /**
-     * Using the resourceId as the key, adds the resource, and any resource rules against that resource, to the cache
+     * Using the resourceId as the key, adds the resource, and any resource rules against that resource, to the cache.
      *
      * @param resourceId the resourceId the user wants to apply resource rules to
      * @param rules      the resource rules that apply to this resource
@@ -75,8 +75,8 @@ public class PolicyServiceCachingProxy {
     }
 
     /**
-     * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesnt exist a message is sent to the logs
-     * and a {@link PolicyService} getRecordRules() is called
+     * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesn't exist a message will be sent to the logs
+     * and a {@link PolicyService#getRecordRules(String)} is called
      *
      * @param resourceId the resourceId the user wants record rules against
      * @return the record rules that apply to the resource

@@ -36,12 +36,13 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * PolicyResponse represents the output for policy-service which will include the Rules to implement with this Resource.
- * This will be forwarded to the attribute-masking-service for preliminary processing and routing of the data.
+ * PolicyResponse represents the output for Policy Service which will include the Rules to implement with this Resource.
+ * This will be forwarded to the Attribute-Masking Service for preliminary processing and routing of the data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the attribute-masking-service.
+ * {@link PolicyResponse} is the output from the Policy Service.
+ * uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest is the input to the Attribute-Masking Service.
  */
+@SuppressWarnings({"java:S3740", "rawtypes"}) //Suppress parameterised type for generic class code smell
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PolicyResponse {
 
@@ -52,7 +53,7 @@ public final class PolicyResponse {
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
-    private final Rules rules;  //Holds all of the Rules applicable to this request
+    private final Rules rules;  //Holds the Rules applicable to this request
 
     @JsonCreator
     private PolicyResponse(
@@ -133,12 +134,12 @@ public final class PolicyResponse {
 
 
     /**
-     * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the PolicyResponse. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * PolicyResponse class.
          *
          * @return interface {@link IUserId} for the next step in the build.
@@ -149,11 +150,11 @@ public final class PolicyResponse {
         }
 
         /**
-         * Starter method for the Builder class that uses a PolicyRequest and appends the Rules.
+         * Starter method for the Builder class which uses a PolicyRequest and appends the Rules.
          * This method is called followed by the call to add rules with the IRules interface to create the
          * PolicyResponse class.
          *
-         * @param request message that has been sent to the policy-service
+         * @param request message that has been sent to the Policy Service
          * @return interface {@link IRules} for the next step in the build.
          */
         public static IRules create(final PolicyRequest request) {
@@ -206,7 +207,7 @@ public final class PolicyResponse {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
              * @return interface {@link IUser} for the next step in the build.
@@ -219,7 +220,7 @@ public final class PolicyResponse {
          */
         public interface IUser {
             /**
-             * Adds the user user information.
+             * Adds the user information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
@@ -229,7 +230,7 @@ public final class PolicyResponse {
             }
 
             /**
-             * Adds the user user information.  Uses a JsonNode string form of the information.
+             * Adds the user information. Uses a JsonNode string form of the information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
@@ -252,7 +253,7 @@ public final class PolicyResponse {
             }
 
             /**
-             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             * Adds the resource that has been requested to access. Uses a JsonNode string form of the information.
              *
              * @param resource that is requested to access
              * @return class {@link IRules} for the next step in the build.
@@ -265,7 +266,7 @@ public final class PolicyResponse {
          */
         public interface IRules {
             /**
-             * Adds the rules that has apply to this request.
+             * Adds the rules that apply to this request.
              *
              * @param rules that apply to this request.
              * @return class {@link PolicyResponse} for the completed class from the builder.

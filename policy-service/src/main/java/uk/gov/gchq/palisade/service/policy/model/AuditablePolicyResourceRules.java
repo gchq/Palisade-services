@@ -24,8 +24,8 @@ import java.util.StringJoiner;
 
 /**
  * This class is a container for {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream
- * processing.  The class represents the data after making the request for the rules. Under normal conditions
- * {@code PolicyRequest} and {@code Rules} will be non-null, indicating successful process OR {@code AuditErrorMessage}
+ * processing. The class represents the data after making the request for the rules. Under normal conditions,
+ * {@link PolicyRequest} and {@link Rules} will be non-null, indicating successful process OR {@link AuditErrorMessage}
  * when there has been an error in the process.
  */
 public final class AuditablePolicyResourceRules {
@@ -35,10 +35,7 @@ public final class AuditablePolicyResourceRules {
     private final AuditErrorMessage auditErrorMessage;
 
     private AuditablePolicyResourceRules(
-            final PolicyRequest policyRequest,
-            final Rules<LeafResource> rules,
-            final AuditErrorMessage auditErrorMessage) {
-
+            final PolicyRequest policyRequest, final Rules<LeafResource> rules, final AuditErrorMessage auditErrorMessage) {
         this.policyRequest = policyRequest;
         this.rules = rules;
         this.auditErrorMessage = auditErrorMessage;
@@ -61,61 +58,63 @@ public final class AuditablePolicyResourceRules {
 
 
     /**
-     * The static builder
+     * Builder class for the creation of instances of the AuditablePolicyRecordResponse.
+     * This is a variant of the Fluent Builder.
      */
     public static class Builder {
 
         /**
-         * The creator function
+         * Starter method for the Builder class. This method is called to start the process of creating the
+         * AuditablePolicyResourceRules class.
          *
-         * @return the composed immutable object
+         * @return public interface {@link IPolicyRequest} for the next step in the build.
          */
         public static IPolicyRequest create() {
             return request -> rules -> audit -> new AuditablePolicyResourceRules(request, rules, audit);
         }
 
         /**
-         * Compose with {@code PolicyRequest}
+         * Adds the {@link PolicyRequest} to the message.
          */
         public interface IPolicyRequest {
             /**
-             * Compose value
+             * Adds the {@link PolicyRequest} to the message.
              *
-             * @param policyRequest or null
-             * @return value object
+             * @param policyRequest or null if there was an issue processing the request
+             * @return interface {@link IRules} for the next step in the build
              */
             IRules withPolicyRequest(PolicyRequest policyRequest);
         }
 
         /**
-         * Compose with {@code Rules}
+         * Adds the {@link Rules} to the message.
          */
         public interface IRules {
             /**
-             * Compose value
+             * Adds the {@link Rules} to the message.
              *
-             * @param rules or null
-             * @return value object
+             * @param rules or null if there was an issue finding rules for the resource
+             * @return interface {@link IAuditErrorMessage} for the next step in the build
              */
             IAuditErrorMessage withRules(Rules<LeafResource> rules);
         }
 
         /**
-         * Compose with {@code AuditErrorMessage}
+         * Adds the {@link AuditErrorMessage} to the message.
          */
         public interface IAuditErrorMessage {
             /**
-             * Compose value
+             * Adds the {@link AuditErrorMessage} to the message.
              *
-             * @param audit or null
-             * @return value object
+             * @param audit or null if the request was processed successfully
+             * @return class {@link AuditablePolicyResourceRules} for the completed class from the builder.
              */
             AuditablePolicyResourceRules withAuditErrorMessage(AuditErrorMessage audit);
 
             /**
-             * Without error audit
+             * By default, add a null AuditErrorMessage to the message, implying the resource was processed successfully
              *
-             * @return the composed immutable object
+             * @return class {@link AuditablePolicyResourceRules} for the completed class from the builder.
              */
             default AuditablePolicyResourceRules withNoErrors() {
                 return this.withAuditErrorMessage(null);

@@ -66,11 +66,10 @@ class RestControllerWebMvcTest extends CommonTestData {
     void testContextLoads() {
         assertAll(
                 () -> assertThat(controller)
-                        .as("The 'controller' should not be null")
+                        .as("Check that the PolicyRestController has started successfully")
                         .isNotNull(),
-
                 () -> assertThat(mockMvc)
-                        .as("The 'mockMvc' should not be null")
+                        .as("Check that MockMvc has started successfully")
                         .isNotNull()
         );
     }
@@ -78,10 +77,17 @@ class RestControllerWebMvcTest extends CommonTestData {
     @Test
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/policy")
+        var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/policy")
                 .header(Token.HEADER, REQUEST_TOKEN)
                 .content(MAPPER.writeValueAsBytes(POLICY_REQUEST))
                 .contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.status().isAccepted());
+                .andExpect(MockMvcResultMatchers.status().isAccepted())
+                .andReturn();
+
+        // Read the response body
+        var responseBody = response.getResponse().getContentAsString();
+        assertThat(responseBody)
+                .as("Check that the response body has been returned but is empty")
+                .isEmpty();
     }
 }

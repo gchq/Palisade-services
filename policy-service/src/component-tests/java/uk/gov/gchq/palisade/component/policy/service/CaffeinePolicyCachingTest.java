@@ -39,9 +39,9 @@ import uk.gov.gchq.palisade.service.policy.rule.PassThroughRule;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -88,19 +88,13 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         }
     }
 
-    /**
-     * Tests that the service loads
-     */
     @Test
     void testContextLoads() {
         assertThat(policyService)
-                .as("The 'policyService' should not be null")
+                .as("Check that the policyService starts successfully")
                 .isNotNull();
     }
 
-    /**
-     * Tests that the correct policy is retrieved for the resource
-     */
     @Test
     void testAddedRuleIsRetrievable() {
         // Given - resources have been added as above
@@ -108,12 +102,19 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(resource.getId());
+            var recordRules = policyService.getResourceRules(resource.getId());
+            var expectedMap = new HashMap<>();
+            expectedMap.put("Does nothing", new PassThroughRule<>());
 
             // Then
             assertThat(recordRules)
                     .as("The returned rules optional should have a value present")
-                    .isPresent();
+                    .isPresent()
+                    .get()
+                    .as("Check that the rules returned contain the correct key and value")
+                    .extracting(Rules::getRules)
+                    .usingRecursiveComparison()
+                    .isEqualTo(expectedMap);
         }
     }
 
@@ -125,7 +126,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules("does not exist");
+        var recordRules = policyService.getResourceRules("does not exist");
 
         // Then
         assertThat(recordRules)
@@ -150,7 +151,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // When - we try to get the first (now-evicted) entry
         forceCleanUp();
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(makeResource.apply(0).getId());
+        var recordRules = policyService.getResourceRules(makeResource.apply(0).getId());
 
         // Then - it has been evicted
         assertThat(recordRules)
@@ -173,7 +174,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         forceCleanUp();
 
         // When - an old entry is requested
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
+        var recordRules = policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
         assertThat(recordRules)

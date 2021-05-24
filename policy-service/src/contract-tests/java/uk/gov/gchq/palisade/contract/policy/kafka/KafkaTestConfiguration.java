@@ -86,22 +86,21 @@ public class KafkaTestConfiguration {
         DockerImageName kafkaImageName;
         try {
             kafkaImageName = DockerImageName.parse(fullImageName)
-                .asCompatibleSubstituteFor(defaultImageName);
+                    .asCompatibleSubstituteFor(defaultImageName);
             kafkaImageName.assertValid();
         } catch (IllegalArgumentException ex) {
             LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
             kafkaImageName = DockerImageName.parse(defaultImageName);
         }
         final KafkaContainer container = new KafkaContainer(kafkaImageName)
-            .withReuse(true)
-            .withStartupTimeout(Duration.ofMinutes(1))
-            .withStartupAttempts(3);
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3);
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         container.start();
 
         createTopics(this.topics, container);
-
         return container;
     }
 
@@ -136,26 +135,26 @@ public class KafkaTestConfiguration {
         return brokers;
     }
 
-    // Serializer for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    // Serialiser for upstream test input
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode policyRequest) {
             try {
                 return MAPPER.writeValueAsBytes(policyRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + policyRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + policyRequest.toString(), e);
             }
         }
     }
 
-    // Deserializer for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    // Deserialiser for downstream test output
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] policyResponse) {
             try {
                 return MAPPER.readTree(policyResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(policyResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(policyResponse), e);
             }
         }
     }
