@@ -30,23 +30,23 @@ In the subsequent request by the client to the Data Service, the Filtered-Resour
 The following diagram shows in a high level the services and their relative relationships with each other. 
 Communications between the services and their related support servers utilise Kafka streaming. 
 
-For a detailed description of the services' workflow see [Appendix 1 Palisade Flow Diagram](#appendix-1-palisade-flow-diagram).  
+For a detailed description of the services' workflow see [Appendix I Palisade Flow Diagram](#appendix-i-palisade-flow-diagram).  
 For a more technical description of each of the services, follow the links below.
 
 <!--- 
 See doc/services.drawio for the source of this diagram
 --->
-![Service Sequence diagram ](doc/services.png)
+![Service Sequence diagram](doc/services.png)
 
-[Attribute-Masking Service](attribute-masking-service/readme.md) creates a redacted version of the rescue.  
-[Audit Service](audit-service/readme.md) operates in the background providing an audit record of the process.  
-[Data Service](data-service/readme.md) initiates the process of passing the resources to the client.  
-[Filtered-Resource Service](filtered-resource-service/readme.md) readies the resources and later handles passing the data to the client.  
-[Palisade Service](palisade-service/readme.md) takes client resource requests and starts the process.  
-[Policy Service](policy-service/readme.md) provides the policy that are to be applied to the data.  
-[Resource Service](resource-service/readme.md) identifies the resources that have been requested.  
-[Topic-Offset Service](topic-offset-service/readme.md) identifies the start and end of the resources for a request.  
-[User Service](user-service/readme.md) identifies the user in the context of the Palisade service.  
+[Attribute-Masking Service](attribute-masking-service/README.md) creates a redacted version of the rescue.  
+[Audit Service](audit-service/README.md) operates in the background providing an audit record of the process.  
+[Data Service](data-service/README.md) initiates the process of passing the resources to the client.  
+[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
+[Palisade Service](palisade-service/README.md) takes client resource requests and starts the process.  
+[Policy Service](policy-service/README.md) provides the policy that are to be applied to the data.  
+[Resource Service](resource-service/README.md) identifies the resources that have been requested.  
+[Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
+[User Service](user-service/README.md) identifies the user in the context of the Palisade service.  
 
 ## Project Build
 
@@ -200,6 +200,7 @@ kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-s
 Use the `-h` flag to see usage instructions.
 
 
-## Appendix 1 Palisade Flow Diagram
 
-![Palisade Flow Diagram ](doc/Palisade-Flow-Diagram.png)
+### Appendix I Palisade Flow Diagram
+
+![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
