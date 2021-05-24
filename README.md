@@ -42,15 +42,15 @@ See doc/services.drawio for the source of this diagram
 --->
 ![Service Sequence diagram ](doc/services.png)
 
-[Palisade Service](palisade-service/readme.md) takes client resource requests and starts the process.  
-[User Service](user-service/readme.md) identifies the user in the context of the Palisade service.  
-[Resource Service](resource-service/readme.md) identifies the resources that have been requested.  
-[Policy Service](policy-service/readme.md) provides the policy that are to be applied to the data.  
 [Attribute-Masking Service](attribute-masking-service/readme.md) creates a redacted version of the rescue.  
+[Audit Service](audit-service/readme.md) operates in the background providing an audit record of the process.
+[Data Service](data-service/readme.md) initiates the process of passing the resources to the client.
+[Filtered-Resource Service](filtered-resource-service/readme.md) readies the resources and later handles passing the data to the client.
+[Palisade Service](palisade-service/readme.md) takes client resource requests and starts the process.
+[Policy Service](policy-service/readme.md) provides the policy that are to be applied to the data.
+[Resource Service](resource-service/readme.md) identifies the resources that have been requested.
 [Topic-Offset Service](topic-offset-service/readme.md) identifies the start and end of the resources for a request.  
-[Filtered-Resource Service](filtered-resource-service/readme.md) readies the resources and later handles passing the data to the client.  
-[Data Service](data-service/readme.md) initiates the process of passing the resources to the client.  
-[Audit Service](audit-service/readme.md) operates in the background providing an audit record of the process.  
+[User Service](user-service/readme.md) identifies the user in the context of the Palisade service.
 
 ## Project Build
 
