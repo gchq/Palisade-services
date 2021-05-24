@@ -35,7 +35,7 @@ For a detailed description of the services' workflow see
 See doc/services.drawio for the source of this diagram
 --->
 [Appendix I Palisade Flow Diagram](#appendix-i-palisade-flow-diagram).  
-For a more technical description of each of the services, follow the related links below.
+For a more technical description of each of the services, follow the links below.
 
 <!--- 
 See doc/services.drawio for the source of this diagram
