@@ -63,7 +63,7 @@
         <testcontainers.kafka.image>confluentinc/cp-kafka:5.5.1</testcontainers.kafka.image>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
-        <dockerfile.base.image>openjdk@sha256:c24e557d6cb84410abfae6570ea9ec5aa6fe2525ec0e536bdd14a66a0e4ab44e</dockerfile.base.image>
+        <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
         <!-- Prefix image tag with image type being used -->
         <dockerfile.base.tag>jre</dockerfile.base.tag>
     </properties>
@@ -192,7 +192,7 @@
             <!-- Use a JRE image, mirrors base config -->
             <id>jrei</id>
             <properties>
-                <dockerfile.base.image>openjdk@sha256:c24e557d6cb84410abfae6570ea9ec5aa6fe2525ec0e536bdd14a66a0e4ab44e</dockerfile.base.image>
+                <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
                 <dockerfile.base.tag>jre</dockerfile.base.tag>
             </properties>
         </profile>
