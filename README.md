@@ -21,7 +21,7 @@ limitations under the License.
 ## Overview
 
 From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
-This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions for the user making the request.
+This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
 
 Under the hood, the request involves sending a message that is processed sequentially by a set of the micro-services starting first with Palisade Service.
 With each service, the message is modified and then forwarded onto the next service with the end goal of producing resources ready to be viewed by the client.
@@ -206,4 +206,3 @@ Use the `-h` flag to see usage instructions.
 #Appendix I Palisade Flow Diagram
 
 ![Palisade Flow Diagram ](doc/palisade_flow_diagram.png)
-
