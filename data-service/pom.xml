@@ -64,7 +64,7 @@
         <testcontainers.redis.image>redis:6-alpine</testcontainers.redis.image>
 
         <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
-        <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
+        <dockerfile.base.image>openjdk@sha256:775cd07d9c8c44db4a329269b128065dd86549675ea4db70b6201f3081eb2d89</dockerfile.base.image>
         <!-- Prefix image tag with image type being used -->
         <dockerfile.base.tag>jre</dockerfile.base.tag>
     </properties>
@@ -202,18 +202,18 @@
             </build>
         </profile>
         <profile>
-            <!-- Use a JRE image, mirrors base config -->
+            <!-- Use a JRE image, openjdk:11-jre-slim linux/amd64, mirrors base config -->
             <id>jrei</id>
             <properties>
-                <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
+                <dockerfile.base.image>openjdk@sha256:775cd07d9c8c44db4a329269b128065dd86549675ea4db70b6201f3081eb2d89</dockerfile.base.image>
                 <dockerfile.base.tag>jre</dockerfile.base.tag>
             </properties>
         </profile>
         <profile>
-            <!-- Use a JDK image -->
+            <!-- Use a JDK image, openjdk:11-jdk-slim linux/amd64 -->
             <id>jdki</id>
             <properties>
-                <dockerfile.base.image>openjdk@sha256:79d31d2bce83bb2a8449700d7d6c3ce5ae178792c52b906cb144a3c72671875d</dockerfile.base.image>
+                <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
                 <dockerfile.base.tag>jdk</dockerfile.base.tag>
             </properties>
         </profile>
