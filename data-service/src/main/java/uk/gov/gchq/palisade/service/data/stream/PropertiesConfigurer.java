@@ -125,7 +125,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                 .map(EnumerablePropertySource::getPropertyNames)
                 .flatMap(Arrays::stream)
                 .distinct()
-                .filter(akka -> akka.startsWith("akka"))
+                .filter(akka -> akka.startsWith("akka") || akka.startsWith("alpakka"))
                 .collect(Collectors.toMap(Function.identity(), environment::getProperty));
     }
 
