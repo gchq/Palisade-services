@@ -17,6 +17,8 @@ FROM $BASE_IMG
 
 ARG NETCAT_VERSION=1.10-41.1
 ARG CURL_VERSION=7.64.0-4+deb10u2
+RUN apt search curl
+
 RUN apt-get update \
    && apt-get install -y netcat=${NETCAT_VERSION} curl=${CURL_VERSION} --no-install-recommends \
    && apt-get clean \
