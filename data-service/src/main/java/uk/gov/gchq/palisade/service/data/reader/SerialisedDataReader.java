@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -177,26 +176,6 @@ public abstract class SerialisedDataReader implements DataReader {
     public void setDefaultSerialiser(final Serialiser<?> defaultSerialiser) {
         requireNonNull(defaultSerialiser);
         this.defaultSerialiser = defaultSerialiser;
-    }
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof SerialisedDataReader)) {
-            return false;
-        }
-        final SerialisedDataReader that = (SerialisedDataReader) o;
-        return Objects.equals(defaultSerialiser, that.defaultSerialiser) &&
-                Objects.equals(serialisers, that.serialisers);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(defaultSerialiser, serialisers);
     }
 
     @Override
