@@ -27,7 +27,7 @@ Under the hood, the request involves sending a message that is processed sequent
 With each service, the message is modified and then forwarded onto the next service with the end goal of producing resources ready to be viewed by the client.
 This initial sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
 In the subsequent request by the client to the Data Service, the Filtered-Resource is requested to then proceed with passing this data to the client.
-The following diagram shows in a high level the services and their relative relationships with each other. 
+The following diagram shows at a high level the services and their relative relationships with each other. 
 Communications between the services and their related support servers utilise Kafka streaming. 
 
 For a detailed description of the services' workflow see [Appendix I - Palisade Flow Diagram](#appendix-i).  
