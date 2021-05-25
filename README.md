@@ -46,7 +46,7 @@ See doc/services.drawio for the source of this diagram
 [User Service](user-service/README.md) identifies the user in the context of the Palisade service.  
 [Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
 [Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
-[Attribute-Masking Service](attribute-masking-service/README.md) creates a redacted version of the rescue.  
+[Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
 [Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
 [Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
 
