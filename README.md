@@ -204,5 +204,3 @@ For a detailed description of the services' workflow see
 ### Appendix I
 
 ![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
-
-[]: #appendix
