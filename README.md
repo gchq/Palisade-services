@@ -38,15 +38,17 @@ See doc/services.drawio for the source of this diagram
 --->
 ![Service Sequence diagram](doc/services.png)
 
-[Attribute-Masking Service](attribute-masking-service/README.md) creates a redacted version of the rescue.  
-[Audit Service](audit-service/README.md) operates in the background providing an audit record of the process.  
-[Data Service](data-service/README.md) initiates the process of passing the resources to the client.  
-[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
 [Palisade Service](palisade-service/README.md) takes client resource requests and starts the process.  
-[Policy Service](policy-service/README.md) provides the policy that are to be applied to the data.  
-[Resource Service](resource-service/README.md) identifies the resources that have been requested.  
-[Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
 [User Service](user-service/README.md) identifies the user in the context of the Palisade service.  
+[Resource Service](resource-service/README.md) identifies the resources that have been requested.  
+[Policy Service](policy-service/README.md) provides the policy that are to be applied to the data.  
+[Attribute-Masking Service](attribute-masking-service/README.md) creates a redacted version of the rescue.  
+[Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
+[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
+
+[Data Service](data-service/README.md) initiates the process of passing the resources to the client.  
+
+[Audit Service](audit-service/README.md) operates in the background providing an audit record of the process.    
 
 ## Project Build
 
