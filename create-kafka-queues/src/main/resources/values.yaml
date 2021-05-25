@@ -45,11 +45,9 @@ kafkaCreateTopics:
 
 waitForServices:
 - name: kafka
-  tpl: "palisade.kafka.fullname"
-  port: 9092
+  tpl: "palisade.kafka.url"
 - name: zookeeper
-  tpl: "palisade.zookeeper.fullname"
-  port: 2181
+  tpl: "palisade.zookeeper.url"
 
 image:
   name: @artifactId@
