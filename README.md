@@ -50,7 +50,7 @@ See doc/services.drawio for the source of this diagram
 [Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
 [Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
 
-[Data Service](data-service/README.md) initiates the process of passing the resources to the client.  
+[Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
 
 [Audit Service](audit-service/README.md) operates in the background providing an audit log for each request.    
 
