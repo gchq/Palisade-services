@@ -16,7 +16,7 @@ limitations under the License.
 
 # <img src="logos/logo.svg" width="180">
 
-### A Tool for Complex and Scalable Data Access Policy Enforcement
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
 ## Overview
 
