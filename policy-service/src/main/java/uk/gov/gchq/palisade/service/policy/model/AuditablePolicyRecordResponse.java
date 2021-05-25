@@ -61,48 +61,50 @@ public final class AuditablePolicyRecordResponse {
     }
 
     /**
-     * The static builder
+     * Builder class for the creation of instances of the AuditablePolicyRecordResponse.
+     * This is a variant of the Fluent Builder
      */
     public static class Builder {
 
         /**
-         * The creator function
+         * Starter method for the Builder class. This method is called to start the process of creating the
+         * AuditablePolicyRecordResponse class.
          *
-         * @return the composed immutable object
+         * @return public interface {@link IPolicyResponse} for the next step in the build.
          */
         public static IPolicyResponse create() {
             return request -> audit -> new AuditablePolicyRecordResponse(request, audit);
         }
 
         /**
-         * Compose with {@code PolicyResponse}
+         * Adds the PolicyResponse to the message.
          */
         public interface IPolicyResponse {
             /**
-             * Compose value
+             * Adds the PolicyResponse to the message
              *
-             * @param response value or null
-             * @return value object
+             * @param response a PolicyResponse or null if there was an issue retrieving the rules, or no rules existed
+             * @return interface {@link IAuditErrorMessage} for the next step in the build
              */
             IAuditErrorMessage withPolicyResponse(PolicyResponse response);
         }
 
         /**
-         * Compose with {@code AuditErrorMessage}
+         * Adds the AuditErrorMessage to the message.
          */
         public interface IAuditErrorMessage {
             /**
-             * Compose value
+             * Adds the AuditErrorMessage to the message.
              *
-             * @param audit value or null
-             * @return value object
+             * @param audit an AuditErrorMessage if there was an issue retrieving rules, or no rules existed for this resource, or null if a PolicyResponse was created
+             * @return class {@link AuditablePolicyRecordResponse} for the completed class from the builder.
              */
             AuditablePolicyRecordResponse withAuditErrorMessage(AuditErrorMessage audit);
 
             /**
-             * Without error audit
+             * By default, add no AuditErrorMessage to the builder
              *
-             * @return the composed immutable object
+             * @return class {@link AuditablePolicyRecordResponse} for the completed class from the builder.
              */
             default AuditablePolicyRecordResponse withNoErrors() {
                 return this.withAuditErrorMessage(null);

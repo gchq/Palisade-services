@@ -108,8 +108,10 @@ curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-reques
     "type": "uk.gov.gchq.palisade.test.TestType"
   },
   "rules": {
-    "message": "no rules set",
-    "rules": {}
+    "message": "Some message about the policy",
+    "rules": {
+      "Serialised format rule":"uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule"
+    }
   }
 }'
 ```
