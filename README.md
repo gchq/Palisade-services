@@ -42,7 +42,7 @@ See doc/services.drawio for the source of this diagram
 --->
 ![Service Sequence diagram](doc/services.png)
 
-[Palisade Service](palisade-service/README.md) takes client resource requests and starts the process.  
+[Palisade Service](palisade-service/README.md) recieves a clients request, returns a unique token and initiates the processing of resources.
 [User Service](user-service/README.md) identifies the user in the context of the Palisade service.  
 [Resource Service](resource-service/README.md) identifies the resources that have been requested.  
 [Policy Service](policy-service/README.md) provides the policy that are to be applied to the data.  
