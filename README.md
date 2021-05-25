@@ -43,7 +43,7 @@ See doc/services.drawio for the source of this diagram
 ![Service Sequence diagram](doc/services.png)
 
 [Palisade Service](palisade-service/README.md) recieves a clients request, returns a unique token and initiates the processing of resources.
-[User Service](user-service/README.md) identifies the user in the context of the Palisade service.  
+[User Service](user-service/README.md) connects to User Service providers to ensure the user exists.  
 [Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
 [Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
 [Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
