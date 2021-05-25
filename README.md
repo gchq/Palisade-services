@@ -24,9 +24,13 @@ From the client’s perspective, they submit a request to examine data and recei
 This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
 
 Under the hood, the request involves sending a message that is processed sequentially by a set of the micro-services starting first with Palisade Service.
-With each service, the message is modified and then forwarded onto the next service with the end goal of producing resources ready to be viewed by the client.
-This initial sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
-In the subsequent request by the client to the Data Service, the service reads the resource and returns it to the client (after applying relevant policies to the data).
+The Palisade Service will perform two tasks.
+First it will return a reference, a token back to the client that will uniquely identify this request.
+This token is used throughout the application to tie every aspect of the process to this unique identifier and is later used by the client to retrieve the resources available for this request. 
+The second task for the Palisade Service is to initiate the processing of the request by forwarding it onto the next service in the sequence (in this case the User Service).
+The service will perform its required task and then forward the message onto the next service with the end goal of producing resources ready to be viewed by the client.
+This sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
+In the subsequent request by the client to the Data Service, the service returns, one-by-one upon request over a websocket, metadata for a single resource (e.g. a file) they are authorised to view in some capacity.
 The following diagram shows at a high level the services and their relative relationships with each other. 
 Communications between the services and their related support servers utilise Kafka streaming. 
 
