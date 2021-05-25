@@ -52,7 +52,7 @@ See doc/services.drawio for the source of this diagram
 
 [Data Service](data-service/README.md) initiates the process of passing the resources to the client.  
 
-[Audit Service](audit-service/README.md) operates in the background providing an audit record of the process.    
+[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request.    
 
 ## Project Build
 
