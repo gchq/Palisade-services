@@ -16,7 +16,7 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
-# Attribute-Masking-Service
+# Attribute-Masking Service
 
 ## Flow of Control
 
