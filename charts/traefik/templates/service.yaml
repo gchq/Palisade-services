@@ -39,3 +39,10 @@ spec:
   selector:
     app.kubernetes.io/name: traefik
     app.kubernetes.io/part-of: traefik
+
+{{/*  tls:*/}}
+{{/*    stores:*/}}
+{{/*      default:*/}}
+{{/*        defaultCertificate:*/}}
+{{/*          certFile: /traefikCertificate.crt*/}}
+{{/*          keyFile: /traefikPrivate.key*/}}

@@ -16,8 +16,11 @@ container:
   args:
     - --api.insecure
     - --accesslog
+#    - --defaultEntryPoints=["http","https"]
     - --entrypoints.web.Address=:80
     - --entrypoints.tls.Address=:443
+#    - --entrypoints.tls.certificates.CertFile="/ssl/traefikCertificate.crt"
+#    - --entrypoints.tls.certificates.KeyFile="/ssl/traefikPrivate.key"
     - --serverstransport.insecureskipverify
     - --providers.kubernetescrd
     - --ping=true
