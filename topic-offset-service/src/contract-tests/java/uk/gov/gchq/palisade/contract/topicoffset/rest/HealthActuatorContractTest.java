@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Test checks the services health endpoint for the Topic-Offset-Service
+ * Test checks the services health endpoint for the Topic-Offset Service
  */
 @SpringBootTest(
         classes = {TopicOffsetApplication.class},

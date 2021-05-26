@@ -33,13 +33,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The TopicOffsetRequest is the input for topic-offset-service.  This is used to optimise the later retrieval of the
+ * The TopicOffsetRequest is the input for Topic-Offset Service. This is used to optimise the later retrieval of the
  * data for the client. TopicOffsetResponse is the output for this service.
  * Note there are three classes that effectively represent the same data but under a slightly different transformation:
  * <ul>
- * <li> {@code uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse} is the output from the attribute-masking-service.
- * <li> {@code uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest} is the input for this the topic-offset-service.
- * <li> {@code uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest} is the input for this the filtered-resource-service.
+ * <li> {@code uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse} is the output from the Attribute-Masking Service.
+ * <li> {@link TopicOffsetRequest} is the input for this the Topic-Offset Service.
  * </ul>
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -100,12 +99,12 @@ public final class TopicOffsetRequest {
 
 
     /**
-     * Builder class for the creation of instances of the TopicOffsetRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the TopicOffsetRequest. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * TopicOffsetRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.
@@ -157,7 +156,7 @@ public final class TopicOffsetRequest {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
              * @return interface {@link IResource} for the next step in the build.
@@ -181,7 +180,7 @@ public final class TopicOffsetRequest {
             }
 
             /**
-             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             * Adds the resource that has been requested to access. Uses a JsonNode string form of the information.
              *
              * @param resource that is requested to access.
              * @return interface {@link TopicOffsetRequest} for the completed class from the builder.

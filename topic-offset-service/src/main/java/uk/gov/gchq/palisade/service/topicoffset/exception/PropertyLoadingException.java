@@ -16,10 +16,12 @@
 
 package uk.gov.gchq.palisade.service.topicoffset.exception;
 
+import uk.gov.gchq.palisade.service.topicoffset.stream.PropertiesConfigurer;
+
 /**
  * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
- * Should only be thrown by a {@link uk.gov.gchq.palisade.service.topicoffset.stream.PropertiesConfigurer}
- * when loading Spring YAML config and converting to Akka HOCON config
+ * Should only be thrown by a {@link PropertiesConfigurer}
+ * when loading Spring YAML config and converting to Akka HOCON config.
  */
 public class PropertyLoadingException extends RuntimeException {
 

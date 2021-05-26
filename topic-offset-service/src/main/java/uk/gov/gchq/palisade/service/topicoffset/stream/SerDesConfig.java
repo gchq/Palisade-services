@@ -24,7 +24,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
@@ -32,15 +31,15 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * Static configuration for kafka key/value serialisers/deserialisers
+ * The static configuration for kafka key/value serialisers/deserialisers
  * - Each input has a pair of key/value deserialisers
  * - Each output has a pair of key/value serialisers
- * In general, the keys are not used so the choice of serialiser is not important
+ * In general, the keys are not used, so the choice of serialiser is not important
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final String SERIALISATION_FAILED_MESSAGE = "Failed to serialise ";
+    private static final String DESERIALISATION_FAILED_MESSAGE = "Failed to deserialise ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -52,7 +51,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> maskedResourceKeySerializer() {
+    public static Serializer<String> maskedResourceKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -62,12 +61,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetRequest)
      */
-    public static Serializer<TopicOffsetRequest> maskedResourceValueSerializer() {
+    public static Serializer<TopicOffsetRequest> maskedResourceValueSerialiser() {
         return (String ignored, TopicOffsetRequest topicOffsetRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(topicOffsetRequest);
             } catch (IOException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + topicOffsetRequest.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + topicOffsetRequest.toString(), e);
             }
         };
     }
@@ -77,7 +76,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> maskedResourceKeyDeserializer() {
+    public static Deserializer<String> maskedResourceKeyDeserialiser() {
         return new StringDeserializer();
     }
 
@@ -86,12 +85,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (TopicOffsetRequest)
      */
-    public static Deserializer<TopicOffsetRequest> maskedResourceValueDeserializer() {
+    public static Deserializer<TopicOffsetRequest> maskedResourceValueDeserialiser() {
         return (String ignored, byte[] topicOffsetRequest) -> {
             try {
                 return MAPPER.readValue(topicOffsetRequest, TopicOffsetRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(topicOffsetRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALISATION_FAILED_MESSAGE + new String(topicOffsetRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -101,7 +100,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> maskedResourceOffsetKeySerializer() {
+    public static Serializer<String> maskedResourceOffsetKeySerialiser() {
         return new StringSerializer();
     }
 
@@ -110,36 +109,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetResponse)
      */
-    public static Serializer<TopicOffsetResponse> maskedResourceOffsetValueSerializer() {
+    public static Serializer<TopicOffsetResponse> maskedResourceOffsetValueSerialiser() {
         return (String ignored, TopicOffsetResponse topicOffsetResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(topicOffsetResponse);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + topicOffsetResponse.toString(), e);
-            }
-        };
-    }
-
-    /**
-     * Kafka key serialiser for downstream messages going out as errors
-     *
-     * @return an appropriate key serialiser for the topic's message content
-     */
-    public static Serializer<String> errorKeySerializer() {
-        return new StringSerializer();
-    }
-
-    /**
-     * Kafka value serialiser for downstream messages going out as errors
-     *
-     * @return an appropriate value serialiser for the topic's message content (AuditMessage)
-     */
-    public static Serializer<AuditErrorMessage> errorValueSerializer() {
-        return (String ignored, AuditErrorMessage auditErrorMessage) -> {
-            try {
-                return MAPPER.writeValueAsBytes(auditErrorMessage);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALISATION_FAILED_MESSAGE + topicOffsetResponse.toString(), e);
             }
         };
     }

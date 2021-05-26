@@ -46,11 +46,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Component tests for TopicOffsetRestController.
  * A request of type {@link TopicOffsetRequest} as a Json string, and HTTP header with a required Token
- * and optionally a StreamMarker is sent.  The response will either be a {@link TopicOffsetResponse} or null
+ * and optionally a StreamMarker is sent. The response will either be a {@link TopicOffsetResponse} or null.
  */
 @WebMvcTest(controllers = {TopicOffsetRestController.class})
 @ContextConfiguration(classes = {TopicOffsetRestControllerTest.class, TopicOffsetRestController.class})
 class TopicOffsetRestControllerTest {
+
+    public static final String SERVICE_ENDPOINT_URL = "/api/offset";
+    public static final String TEST_REQUEST_TOKEN = "test-request-token";
+    public static final String MESSAGE_BODY_KEY = "$";
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,10 +63,6 @@ class TopicOffsetRestControllerTest {
 
     @MockBean
     private KafkaProducerService serviceMock;
-
-    public static final String SERVICE_ENDPOINT_URL = "/api/offset";
-    public static final String TEST_REQUEST_TOKEN = "test-request-token";
-    public static final String MESSAGE_BODY_KEY = "$";
 
     @BeforeEach
     void setUp() {
@@ -86,12 +86,12 @@ class TopicOffsetRestControllerTest {
     }
 
     /**
-     * This permutation is for a request that comes in for an end of messages indicator, StreamMarker is set to START.
-     * Test should accept an incoming request including {@link TopicOffsetRequest}, {@link Token}, and a {@link StreamMarker}
-     * as a POST to the the URL "/api/offset" as a JSON String. Response should be a 2XX status and null body.
+     * Test should accept an incoming request including {@link TopicOffsetRequest}, {@link Token}, and a {@link StreamMarker#START}
+     * as a POST to the URL "/api/offset" as a JSON String. Response should be a 2XX status and null body.
      *
      * @throws Exception if it fails to process the request
      */
+    @SuppressWarnings("java:S112") // Suppress specific exception smell
     @Test
     void testControllerWithOffsetForTopic() throws Exception {
         // Given this is an offset for the topic
