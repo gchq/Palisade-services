@@ -30,6 +30,8 @@ import org.springframework.context.event.EventListener;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
 
+import javax.annotation.PreDestroy;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,22 +53,23 @@ public class TopicOffsetApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopicOffsetApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final Executor executor;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param materialiser the Akka {@link Materializer} configured to be used
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public TopicOffsetApplication(
             final Collection<RunnableGraph<?>> runners,
-            final Materializer materializer,
+            final Materializer materialiser,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
-        this.materializer = materializer;
+        this.materialiser = materialiser;
         this.executor = executor;
     }
 
@@ -87,11 +90,21 @@ public class TopicOffsetApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
+        runnerThreads.addAll(runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
+                .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
-
         runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }
