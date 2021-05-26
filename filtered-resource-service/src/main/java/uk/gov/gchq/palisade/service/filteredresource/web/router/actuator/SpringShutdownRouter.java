@@ -16,34 +16,32 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
 
+import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.server.Directives;
 import akka.http.javadsl.server.Route;
 import akka.http.scaladsl.model.StatusCode;
-import org.springframework.boot.ExitCodeGenerator;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.actuate.context.ShutdownEndpoint;
 
 /**
- * Route for "/shutdown" to the Spring {@link org.springframework.boot.SpringApplication#exit(ApplicationContext, ExitCodeGenerator...)}
- * static method, to imitate the equivalent spring actuator
+ * Route for "/shutdown" to the Spring {@link ShutdownEndpoint#shutdown()}
+ * method, to imitate the equivalent spring actuator.
  */
 public class SpringShutdownRouter implements ActuatorSupplier {
     private static final StatusCode HTTP_OK = StatusCode.int2StatusCode(200);
 
-    private final ApplicationContext ctx;
+    private final ShutdownEndpoint springShutdownEndpoint;
 
     /**
-     * POSTable endpoint to call the {@link SpringApplication#exit(ApplicationContext, ExitCodeGenerator...)}
+     * POSTable endpoint to call the {@link ShutdownEndpoint#shutdown()}
      *
-     * @param applicationContext the spring application context
+     * @param shutdownEndpoint the spring shutdown endpoint
      */
-    public SpringShutdownRouter(final ApplicationContext applicationContext) {
-        this.ctx = applicationContext;
+    public SpringShutdownRouter(final ShutdownEndpoint shutdownEndpoint) {
+        this.springShutdownEndpoint = shutdownEndpoint;
     }
 
     private Route postShutdown() {
-        SpringApplication.exit(ctx, () -> 0);
-        return Directives.complete(HTTP_OK);
+        return Directives.complete(HTTP_OK, springShutdownEndpoint.shutdown(), Jackson.marshaller());
     }
 
     /**

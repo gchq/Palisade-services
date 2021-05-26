@@ -33,6 +33,8 @@ import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 
+import javax.annotation.PreDestroy;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -49,6 +51,7 @@ public class PalisadeApplication {
     private final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner;
     private final PalisadeService palisadeService;
     private final Materializer materialiser;
+    private CompletableFuture<?> runnerThread = new CompletableFuture<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -84,8 +87,20 @@ public class PalisadeApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
+        runnerThread = CompletableFuture.supplyAsync(() -> runner.run(materialiser));
         palisadeService.registerRequestSink(runner.run(materialiser)
                 .mapMaterializedValue(notUsed -> CompletableFuture.completedFuture(Done.done())));
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThread.cancel(true);
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }
 

@@ -20,7 +20,7 @@ import org.apache.kafka.common.header.Headers;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 /**
- * Service contract for topic-offset-service.  Implementations are expected to return true when the condition are met
+ * Service contract for Topic-Offset Service. Implementations are expected to return true when the condition are met
  * for sending a message with the offset setting.
  */
 public interface TopicOffsetService {

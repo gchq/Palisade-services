@@ -37,7 +37,10 @@ import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 
+import javax.annotation.PreDestroy;
+
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -56,28 +59,29 @@ public class ResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final Executor executor;
     private final PersistenceLayer persistence;
     private final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners         collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer    the Akka {@link Materializer} configured to be used
+     * @param materialiser    the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor        an executor for any {@link CompletableFuture}s (preferably the application task executor)
      * @param resourceBuilder a {@link Supplier} of resources as built by a ResourcePrepopulationFactory,
      *                        but with a connection detail attached
      */
     public ResourceApplication(final Set<RunnableGraph<?>> runners,
-                               final Materializer materializer,
+                               final Materializer materialiser,
                                final PersistenceLayer persistence,
                                @Qualifier("configuredResourceBuilder") final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
                                @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = Collections.unmodifiableSet(runners);
-        this.materializer = materializer;
+        this.materialiser = materialiser;
         this.persistence = persistence;
         this.executor = executor;
         this.resourceBuilder = resourceBuilder;
@@ -117,16 +121,26 @@ public class ResourceApplication {
                             .via(persistence.withPersistenceById(rootResource.getId()))
                             .via(persistence.withPersistenceByType(leafResource.getType()))
                             .via(persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat()))
-                            .runWith(loggingSink, materializer)
+                            .runWith(loggingSink, materialiser)
                             .toCompletableFuture().join();
                 });
 
-        // Then start up kafka
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
+        // Then start up all runners
+        runnerThreads.addAll(runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
+                .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
-
         runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }
