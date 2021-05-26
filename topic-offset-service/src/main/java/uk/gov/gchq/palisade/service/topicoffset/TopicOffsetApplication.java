@@ -40,11 +40,11 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
- * Topic Offset Service is a performance optimisation for the stream message process.  The service will look for the
+ * Topic Offset Service is a performance optimisation for the stream message process. The service will look for the
  * indication that this message is the first of a set of response messages for a specific request. It will
  * be watching for a Kafka header with the message {Stream-Marker=Start, Token=xxxx-xxxx-xxxx}. It will take this
- * information along with the commit offset of this stream and this will be written to the downstream queue.  This can
- * then be used to optimise the start up client connections by the filtered-resource-service.
+ * information along with the commit offset of this stream and this will be written to the downstream queue. This can
+ * then be used to optimise the start up client connections by the Filtered-Resource Service.
  */
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
@@ -61,7 +61,7 @@ public class TopicOffsetApplication {
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materialiser the Akka {@link Materializer} configured to be used
+     * @param materialiser the Akka {@link Materializer} responsible for turning a stream blueprint into a running stream.
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public TopicOffsetApplication(
@@ -74,9 +74,9 @@ public class TopicOffsetApplication {
     }
 
     /**
-     * Starts the Topic Offset Service
+     * Starts the Topic-Offset Service
      *
-     * @param args required input for the main method
+     * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
         LOGGER.debug("TopicOffsetApplication started with: {}", (Object) args);
@@ -98,7 +98,7 @@ public class TopicOffsetApplication {
     }
 
     /**
-     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     * Cancels any futures that are running and then terminates the Akka Actor, so the service can be terminated safely.
      */
     @PreDestroy
     public void onExit() {

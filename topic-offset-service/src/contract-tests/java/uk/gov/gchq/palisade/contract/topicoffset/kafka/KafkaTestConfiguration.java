@@ -83,6 +83,7 @@ public class KafkaTestConfiguration {
     }
 
     @Bean
+    @SuppressWarnings("java:S112") // Suppress specific exception smell
     KafkaContainer kafkaContainer() throws Exception {
         DockerImageName kafkaImageName;
         try {
@@ -117,7 +118,7 @@ public class KafkaTestConfiguration {
     ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
         return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                 props.getAllActiveProperties().entrySet().stream()
-                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                        .filter(kafkaPort -> !"akka.discovery.config.services.kafka.endpoints[0].port".equals(kafkaPort.getKey())),
                 Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
     }
@@ -132,30 +133,30 @@ public class KafkaTestConfiguration {
     static String getKafkaBrokers(final KafkaContainer kafka) {
         Integer mappedPort = kafka.getFirstMappedPort();
         String brokers = String.format("%s:%d", "localhost", mappedPort);
-        LOGGER.info("brokers: " + brokers);
+        LOGGER.info("brokers: {}", brokers);
         return brokers;
     }
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
+    static class RequestSerialiser implements Serializer<JsonNode> {
         @Override
         public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
             try {
                 return MAPPER.writeValueAsBytes(topicOffsetRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialise " + topicOffsetRequest.toString(), e);
             }
         }
     }
 
     // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    static class ResponseDeserialiser implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
             try {
                 return MAPPER.readTree(topicOffsetResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
+                throw new SerializationFailedException("Failed to deserialise " + new String(topicOffsetResponse), e);
             }
         }
     }

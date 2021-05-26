@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.topicoffset.model;
 
 /**
  * Marks the start or end of a stream of messages.
- * Will be present in headers to indicate the start or end of message in the stream.  This header will not be present
+ * Will be present in headers to indicate the start or end of message in the stream. This header will not be present
  * set for all other messages.
  */
 public enum StreamMarker {

@@ -36,7 +36,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
@@ -59,14 +58,13 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, TopicOffsetRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, TopicOffsetResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
     Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, TopicOffsetRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.maskedResourceKeySerializer(),
-                SerDesConfig.maskedResourceValueSerializer());
+                SerDesConfig.maskedResourceKeySerialiser(),
+                SerDesConfig.maskedResourceValueSerialiser());
 
         return INPUT_COMPONENTS.plainProducer(producerSettings);
     }
@@ -75,8 +73,8 @@ public class AkkaComponentsConfig {
     Source<CommittableMessage<String, TopicOffsetRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, TopicOffsetRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.maskedResourceKeyDeserializer(),
-                SerDesConfig.maskedResourceValueDeserializer());
+                SerDesConfig.maskedResourceKeyDeserialiser(),
+                SerDesConfig.maskedResourceValueDeserialiser());
 
         Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
@@ -90,21 +88,11 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, TopicOffsetResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, TopicOffsetResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.maskedResourceOffsetKeySerializer(),
-                SerDesConfig.maskedResourceOffsetValueSerializer());
+                SerDesConfig.maskedResourceOffsetKeySerialiser(),
+                SerDesConfig.maskedResourceOffsetValueSerialiser());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
-    }
-
-    @Bean
-    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
-
-        return ERROR_COMPONENTS.plainProducer(producerSettings);
     }
 
     @Bean

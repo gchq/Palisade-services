@@ -26,15 +26,20 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The TopicOffsetResponse is the output for topic-offset-service. It will only be created if the request message was
- * found to be the start of the messages for a specific client request. It will will contain the offset in the message
- * queue for this first message. This is forwarded to the masked-resource-offset stream where it is used to prepare for
+ * The TopicOffsetResponse is the output for Topic-Offset Service. It will only be created if the request message was
+ * found to be the start marker for the messages of a specific client request. It will contain the offset in the message
+ * queue for this first message. This is forwarded to the masked-resource-offset Kafka topic where it is used to prepare for
  * the client request to retrieve the data.
+ * Note there is another class that effectively represent the same data but represent a different stage of the process.
+ * <ul>
+ * <li> {@code uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage} is the input for this the Filtered-Resource Service.
+ * <li> {@link TopicOffsetResponse} is the output from the Topic-Offset Service.
+ * </ul>
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class TopicOffsetResponse {
 
-    private final Long commitOffset;  //Kafka commit offset of a start-of-stream message
+    private final Long commitOffset;  // Kafka commit offset of a start-of-stream message
 
     @JsonCreator
     private TopicOffsetResponse(
@@ -50,15 +55,15 @@ public final class TopicOffsetResponse {
     }
 
     /**
-     * Builder class for the creation of instances of the TopicOffsetResponse.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the TopicOffsetResponse. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * TopicOffsetResponse class.
          *
-         * @return interface {@link TopicOffsetRequest.Builder.IUserId} for the next step in the build.
+         * @return interface to create a new {@link TopicOffsetResponse}.
          */
         public static CommitOffset create() {
             return TopicOffsetResponse::new;

@@ -79,7 +79,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .all()
                     .get(1, TimeUnit.SECONDS);
 
-            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
+            var consumerGroupDescription = groupDescriptionMap.get(this.groupId);
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
             // While we perform additional checks on the STABLE state, take any of the below to mean 'healthy'
