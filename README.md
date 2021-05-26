@@ -23,7 +23,7 @@ limitations under the License.
 From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
 This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
 
-Under the hood, the request involves sending a message that is processed sequentially by a set of the micro-services starting first with Palisade Service.
+Under the hood, the request involves sending a message that is processed sequentially by a set of micro-services starting first with Palisade Service.
 The Palisade Service will perform two tasks.
 First it will return a reference, a token back to the client that will uniquely identify this request.
 This token is used throughout the application to tie every aspect of the process to this unique identifier and is later used by the client to retrieve the resources available for this request. 
