@@ -48,7 +48,7 @@ See doc/services.drawio for the source of this diagram
 [Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
 [Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
 [Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
-[Topic-Offset Service](topic-offset-service/README.md) identifies the start and end of the resources for a request.  
+[Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
 [Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
 
 [Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
