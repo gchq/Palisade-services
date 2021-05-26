@@ -32,13 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Consists of:
  * 1) Indicator which is for the start of a set of messages for a specific request
  * 2) Indicator which is for the end of a set of messages for a specific request
- * 3) No Indicator which is for the messages with data
+ * 3) No Indicator which is for the messages with data.
  */
 class SimpleTopicOffsetServiceTest {
 
+    public static final String REQUEST_TOKEN = "test-request-token";
+
     private final SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
 
-    public static final String REQUEST_TOKEN = "test-request-token";
     private Headers headers;
 
     @BeforeEach
@@ -54,7 +55,9 @@ class SimpleTopicOffsetServiceTest {
     @Test
     void testTopicOffsetServiceWithAStart() {
         headers.add(StreamMarker.HEADER, StreamMarker.START.toString().getBytes());
-        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isTrue();
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers))
+                .as("Check that the start of stream message is in the header")
+                .isTrue();
     }
 
     /**
@@ -64,7 +67,9 @@ class SimpleTopicOffsetServiceTest {
     @Test
     void testTopicOffsetServiceWithAnEnd() {
         headers.add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
-        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers))
+                .as("Check that the header doesnt contain a start marker")
+                .isFalse();
     }
 
     /**
@@ -72,7 +77,9 @@ class SimpleTopicOffsetServiceTest {
      */
     @Test
     void testTopicOffsetServiceWithoutAnyStreamMarker() {
-        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers))
+                .as("Check that the header doesnt belong to this topic")
+                .isFalse();
     }
 
     /**
@@ -82,9 +89,11 @@ class SimpleTopicOffsetServiceTest {
     @Test
     void testCreateTopicOffsetResponse() {
         Long offset = 1L;
-        TopicOffsetResponse actual = simpleTopicOffsetService.createTopicOffsetResponse(offset);
-        TopicOffsetResponse expected = TopicOffsetResponse.Builder.create().withOffset(offset);
+        var actual = simpleTopicOffsetService.createTopicOffsetResponse(offset);
+        var expected = TopicOffsetResponse.Builder.create().withOffset(offset);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual)
+                .as("Check that the actual offset is the offset we expect")
+                .isEqualTo(expected);
     }
 }

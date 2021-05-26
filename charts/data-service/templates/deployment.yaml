@@ -91,7 +91,7 @@ spec:
       {{- range $name, $_ := .Values.global.persistence.dataStores }}
       - name: {{ $name }}
         persistentVolumeClaim:
-          claimName: {{ $name }}-{{ include "palisade.namespace" $ }}
+          claimName: {{ $name }}
           readOnly: true
       {{- end }}
       {{- with .Values.nodeSelector }}

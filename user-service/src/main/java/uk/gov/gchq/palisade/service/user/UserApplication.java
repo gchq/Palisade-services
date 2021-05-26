@@ -37,6 +37,8 @@ import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.user.User;
 
+import javax.annotation.PreDestroy;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,10 +56,11 @@ public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
 
     private final Set<RunnableGraph<?>> runners;
-    private final Materializer materializer;
+    private final Materializer materialiser;
     private final Executor executor;
     private final UserServiceCachingProxy service;
     private final UserConfiguration userConfig;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -77,7 +80,7 @@ public class UserApplication {
         this.service = service;
         this.userConfig = configuration;
         this.runners = new HashSet<>(runners);
-        this.materializer = materialiser;
+        this.materialiser = materialiser;
         this.executor = executor;
     }
 
@@ -107,11 +110,22 @@ public class UserApplication {
                 .peek(user -> LOGGER.debug(user.toString()))
                 .forEach(service::addUser);
 
-        // Then start up kafka
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
+        // Then start up all runners
+        runnerThreads.addAll(runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
+                .collect(Collectors.toSet()));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }

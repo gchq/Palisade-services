@@ -19,8 +19,10 @@ package uk.gov.gchq.palisade.contract.resource.redis;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -44,7 +46,11 @@ import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceP
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,6 +87,24 @@ class RedisPersistenceTest {
      * </pre>
      */
 
+    @TempDir
+    static Path tempDir;
+
+    // Temp files
+    static File tempEmployeeAvroFile;
+    static File tempEmployeeJsonFile;
+    static File tempClientAvroFile;
+
+    // Test resources
+    static DirectoryResource testDirectory;
+    static FileResource employeeAvroFile;
+    static FileResource employeeJsonFile;
+    static FileResource clientAvroFile;
+
+    // Test requests
+    static ResourceRequest testDirectoryRequest;
+    static ResourceRequest employeeAvroRequest;
+
     private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
     private static final Context CONTEXT = new Context().purpose("purpose");
     private static final User USER = new User().userId("test-user");
@@ -88,33 +112,45 @@ class RedisPersistenceTest {
     private static final String CLIENT_TYPE = "client";
     private static final String AVRO_FORMAT = "avro";
     private static final String JSON_FORMAT = "json";
-    private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
-    private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource EMPLOYEE_JSON_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.json"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(JSON_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource CLIENT_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/client.avro"))
-            .type(CLIENT_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
 
-    public static final ResourceRequest TEST_DIRECTORY_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(TEST_DIRECTORY.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
-    public static final ResourceRequest EMPLOYEE_AVRO_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(EMPLOYEE_AVRO_FILE.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
+    @BeforeAll
+    static void startup() throws IOException {
+        // Create temporary test files
+        tempEmployeeAvroFile = Files.createFile(tempDir.resolve("employee.avro")).toFile();
+        tempEmployeeJsonFile = Files.createFile(tempDir.resolve("employee.json")).toFile();
+        tempClientAvroFile = Files.createFile(tempDir.resolve("client.avro")).toFile();
+
+        // Create the test resources from the temp files
+        testDirectory = (DirectoryResource) ResourceBuilder.create("file:" + tempDir + "/");
+        employeeAvroFile = ((FileResource) ResourceBuilder.create("file:" + tempEmployeeAvroFile.getPath()))
+                .type(EMPLOYEE_TYPE)
+                .serialisedFormat(AVRO_FORMAT)
+                .connectionDetail(DETAIL);
+        employeeJsonFile = ((FileResource) ResourceBuilder.create("file:" + tempEmployeeJsonFile.getPath()))
+                .type(EMPLOYEE_TYPE)
+                .serialisedFormat(JSON_FORMAT)
+                .connectionDetail(DETAIL);
+        clientAvroFile = ((FileResource) ResourceBuilder.create("file:" + tempClientAvroFile.getPath()))
+                .type(CLIENT_TYPE)
+                .serialisedFormat(AVRO_FORMAT)
+                .connectionDetail(DETAIL);
+
+        // Create test requests
+        testDirectoryRequest = ResourceRequest.Builder.create()
+                .withUserId(USER.getUserId().getId())
+                .withResourceId(testDirectory.getId())
+                .withContext(CONTEXT)
+                .withUser(USER);
+        employeeAvroRequest = ResourceRequest.Builder.create()
+                .withUserId(USER.getUserId().getId())
+                .withResourceId(employeeAvroFile.getId())
+                .withContext(CONTEXT)
+                .withUser(USER);
+    }
 
     @BeforeEach
     void setup() {
+
         // Wipe all keys from Redis
         redisTemplate.execute(conn -> conn.keyCommands()
                 .keys(ByteBuffer.wrap("test:*".getBytes()))
@@ -124,9 +160,9 @@ class RedisPersistenceTest {
                 .collectList().block();
 
         // Pre-populate
-        for (LeafResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
+        for (LeafResource file : Arrays.asList(employeeJsonFile, employeeAvroFile, clientAvroFile)) {
             Source.single(file)
-                    .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
+                    .via(persistenceLayer.withPersistenceById(testDirectory.getId()))
                     .via(persistenceLayer.withPersistenceByType(file.getType()))
                     .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
                     .runWith(Sink.seq(), materializer)
@@ -140,7 +176,7 @@ class RedisPersistenceTest {
         List<LeafResource> resourceResult = new LinkedList<>();
 
         // When making a get request to the resource service by resource for a directory
-        List<AuditableResourceResponse> resourceAuditable = service.getResourcesByResource(TEST_DIRECTORY_REQUEST)
+        List<AuditableResourceResponse> resourceAuditable = service.getResourcesByResource(testDirectoryRequest)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         resourceAuditable.forEach(response -> resourceResult.add(response.getResourceResponse().resource));
@@ -148,10 +184,10 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when getting a Resource by its directory, the correct resources are returned")
-                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .containsOnly(employeeJsonFile, employeeAvroFile, clientAvroFile);
 
         // When making a get request to the resource service by resource for a specific file
-        resourceAuditable = service.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
+        resourceAuditable = service.getResourcesByResource(employeeAvroRequest)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         resourceAuditable.forEach(response -> resourceResult.add(response.getResourceResponse().resource));
@@ -159,7 +195,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when we get a Resource by itself, the correct resource is returned")
-                .contains(EMPLOYEE_AVRO_FILE);
+                .contains(employeeAvroFile);
     }
 
     @Test
@@ -168,7 +204,7 @@ class RedisPersistenceTest {
         List<LeafResource> idResult = new LinkedList<>();
 
         // When making a get request to the resource service by resourceId for a directory
-        List<AuditableResourceResponse> idAuditable = service.getResourcesById(TEST_DIRECTORY_REQUEST)
+        List<AuditableResourceResponse> idAuditable = service.getResourcesById(testDirectoryRequest)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         idAuditable.forEach(response -> idResult.add(response.getResourceResponse().resource));
@@ -176,11 +212,11 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we get resources by the Id of the repository, the correct resources are returned")
-                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .containsOnly(employeeJsonFile, employeeAvroFile, clientAvroFile);
         idResult.clear();
 
         // When making a get request to the resource service by resourceId for a specific file
-        idAuditable = service.getResourcesById(EMPLOYEE_AVRO_REQUEST)
+        idAuditable = service.getResourcesById(employeeAvroRequest)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         idAuditable.forEach(response -> idResult.add(response.getResourceResponse().resource));
@@ -188,7 +224,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we request one resource by its ID, only the correct resource is returned")
-                .containsOnly(EMPLOYEE_AVRO_FILE);
+                .containsOnly(employeeAvroFile);
     }
 
     @Test
@@ -197,7 +233,7 @@ class RedisPersistenceTest {
         List<LeafResource> typeResult = new LinkedList<>();
 
         // When making a get request to the resource service by type
-        List<AuditableResourceResponse> typeAuditable = service.getResourcesByType(TEST_DIRECTORY_REQUEST, EMPLOYEE_TYPE)
+        List<AuditableResourceResponse> typeAuditable = service.getResourcesByType(testDirectoryRequest, EMPLOYEE_TYPE)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         typeAuditable.forEach(response -> typeResult.add(response.getResourceResponse().resource));
@@ -205,11 +241,11 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resources are returned")
-                .containsOnly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE);
+                .containsOnly(employeeJsonFile, employeeAvroFile);
         typeResult.clear();
 
         // When making a get request to the resource service by type
-        typeAuditable = service.getResourcesByType(TEST_DIRECTORY_REQUEST, CLIENT_TYPE)
+        typeAuditable = service.getResourcesByType(testDirectoryRequest, CLIENT_TYPE)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         typeAuditable.forEach(response -> typeResult.add(response.getResourceResponse().resource));
@@ -217,7 +253,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resource is returned")
-                .containsOnly(CLIENT_AVRO_FILE);
+                .containsOnly(clientAvroFile);
     }
 
     @Test
@@ -226,7 +262,7 @@ class RedisPersistenceTest {
         List<LeafResource> formatResult = new LinkedList<>();
 
         // When making a get request to the resource service by serialisedFormat
-        List<AuditableResourceResponse> formatAuditable = service.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, AVRO_FORMAT)
+        List<AuditableResourceResponse> formatAuditable = service.getResourcesBySerialisedFormat(testDirectoryRequest, AVRO_FORMAT)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         formatAuditable.forEach(response -> formatResult.add(response.getResourceResponse().resource));
@@ -234,11 +270,11 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request resource by their format and directory, the correct resources are returned")
-                .contains(CLIENT_AVRO_FILE, EMPLOYEE_AVRO_FILE);
+                .contains(clientAvroFile, employeeAvroFile);
         formatResult.clear();
 
         // When making a get request to the resource service by serialisedFormat
-        formatAuditable = service.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, JSON_FORMAT)
+        formatAuditable = service.getResourcesBySerialisedFormat(testDirectoryRequest, JSON_FORMAT)
                 .runWith(Sink.seq(), materializer)
                 .toCompletableFuture().join();
         formatAuditable.forEach(response -> formatResult.add(response.getResourceResponse().resource));
@@ -246,7 +282,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
-                .containsOnly(EMPLOYEE_JSON_FILE);
+                .containsOnly(employeeJsonFile);
     }
 
 }

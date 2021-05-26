@@ -41,6 +41,7 @@ management:
       enabled: false
     kafka:
       enabled: true
+  endpoint:
     shutdown:
       enabled: true
   endpoints:

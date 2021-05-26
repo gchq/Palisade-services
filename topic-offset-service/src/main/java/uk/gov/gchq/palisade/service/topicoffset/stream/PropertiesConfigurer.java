@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.topicoffset.stream;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValueFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,8 +43,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -54,12 +53,13 @@ import java.util.stream.StreamSupport;
  * Parse and convert Spring maps and lists to Akka configs
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
+    @SuppressWarnings("java:S5998") //Suppress regex smell
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final int PROPERTY_PATH = 1;
     private static final int PROPERTY_INDEX = 2;
     private static final int PROPERTY_TAIL = 3;
     private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
-    private static final String LIST_ITEM_SEPERATOR = ",";
+    private static final String LIST_ITEM_SEPARATOR = ",";
 
     private String[] locations;
     private final ResourceLoader resourceLoader;
@@ -89,8 +89,8 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
         envPropSources.forEach((PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
-                locations = ((String) propertySource.getProperty("application.properties.locations"))
-                        .split(LIST_ITEM_SEPERATOR);
+                locations = ((String) Objects.requireNonNull(propertySource.getProperty("application.properties.locations")))
+                        .split(LIST_ITEM_SEPARATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)
                                 .forEach(envPropSources::addFirst));
@@ -99,7 +99,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     }
 
     private List<PropertySource<?>> loadProperties(final String filename) {
-        YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
+        var loader = new YamlPropertySourceLoader();
         try {
             final Resource[] possiblePropertiesResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(filename);
             return Arrays.stream(possiblePropertiesResources)
@@ -121,7 +121,8 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
 
     public Map<String, String> getAllActiveProperties() {
         return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
-                .filter(ps -> ps instanceof EnumerablePropertySource).map(EnumerablePropertySource.class::cast)
+                .filter(EnumerablePropertySource.class::isInstance)
+                .map(EnumerablePropertySource.class::cast)
                 .map(EnumerablePropertySource::getPropertyNames)
                 .flatMap(Arrays::stream)
                 .distinct()
@@ -142,7 +143,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         final Map<String, String> array = props.entrySet().stream()
                 .filter(entry -> entry.getKey().matches(INDEXED_PROPERTY_PATTERN.pattern()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        Config config = ConfigFactory.parseMap(std);
+        var config = ConfigFactory.parseMap(std);
 
         List<String> keys = array.keySet().stream()
                 .map(PropertiesConfigurer::reductionKey)
@@ -158,12 +159,11 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     }
 
     private static Config toConfig(final Config orig, final String key, final Map<String, String> config) {
-        // Map or list?
-        Matcher mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
+        var mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
         if (mat.find()) {
             Map<String, String> node = new HashMap<>();
             config.forEach((String mapKey, String value) -> {
-                Matcher fieldNameKeyMatcher = FIELD_NAME_PATTERN.matcher(mapKey);
+                var fieldNameKeyMatcher = FIELD_NAME_PATTERN.matcher(mapKey);
                 if (fieldNameKeyMatcher.matches()) {
                     node.put(fieldNameKeyMatcher.group(1), value);
                 }
@@ -174,13 +174,13 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
             return orig.withValue(key, ConfigValueFactory.fromIterable(list));
         } else {
             List<String> node = new ArrayList<>(config.values());
-            ConfigList configList = ConfigValueFactory.fromIterable(node);
+            var configList = ConfigValueFactory.fromIterable(node);
             return orig.withValue(key, configList);
         }
     }
 
     private static String reductionKey(final String key) {
-        Matcher mat = INDEXED_PROPERTY_PATTERN.matcher(key);
+        var mat = INDEXED_PROPERTY_PATTERN.matcher(key);
         // Early return if this is a simple key/value property
         if (!mat.matches() || mat.groupCount() <= PROPERTY_INDEX) {
             return "";

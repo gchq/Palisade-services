@@ -26,13 +26,11 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
-import uk.gov.gchq.palisade.user.UserId;
 
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -47,11 +45,8 @@ public class ContractTestData {
     }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final String RESOURCE_ID = "/test/resourceId";
-    public static final String PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
+    private static final String MASKED_RESOURCE_TOPIC_NAME = "masked-resource";
+    public static final String REQUEST_TOKEN = "test-request-token";
 
     public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"resource\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"uk.gov.gchq.palisade.test.TestType\"}}}";
 
@@ -71,32 +66,23 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"resource\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"@class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"}}}", i, i);
-    public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
+    public static final IntFunction<String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"@class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"resource\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"@class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"@class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"}}}", i, i);
+    public static final IntFunction<JsonNode> REQUEST_FACTORY_NODE = (int i) -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
     };
-    public static final Function<Integer, TopicOffsetRequest> REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), TopicOffsetRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
-
-    public static final String REQUEST_TOKEN = "test-request-token";
 
     public static final Headers START_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes())});
     public static final Headers REQUEST_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes())});
     public static final Headers END_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.END.toString().getBytes())});
 
-    public static final ProducerRecord<String, JsonNode> START_RECORD = new ProducerRecord<String, JsonNode>("masked-resource", 0, null, null, START_HEADERS);
-    public static final ProducerRecord<String, JsonNode> END_RECORD = new ProducerRecord<String, JsonNode>("masked-resource", 0, null, null, END_HEADERS);
+    public static final ProducerRecord<String, JsonNode> START_RECORD = new ProducerRecord<String, JsonNode>(MASKED_RESOURCE_TOPIC_NAME, 0, null, null, START_HEADERS);
+    public static final ProducerRecord<String, JsonNode> END_RECORD = new ProducerRecord<String, JsonNode>(MASKED_RESOURCE_TOPIC_NAME, 0, null, null, END_HEADERS);
 
     // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("masked-resource", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<String, JsonNode>(MASKED_RESOURCE_TOPIC_NAME, 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

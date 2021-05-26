@@ -15,66 +15,50 @@
  */
 package uk.gov.gchq.palisade.component.topicoffset.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for the evaluating the TopicOffsetRequest and the related serialising to a JSon string
- * and deseralising back to an object.
+ * Tests for the evaluating the TopicOffsetRequest, and the related serialising to a JSon string
+ * and deserialising back to an object.
  */
-@JsonTest
-@ContextConfiguration(classes = {TopicOffsetRequestTest.class})
 class TopicOffsetRequestTest {
-
-    @Autowired
-    private JacksonTester<TopicOffsetRequest> jsonTester;
-
-    @Test
-    void testContextLoads() {
-        assertThat(jsonTester)
-                .as("Check that the jsonTester has been autowired successfully")
-                .isNotNull();
-    }
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserialises and tests against the original object.
      *
-     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     * @throws JsonProcessingException throws if the {@link TopicOffsetRequest} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testTopicOffsetRequestSerialisingAndDeserialising() throws IOException {
+    void testTopicOffsetRequestSerialisingAndDeserialising() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+
         var topicOffsetRequest = TopicOffsetRequest.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
                 .withContext(new Context().purpose("testContext"))
                 .withResourceNode(NullNode.getInstance());
 
-        var topicOffsetRequestJsonContent = jsonTester.write(topicOffsetRequest);
-        var topicOffsetRequestObjectContent = jsonTester.parse(topicOffsetRequestJsonContent.getJson());
-        var topicOffsetRequestObject = topicOffsetRequestObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(topicOffsetRequest);
+        var actualInstance = mapper.readValue(actualJson, topicOffsetRequest.getClass());
 
         assertThat(topicOffsetRequest)
                 .as("Check that whilst using the objects toString method, the objects are the same")
-                .isEqualTo(topicOffsetRequestObject);
+                .isEqualTo(actualInstance);
 
         assertThat(topicOffsetRequest)
                 .as("Check %s using recursion that the serialised and deseralised objects are the same", topicOffsetRequest.getClass().getSimpleName())
                 .usingRecursiveComparison()
-                .isEqualTo(topicOffsetRequestObject);
+                .isEqualTo(actualInstance);
     }
 }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.data.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
@@ -26,6 +27,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Collections;
 import java.util.Set;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 @Component
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
     private final ProducerTopicConfiguration topicConfiguration;
@@ -58,7 +61,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-        Set<String> configTopics = topicConfiguration.getTopicNames();
+        Set<String> configTopics = topicsFromConfig(topicConfiguration);
         Set<String> kafkaTopics = topicsFromKafka(adminClient.describeTopics(configTopics));
 
         if (kafkaTopics.equals(configTopics)) {
@@ -71,6 +74,15 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .withDetail("kafkaTopics", kafkaTopics)
                     .build();
         }
+    }
+
+    private static Set<String> topicsFromConfig(final ProducerTopicConfiguration topicConfiguration) {
+        // Get topic names defined in config
+        return topicConfiguration.getTopics()
+                .values()
+                .stream()
+                .map(Topic::getName)
+                .collect(Collectors.toSet());
     }
 
     private static Set<String> topicsFromKafka(final DescribeTopicsResult topicsResult) {
