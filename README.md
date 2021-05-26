@@ -35,7 +35,7 @@ These resources can then be read from the Data Service.
 The following diagram shows at a high level the services and their relative relationships with each other. 
 Communications between the services and their related support servers utilise Kafka streaming. 
 
-For a detailed description of the services' workflow see [Appendix I - Palisade Flow Diagram](#appendix-i).  
+For a detailed description of the services see [Appendix I - Architecture Diagrams](#appendix-i-architecture-diagrams).  
 For a more technical description of each of the services, follow the links below.
 
 <!--- 
@@ -206,8 +206,15 @@ kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-s
 
 Use the `-h` flag to see usage instructions.
 
-For a detailed description of the services' workflow see
 
-### Appendix I
+## Appendix I Architecture Diagrams
 
+## Services Description
+![Palisade Services Description](doc/services-description.png)
+
+## Audit Service
+![Palisade Audit Service](doc/audit-service.png)
+
+## Palisade Flow Diagram
 ![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
+
