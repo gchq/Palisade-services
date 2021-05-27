@@ -1,0 +1,108 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: kube-system
+  name: traefik-configmap
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: traefik
+data:
+  dyn-traefik.yml: |
+    providers:
+      kubernetesCRD:
+        certAuthFilePath: /etc/traefik/traefikCertificate.crt
+
+  traefik.csr: |
+    -----BEGIN CERTIFICATE REQUEST-----
+    MIIDMTCCAhkCAQAwgdYxCzAJBgNVBAYTAkdCMRgwFgYDVQQIDA9HbG91Y2VzdGVy
+    c2hpcmUxEzARBgNVBAcMCkNoZWx0ZW5oYW0xDTALBgNVBAoMBEdDSFExETAPBgNV
+    BAsMCFBhbGlzYWRlMSYwJAYDVQQDDB1wYWxpc2FkZS1wcm9kLmFwcHMuZ3NzLmdv
+    di51azFOMEwGCSqGSIb3DQEJARY/NTI5NTg4MDkrZGV2ZWxvcGVyMDExODk5OTg4
+    MTk5OTExOTcyNTNAdXNlcnMubm9yZXBseS5naXRodWIuY29tMIIBIjANBgkqhkiG
+    9w0BAQEFAAOCAQ8AMIIBCgKCAQEA297rGLamAyUVR/qDzpcI7TldkZ7jG7t6vTSB
+    JZigk2rm0GbUUURYBEVo2PnEJsotyZ1myu4BFyIjgKwPWYU0uTGM3RH2qUNKOnlM
+    ULXRRxZ0TK4IjRr576/J27PonNxv0pKemwkakil49NGoah+3QzDMERlUZPFzWzNI
+    SlTjIo+bYAzZanGmHaVdteozCcJOJYf3gwZnw94v1+x3wKUpHED11xJ3X+CVvbWy
+    eEj/LXM6HQvKF7zhFaYrx87WtNvnscYts54D6xvzzo12WJZsci+auv77JXLycX9F
+    WbPRHJvESsWpB1xQIcIDg+rcZvT58fxRpV0QR1okVMsQnUl+/wIDAQABoBUwEwYJ
+    KoZIhvcNAQkHMQYMBHBhc3MwDQYJKoZIhvcNAQELBQADggEBABC4oSAjXscT8E8r
+    fsK9jLqWXmzEYgrj8js2kHDPV4h+vlRYKYR1D4307FMy9KoSjSY/IElDiLnRt14+
+    09MrbrsQlvAwI1ZDZoTC5AbrgVdtLNbfBMNPoU+PPYhPy5S6uVgoF4+l6ix5JTW+
+    a61nXHxaegnjn3kHZqhloCoyZxp64TrmUBVqUBVGBnCVIoB1Ig/7h6PGDUXzqir/
+    O7YjA8wZ43eEQr1v/ZgGcy2UMdOSSAy0oM9V69Fm3DiiET7BnUsVY1J0ZHQxxPw5
+    9QUV3St6MNQBOVsCvFgPT0AT8UMrQSuxN8Pex2Y10W3od4gJQ8TZ9PFsmkN5kctS
+    9LsfKcI=
+    -----END CERTIFICATE REQUEST-----
+
+  traefikCertificate.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIENTCCAx0CFDIOYRs8KYQFucFXd8JJJBB9b+WyMA0GCSqGSIb3DQEBCwUAMIHW
+    MQswCQYDVQQGEwJHQjEYMBYGA1UECAwPR2xvdWNlc3RlcnNoaXJlMRMwEQYDVQQH
+    DApDaGVsdGVuaGFtMQ0wCwYDVQQKDARHQ0hRMREwDwYDVQQLDAhQYWxpc2FkZTEm
+    MCQGA1UEAwwdcGFsaXNhZGUtcHJvZC5hcHBzLmdzcy5nb3YudWsxTjBMBgkqhkiG
+    9w0BCQEWPzUyOTU4ODA5K2RldmVsb3BlcjAxMTg5OTk4ODE5OTkxMTk3MjUzQHVz
+    ZXJzLm5vcmVwbHkuZ2l0aHViLmNvbTAeFw0yMTA1MjAxMzAwMDNaFw0yMjA1MjAx
+    MzAwMDNaMIHWMQswCQYDVQQGEwJHQjEYMBYGA1UECAwPR2xvdWNlc3RlcnNoaXJl
+    MRMwEQYDVQQHDApDaGVsdGVuaGFtMQ0wCwYDVQQKDARHQ0hRMREwDwYDVQQLDAhQ
+    YWxpc2FkZTEmMCQGA1UEAwwdcGFsaXNhZGUtcHJvZC5hcHBzLmdzcy5nb3YudWsx
+    TjBMBgkqhkiG9w0BCQEWPzUyOTU4ODA5K2RldmVsb3BlcjAxMTg5OTk4ODE5OTkx
+    MTk3MjUzQHVzZXJzLm5vcmVwbHkuZ2l0aHViLmNvbTCCASIwDQYJKoZIhvcNAQEB
+    BQADggEPADCCAQoCggEBANve6xi2pgMlFUf6g86XCO05XZGe4xu7er00gSWYoJNq
+    5tBm1FFEWARFaNj5xCbKLcmdZsruARciI4CsD1mFNLkxjN0R9qlDSjp5TFC10UcW
+    dEyuCI0a+e+vyduz6Jzcb9KSnpsJGpIpePTRqGoft0MwzBEZVGTxc1szSEpU4yKP
+    m2AM2Wpxph2lXbXqMwnCTiWH94MGZ8PeL9fsd8ClKRxA9dcSd1/glb21snhI/y1z
+    Oh0Lyhe84RWmK8fO1rTb57HGLbOeA+sb886NdliWbHIvmrr++yVy8nF/RVmz0Ryb
+    xErFqQdcUCHCA4Pq3Gb0+fH8UaVdEEdaJFTLEJ1Jfv8CAwEAATANBgkqhkiG9w0B
+    AQsFAAOCAQEAEi8dlxywgmvIeu9/sBwngORROVR2kIy6zKAHsZGmHLI6m+XWURDD
+    00Vz8FWulU+B3+3l3N2QH6KQPlkJRCnqdsQiP7stFIx09HjqC5FFhNxumpriQD2M
+    wz/UxE5L1CAYr9g967V99LhsvXo1tvipLud9G+UZhbhC40edm9DnyN7Hrg0Y+G/Y
+    nvS7hw3tr8gZR6r4oSi/g0NxbjMuirk2bUX1NY6sI/RNPhZmFQwXsT5XtHRnBaAq
+    0Wi2UuhbI9goO0wjnxJdbuRug4tL+YfpXrwonE93r8GhMOGBIcaqS9PXhoGa2bfi
+    +Amtl8s4mHjf4FHIRM66wABBZnym+f5iNQ==
+    -----END CERTIFICATE-----
+
+  traefikPrivate.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    Proc-Type: 4,ENCRYPTED
+    DEK-Info: AES-128-CBC,880613CE14C95B4CAB87407CAAD954A8
+
+    ZPBOVaaM3atS3ov2Yko1Vs2blqrjoq88kt8NKts+7YVKbYXPNvlEMSaSXjepLGMz
+    uuCDaQfmNRcKrXZ+6nnbDwqJtxGScDP00GrHAIyDWo14S6FZNY/XAVs5lDGYgP69
+    ZIOH39igByksx41q1pFFZkax+oUrEGJO9GQnDQGTCax7IqRbP6K6frQkLVGpXjl5
+    lUk7hn86YgdeydWLGacJnQ5wnKzVdGCxTG7BJTmNiztbPfJQGnD1gFPDXMcJn6kd
+    IszvCCD4JpGzahEGSpwME5Iyonn6sDuYpXHg2c0UsKqs75Wu4DCuKsoGjIIkdtVE
+    Koddf4sJs0RpuMqY7SRVb/2pawxzTtKFtb7JGSYFe+FmfR6ZD3kZcdlSeRKU0dkb
+    Vm5i+8h/FItYAmnb4Y7g64gINMaVokK4R68d7DXevyBevcWUI1XXKR2rYIeUKSMJ
+    vpxch/Joj587Zq+G770sos3+7dIMwxvDvELJa+foUow7vNesuHXG61RUdTWmXx+C
+    yHt7kuM0osKSjsU3vTfgxcGwyX7l4CMZjqQxpUviPjDWw7mMW9DT+3oHFakeYqqA
+    nYDkOXOtFsIhSlwqmoCOrqWITue89vu/aOMvUOiIju/abZjekOnKVgAyOA3Fq8QD
+    SoUC3prJhiOBzGh9eKG6k6x2d9G4wVwFv/7wxO2E387QzMbVhE/BjeieUpEYOK10
+    0ZD7W8bukPsxWcrT2XO5yqzSOatorApjnAj4ll6fjfQeeFWeG6YC3Gq1OHFTLH6q
+    mrOMyzQE07KJFN/AUu5hPfluNnwle7CPrCHNSbshb2FVsRloerkhd4Yot7J5OOUX
+    RfidJvgQdIru4gd4/vJqlLIrdymXgk+8RBzMh0fmGJbYML2oqYgAL4oKIU0f9uUq
+    0+KEhaRj3+cVYQOP72SDdkv3shu+l7JvfBu6Ny42Gev26KHtCKFHZjuKKSUgDEN1
+    /YtP9IvCPgu9xRTEZDhBCJXIzcIgd1joAR7iqCw0Dm10anPzsvS+1bIwNZn8ZT7m
+    YBqATbvIxGW/NXShFTPySIm2foWJlZkvwPjo2KXvdzd/GuNNuV+m2n1grSkaZqsw
+    AZ7L4hAp9dOqB14zd+Rfu+N1q8zwYnCHCY22a7igp5P16DrBHIm5gY+zd4BSIG2C
+    K2xhikgWeA8RvNE+vjqiCJw8zjukdBS0az6E8P/mDcUoEm7irSHPuhclKd59JFZW
+    DSfdtEp6ZnHM8WmeY6Y8d3bp8pENfcr4BkFqyjq69kUu+r5immYvYW8EdLTZHA2p
+    inSLNqS/BR4A1XGjD7taJo7cERXBEtL3xjtzlaGgbtvLoWkI0sq5MJIVKThofADL
+    nKkpkdZPrJ4P5FB3HeJSkdUQLG0wPiZZ35ALE/EXunUl8JcQqcIyikIGncsuSV/B
+    5b4UznUZXPBHL1/G3/A+E4xZpCS1g3y92DNA49kRhBe7kFm4YKbU6llIaRZIRV+F
+    7+ScVHetrldJ6fcCLGgO2q3nfJlprLF2y6MqNRg+2a2VWBstiuZuaecCHBe55UPL
+    mPrrilvWNgc0XloGTdpnlY+UZ8uWMA07ZgNLVEgwhLNXkcDZw/7jBdjti1Ej9Whx
+    -----END RSA PRIVATE KEY-----

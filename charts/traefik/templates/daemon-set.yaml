@@ -64,3 +64,10 @@ spec:
               - NET_BIND_SERVICE
             drop:
               - ALL
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/traefik/
+      volumes:
+      - name: config-volume
+        configMap:
+          name: traefik-configmap
