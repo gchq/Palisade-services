@@ -37,7 +37,7 @@ class SimpleResourceServiceTest {
     @Test
     void testJavaFilesInUnitTest() throws IOException {
         // Given we create a file and add it to the service
-        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
+        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create("file:./src/unit-tests/java/");
 
         LeafResource resource = (LeafResource) ResourceBuilder.create(
                 new File("./src/unit-tests/java/uk/gov/gchq/palisade/service/resource/ApplicationTestData.java").getCanonicalFile().toURI());

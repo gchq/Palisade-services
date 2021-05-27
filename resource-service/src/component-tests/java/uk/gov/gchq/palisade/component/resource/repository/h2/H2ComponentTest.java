@@ -19,8 +19,10 @@ package uk.gov.gchq.palisade.component.resource.repository.h2;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
@@ -44,6 +46,10 @@ import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -76,6 +82,24 @@ class H2ComponentTest {
      * </pre>
      */
 
+    @TempDir
+    static Path tempDir;
+
+    // Temp files
+    static File tempEmployeeAvroFile;
+    static File tempEmployeeJsonFile;
+    static File tempClientAvroFile;
+
+    // Test resources
+    static DirectoryResource testDirectory;
+    static FileResource employeeAvroFile;
+    static FileResource employeeJsonFile;
+    static FileResource clientAvroFile;
+
+    // Test requests
+    static ResourceRequest testDirectoryRequest;
+    static ResourceRequest employeeAvroRequest;
+
     private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
     private static final Context CONTEXT = new Context().purpose("purpose");
     private static final User USER = new User().userId("test-user");
@@ -83,36 +107,47 @@ class H2ComponentTest {
     private static final String CLIENT_TYPE = "client";
     private static final String AVRO_FORMAT = "avro";
     private static final String JSON_FORMAT = "json";
-    private static final DirectoryResource TEST_DIRECTORY = (DirectoryResource) ResourceBuilder.create("file:/test/");
-    private static final FileResource EMPLOYEE_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.avro"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource EMPLOYEE_JSON_FILE = ((FileResource) ResourceBuilder.create("file:/test/employee.json"))
-            .type(EMPLOYEE_TYPE)
-            .serialisedFormat(JSON_FORMAT)
-            .connectionDetail(DETAIL);
-    private static final FileResource CLIENT_AVRO_FILE = ((FileResource) ResourceBuilder.create("file:/test/client.avro"))
-            .type(CLIENT_TYPE)
-            .serialisedFormat(AVRO_FORMAT)
-            .connectionDetail(DETAIL);
 
-    public static final ResourceRequest TEST_DIRECTORY_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(TEST_DIRECTORY.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
-    public static final ResourceRequest EMPLOYEE_AVRO_REQUEST = ResourceRequest.Builder.create()
-            .withUserId(USER.getUserId().getId())
-            .withResourceId(EMPLOYEE_AVRO_FILE.getId())
-            .withContext(CONTEXT)
-            .withUser(USER);
+    @BeforeAll
+    static void startup() throws IOException {
+        // Create temporary test files
+        tempEmployeeAvroFile = Files.createFile(tempDir.resolve("employee.avro")).toFile();
+        tempEmployeeJsonFile = Files.createFile(tempDir.resolve("employee.json")).toFile();
+        tempClientAvroFile = Files.createFile(tempDir.resolve("client.avro")).toFile();
+
+        // Create the test resources from the temp files
+        testDirectory = (DirectoryResource) ResourceBuilder.create("file:" + tempDir + "/");
+        employeeAvroFile = ((FileResource) ResourceBuilder.create("file:" + tempEmployeeAvroFile.getPath()))
+                .type(EMPLOYEE_TYPE)
+                .serialisedFormat(AVRO_FORMAT)
+                .connectionDetail(DETAIL);
+        employeeJsonFile = ((FileResource) ResourceBuilder.create("file:" + tempEmployeeJsonFile.getPath()))
+                .type(EMPLOYEE_TYPE)
+                .serialisedFormat(JSON_FORMAT)
+                .connectionDetail(DETAIL);
+        clientAvroFile = ((FileResource) ResourceBuilder.create("file:" + tempClientAvroFile.getPath()))
+                .type(CLIENT_TYPE)
+                .serialisedFormat(AVRO_FORMAT)
+                .connectionDetail(DETAIL);
+
+        // Create test requests
+        testDirectoryRequest = ResourceRequest.Builder.create()
+                .withUserId(USER.getUserId().getId())
+                .withResourceId(testDirectory.getId())
+                .withContext(CONTEXT)
+                .withUser(USER);
+        employeeAvroRequest = ResourceRequest.Builder.create()
+                .withUserId(USER.getUserId().getId())
+                .withResourceId(employeeAvroFile.getId())
+                .withContext(CONTEXT)
+                .withUser(USER);
+    }
 
     @BeforeEach
     void setup() {
-        for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
+        for (FileResource file : Arrays.asList(employeeJsonFile, employeeAvroFile, clientAvroFile)) {
             Source.single(file)
-                    .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
+                    .via(persistenceLayer.withPersistenceById(testDirectory.getId()))
                     .via(persistenceLayer.withPersistenceByType(file.getType()))
                     .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
                     .runWith(Sink.ignore(), materializer)
@@ -125,7 +160,7 @@ class H2ComponentTest {
         // Given - setup
 
         // When making a get request to the resource service by resource for a directory
-        List<LeafResource> resourceResult = proxy.getResourcesByResource(TEST_DIRECTORY_REQUEST)
+        List<LeafResource> resourceResult = proxy.getResourcesByResource(testDirectoryRequest)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         auditableResponse.getAuditErrorMessage().getError().printStackTrace();
@@ -139,10 +174,10 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when getting a Resource by its directory, the correct resources are returned")
-                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .contains(employeeJsonFile, employeeAvroFile, clientAvroFile);
 
         // When making a get request to the resource service by resource for a specific file
-        resourceResult = proxy.getResourcesByResource(EMPLOYEE_AVRO_REQUEST)
+        resourceResult = proxy.getResourcesByResource(employeeAvroRequest)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         auditableResponse.getAuditErrorMessage().getError().printStackTrace();
@@ -156,7 +191,7 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when we get a Resource by itself, the correct resource is returned")
-                .containsOnly(EMPLOYEE_AVRO_FILE);
+                .containsOnly(employeeAvroFile);
     }
 
     @Test
@@ -164,7 +199,7 @@ class H2ComponentTest {
         // Given - setup
 
         // When making a get request to the resource service by resourceId for a directory
-        List<LeafResource> idResult = proxy.getResourcesById(TEST_DIRECTORY_REQUEST)
+        List<LeafResource> idResult = proxy.getResourcesById(testDirectoryRequest)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -177,10 +212,10 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we get resources by the Id of the directory, the correct resources are returned")
-                .contains(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .contains(employeeJsonFile, employeeAvroFile, clientAvroFile);
 
         // When making a get request to the resource service by resourceId for a specific file
-        idResult = proxy.getResourcesById(EMPLOYEE_AVRO_REQUEST)
+        idResult = proxy.getResourcesById(employeeAvroRequest)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -193,7 +228,7 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we request one resource by its ID, only the correct resource is returned")
-                .containsOnly(EMPLOYEE_AVRO_FILE);
+                .containsOnly(employeeAvroFile);
     }
 
     @Test
@@ -201,7 +236,7 @@ class H2ComponentTest {
         // Given - setup
 
         // When making a get request to the resource service by type
-        List<LeafResource> typeResult = proxy.getResourcesByType(TEST_DIRECTORY_REQUEST, EMPLOYEE_TYPE)
+        List<LeafResource> typeResult = proxy.getResourcesByType(testDirectoryRequest, EMPLOYEE_TYPE)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -214,10 +249,10 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resources are returned")
-                .containsExactly(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE);
+                .containsExactly(employeeJsonFile, employeeAvroFile);
 
         // When making a get request to the resource service by type
-        typeResult = proxy.getResourcesByType(TEST_DIRECTORY_REQUEST, CLIENT_TYPE)
+        typeResult = proxy.getResourcesByType(testDirectoryRequest, CLIENT_TYPE)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -230,7 +265,7 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resource is returned")
-                .containsOnly(CLIENT_AVRO_FILE);
+                .containsOnly(clientAvroFile);
     }
 
     @Test
@@ -238,7 +273,7 @@ class H2ComponentTest {
         // Given - setup
 
         // When making a get request to the resource service by serialisedFormat
-        List<LeafResource> formatResult = proxy.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, AVRO_FORMAT)
+        List<LeafResource> formatResult = proxy.getResourcesBySerialisedFormat(testDirectoryRequest, AVRO_FORMAT)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -251,10 +286,10 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request resource by their format and directory, the correct resources are returned")
-                .containsExactly(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+                .containsExactly(employeeAvroFile, clientAvroFile);
 
         // When making a get request to the resource service by serialisedFormat
-        formatResult = proxy.getResourcesBySerialisedFormat(TEST_DIRECTORY_REQUEST, JSON_FORMAT)
+        formatResult = proxy.getResourcesBySerialisedFormat(testDirectoryRequest, JSON_FORMAT)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         fail("Expecting success but error was thrown: %s", auditableResponse.getAuditErrorMessage());
@@ -267,6 +302,6 @@ class H2ComponentTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
-                .containsOnly(EMPLOYEE_JSON_FILE);
+                .containsOnly(employeeJsonFile);
     }
 }

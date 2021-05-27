@@ -28,7 +28,6 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -49,22 +48,22 @@ import java.util.stream.Collectors;
 public class KafkaProducerService {
     private final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
-    private final Materializer materializer;
+    private final Materializer materialiser;
 
     /**
      * Autowired constructor for the rest controller
      *
      * @param upstreamSink   a sink to the upstream topic
      * @param upstreamConfig the config for the topic (name, partitions, ...)
-     * @param materializer   the akka system materializer
+     * @param materialiser   the akka system materialiser responsible for turning a stream blueprint into a running stream
      */
     public KafkaProducerService(
             final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink,
             final ConsumerTopicConfiguration upstreamConfig,
-            final Materializer materializer) {
+            final Materializer materialiser) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
-        this.materializer = materializer;
+        this.materialiser = materialiser;
     }
 
     /**
@@ -81,7 +80,7 @@ public class KafkaProducerService {
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
 
         // Get topic and calculate partition, unless this service has been assigned a partition
-        Topic topic = this.upstreamConfig.getTopics().get("input-topic");
+        var topic = this.upstreamConfig.getTopics().get("input-topic");
         int partition = Optional.ofNullable(topic.getAssignment())
                 .orElseGet(() -> Token.toPartition(token, topic.getPartitions()));
 
@@ -95,14 +94,14 @@ public class KafkaProducerService {
                 // Akka reactive streams can't have null elements, so map to and from optional
                 .fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
 
-                // Create kafka producer record from request
+                // Create a kafka producer record from request
                 .map(request -> new ProducerRecord<String, TopicOffsetRequest>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
 
                 // Sink records to this service's upstream topic (not downstream)
                 .toMat(this.upstreamSink, Keep.right())
 
                 // Run the graph
-                .run(this.materializer)
+                .run(this.materialiser)
 
                 // Return a CompletableFuture<Void> result
                 .toCompletableFuture()

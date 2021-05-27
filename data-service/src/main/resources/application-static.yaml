@@ -30,7 +30,7 @@ spring:
 akka:
   kafka:
     producer.topics:
-      output-topic.partitions: 1
+      success-topic.partitions: 1
       error-topic.partitions: 1
   discovery.config.services.kafka.endpoints:
   - host: localhost

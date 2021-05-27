@@ -16,9 +16,46 @@ limitations under the License.
 
 # <img src="logos/logo.svg" width="180">
 
-## Scalable Data Access Policy Management and Enforcement
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
-### Project Build
+## Overview
+
+From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
+This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
+
+Under the hood, the request involves sending a message that is processed sequentially by a set of micro-services starting first with Palisade Service.
+The Palisade Service will perform two tasks.
+First it will return a reference, a token back to the client that will uniquely identify this request.
+This token is used throughout the application to tie every aspect of the process to this unique identifier and is later used by the client to retrieve the resources available for this request. 
+The second task for the Palisade Service is to initiate the processing of the request by forwarding it onto the next service in the sequence (in this case the User Service).
+The service will perform its required task and then forward the message onto the next service with the end goal of producing resources ready to be viewed by the client.
+This sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed data.
+In the subsequent request by the client to the Filtered-Resource Service, the service returns, one-by-one upon request over a websocket, metadata for a single resource (e.g. a file) they are authorised to view in some capacity.
+These resources can then be read from the Data Service.
+The following diagram shows at a high level the services and their relative relationships with each other. 
+Communications between the services and their related support servers utilise Kafka streaming. 
+
+For a detailed description of the services see [Appendix I - Architecture Diagrams](#appendix-i-architecture-diagrams).  
+For a more technical description of each of the services, follow the links below.
+
+<!--- 
+See doc/services.drawio for the source of this diagram
+--->
+![Service Sequence diagram](doc/services.png)
+
+[Palisade Service](palisade-service/README.md) recieves a clients request, returns a unique token and initiates the processing of resources.
+[User Service](user-service/README.md) connects to User Service providers to ensure the user exists.  
+[Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
+[Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
+[Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
+[Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
+[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
+
+[Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
+
+[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request.    
+
+## Project Build
 
 This is a classic multi-module maven java project with a Spring Boot Parent.
 Each module defines an individual service endpoint within Palisade (except for the services-manager module).
@@ -168,3 +205,16 @@ kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-s
 ```
 
 Use the `-h` flag to see usage instructions.
+
+
+## Appendix I Architecture Diagrams
+
+## Services Description
+![Palisade Services Description](doc/services-description.png)
+
+## Audit Service
+![Palisade Audit Service](doc/audit-service.png)
+
+## Palisade Flow Diagram
+![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
+

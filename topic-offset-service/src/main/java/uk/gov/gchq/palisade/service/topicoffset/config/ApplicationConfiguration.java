@@ -15,33 +15,25 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
-import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.SimpleTopicOffsetService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
 /**
- * Spring configuration of the Topic Offset Service.  Used to define Spring Beans needed in the service.
+ * Spring configuration of the Topic Offset Service. Used to define Spring Beans needed in the service.
  */
 @Configuration
 public class ApplicationConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * Creates a new SimpleTopicOffsetService
+     *
+     * @return a new instance of a TopicOffsetService
+     */
     @Bean
     TopicOffsetService topicOffsetService() {
         return new SimpleTopicOffsetService();
     }
-
-    @Bean
-    ErrorHandlingService loggingErrorHandlerService() {
-        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, TopicOffsetRequest request, Throwable error)
-                -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
-    }
-
 }

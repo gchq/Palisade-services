@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import java.nio.charset.Charset;
 
 /**
- * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
+ * Simple implementation of the Topic-Offset Service. This service will check to see if there is a header with the
  * start marker in the collection of headers. If this condition is met, the response will be to return true.
  */
 public class SimpleTopicOffsetService implements TopicOffsetService {
@@ -40,8 +39,8 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      */
     @Override
     public boolean isOffsetForTopic(final Headers headers) {
-        Header x = headers.lastHeader(StreamMarker.HEADER);
-        boolean isOffset = ((x != null) && (new String(x.value(), Charset.defaultCharset()).equals(StreamMarker.START.toString())));
+        var header = headers.lastHeader(StreamMarker.HEADER);
+        boolean isOffset = ((header != null) && (new String(header.value(), Charset.defaultCharset()).equals(StreamMarker.START.toString())));
         if (isOffset) {
             LOGGER.info("Found topic offset: {}", headers);
         }
