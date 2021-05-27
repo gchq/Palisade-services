@@ -42,6 +42,10 @@
         <tag>HEAD</tag>
     </scm>
 
+    <properties>
+        <examples.app.version>0.5.0-${revision}</examples.app.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
@@ -59,6 +63,15 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.yaml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
@@ -88,7 +101,7 @@
                 <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>copy-and-rename-file</id>
+                        <id>copy-and-rename-readme-file</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy</goal>
@@ -96,6 +109,17 @@
                         <configuration>
                             <sourceFile>${basedir}/src/main/resources/doc/README-TEMPLATE.md</sourceFile>
                             <destinationFile>${basedir}/README.md</destinationFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-banner-file</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${basedir}/src/main/resources/banner.txt</sourceFile>
+                            <destinationFile>${basedir}/target/classes/banner.txt</destinationFile>
                         </configuration>
                     </execution>
                 </executions>

@@ -15,59 +15,42 @@
  */
 package uk.gov.gchq.palisade.component.topicoffset.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for the evaluating the TopicOffsetResponse and the related serialising to a JSON string
- * and deseralising back to an object.
+ * Tests for evaluating the TopicOffsetResponse, and the related serialising to a JSON string
+ * and deserialising back to an object.
  */
-@JsonTest
-@ContextConfiguration(classes = {TopicOffsetResponseTest.class})
 class TopicOffsetResponseTest {
-
-    @Autowired
-    private JacksonTester<TopicOffsetResponse> jsonTester;
-
-    @Test
-    void testContextLoads() {
-        assertThat(jsonTester)
-                .as("Check that the jsonTester has been started correctly")
-                .isNotNull();
-    }
 
     /**
      * Create the object with the constructor and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialise and tests against the original Object
+     * Takes the JSON Object, deserialise and tests against the original Object.
      *
-     * @throws IOException throws if the {@link TopicOffsetResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     * @throws JsonProcessingException if the {@link TopicOffsetResponse} object cannot be converted to a JsonContent.
+     *                                 This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testTopicOffsetResponseSerialisingAndDeserialising() throws IOException {
+    void testTopicOffsetResponseSerialisingAndDeserialising() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
         var topicOffsetResponse = TopicOffsetResponse.Builder.create().withOffset(101L);
 
-        var topicOffsetResponseJsonContent = jsonTester.write(topicOffsetResponse);
-        var offsetResponseObjectContent = jsonTester.parse(topicOffsetResponseJsonContent.getJson());
-        var topicOffsetResponseObject = offsetResponseObjectContent.getObject();
+        var actualJson = mapper.writeValueAsString(topicOffsetResponse);
+        var actualInstance = mapper.readValue(actualJson, topicOffsetResponse.getClass());
 
         assertThat(topicOffsetResponse)
                 .as("Check that whilst using the objects toString method, the objects are the same")
-                .isEqualTo(topicOffsetResponseObject);
+                .isEqualTo(actualInstance);
 
         assertThat(topicOffsetResponse)
                 .as("Check %s using recursion that the serialised and deseralised objects are the same", topicOffsetResponse.getClass().getSimpleName())
                 .usingRecursiveComparison()
-                .isEqualTo(topicOffsetResponseObject);
-
+                .isEqualTo(actualInstance);
     }
 }

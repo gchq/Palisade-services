@@ -35,6 +35,10 @@ import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 
+import javax.annotation.PreDestroy;
+
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Starter for the Data Service. Will start the service and initialise all of the components needed to run the service.
  */
@@ -49,6 +53,7 @@ public class DataApplication {
     private final StdSerialiserConfiguration serialiserConfiguration;
     private final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner;
     private final Materializer materialiser;
+    private CompletableFuture<?> runnerThread = new CompletableFuture<>();
 
     /**
      * Constructor for {@code DataApplication}.
@@ -94,6 +99,7 @@ public class DataApplication {
     public void initPostConstruct() {
 
         //start the Kafka sink for sending success and error messages to Audit Service
+        runnerThread = CompletableFuture.supplyAsync(() -> runner.run(materialiser));
         auditMessageService.registerRequestSink(runner.run(materialiser));
 
         // Add serialiser to the Data Service
@@ -101,5 +107,16 @@ public class DataApplication {
         serialiserConfiguration.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
                 .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThread.cancel(true);
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }

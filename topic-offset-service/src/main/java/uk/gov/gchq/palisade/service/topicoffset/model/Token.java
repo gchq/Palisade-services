@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.topicoffset.model;
 /**
  * Simply stores the expected header key for Tokens
  * Since the content of tokens are strings, there is no need for further implementation
- * If desired, this could extend eg. UUID if more meaningful Token processing was desired
+ * If desired, this could extend eg. UUID if more meaningful Token processing is desired.
  */
 public final class Token {
     public static final String HEADER = "x-request-token";
