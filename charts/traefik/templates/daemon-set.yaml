@@ -66,8 +66,13 @@ spec:
               - ALL
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/traefik/
+          mountPath: /config
+        - name: certs-volume
+          mountPath: /certs
       volumes:
       - name: config-volume
         configMap:
-          name: traefik-configmap
+          name: traefik-config
+      - name: certs-volume
+        secret:
+          secretName: traefik-certs
