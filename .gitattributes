@@ -1,2 +1,10 @@
-# Force the following filetypes to have unix eols, so Windows/MacOS does not break them
-*.sh text eol=lf
+# Set the default behavior, in case people don't have core.autocrlf set
+*                  text=auto
+
+## CONFIG
+.gitattributes     text export-ignore
+.gitignore         text export-ignore
+
+## OS/EOL Specific
+*.bat              text eol=crlf
+*.sh               text eol=lf
