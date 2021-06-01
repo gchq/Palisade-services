@@ -1,0 +1,2 @@
+# Force the following filetypes to have unix eols, so Windows/MacOS does not break them
+*.sh text eol=lf
