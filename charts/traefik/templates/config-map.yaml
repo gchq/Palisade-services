@@ -38,6 +38,11 @@ metadata:
   labels:
     app.kubernetes.io/name: traefik
     app.kubernetes.io/part-of: traefik
+# ATTENTION
+# While TLS certs are included as secrets here, take note:
+# * they are not used at this time by traefik
+# * publishing certificate private-keys on an open-source repository is not appropriate for security
+# If you require TLS certifictates for traefik, this is not the place for it
 stringData:
   tls.crt: |
     -----BEGIN CERTIFICATE-----
