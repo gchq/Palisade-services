@@ -11,25 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+kind: TLSStore
 metadata:
-  name: {{ include "data-service.name" . }}
-  namespace: {{ include "palisade.namespace" . }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
+  name: default
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: traefik
 spec:
-  entryPoints:
-    - tls
-  routes:
-    - match: PathPrefix(`{{ include "data-service.root" . }}/data`)
-      kind: Rule
-      services:
-        - name: {{ include "data-service.name" . }}
-          port: 80
-      middlewares:
-        - name: data-pathparam-regex
-          namespace: {{ include "palisade.namespace" . }}
-  tls: {}
+  defaultCertificate:
+    secretName: traefik-certs

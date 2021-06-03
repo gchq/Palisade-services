@@ -47,7 +47,9 @@ eclipse-formatter.xml
 # Ignore H2 generated databases
 *.db
 
-
+# Ignore JVM example log/err files
+*.log
+*.err
 
 # Created by https://www.toptal.com/developers/gitignore/api/eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=eclipse
