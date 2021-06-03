@@ -17,9 +17,12 @@ kind: IngressRoute
 metadata:
   name: palisade-service
   namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   entryPoints:
-    - web
+    - tls
   routes:
     - match: PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
       kind: Rule
@@ -29,3 +32,4 @@ spec:
       middlewares:
         - name: palisade-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
+  tls: {}
