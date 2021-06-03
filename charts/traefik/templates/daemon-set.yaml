@@ -64,3 +64,15 @@ spec:
               - NET_BIND_SERVICE
             drop:
               - ALL
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: certs-volume
+          mountPath: /certs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: traefik-config
+      - name: certs-volume
+        secret:
+          secretName: traefik-certs
