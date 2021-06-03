@@ -12,21 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG BASE_IMG
-FROM $BASE_IMG
+# Set the default behavior, in case people don't have core.autocrlf set
+*                  text=auto
 
-ARG NETCAT_VERSION=1.*
-ARG CURL_VERSION=7.*
+## CONFIG
+.gitattributes     text export-ignore
+.gitignore         text export-ignore
 
-RUN apt-get update \
-   && apt-get install -y netcat=${NETCAT_VERSION} curl=${CURL_VERSION} --no-install-recommends \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/*
-
-ARG KAFKA_TGZ_URL
-RUN echo ${KAFKA_TGZ_URL}
-RUN curl --location ${KAFKA_TGZ_URL} --output kafka.tgz && \
-    tar --strip-components=1 -xvzf kafka.tgz && \
-    rm kafka.tgz
-
-COPY wait-for-services.sh create-topics.sh /bin/
+## OS/EOL Specific
+*.bat              text eol=crlf
+*.sh               text eol=lf

@@ -17,9 +17,12 @@ kind: IngressRoute
 metadata:
   name: {{ include "filtered-resource-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   entryPoints:
-    - web
+    - tls
   routes:
     - match: PathPrefix(`{{ include "filtered-resource-service.root" . }}/filteredResource`)
       kind: Rule
@@ -29,3 +32,4 @@ spec:
       middlewares:
         - name: filtered-resource-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
+  tls: {}
