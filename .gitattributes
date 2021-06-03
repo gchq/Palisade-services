@@ -11,29 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-replicaCount: 1
 
-service:
-  port: 80
-  internalPort: 8089
-  type: ClusterIP
+# Set the default behavior, in case people don't have core.autocrlf set
+*                  text=auto
 
-image:
-  name: audit-service
-  base: jre
-  tag: SNAPSHOT-bb269c1
-  pullPolicy: IfNotPresent
-  codeRelease: 0.5.0-SNAPSHOT
+## CONFIG
+.gitattributes     text export-ignore
+.gitignore         text export-ignore
 
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }
+## OS/EOL Specific
+*.bat              text eol=crlf
+*.sh               text eol=lf

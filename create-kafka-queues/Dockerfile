@@ -30,4 +30,3 @@ RUN curl --location ${KAFKA_TGZ_URL} --output kafka.tgz && \
     rm kafka.tgz
 
 COPY wait-for-services.sh create-topics.sh /bin/
-RUN sed -i 's/\r$//' /bin/wait-for-services.sh /bin/create-topics.sh
