@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=5s, maximumSize=100"}
 )
 @EnableCaching
 @ActiveProfiles({"caffeine"})
@@ -170,7 +170,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         assertThat(policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId())).isPresent();
         // Given - a sufficient amount of time has passed
 
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(5);
         forceCleanUp();
 
         // When - an old entry is requested
