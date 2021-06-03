@@ -18,8 +18,10 @@ container:
     - --accesslog
     - --entrypoints.web.Address=:80
     - --entrypoints.tls.Address=:443
-    - --serverstransport.insecureskipverify
+    - --providers.file.filename=/config/traefik.yaml
+    - --serversTransport.insecureSkipVerify=true
     - --providers.kubernetescrd
+    - --log.level=DEBUG
     - --ping=true
 
 admin:
