@@ -129,6 +129,7 @@ public class AttributeMaskingService {
         return Optional.ofNullable(nullableRequest)
                 .map((AttributeMaskingRequest request) -> {
                     LeafResource maskedResource = mask(request);
+                    LOGGER.debug("Masked resource is {}", maskedResource);
                     return AuditableAttributeMaskingResponse.Builder.create()
                             .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
                             .withAuditErrorMessage(null);

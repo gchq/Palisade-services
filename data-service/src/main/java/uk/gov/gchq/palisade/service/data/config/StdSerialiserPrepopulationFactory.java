@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.data.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.service.data.exception.SerialiserConstructorNotFoundException;
@@ -23,6 +26,7 @@ import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationExcep
 import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
 import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
@@ -39,31 +43,16 @@ import static java.util.Objects.requireNonNull;
  * - A {@link String} value of the fully qualified class of the serialiser that will be created.
  */
 public class StdSerialiserPrepopulationFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StdSerialiserPrepopulationFactory.class);
 
-    private String flavourFormat;
-    private String flavourType;
-    private String serialiserClass;
+    private String flavourFormat = "";
+    private String flavourType = "";
+    private String serialiserClass = "";
 
     /**
      * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object.
      */
     public StdSerialiserPrepopulationFactory() {
-        flavourFormat = "";
-        flavourType = "";
-        serialiserClass = "";
-    }
-
-    /**
-     * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument.
-     *
-     * @param flavourFormat   a {@link String} value of the serialised format for a {@link DataFlavour}
-     * @param flavourType     a {@link String} value of the fully qualified type for a {@link DataFlavour}
-     * @param serialiserClass a {@link String} value of the fully qualified class to create a {@link Serialiser}
-     */
-    public StdSerialiserPrepopulationFactory(final String flavourFormat, final String flavourType, final String serialiserClass) {
-        this.flavourFormat = flavourFormat;
-        this.flavourType = flavourType;
-        this.serialiserClass = serialiserClass;
     }
 
     @Generated
@@ -104,12 +93,18 @@ public class StdSerialiserPrepopulationFactory {
      *
      * @return an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */
+    @SuppressWarnings("unchecked")
     public Entry<DataFlavour, Serialiser<Object>> build() {
         Serialiser<Object> serialiser;
+        LOGGER.info("Building serialiser for class '{}', resource format '{}' and domain type '{}'", serialiserClass, flavourFormat, flavourType);
         try {
-            serialiser = (Serialiser<Object>) Class.forName(serialiserClass)
-                    .getConstructor(Class.class)
-                    .newInstance(Class.forName(flavourType));
+            Class<?> serialiserClazz = Class.forName(serialiserClass);
+            LOGGER.debug("Got class {} for serialiser classname {}", serialiserClazz, serialiserClass);
+            Constructor<?> serialiserConstructor = serialiserClazz.getConstructor(Class.class);
+            LOGGER.debug("Got one-element constructor {} for class {}", serialiserConstructor, serialiserClazz);
+            Class<?> typeClass = Class.forName(flavourType);
+            LOGGER.debug("Got class {} for flavourType classname {}", typeClass, flavourType);
+            serialiser = (Serialiser<Object>) serialiserConstructor.newInstance(typeClass);
         } catch (ClassNotFoundException ex) {
             throw new SerialiserNotFoundException("Error getting the serialiser class", ex);
         } catch (NoSuchMethodException ex) {
@@ -117,7 +112,9 @@ public class StdSerialiserPrepopulationFactory {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException ex) {
             throw new SerialiserInitialisationException("Error initialising the serialiser", ex);
         }
-        return new SimpleImmutableEntry<>(DataFlavour.of(flavourType, flavourFormat), serialiser);
+        var serdeEntry = new SimpleImmutableEntry<>(DataFlavour.of(flavourType, flavourFormat), serialiser);
+        LOGGER.debug("Created serialiser entry {}", serdeEntry);
+        return serdeEntry;
     }
 
     @Override

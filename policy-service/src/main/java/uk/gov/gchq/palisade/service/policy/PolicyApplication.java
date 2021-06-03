@@ -104,16 +104,18 @@ public class PolicyApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
         //Pre-populate the cache
-        LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
+        LOGGER.info("Pre-populating using policy config: {}", policyConfig.getClass());
         policyConfig.getPolicies()
                 .forEach((PolicyPrepopulationFactory factory) -> {
                     //Build Resource Rules
                     Entry<String, Rules<LeafResource>> resourceMap = factory.buildResourceRules();
                     service.setResourceRules(resourceMap.getKey(), resourceMap.getValue());
+                    LOGGER.info("(Resource) cache add for {} -> {}", resourceMap.getKey(), resourceMap.getValue());
 
                     //Build Record Rules
                     Entry<String, Rules<Serializable>> recordMap = factory.buildRecordRules();
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
+                    LOGGER.info("(Record) cache add for {} -> {}", recordMap.getKey(), recordMap.getValue());
                 });
 
         //Then start up all runners
