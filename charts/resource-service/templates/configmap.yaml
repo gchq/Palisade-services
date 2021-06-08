@@ -39,7 +39,7 @@ data:
         port: 9092
   application-redis.yaml: |
     spring:
-      {{ if .Values.global.topicPrefix }}
+      {{- if .Values.global.topicPrefix }}
       data:
         redis:
           repositories:
@@ -66,3 +66,9 @@ data:
         host: {{ $masterFullname }}
         port: {{ $masterPort }}
       {{- end }}
+  {{- if .Values.global.additionalConfigMaps }}
+  {{- range $name, $value := .Values.global.additionalConfigMaps }}
+  {{ $name }}: |
+  {{- $value | nindent 4 }}
+  {{- end }}
+  {{- end }}

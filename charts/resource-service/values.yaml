@@ -22,7 +22,7 @@ service:
 image:
   name: resource-service
   base: jre
-  tag: SNAPSHOT-bb269c1
+  tag: SNAPSHOT-84c97d0
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

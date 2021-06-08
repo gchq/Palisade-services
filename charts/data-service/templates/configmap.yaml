@@ -63,3 +63,9 @@ data:
         host: {{ $masterFullname }}
         port: {{ $masterPort }}
       {{- end }}
+  {{- if .Values.global.additionalConfigMaps }}
+  {{- range $name, $value := .Values.global.additionalConfigMaps }}
+  {{ $name }}: |
+  {{- $value | nindent 4 }}
+  {{- end }}
+  {{- end }}

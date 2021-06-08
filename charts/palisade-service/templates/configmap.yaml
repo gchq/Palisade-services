@@ -34,3 +34,9 @@ data:
       discovery.config.services.kafka.endpoints:
       - host: {{ include "palisade.kafka.fullname" . }}
         port: 9092
+  {{- if .Values.global.additionalConfigMaps }}
+  {{- range $name, $value := .Values.global.additionalConfigMaps }}
+  {{ $name }}: |
+  {{- $value | nindent 4 }}
+  {{- end }}
+  {{- end }}
