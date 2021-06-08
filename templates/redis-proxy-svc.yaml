@@ -29,7 +29,7 @@ spec:
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
   # Docs suggest FQDN can be shortened inside current namespace, and inside current cluster, but this doesn't work in AWS
   # {{- if .Values.redis.install }}
-  externalName: palisade-redis-master.svc.cluster.local
+  externalName: palisade-redis-master.{{ include "palisade.namespace" . }}.svc.cluster.local
   # {{- else if eq .Values.global.hosting "aws" }}
   # externalName: redis-master.palisade-shared.svc.cluster.local
   # {{- end }}
