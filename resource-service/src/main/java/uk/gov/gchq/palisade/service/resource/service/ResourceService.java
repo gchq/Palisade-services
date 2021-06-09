@@ -32,6 +32,7 @@ import java.util.Iterator;
  * method call on this interface doesn't guarantee that the user will be allowed to access it by policy. Other
  * components of the Palisade system will enforce the necessary policy controls to prevent access to resources by users
  * without the necessary access rights.
+ *
  * @implNote None of the {@code getResourcesByXXX} methods in this class will return in error if there
  * don't happen to be any resources that do not match a request, instead they will simply return empty {@link Iterator}
  * instances.

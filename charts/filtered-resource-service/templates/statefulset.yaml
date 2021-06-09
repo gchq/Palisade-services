@@ -80,15 +80,9 @@ spec:
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "filtered-resource-service.classpathJars.name" . }}
-          mountPath: {{ include "filtered-resource-service.classpathJars.mount" . }}
         - name: config-volume
           mountPath: {{ include "filtered-resource-service.config.path" . }}
       volumes:
-      - name: {{ include "filtered-resource-service.classpathJars.name" . }}
-        persistentVolumeClaim:
-          claimName: {{ include "filtered-resource-service.classpathJars.name" . }}
-          readOnly: true
       - name: config-volume
         configMap:
           name: {{ include "filtered-resource-service.name" . }}-configmap
