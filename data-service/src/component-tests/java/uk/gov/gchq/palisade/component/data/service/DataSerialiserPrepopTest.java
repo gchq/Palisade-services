@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.component.data.repository.TestAsyncConfiguration;
 import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
+import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.stream.config.AkkaSystemConfig;
 
@@ -49,12 +50,21 @@ class DataSerialiserPrepopTest {
 
     @Test
     void testDataReaderIsPopulatedBySerialiser() {
+        var std = new StdSerialiserPrepopulationFactory();
+        std.setFlavourFormat("string");
+        std.setFlavourType("java.lang.String");
+        std.setSerialiserClass("uk.gov.gchq.palisade.component.data.service.TestSerialiser");
+
         assertThat(flavourType)
                 .isNotNull()
                 .isEqualTo("java.lang.String");
 
         assertThat(serdesConfig)
-                .extracting(StdSerialiserConfiguration::getSerialisers).asList()
-                .hasSize(1);
+                .extracting(StdSerialiserConfiguration::getSerialisers)
+                .asList()
+                .hasSize(1)
+                .first()
+                .usingRecursiveComparison()
+                .isEqualTo(std);
     }
 }
