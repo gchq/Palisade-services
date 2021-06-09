@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.component.data.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
 @ActiveProfiles({"h2test", "test-serialisers"})
-class DataSerialiserPrepopTest {
+@Disabled
+class DataSerialiserPrePopTest {
+
     @Autowired
     StdSerialiserConfiguration serdesConfig;
 
