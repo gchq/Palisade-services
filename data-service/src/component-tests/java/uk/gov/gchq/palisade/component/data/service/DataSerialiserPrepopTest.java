@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
-@ActiveProfiles({"h2test", "testserialisers"})
+@ActiveProfiles({"h2test", "test-serialisers"})
 class DataSerialiserPrepopTest {
     @Autowired
     StdSerialiserConfiguration serdesConfig;
