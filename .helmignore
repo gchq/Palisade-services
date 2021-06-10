@@ -16,9 +16,11 @@
 # This supports shell glob matching, relative path matching, and
 # negation (prefixed with !). Only one pattern per line.
 .DS_Store
+
 # Common VCS dirs
 .git/
 .github/
+.gitattributes
 .gitignore
 *.tmp
 *.iml
@@ -29,20 +31,25 @@ mvn_dependency_tree.txt
 pom.xml
 *.md
 velocity*
+
 # Various IDEs
 .project
 .idea/
 *.tmproj
 .vscode/
+
 # Non-service directories
+/doc/
 /logos/
 /licences/
 /target/
 /licenses/
 /code-style/
 *.lock
+
 # Previous helm packages
 Palisade-services-*.tgz
+
 # Add the directory for every service module here
 /attribute-masking-service/
 /audit-service/
