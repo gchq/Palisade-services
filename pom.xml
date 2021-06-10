@@ -51,7 +51,7 @@
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
         <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
         <licence.acceptPomPackaging>true</licence.acceptPomPackaging>
-        <image.repository/>
+        <image.repository>gchq/palisade-</image.repository>
 
         <!-- Plugins -->
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
