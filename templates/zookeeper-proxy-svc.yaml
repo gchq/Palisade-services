@@ -31,5 +31,5 @@ spec:
   {{- if eq .Values.global.hosting "aws" }}
   externalName: zookeeper.palisade-shared.svc.cluster.local
   {{- else }}
-  externalName: palisade-zooekeeper.{{ include "palisade.namespace" . }}
+  externalName: palisade-zookeeper.{{ include "palisade.namespace" . }}
   {{- end }}
