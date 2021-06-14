@@ -30,12 +30,15 @@ mvn_dependency_tree.txt
 pom.xml
 *.md
 velocity*
+
 # Various IDEs
 .project
 .idea/
 *.tmproj
 .vscode/
+
 # Non-service directories
+/doc/
 /logos/
 /licences/
 /target/
@@ -43,8 +46,10 @@ velocity*
 /code-style/
 *.lock
 *.db
+
 # Previous helm packages
 Palisade-services-*.tgz
+
 # Add the directory for every service module here
 /attribute-masking-service/
 /audit-service/

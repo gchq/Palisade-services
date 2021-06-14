@@ -31,8 +31,8 @@ spec:
   type: ExternalName
   # Specify the FQDN of the service to use. Pod selectors can't select outside of namespace
   # Docs suggest FQDN can be shortened inside current namespace, and inside current cluster, but this doesn't work in AWS
-  {{- if eq .Values.global.hosting "aws" }}
+  {{- if .Values.global.kafka.install }}
+  externalName: palisade-kafka.{{ include "palisade.namespace" . }}.svc.cluster.local
+  {{- else if eq .Values.global.hosting "aws" }}
   externalName: kafka.palisade-shared.svc.cluster.local
-  {{- else }}
-  externalName: palisade-kafka.{{ include "palisade.namespace" . }}
   {{- end }}
