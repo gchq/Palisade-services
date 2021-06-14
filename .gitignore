@@ -39,6 +39,8 @@ velocity.log.*
 velocity.log
 services-launcher/.log
 *.factorypath
+*.ipr
+*.iws
 
 ##VSCODE default files that dont need to be tracked
 eclipse-formatter.xml
@@ -56,14 +58,12 @@ eclipse-formatter.xml
 
 ### Eclipse ###
 .metadata
-bin/
 tmp/
 *.tmp
 *.bak
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
 .recommenders
 

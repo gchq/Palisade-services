@@ -110,12 +110,12 @@ public class PolicyApplication {
                     //Build Resource Rules
                     Entry<String, Rules<LeafResource>> resourceMap = factory.buildResourceRules();
                     service.setResourceRules(resourceMap.getKey(), resourceMap.getValue());
-                    LOGGER.info("(Resource) cache add for {} -> {}", resourceMap.getKey(), resourceMap.getValue());
+                    LOGGER.debug("(Resource) cache add for {} -> {}", resourceMap.getKey(), resourceMap.getValue());
 
                     //Build Record Rules
                     Entry<String, Rules<Serializable>> recordMap = factory.buildRecordRules();
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
-                    LOGGER.info("(Record) cache add for {} -> {}", recordMap.getKey(), recordMap.getValue());
+                    LOGGER.debug("(Record) cache add for {} -> {}", recordMap.getKey(), recordMap.getValue());
                 });
 
         //Then start up all runners

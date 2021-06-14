@@ -113,13 +113,11 @@ public class ResourceServicePersistenceProxy {
                                 )))
                         )
                 ))
-                .map(resource -> {
+                .map((AuditableResourceResponse resource) -> {
                     LOGGER.debug("Got resource {} for request {}", resource, request);
                     return resource;
                 })
                 .mapMaterializedValue(ignored -> NotUsed.notUsed());
-
-        /**/
     }
 
     /**
@@ -171,7 +169,7 @@ public class ResourceServicePersistenceProxy {
                                 .withResourceResponse(ResourceResponse.Builder.create(request)
                                         .withResource(leafResource)))
                 ))
-                .map(resource -> {
+                .map((AuditableResourceResponse resource) -> {
                     LOGGER.debug("Got resource {} for request {} and type {}", resource, request, type);
                     return resource;
                 })
@@ -197,7 +195,7 @@ public class ResourceServicePersistenceProxy {
                                 .withResourceResponse(ResourceResponse.Builder.create(request)
                                         .withResource(leafResource)))
                 ))
-                .map(resource -> {
+                .map((AuditableResourceResponse resource) -> {
                     LOGGER.debug("Got resource {} for request {} and format {}", resource, request, serialisedFormat);
                     return resource;
                 })

@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.component.data.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.component.data.repository.TestAsyncConfiguration;
 import uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
+import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.stream.config.AkkaSystemConfig;
 
@@ -39,8 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableAutoConfiguration
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
-@ActiveProfiles({"h2test", "testserialisers"})
-class DataSerialiserPrepopTest {
+@ActiveProfiles({"h2test", "test-serialisers"})
+@Disabled
+class DataSerialiserPrePopTest {
+
     @Autowired
     StdSerialiserConfiguration serdesConfig;
 
@@ -49,12 +53,21 @@ class DataSerialiserPrepopTest {
 
     @Test
     void testDataReaderIsPopulatedBySerialiser() {
+        var std = new StdSerialiserPrepopulationFactory();
+        std.setFlavourFormat("string");
+        std.setFlavourType("java.lang.String");
+        std.setSerialiserClass("uk.gov.gchq.palisade.component.data.service.TestSerialiser");
+
         assertThat(flavourType)
                 .isNotNull()
                 .isEqualTo("java.lang.String");
 
         assertThat(serdesConfig)
-                .extracting(StdSerialiserConfiguration::getSerialisers).asList()
-                .hasSize(1);
+                .extracting(StdSerialiserConfiguration::getSerialisers)
+                .asList()
+                .hasSize(1)
+                .first()
+                .usingRecursiveComparison()
+                .isEqualTo(std);
     }
 }
