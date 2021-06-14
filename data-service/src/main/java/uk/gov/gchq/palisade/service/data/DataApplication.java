@@ -86,8 +86,7 @@ public class DataApplication {
     public static void main(final String[] args) {
         LOGGER.debug("DataApplication started with: {}", (Object) args);
 
-        new SpringApplicationBuilder(DataApplication.class)
-                .web(WebApplicationType.SERVLET)
+        new SpringApplicationBuilder(DataApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 
@@ -104,14 +103,10 @@ public class DataApplication {
         auditMessageService.registerRequestSink(runner.run(materialiser));
 
         // Add serialiser to the Data Service
-        LOGGER.info("Pre-populating using serialiser config: {}", serialiserConfiguration);
+        LOGGER.debug("Pre-populating using serialiser config: {}", serialiserConfiguration.getClass());
         serialiserConfiguration.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
-                .forEach(entry -> {
-                    dataReader.addSerialiser(entry.getKey(), entry.getValue());
-                    LOGGER.info("Added serialiser to data-reader for flavour {}", entry.getKey());
-                    LOGGER.debug("Added {} -> {}", entry.getKey(), entry.getValue());
-                });
+                .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));
     }
 
     /**

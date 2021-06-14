@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 
@@ -28,7 +25,6 @@ import java.util.Map;
  * The class AuditEventService used to create {@link AuditSuccessMessage}s that can be sent to the AuditService
  */
 public class AuditEventService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventService.class);
     private final Map<String, String> additionalAttributes;
 
     /**
@@ -48,7 +44,6 @@ public class AuditEventService {
      * @return an {@link AuditSuccessMessage} to be written to the "success" kafka topic
      */
     public AuditSuccessMessage createSuccessMessage(final FilteredResourceRequest request) {
-        LOGGER.debug("Creating success message for request {}", request);
         return AuditSuccessMessage.Builder.create(request, this.additionalAttributes);
     }
 

@@ -110,7 +110,6 @@ public abstract class PalisadeService {
         AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes).withError(error);
         AuditablePalisadeSystemResponse auditableRequest = AuditablePalisadeSystemResponse.Builder.create().withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
-        LOGGER.debug("Auditing error for request {} with token {} and attributes {}", request, token, attributes, error);
 
         return futureSink.thenCompose(sink -> Source.single(requestPair)
                 .runWith(sink, materialiser)

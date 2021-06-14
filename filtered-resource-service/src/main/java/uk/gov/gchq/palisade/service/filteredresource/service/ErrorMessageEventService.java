@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.error.TokenErrorMessagePersistenceLayer;
@@ -32,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
  * It will be later sent to the client via websocket.
  */
 public class ErrorMessageEventService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorMessageEventService.class);
     private final TokenErrorMessagePersistenceLayer persistenceLayer;
 
     /**
@@ -54,7 +50,6 @@ public class ErrorMessageEventService {
      * @return a {@link CompletableFuture} of a {@link TokenErrorMessageEntity} representing the async completion of the persistence event
      */
     public CompletableFuture<TokenErrorMessageEntity> putAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage) {
-        LOGGER.debug("Storing error message for token {} and error {}", token, auditErrorMessage);
         return this.persistenceLayer.putErrorMessage(token, auditErrorMessage.getServiceName(), auditErrorMessage.getError());
     }
 }

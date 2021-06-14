@@ -123,7 +123,6 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
         // Interpret relative paths and prepend 'file:'
         String resourceUriId = ResourceBuilder.create(resourceId).getId();
-        LOGGER.debug("Built resource rules {} for resourceId {}", rules, resourceUriId);
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
@@ -135,7 +134,6 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
         // Interpret relative paths and prepend 'file:'
         String resourceUriId = ResourceBuilder.create(resourceId).getId();
-        LOGGER.debug("Built record rules {} for resourceId {}", rules, resourceUriId);
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
