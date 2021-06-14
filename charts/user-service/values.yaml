@@ -22,7 +22,7 @@ service:
 image:
   name: user-service
   base: jre
-  tag: SNAPSHOT-c2249a1
+  tag: SNAPSHOT-03949b6
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

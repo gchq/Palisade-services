@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, DefaultConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s", "spring.cache.redis.keyPrefix=test:"}
+        properties = {"spring.cache.redis.timeToLive=3s", "spring.cache.redis.keyPrefix=test:"}
 )
 @EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})
@@ -172,7 +172,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         assertThat(cacheProxy.getResourceRules((ACCESSIBLE_JSON_TXT_FILE.getId()))).get().isNotNull();
 
         // Given - a sufficient amount of time has passed
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(5);
 
         // When - an old entry is requested
         var recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
