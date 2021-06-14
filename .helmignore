@@ -20,6 +20,7 @@
 .git/
 .github/
 .gitignore
+.gitattributes
 *.tmp
 *.iml
 *~
@@ -41,6 +42,7 @@ velocity*
 /licenses/
 /code-style/
 *.lock
+*.db
 # Previous helm packages
 Palisade-services-*.tgz
 # Add the directory for every service module here
