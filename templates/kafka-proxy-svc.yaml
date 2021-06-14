@@ -35,6 +35,4 @@ spec:
   externalName: palisade-kafka.{{ include "palisade.namespace" . }}.svc.cluster.local
   {{- else if eq .Values.global.hosting "aws" }}
   externalName: kafka.palisade-shared.svc.cluster.local
-  {{- else }}
-  externalName: palisade-kafka.{{ include "palisade.namespace" . }}
   {{- end }}
