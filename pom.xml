@@ -137,7 +137,6 @@
                 <snapshots.repository.name>Sonatype Nexus snapshot repository</snapshots.repository.name>
                 <snapshots.repository.url>https://oss.sonatype.org/content/repositories/snapshots</snapshots.repository.url>
                 <!-- Build configuration for release -->
-                <image.repository>gchq/palisade-</image.repository>
                 <revision>RELEASE</revision>
                 <common.revision>RELEASE</common.revision>
                 <maven.test.skip>true</maven.test.skip>
