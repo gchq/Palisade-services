@@ -221,6 +221,7 @@ public final class AttributeMaskingRequest {
             /**
              * Adds the rules that specify the access.
              *
+             * @param <T> the domain class for the rules
              * @param rules that apply to this request.
              * @return class {@link AttributeMaskingRequest} for the completed class from the builder.
              */
