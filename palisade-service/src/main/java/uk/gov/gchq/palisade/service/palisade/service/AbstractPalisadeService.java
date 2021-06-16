@@ -37,9 +37,9 @@ import java.util.concurrent.CompletionStage;
  * towards the end goal of the data that satisfies the data request, and the necessary restrictions that are to be
  * imposed on the access to the data.
  */
-public abstract class PalisadeService {
+public abstract class AbstractPalisadeService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPalisadeService.class);
 
     private final Materializer materialiser;
     private final CompletableFuture<Sink<TokenRequestPair, CompletionStage<Done>>> futureSink;
@@ -49,7 +49,7 @@ public abstract class PalisadeService {
      *
      * @param materialiser the materialiser
      */
-    PalisadeService(final Materializer materialiser) {
+    AbstractPalisadeService(final Materializer materialiser) {
         this.futureSink = new CompletableFuture<>();
         this.materialiser = materialiser;
     }

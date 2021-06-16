@@ -46,7 +46,7 @@ import static java.util.Objects.requireNonNull;
  * A serialiser is chosen based on a {@link DataFlavour} which is a combination of
  * data type and serialised format.
  */
-public abstract class SerialisedDataReader implements DataReader {
+public abstract class AbstractSerialisedDataReader implements DataReader {
 
     private Serialiser<?> defaultSerialiser = new SimpleStringSerialiser();
 
@@ -59,11 +59,11 @@ public abstract class SerialisedDataReader implements DataReader {
     /**
      * Set the serialiser
      *
-     * @param serialisers a mapping of data type to serialisers {@link SerialisedDataReader}
-     * @return the {@link SerialisedDataReader}
+     * @param serialisers a mapping of data type to serialisers {@link AbstractSerialisedDataReader}
+     * @return the {@link AbstractSerialisedDataReader}
      */
     @Generated
-    public SerialisedDataReader serialisers(final Map<DataFlavour, Serialiser<?>> serialisers) {
+    public AbstractSerialisedDataReader serialisers(final Map<DataFlavour, Serialiser<?>> serialisers) {
         requireNonNull(serialisers, "The serialisers cannot be set to null.");
         this.setSerialisers(serialisers);
         return this;
@@ -73,10 +73,10 @@ public abstract class SerialisedDataReader implements DataReader {
      * Set the default serialiser.
      *
      * @param serialiser the {@link Serialiser} to be set as the default
-     * @return the {@link SerialisedDataReader} object
+     * @return the {@link AbstractSerialisedDataReader} object
      */
     @Generated
-    public SerialisedDataReader defaultSerialiser(final Serialiser<?> serialiser) {
+    public AbstractSerialisedDataReader defaultSerialiser(final Serialiser<?> serialiser) {
         requireNonNull(serialiser, "The default serialiser cannot be set to null.");
         this.setDefaultSerialiser(serialiser);
         return this;
@@ -112,7 +112,7 @@ public abstract class SerialisedDataReader implements DataReader {
 
     /**
      * This is the method that connects to the data and streams the raw data
-     * into the {@link SerialisedDataReader}.
+     * into the {@link AbstractSerialisedDataReader}.
      *
      * @param resource the resource to be accessed
      * @return a stream of data in the format that the client expects the data to be in.
@@ -181,7 +181,7 @@ public abstract class SerialisedDataReader implements DataReader {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", SerialisedDataReader.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AbstractSerialisedDataReader.class.getSimpleName() + "[", "]")
                 .add("defaultSerialiser=" + defaultSerialiser)
                 .add("serialisers=" + serialisers)
                 .toString();

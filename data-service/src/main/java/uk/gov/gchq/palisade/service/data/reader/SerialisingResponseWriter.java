@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 /**
- * The response writer for the {@link SerialisedDataReader} which will apply the record level rules for Palisade.
+ * The response writer for the {@link AbstractSerialisedDataReader} which will apply the record level rules for Palisade.
  *
  * @param <T> the type of {@link SerialisingResponseWriter}
  */
