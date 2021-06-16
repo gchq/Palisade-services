@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.user.User;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -223,7 +224,7 @@ public final class AttributeMaskingRequest {
              * @param rules that apply to this request.
              * @return class {@link AttributeMaskingRequest} for the completed class from the builder.
              */
-            default AttributeMaskingRequest withRules(Rules rules) {
+            default <T extends Serializable> AttributeMaskingRequest withRules(Rules<T> rules) {
                 return withRulesNode(MAPPER.valueToTree(rules));
             }
 

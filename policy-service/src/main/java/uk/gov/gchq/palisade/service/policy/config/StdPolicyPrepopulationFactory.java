@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -122,7 +122,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         resourceRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
         // Interpret relative paths and prepend 'file:'
-        String resourceUriId = ResourceBuilder.create(resourceId).getId();
+        String resourceUriId = AbstractResourceBuilder.create(resourceId).getId();
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
@@ -133,7 +133,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         recordRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
         // Interpret relative paths and prepend 'file:'
-        String resourceUriId = ResourceBuilder.create(resourceId).getId();
+        String resourceUriId = AbstractResourceBuilder.create(resourceId).getId();
         return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 

@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A class that handles the Uncaught Exceptions thrown by the Async processes
  */
@@ -33,7 +35,8 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAsyncExceptionHandler.class);
 
     @Override
-    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object... objects) {
+    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object[] objects) {
+        requireNonNull(objects);
         String parameters = Stream.of(objects)
                 .map(Object::toString)
                 .collect(Collectors.joining(", ", "[", "]"));
