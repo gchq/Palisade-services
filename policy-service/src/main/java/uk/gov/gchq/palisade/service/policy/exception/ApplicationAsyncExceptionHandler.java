@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.policy.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A class that handles the Uncaught Exceptions thrown by the Async processes
@@ -31,8 +35,11 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAsyncExceptionHandler.class);
 
     @Override
-    public void handleUncaughtException(final Throwable throwable, final Method method, final Object... objects) {
-        LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(), Stream.of(objects).map(Object::toString).collect(Collectors.joining(", ", "[", "]")));
+    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object[] objects) {
+        requireNonNull(objects);
+        String parameters = Stream.of(objects)
+                .map(Object::toString)
+                .collect(Collectors.joining(", ", "[", "]"));
+        LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(), parameters);
     }
-
 }

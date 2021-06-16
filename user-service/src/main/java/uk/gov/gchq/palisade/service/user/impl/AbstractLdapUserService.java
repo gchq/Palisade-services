@@ -208,7 +208,7 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected Set<Object> basicSearch(final UserId userId,
                                       final String name, final String attrIdForUserId,
-                                      final String... attrs) throws NamingException {
+                                      final String[] attrs) throws NamingException {
         LOGGER.debug("Performing basic search using {}, {}, {}, {}", userId, name, attrIdForUserId, attrs);
         final NamingEnumeration<SearchResult> attrResults = context.search(
                 name,
