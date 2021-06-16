@@ -94,8 +94,17 @@ public abstract class AbstractLdapUserService implements UserService {
     protected AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
+
+        // Create the LDAP config
+        Properties config = new Properties();
+        if (new File(ldapConfigPath).exists()) {
+            config.load(Files.newInputStream(Paths.get(ldapConfigPath)));
+        } else {
+            config.load(getClass().getResourceAsStream(ldapConfigPath));
+        }
+
         this.ldapConfigPath = ldapConfigPath;
-        this.context = createContext(ldapConfigPath);
+        this.context = new InitialLdapContext(config, null);
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
 
@@ -161,31 +170,27 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected abstract Set<String> getRoles(final UserId userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException;
 
-    protected LdapContext createContext(final String ldapConfigPath) throws IOException, NamingException {
-        final Properties config = new Properties();
-        if (new File(ldapConfigPath).exists()) {
-            config.load(Files.newInputStream(Paths.get(ldapConfigPath)));
-        } else {
-            config.load(getClass().getResourceAsStream(ldapConfigPath));
-        }
-        return new InitialLdapContext(config, null);
-    }
-
     protected Map<String, Object> getAttributes(final UserId userId) throws NamingException {
-        final Map<String, Object> attributes = new HashMap<>();
+        Map<String, Object> attributes = new HashMap<>();
         final String[] requestAttrs = getAttributeNames();
         if (null != requestAttrs && requestAttrs.length > 0) {
             final Attributes userAttrs = context.getAttributes(formatInput(userId.getId()), requestAttrs);
             if (null != userAttrs) {
                 for (final String requestAttr : requestAttrs) {
-                    final Attribute attribute = userAttrs.get(requestAttr);
-                    if (null != attribute) {
-                        final NamingEnumeration<?> all = attribute.getAll();
-                        if (all.hasMore()) {
-                            attributes.put(requestAttr, all.next());
-                        }
-                    }
+                    attributes = addAttribute(attributes, userAttrs, requestAttr);
                 }
+            }
+        }
+        return attributes;
+    }
+
+    protected Map<String, Object> addAttribute(final Map<String, Object> attributes, final Attributes userAttrs,
+                                                final String requestAttr) throws NamingException {
+        final Attribute attribute = userAttrs.get(requestAttr);
+        if (null != attribute) {
+            NamingEnumeration<?> all = attribute.getAll();
+            if (all.hasMore()) {
+                attributes.put(requestAttr, all.next());
             }
         }
         return attributes;
