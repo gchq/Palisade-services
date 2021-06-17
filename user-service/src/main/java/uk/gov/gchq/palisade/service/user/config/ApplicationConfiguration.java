@@ -35,7 +35,6 @@ import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.user.User;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
