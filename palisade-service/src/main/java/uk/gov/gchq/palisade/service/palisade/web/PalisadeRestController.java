@@ -72,7 +72,7 @@ public class PalisadeRestController {
             token = palisadeService.registerDataRequest(request).join();
             palisadeClientResponse = new PalisadeClientResponse(token);
             LOGGER.debug("registerDataRequest token is {}", token);
-        } catch (CompletionException | IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             LOGGER.error("PalisadeRestController Exception thrown", e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             Map<String, Object> attributes = new HashMap<>();
