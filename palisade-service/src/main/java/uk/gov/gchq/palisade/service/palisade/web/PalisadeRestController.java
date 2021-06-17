@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 
 /**
  * Provides the external application api for the Palisade Service.
@@ -71,7 +72,7 @@ public class PalisadeRestController {
             token = palisadeService.registerDataRequest(request).join();
             palisadeClientResponse = new PalisadeClientResponse(token);
             LOGGER.debug("registerDataRequest token is {}", token);
-        } catch (Exception e) {
+        } catch (CompletionException | IllegalArgumentException e) {
             LOGGER.error("PalisadeRestController Exception thrown", e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             Map<String, Object> attributes = new HashMap<>();

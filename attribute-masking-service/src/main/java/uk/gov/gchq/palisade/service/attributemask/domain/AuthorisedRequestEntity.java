@@ -140,7 +140,7 @@ public class AuthorisedRequestEntity {
     }
 
     @Generated
-    public Rules<?> getRules() {
+    public Rules getRules() {
         return rules;
     }
 

@@ -49,19 +49,19 @@ public class StdUserConfiguration implements UserConfiguration {
      * @param users a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
     public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
-        this.users = users;
+        this.users = Collections.unmodifiableList(users);
     }
 
     @Override
     @Generated
     public List<StdUserPrepopulationFactory> getUsers() {
-        return users;
+        return Collections.unmodifiableList(users);
     }
 
     @Generated
     public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
-        this.users = users;
+        this.users = Collections.unmodifiableList(users);
     }
 
     @Override

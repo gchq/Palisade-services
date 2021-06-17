@@ -216,24 +216,29 @@ public abstract class AbstractLdapUserService implements UserService {
                 attrs
         );
 
-        final Set<Object> results = new HashSet<>();
+        Set<Object> results = new HashSet<>();
         while (attrResults.hasMore()) {
             final SearchResult result = attrResults.next();
             final Attributes resultAttrs = result.getAttributes();
             if (null != resultAttrs) {
-                final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
-                if (null != all) {
-                    while (all.hasMore()) {
-                        final Attribute next = all.next();
-                        final Object nextValue = next.get();
-                        if (null != nextValue) {
-                            results.add(nextValue);
-                        }
-                    }
-                }
+                results = getValues(resultAttrs, results);
             }
         }
         return results;
+    }
+
+    protected Set<Object> getValues(final Attributes resultAttrs, final Set<Object> values) throws NamingException {
+        final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
+        if (null != all) {
+            while (all.hasMore()) {
+                final Attribute next = all.next();
+                final Object nextValue = next.get();
+                if (null != nextValue) {
+                    values.add(nextValue);
+                }
+            }
+        }
+        return values;
     }
 
     /**
