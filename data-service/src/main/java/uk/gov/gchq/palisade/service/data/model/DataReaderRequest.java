@@ -102,7 +102,7 @@ public class DataReaderRequest {
     }
 
     @Generated
-    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
+    @SuppressWarnings({"java:S3740", "rawtypes"}) // Provide the parametrized type for this generic
     public Rules getRules() {
         return rules;
     }

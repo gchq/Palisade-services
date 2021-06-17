@@ -38,8 +38,8 @@ public class ServiceConfiguration {
     private String jar;
     private List<String> paths = Collections.emptyList();
     private List<String> profiles = Collections.singletonList("default");
-    private String log = null;
-    private String err = null;
+    private String log;
+    private String err;
     private Map<String, String> level = Collections.emptyMap();
 
     @Generated

@@ -70,7 +70,6 @@ public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
     protected final LdapContext context;
-    private final String ldapConfigPath;
 
     /**
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
@@ -80,7 +79,6 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected AbstractLdapUserService(final LdapContext context) {
         this.context = context;
-        this.ldapConfigPath = null;
     }
 
     /**
@@ -106,7 +104,6 @@ public abstract class AbstractLdapUserService implements UserService {
             config.load(getClass().getResourceAsStream(ldapConfigPath));
         }
 
-        this.ldapConfigPath = ldapConfigPath;
         this.context = new InitialLdapContext(config, null);
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
