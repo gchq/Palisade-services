@@ -42,6 +42,7 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Policy Service.
  * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the Attribute-Masking Service.
  */
+@SuppressWarnings("common-java:InsufficientBranchCoverage")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AttributeMaskingRequest {
 
@@ -102,7 +103,7 @@ public final class AttributeMaskingRequest {
     }
 
     @Generated
-    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
+    @SuppressWarnings({"java:S3740", "rawtypes"}) // Provide the parametrized type for this generic
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
