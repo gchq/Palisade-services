@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletionException;
 
 /**
  * Provides the external application api for the Palisade Service.
