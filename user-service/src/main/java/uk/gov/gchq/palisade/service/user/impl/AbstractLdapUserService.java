@@ -99,7 +99,7 @@ public abstract class AbstractLdapUserService implements UserService {
         // Create the LDAP config
         Properties config = new Properties();
         if (new File(ldapConfigPath).exists()) {
-            try (final InputStream inputStream = Files.newInputStream(Paths.get(ldapConfigPath))) {
+            try (InputStream inputStream = Files.newInputStream(Paths.get(ldapConfigPath))) {
                 config.load(inputStream);
             }
         } else {
