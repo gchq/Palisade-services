@@ -97,6 +97,7 @@ public abstract class AbstractSerialisedDataReader implements DataReader {
      * read to be streamed back to the client
      */
     @Override
+    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
     public DataReaderResponse read(final DataReaderRequest request, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
         requireNonNull(request, "The request cannot be null.");
 

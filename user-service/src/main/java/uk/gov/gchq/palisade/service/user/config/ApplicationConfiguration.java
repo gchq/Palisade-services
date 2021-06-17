@@ -122,11 +122,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Override
     @Bean("threadPoolTaskExecutor")
     public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek((ThreadPoolTaskExecutor ex) -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(THREAD_POOL);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
+        return Optional.of(new ThreadPoolTaskExecutor()).stream()
+                .peek((ThreadPoolTaskExecutor ex) -> {
+                    ex.setThreadNamePrefix("AppThreadPool-");
+                    ex.setCorePoolSize(THREAD_POOL);
+                    LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+                })
+                .findFirst().orElse(null);
     }
 
     @Override

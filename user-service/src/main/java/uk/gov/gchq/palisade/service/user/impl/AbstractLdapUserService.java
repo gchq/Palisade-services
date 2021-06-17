@@ -34,6 +34,7 @@ import javax.naming.ldap.LdapContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -98,7 +99,9 @@ public abstract class AbstractLdapUserService implements UserService {
         // Create the LDAP config
         Properties config = new Properties();
         if (new File(ldapConfigPath).exists()) {
-            config.load(Files.newInputStream(Paths.get(ldapConfigPath)));
+            try (final InputStream inputStream = Files.newInputStream(Paths.get(ldapConfigPath))) {
+                config.load(inputStream);
+            }
         } else {
             config.load(getClass().getResourceAsStream(ldapConfigPath));
         }

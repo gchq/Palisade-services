@@ -40,6 +40,12 @@ public class ScheduleShutdown implements Runnable {
     private final List<String> serviceNames;
     private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function to be actioned
+     */
     public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         // Initially not reversed
         List<String> reversedServiceNames = managerConfiguration.getSchedule().stream()

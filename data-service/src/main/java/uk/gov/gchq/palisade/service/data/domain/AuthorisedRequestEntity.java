@@ -138,7 +138,7 @@ public class AuthorisedRequestEntity {
     }
 
     @Generated
-    @SuppressWarnings("java:S1452")
+    @SuppressWarnings("java:S1452") // Generic wildcard types should not be used in return types
     public Rules<?> getRules() {
         return rules;
     }

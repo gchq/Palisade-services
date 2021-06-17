@@ -30,6 +30,11 @@ public class ConfigPrinter implements Runnable {
     // Autowired through constructor
     private final ManagerConfiguration config;
 
+    /**
+     * Constructor taking 1 argument
+     *
+     * @param config the configuration for the manager
+     */
     public ConfigPrinter(final ManagerConfiguration config) {
         this.config = config;
     }

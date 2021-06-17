@@ -36,7 +36,7 @@ public class DataReaderRequest {
     private LeafResource resource;
     private User user;
     private Context context;
-    private Rules rules;
+    private Rules<?> rules;
 
     public DataReaderRequest() {
         // no args constructor required
@@ -85,7 +85,7 @@ public class DataReaderRequest {
      * @return the {@link DataReaderRequest}
      */
     @Generated
-    public DataReaderRequest rules(final Rules rules) {
+    public DataReaderRequest rules(final Rules<?> rules) {
         this.setRules(rules);
         return this;
     }
@@ -102,12 +102,13 @@ public class DataReaderRequest {
     }
 
     @Generated
+    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
     public Rules getRules() {
         return rules;
     }
 
     @Generated
-    public void setRules(final Rules rules) {
+    public void setRules(final Rules<?> rules) {
         requireNonNull(rules);
         this.rules = rules;
     }

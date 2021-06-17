@@ -53,6 +53,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Bean configuration and dependency injection graph
+ */
 @Configuration
 @EnableConfigurationProperties
 @EnableAutoConfiguration

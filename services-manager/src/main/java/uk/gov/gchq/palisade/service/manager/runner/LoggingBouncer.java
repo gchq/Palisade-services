@@ -37,11 +37,20 @@ public class LoggingBouncer implements Runnable {
     private final Map<String, ServiceConfiguration> loggingConfiguration;
     private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function to be actioned
+     */
     public LoggingBouncer(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.loggingConfiguration = managerConfiguration.getServices();
         this.serviceProducer = serviceProducer;
     }
 
+    /**
+     * Runs the function for each entry in the configuration map
+     */
     public void run() {
         loggingConfiguration.forEach((String serviceName, ServiceConfiguration config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);

@@ -102,6 +102,7 @@ public final class AttributeMaskingRequest {
     }
 
     @Generated
+    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
