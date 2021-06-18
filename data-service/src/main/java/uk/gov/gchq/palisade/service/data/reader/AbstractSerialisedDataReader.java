@@ -97,7 +97,7 @@ public abstract class AbstractSerialisedDataReader implements DataReader {
      * read to be streamed back to the client
      */
     @Override
-    @SuppressWarnings("java:S3740") // Provide the parametrized type for this generic
+    @SuppressWarnings({"java:S3740", "rawtypes", "unchecked"}) // Provide the parametrized type for this generic
     public DataReaderResponse read(final DataReaderRequest request, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
         requireNonNull(request, "The request cannot be null.");
 
@@ -128,6 +128,7 @@ public abstract class AbstractSerialisedDataReader implements DataReader {
      * @return the associated {@link Serialiser}
      */
     @Generated
+    @SuppressWarnings("unchecked")
     public <T> Serialiser<T> getSerialiser(final DataFlavour flavour) {
         requireNonNull(flavour, "The flavour cannot be null.");
         Serialiser<?> serialiser = serialisers.get(flavour);

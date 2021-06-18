@@ -65,7 +65,7 @@ public class ManagedService {
                         status = this.managedClient.getHealth(clientUri).status();
                     } catch (RetryableException ex) {
                         // Not up yet
-                        LOGGER.error("An error occurred", ex);
+                        LOGGER.error("An error occurred while checking the service health", ex);
                     }
                     LOGGER.debug("Client uri {} has status {}", clientUri, status);
                     return status;

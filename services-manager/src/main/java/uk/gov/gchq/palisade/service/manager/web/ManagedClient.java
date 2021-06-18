@@ -41,7 +41,7 @@ public interface ManagedClient {
     Response getHealth(final URI url);
 
     /**
-     * Updates the logging level on a service via an endpoint
+     * A REST endpoint that updates the logging level on a service via an endpoint
      *
      * @param url the endpoint used to update the logging level
      * @param module the package the logging level will be applied to
