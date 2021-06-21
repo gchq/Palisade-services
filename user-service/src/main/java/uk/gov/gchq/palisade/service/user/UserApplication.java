@@ -107,11 +107,10 @@ public class UserApplication {
         // Add example users to the user-service cache
         userConfig.getUsers().stream()
                 .map(UserPrepopulationFactory::build)
-                .map((User user) -> {
+                .forEach((User user) -> {
                     LOGGER.info("Cache add for {} -> {}", user.getUserId().getId(), user);
-                    return user;
-                })
-                .forEach(service::addUser);
+                    service.addUser(user);
+                });
 
         // Then start up all runners
         runnerThreads.addAll(runners.stream()
