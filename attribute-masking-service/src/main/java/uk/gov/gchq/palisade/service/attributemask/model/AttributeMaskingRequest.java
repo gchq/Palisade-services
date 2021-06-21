@@ -42,7 +42,6 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Policy Service.
  * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the Attribute-Masking Service.
  */
-@SuppressWarnings("common-java:InsufficientBranchCoverage")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AttributeMaskingRequest {
 
