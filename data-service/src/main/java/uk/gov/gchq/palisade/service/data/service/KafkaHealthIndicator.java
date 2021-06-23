@@ -64,13 +64,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
         Set<String> configTopics = topicsFromConfig(topicConfiguration);
         Set<String> kafkaTopics = topicsFromKafka(adminClient.describeTopics(configTopics));
 
-        for (String x : kafkaTopics) {
-            LOGGER.info("Current kafka topics are {}", x);
-        }
-        for (String x : configTopics) {
-            LOGGER.info("Current config topics are {}", x);
-        }
-
         if (kafkaTopics.equals(configTopics)) {
             return Health.up()
                     .withDetail("topics", configTopics)
