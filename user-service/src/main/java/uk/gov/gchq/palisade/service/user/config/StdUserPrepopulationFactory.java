@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.user.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.user.User;
 
@@ -32,6 +35,7 @@ import static java.util.Objects.requireNonNull;
  * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles.
  */
 public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StdUserPrepopulationFactory.class);
 
     private String userId;
     private Set<String> auths;
@@ -97,10 +101,12 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     @Override
     public User build() {
-        return new User()
+        User user = new User()
                 .userId(this.getUserId())
                 .roles(this.getRoles())
                 .auths(this.getAuths());
+        LOGGER.debug("Built user {}", user);
+        return user;
     }
 
     @Override
