@@ -22,10 +22,9 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A class that handles the Uncaught Exceptions thrown by the Async processes
@@ -36,8 +35,7 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
 
     @Override
     public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object[] objects) {
-        requireNonNull(objects);
-        String parameters = Stream.of(objects)
+        String parameters = Stream.of(Optional.ofNullable(objects).orElse(Stream.of().toArray()))
                 .map(Object::toString)
                 .collect(Collectors.joining(", ", "[", "]"));
         LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(), parameters);

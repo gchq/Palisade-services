@@ -61,7 +61,7 @@ public class ServiceConfiguration {
     @Generated
     public void setPaths(final List<String> paths) {
         requireNonNull(paths);
-        this.paths = Collections.unmodifiableList(paths);
+        this.paths = List.copyOf(paths);
     }
 
     @Generated
@@ -72,7 +72,7 @@ public class ServiceConfiguration {
     @Generated
     public void setProfiles(final List<String> profiles) {
         requireNonNull(profiles);
-        this.profiles = Collections.unmodifiableList(profiles);
+        this.profiles = List.copyOf(profiles);
     }
 
     @Generated
