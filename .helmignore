@@ -16,12 +16,11 @@
 # This supports shell glob matching, relative path matching, and
 # negation (prefixed with !). Only one pattern per line.
 .DS_Store
-
 # Common VCS dirs
 .git/
 .github/
-.gitattributes
 .gitignore
+.gitattributes
 *.tmp
 *.iml
 *~
@@ -46,6 +45,7 @@ velocity*
 /licenses/
 /code-style/
 *.lock
+*.db
 
 # Previous helm packages
 Palisade-services-*.tgz

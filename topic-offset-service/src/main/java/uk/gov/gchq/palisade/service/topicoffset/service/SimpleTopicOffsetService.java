@@ -43,6 +43,9 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
         boolean isOffset = ((header != null) && (new String(header.value(), Charset.defaultCharset()).equals(StreamMarker.START.toString())));
         if (isOffset) {
             LOGGER.info("Found topic offset: {}", headers);
+            LOGGER.debug("Header {} satisfied the predicate", header);
+        } else {
+            LOGGER.debug("Header {} failed the predicate, in headers {}", header, headers);
         }
         return isOffset;
     }
@@ -55,6 +58,7 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      */
     @Override
     public TopicOffsetResponse createTopicOffsetResponse(final Long offset) {
+        LOGGER.info("Created response for offset {}", offset);
         return TopicOffsetResponse.Builder.create().withOffset(offset);
     }
 }
