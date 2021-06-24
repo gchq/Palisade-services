@@ -135,6 +135,7 @@ public class PolicyServiceAsyncProxy {
         Rules<LeafResource> rules = auditablePolicyResourceRules.getRules();
         var policyRequest = auditablePolicyResourceRules.getPolicyRequest();
         if (!Objects.isNull(rules)) {
+            LOGGER.debug("Applying rules {} to resource {}", rules, policyRequest.getResource());
             // Apply the rules to the resource - a coarse grain filtering
             var resource = PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules);
             return AuditablePolicyResourceResponse.Builder.create(auditablePolicyResourceRules).withModifiedResource(resource);
