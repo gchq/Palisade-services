@@ -99,11 +99,11 @@ public class StdSerialiserPrepopulationFactory {
         LOGGER.info("Building serialiser for class '{}', resource format '{}' and domain type '{}'", serialiserClass, flavourFormat, flavourType);
         try {
             Class<?> serialiserClazz = Class.forName(serialiserClass);
-            LOGGER.debug("Got class {} for serialiser classname {}", serialiserClazz, serialiserClass);
+            LOGGER.trace("Got class {} for serialiser classname {}", serialiserClazz, serialiserClass);
             Constructor<?> serialiserConstructor = serialiserClazz.getConstructor(Class.class);
-            LOGGER.debug("Got one-element constructor {} for class {}", serialiserConstructor, serialiserClazz);
+            LOGGER.trace("Got one-element constructor {} for class {}", serialiserConstructor, serialiserClazz);
             Class<?> typeClass = Class.forName(flavourType);
-            LOGGER.debug("Got class {} for flavourType classname {}", typeClass, flavourType);
+            LOGGER.trace("Got class {} for flavourType classname {}", typeClass, flavourType);
             serialiser = (Serialiser<Object>) serialiserConstructor.newInstance(typeClass);
         } catch (ClassNotFoundException ex) {
             throw new SerialiserNotFoundException("Error getting the serialiser class", ex);

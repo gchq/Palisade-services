@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.component.data.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +34,7 @@ import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.stream.config.AkkaSystemConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class, AkkaSystemConfig.class})
@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
 @ActiveProfiles({"h2test", "test-serialisers"})
-@Disabled
 class DataSerialiserPrePopTest {
 
     @Autowired
@@ -50,24 +49,45 @@ class DataSerialiserPrePopTest {
 
     @Value("${population.serialisers[0].flavourType}")
     String flavourType;
+    @Value("${population.serialisers[0].flavourFormat}")
+    String flavourFormat;
+    @Value("${population.serialisers[0].serialiserClass}")
+    String serialiserClass;
 
     @Test
     void testDataReaderIsPopulatedBySerialiser() {
+        // Given the SpringBoot context has loaded and read the config yaml
+
+        // Given we expect the prepop factory to serialise "string"/"java.lang.String" type/format resources with the TestSerialiser
         var std = new StdSerialiserPrepopulationFactory();
         std.setFlavourFormat("string");
         std.setFlavourType("java.lang.String");
         std.setSerialiserClass("uk.gov.gchq.palisade.component.data.service.TestSerialiser");
 
-        assertThat(flavourType)
+        // Check that the yaml contains the expected values before we do any tests
+        assumeThat(flavourType)
+                .as("The flavourType should be read from config")
                 .isNotNull()
                 .isEqualTo("java.lang.String");
+        assumeThat(flavourFormat)
+                .as("The flavourFormat should be read from config")
+                .isNotNull()
+                .isEqualTo("string");
+        assumeThat(serialiserClass)
+                .as("The serialiserClass should be read from config")
+                .isNotNull()
+                .isEqualTo("uk.gov.gchq.palisade.component.data.service.TestSerialiser");
 
+        // When the serdesConfig is autowired
+        // Then it should produce the expected prepop factory
         assertThat(serdesConfig)
                 .extracting(StdSerialiserConfiguration::getSerialisers)
                 .asList()
+                .as("There should be one configured serialiser")
                 .hasSize(1)
                 .first()
                 .usingRecursiveComparison()
+                .as("The configured serialiser should match the expected")
                 .isEqualTo(std);
     }
 }
