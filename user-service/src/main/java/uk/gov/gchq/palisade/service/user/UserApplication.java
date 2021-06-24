@@ -108,7 +108,7 @@ public class UserApplication {
         userConfig.getUsers().stream()
                 .map(UserPrepopulationFactory::build)
                 .forEach((User user) -> {
-                    LOGGER.debug(user.toString());
+                    LOGGER.info("Cache add for {} -> {}", user.getUserId().getId(), user);
                     service.addUser(user);
                 });
 
