@@ -40,6 +40,7 @@ public class StdSerialiserConfiguration {
      * Constructor with 0 arguments for a {@link StdSerialiserConfiguration} object
      */
     public StdSerialiserConfiguration() {
+        // no-args constructor
     }
 
     /**
