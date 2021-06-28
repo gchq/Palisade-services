@@ -47,8 +47,8 @@ public class TaskRunner {
     /**
      * Constructor taking 2 arguments
      *
-     * @param processBuilders a map of string to {@link ProcessBuilder}
-     * @param serviceProducer the function to be actioned
+     * @param processBuilders a map of {@link String} service names to {@link ProcessBuilder} factories for starting running processes
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
      */
     public TaskRunner(final Map<String, ProcessBuilder> processBuilders, final Function<String, ManagedService> serviceProducer) {
         this.processBuilders = processBuilders;
@@ -73,7 +73,7 @@ public class TaskRunner {
     /**
      * Run the process for each service configuration
      *
-     * @return a {@link Map} of a String value and a {@link List} of Booleans within a {@link Supplier}
+     * @return a {@link Map} of service-names to a {@link List} of indicators of whether this task is 'done' (exited or status=UP etc.)
      */
     public Map<String, List<Supplier<Boolean>>> run() {
         // Start processes for each service configuration

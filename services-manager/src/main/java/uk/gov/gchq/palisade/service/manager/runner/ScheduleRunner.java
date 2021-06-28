@@ -52,7 +52,7 @@ public class ScheduleRunner implements Runnable {
      * Constructor taking 2 arguments
      *
      * @param managerConfiguration the configuration for the service manager
-     * @param serviceProducer the function to be actioned
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
      */
     public ScheduleRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.rootDir = managerConfiguration.getRoot();
@@ -63,7 +63,7 @@ public class ScheduleRunner implements Runnable {
     /**
      * Waits for the task to be completed
      *
-     * @param taskCompleteIndicators supplier of {@link Boolean}s for the task
+     * @param taskCompleteIndicators supplier of {@link Boolean}s for whether some part of the task is 'done'
      */
     // Suppress System.exit warning
     @SuppressWarnings("java:S1147")

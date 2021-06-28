@@ -44,7 +44,7 @@ public class ScheduleShutdown implements Runnable {
      * Constructor taking 2 arguments
      *
      * @param managerConfiguration the configuration for the service manager
-     * @param serviceProducer the function to be actioned
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
      */
     public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         // Initially not reversed

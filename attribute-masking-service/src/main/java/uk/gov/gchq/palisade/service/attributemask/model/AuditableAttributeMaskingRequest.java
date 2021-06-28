@@ -94,10 +94,12 @@ public final class AuditableAttributeMaskingRequest {
 
     }
 
+    @Generated
     public AttributeMaskingRequest getAttributeMaskingRequest() {
         return attributeMaskingRequest;
     }
 
+    @Generated
     public AuditErrorMessage getAuditErrorMessage() {
         return auditErrorMessage;
     }

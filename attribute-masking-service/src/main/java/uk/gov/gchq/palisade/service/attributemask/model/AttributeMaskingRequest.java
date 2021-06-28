@@ -102,7 +102,9 @@ public final class AttributeMaskingRequest {
     }
 
     @Generated
-    @SuppressWarnings({"java:S3740", "rawtypes"}) // Provide the parametrized type for this generic
+    // Generic wildcard types should not be used in return types
+    // But we don't necessarily know the record datatype
+    @SuppressWarnings({"java:S1452"})
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
@@ -114,12 +116,12 @@ public final class AttributeMaskingRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the AttributeMaskingRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AttributeMaskingRequest. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * AttributeMaskingRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.

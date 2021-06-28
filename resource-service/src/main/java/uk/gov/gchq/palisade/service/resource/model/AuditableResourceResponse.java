@@ -55,10 +55,12 @@ public final class AuditableResourceResponse {
                 .orElse(this);
     }
 
+    @Generated
     public ResourceResponse getResourceResponse() {
         return resourceResponse;
     }
 
+    @Generated
     public AuditErrorMessage getAuditErrorMessage() {
         return auditErrorMessage;
     }

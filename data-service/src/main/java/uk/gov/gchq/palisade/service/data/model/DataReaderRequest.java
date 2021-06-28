@@ -102,7 +102,9 @@ public class DataReaderRequest {
     }
 
     @Generated
-    @SuppressWarnings({"java:S3740", "rawtypes"}) // Provide the parametrized type for this generic
+    // Generic wildcard types should not be used in return types
+    // But we don't necessarily know the type of the record
+    @SuppressWarnings("java:S1452")
     public Rules getRules() {
         return rules;
     }
