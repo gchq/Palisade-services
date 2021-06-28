@@ -53,9 +53,10 @@ import java.util.stream.StreamSupport;
 /**
  * Parse and convert Spring maps and lists to Akka configs
  */
+@SuppressWarnings("java:S5998")
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
 
-    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*+)\\[(?<index>\\d+)\\]\\.*(.*?)$");
+    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final int PROPERTY_PATH = 1;
     private static final int PROPERTY_INDEX = 2;
     private static final int PROPERTY_TAIL = 3;
