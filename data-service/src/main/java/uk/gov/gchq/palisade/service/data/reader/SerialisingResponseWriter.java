@@ -117,8 +117,8 @@ public class SerialisingResponseWriter<T extends Serializable> implements Respon
 
         try {
 
-            /**
-             If no rules that apply, then just copy the bytes across
+            /*
+             If there are no rules that apply, then just copy the bytes across
              The value -1L is a convention to indicate deserialise/serialise is by-passed and the number of records
              processed and number of records returned will not be counted
              */

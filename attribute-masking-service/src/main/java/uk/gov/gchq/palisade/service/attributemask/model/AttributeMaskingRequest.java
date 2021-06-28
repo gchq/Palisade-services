@@ -104,7 +104,7 @@ public final class AttributeMaskingRequest {
     @Generated
     // Generic wildcard types should not be used in return types
     // But we don't necessarily know the record datatype
-    @SuppressWarnings({"java:S1452"})
+    @SuppressWarnings({"java:S1452", "rawtypes"})
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
