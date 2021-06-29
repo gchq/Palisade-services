@@ -25,6 +25,14 @@ The service will then query the backing store to see if the requested resourceId
 If this is not the case then the request will be passed onto the local implementation of the Resource Service.
 All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy Service.
 
+## High Level Architecture
+
+<!--- 
+See resource-service/doc/resource-service.drawio for the source of this diagram
+--->
+![Resource Service diagram](doc/resource-service.png)
+
+
 ## Message Model and Database Domain
 
 | ResourceRequest | ResourceResponse | AuditErrorMessage | 
