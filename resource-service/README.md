@@ -16,6 +16,8 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # Resource Service
 
 The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories).
