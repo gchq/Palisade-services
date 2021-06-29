@@ -53,7 +53,9 @@ See doc/services.drawio for the source of this diagram
 
 [Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
 
-[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request.    
+[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request. 
+
+For an overview of all Palisade components, see the root [Palisade README](https://github.com/gchq/Palisade#readme). 
 
 ## Project Build
 
