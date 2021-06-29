@@ -16,6 +16,8 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # Policy Service
 
 The responsibility of the Policy Service is to provide the set of rules (filters or transformations) that need to be

@@ -16,6 +16,8 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # Palisade Service
 
 The Palisade Service is the entry point into the rest of the Palisade Services.
