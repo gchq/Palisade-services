@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --->
 
-# <img src="/logos/logo.svg" width="180">
+# <img src="../logos/logo.svg" width="180">
+
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
 # Filtered Resource Service
 
