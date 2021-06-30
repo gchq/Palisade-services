@@ -16,6 +16,8 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # User Service
 
 The User Service is responsible for providing the other Palisade components with knowledge of the users of the system. 
