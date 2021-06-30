@@ -40,7 +40,7 @@ import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SE
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 @ExtendWith(MockitoExtension.class)
-class  LoggerAuditServiceTest {
+class LoggerAuditServiceTest {
 
     private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}";
 
@@ -119,10 +119,10 @@ class  LoggerAuditServiceTest {
                 .isEmpty();
 
         assertThat(errorCaptor.getAllValues())
-            .as("Check the logged AuditErrorMessage is from the 'User Service'")
-            .hasSize(1)
-            .first()
-            .isEqualTo(auditErrorMessage(USER_SERVICE));
+                .as("Check the logged AuditErrorMessage is from the 'User Service'")
+                .hasSize(1)
+                .first()
+                .isEqualTo(auditErrorMessage(USER_SERVICE));
     }
 
     @Test
@@ -140,10 +140,10 @@ class  LoggerAuditServiceTest {
                 .isEmpty();
 
         assertThat(errorCaptor.getAllValues())
-            .as("Check the logged AuditErrorMessage is from the 'Resource Service'")
-            .hasSize(1)
-            .first()
-            .isEqualTo(auditErrorMessage(RESOURCE_SERVICE));
+                .as("Check the logged AuditErrorMessage is from the 'Resource Service'")
+                .hasSize(1)
+                .first()
+                .isEqualTo(auditErrorMessage(RESOURCE_SERVICE));
     }
 
     @Test
@@ -160,9 +160,9 @@ class  LoggerAuditServiceTest {
                 .isEmpty();
 
         assertThat(errorCaptor.getAllValues())
-            .as("Check the logged AuditErrorMessage is from the 'Policy Service'")
-            .hasSize(1)
-            .first()
-            .isEqualTo(auditErrorMessage(POLICY_SERVICE));
+                .as("Check the logged AuditErrorMessage is from the 'Policy Service'")
+                .hasSize(1)
+                .first()
+                .isEqualTo(auditErrorMessage(POLICY_SERVICE));
     }
 }
