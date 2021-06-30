@@ -22,6 +22,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,8 +34,8 @@ public class ApplicationAsyncExceptionHandler implements AsyncUncaughtExceptionH
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAsyncExceptionHandler.class);
 
     @Override
-    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object... objects) {
-        String parameters = Stream.of(objects)
+    public void handleUncaughtException(final Throwable throwable, final Method method, @Nullable final Object[] objects) {
+        String parameters = Stream.of(Optional.ofNullable(objects).orElseGet(() -> new Object[0]))
                 .map(Object::toString)
                 .collect(Collectors.joining(", ", "[", "]"));
         LOGGER.error("Uncaught Exception thrown by Async method [{}] : {} with Parameters: {}", method.getName(), throwable.getMessage(), parameters);

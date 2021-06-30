@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +37,9 @@ class SimpleResourceServiceTest {
     @Test
     void testJavaFilesInUnitTest() throws IOException {
         // Given we create a file and add it to the service
-        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create("file:./src/unit-tests/java/");
+        DirectoryResource unitTestJava = (DirectoryResource) AbstractResourceBuilder.create("file:./src/unit-tests/java/");
 
-        LeafResource resource = (LeafResource) ResourceBuilder.create(
+        LeafResource resource = (LeafResource) AbstractResourceBuilder.create(
                 new File("./src/unit-tests/java/uk/gov/gchq/palisade/service/resource/ApplicationTestData.java").getCanonicalFile().toURI());
         resource.type("java.lang.String")
                 .serialisedFormat("java")
@@ -59,7 +59,7 @@ class SimpleResourceServiceTest {
     void testCanFindTestResourceAvro() throws IOException {
         // Given we create a avro file
         URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
-        LeafResource testResourceAvro = (LeafResource) ResourceBuilder.create(avroFileURI);
+        LeafResource testResourceAvro = (LeafResource) AbstractResourceBuilder.create(avroFileURI);
         DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
 
         // Given we add the avro to our list of expected returned files

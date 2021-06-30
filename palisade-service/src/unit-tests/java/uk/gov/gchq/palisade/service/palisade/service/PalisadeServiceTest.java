@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class PalisadeServiceTest extends CommonTestData {
 
     final Materializer materialiser = Materializer.createMaterializer(ActorSystem.create());
-    final PalisadeService service = new MockedPalisadeService(materialiser);
+    final AbstractPalisadeService service = new MockedPalisadeService(materialiser);
     LinkedList<TokenRequestPair> sinkCollection;
     Sink<TokenRequestPair, CompletionStage<Done>> sink;
 
@@ -96,7 +96,7 @@ class PalisadeServiceTest extends CommonTestData {
     /**
      * MockPalisadeService used to test that the createToken method returns the correct token
      */
-    static class MockedPalisadeService extends PalisadeService {
+    static class MockedPalisadeService extends AbstractPalisadeService {
 
         /**
          * Instantiates a new mocked Palisade Service for testing.

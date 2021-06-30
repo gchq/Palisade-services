@@ -34,6 +34,7 @@ import javax.naming.ldap.LdapContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -69,7 +70,6 @@ public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
     protected final LdapContext context;
-    private final String ldapConfigPath;
 
     /**
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
@@ -79,7 +79,6 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected AbstractLdapUserService(final LdapContext context) {
         this.context = context;
-        this.ldapConfigPath = null;
     }
 
     /**
@@ -94,8 +93,18 @@ public abstract class AbstractLdapUserService implements UserService {
     protected AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
-        this.ldapConfigPath = ldapConfigPath;
-        this.context = createContext(ldapConfigPath);
+
+        // Create the LDAP config
+        Properties config = new Properties();
+        if (new File(ldapConfigPath).exists()) {
+            try (InputStream inputStream = Files.newInputStream(Paths.get(ldapConfigPath))) {
+                config.load(inputStream);
+            }
+        } else {
+            config.load(getClass().getResourceAsStream(ldapConfigPath));
+        }
+
+        this.context = new InitialLdapContext(config, null);
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
 
@@ -161,31 +170,27 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected abstract Set<String> getRoles(final UserId userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException;
 
-    protected LdapContext createContext(final String ldapConfigPath) throws IOException, NamingException {
-        final Properties config = new Properties();
-        if (new File(ldapConfigPath).exists()) {
-            config.load(Files.newInputStream(Paths.get(ldapConfigPath)));
-        } else {
-            config.load(getClass().getResourceAsStream(ldapConfigPath));
-        }
-        return new InitialLdapContext(config, null);
-    }
-
     protected Map<String, Object> getAttributes(final UserId userId) throws NamingException {
-        final Map<String, Object> attributes = new HashMap<>();
+        Map<String, Object> attributes = new HashMap<>();
         final String[] requestAttrs = getAttributeNames();
         if (null != requestAttrs && requestAttrs.length > 0) {
             final Attributes userAttrs = context.getAttributes(formatInput(userId.getId()), requestAttrs);
             if (null != userAttrs) {
                 for (final String requestAttr : requestAttrs) {
-                    final Attribute attribute = userAttrs.get(requestAttr);
-                    if (null != attribute) {
-                        final NamingEnumeration<?> all = attribute.getAll();
-                        if (all.hasMore()) {
-                            attributes.put(requestAttr, all.next());
-                        }
-                    }
+                    attributes = addAttribute(attributes, userAttrs, requestAttr);
                 }
+            }
+        }
+        return attributes;
+    }
+
+    protected Map<String, Object> addAttribute(final Map<String, Object> attributes, final Attributes userAttrs,
+                                                final String requestAttr) throws NamingException {
+        final Attribute attribute = userAttrs.get(requestAttr);
+        if (null != attribute) {
+            NamingEnumeration<?> all = attribute.getAll();
+            if (all.hasMore()) {
+                attributes.put(requestAttr, all.next());
             }
         }
         return attributes;
@@ -203,7 +208,7 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected Set<Object> basicSearch(final UserId userId,
                                       final String name, final String attrIdForUserId,
-                                      final String... attrs) throws NamingException {
+                                      final String[] attrs) throws NamingException {
         LOGGER.debug("Performing basic search using {}, {}, {}, {}", userId, name, attrIdForUserId, attrs);
         final NamingEnumeration<SearchResult> attrResults = context.search(
                 name,
@@ -211,24 +216,29 @@ public abstract class AbstractLdapUserService implements UserService {
                 attrs
         );
 
-        final Set<Object> results = new HashSet<>();
+        Set<Object> results = new HashSet<>();
         while (attrResults.hasMore()) {
             final SearchResult result = attrResults.next();
             final Attributes resultAttrs = result.getAttributes();
             if (null != resultAttrs) {
-                final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
-                if (null != all) {
-                    while (all.hasMore()) {
-                        final Attribute next = all.next();
-                        final Object nextValue = next.get();
-                        if (null != nextValue) {
-                            results.add(nextValue);
-                        }
-                    }
-                }
+                results = getValues(resultAttrs, results);
             }
         }
         return results;
+    }
+
+    protected Set<Object> getValues(final Attributes resultAttrs, final Set<Object> values) throws NamingException {
+        final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
+        if (null != all) {
+            while (all.hasMore()) {
+                final Attribute next = all.next();
+                final Object nextValue = next.get();
+                if (null != nextValue) {
+                    values.add(nextValue);
+                }
+            }
+        }
+        return values;
     }
 
     /**

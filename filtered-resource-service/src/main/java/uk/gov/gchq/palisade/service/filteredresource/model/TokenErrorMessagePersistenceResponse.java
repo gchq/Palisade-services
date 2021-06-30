@@ -21,7 +21,6 @@ import org.springframework.lang.NonNull;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenErrorMessageEntity;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +36,7 @@ public final class TokenErrorMessagePersistenceResponse {
 
     private TokenErrorMessagePersistenceResponse(final String token, final List<TokenErrorMessageEntity> messageEntities, final Throwable exception) {
         this.token = Optional.ofNullable(token).orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
-        this.messageEntities = Collections.unmodifiableList(messageEntities);
+        this.messageEntities = List.copyOf(messageEntities);
         this.exception = exception;
     }
 

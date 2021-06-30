@@ -190,7 +190,9 @@ class KafkaContractTest {
                         .containsExactly(REQUEST_OBJ.getUserId(),
                                 "/test/resourceId",
                                 new Context().purpose("purpose"),
-                                new User().userId(new UserId().id(REQUEST_OBJ.getUserId())).roles("role").auths("auth"))
+                                new User().userId(new UserId().id(REQUEST_OBJ.getUserId()))
+                                        .roles(Collections.singleton("role"))
+                                        .auths(Collections.singleton("auth")))
         );
     }
 

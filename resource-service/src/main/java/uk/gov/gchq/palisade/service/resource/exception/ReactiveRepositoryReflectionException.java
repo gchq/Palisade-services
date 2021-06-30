@@ -16,10 +16,12 @@
 
 package uk.gov.gchq.palisade.service.resource.exception;
 
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter;
+
 /**
  * A {@code ReactiveRepositoryReflectionException} is a {@link RuntimeException}
  * thrown by the Resource Service to indicate that a {@link java.lang.reflect.Field}
- * could not be reflected within the {@link uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter}
+ * could not be reflected within the {@link AbstractReactiveRepositoryRedisAdapter}
  */
 public class ReactiveRepositoryReflectionException extends RuntimeException {
 

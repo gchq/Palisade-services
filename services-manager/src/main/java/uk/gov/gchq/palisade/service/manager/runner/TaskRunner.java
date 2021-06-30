@@ -44,6 +44,12 @@ public class TaskRunner {
     private final Map<String, ProcessBuilder> processBuilders;
     private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param processBuilders a map of {@link String} service names to {@link ProcessBuilder} factories for starting running processes
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
+     */
     public TaskRunner(final Map<String, ProcessBuilder> processBuilders, final Function<String, ManagedService> serviceProducer) {
         this.processBuilders = processBuilders;
         this.serviceProducer = serviceProducer;
@@ -64,6 +70,11 @@ public class TaskRunner {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Run the process for each service configuration
+     *
+     * @return a {@link Map} of service-names to a {@link List} of indicators of whether this task is 'done' (exited or status=UP etc.)
+     */
     public Map<String, List<Supplier<Boolean>>> run() {
         // Start processes for each service configuration
         Map<String, Process> processes = runServices();
@@ -73,12 +84,24 @@ public class TaskRunner {
                     LinkedList<Supplier<Boolean>> indicators = new LinkedList<>();
                     indicators.addLast(() -> {
                         boolean alive = entry.getValue().isAlive();
-                        LOGGER.info("Process for {} is {}", entry.getKey(), alive ? "RUNNING" : "HALTED");
+                        String status;
+                        if (alive) {
+                            status = "RUNNING";
+                        } else {
+                            status = "HALTED";
+                        }
+                        LOGGER.info("Process for {} is {}", entry.getKey(), status);
                         return !alive;
                     });
                     indicators.addLast(() -> {
                         boolean healthy = serviceProducer.apply(entry.getKey()).isHealthy();
-                        LOGGER.info("Health for {} is {}", entry.getKey(), healthy ? "UP" : "DOWN");
+                        String status;
+                        if (healthy) {
+                            status = "UP";
+                        } else {
+                            status = "DOWN";
+                        }
+                        LOGGER.info("Health for {} is {}", entry.getKey(), status);
                         return healthy;
                     });
                     return new SimpleImmutableEntry<>(entry.getKey(), indicators);

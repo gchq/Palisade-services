@@ -19,6 +19,8 @@ package uk.gov.gchq.palisade.service.attributemask.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.util.Objects;
 
 /**
@@ -92,7 +94,18 @@ public final class AuditableAttributeMaskingRequest {
 
     }
 
+    @Generated
+    public AttributeMaskingRequest getAttributeMaskingRequest() {
+        return attributeMaskingRequest;
+    }
+
+    @Generated
+    public AuditErrorMessage getAuditErrorMessage() {
+        return auditErrorMessage;
+    }
+
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -106,17 +119,8 @@ public final class AuditableAttributeMaskingRequest {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(attributeMaskingRequest, auditErrorMessage);
     }
-
-
-    public AttributeMaskingRequest getAttributeMaskingRequest() {
-        return attributeMaskingRequest;
-    }
-
-    public AuditErrorMessage getAuditErrorMessage() {
-        return auditErrorMessage;
-    }
-
 }
