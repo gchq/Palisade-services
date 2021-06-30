@@ -55,7 +55,7 @@ import java.util.stream.StreamSupport;
 @SuppressWarnings("java:S5998")
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
 
-    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
+    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(?<tail>.*?)$");
     private static final String PROPERTY_PATH = "path";
     private static final String PROPERTY_INDEX = "index";
     private static final String PROPERTY_TAIL = "tail";
