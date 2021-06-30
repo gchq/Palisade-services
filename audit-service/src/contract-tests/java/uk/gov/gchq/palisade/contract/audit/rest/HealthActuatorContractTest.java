@@ -64,6 +64,5 @@ class HealthActuatorContractTest {
         assertThat(responseEntity.getBody())
             .as("check body")
             .contains("\"status\":\"UP\"");
-
     }
 }

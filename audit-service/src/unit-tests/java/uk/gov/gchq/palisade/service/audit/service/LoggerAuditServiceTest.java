@@ -40,7 +40,7 @@ import static uk.gov.gchq.palisade.service.audit.service.ServiceName.RESOURCE_SE
 import static uk.gov.gchq.palisade.service.audit.service.ServiceName.USER_SERVICE;
 
 @ExtendWith(MockitoExtension.class)
-class LoggerAuditServiceTest {
+class  LoggerAuditServiceTest {
 
     private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the 'Filtered Resource Service' or the 'Data Service'. Message received from {}";
 
@@ -114,7 +114,10 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that no messages at logging level INFO are logged")
+                .isEmpty();
+
         assertThat(errorCaptor.getAllValues())
             .as("Check the logged AuditErrorMessage is from the 'User Service'")
             .hasSize(1)
@@ -132,7 +135,10 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(RESOURCE_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that no messages at logging level INFO are logged")
+                .isEmpty();
+
         assertThat(errorCaptor.getAllValues())
             .as("Check the logged AuditErrorMessage is from the 'Resource Service'")
             .hasSize(1)
@@ -149,7 +155,10 @@ class LoggerAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(POLICY_SERVICE));
 
         // Then
-        assertThat(infoCaptor.getAllValues()).isEmpty();
+        assertThat(infoCaptor.getAllValues())
+                .as("Check that no messages at logging level INFO are logged")
+                .isEmpty();
+
         assertThat(errorCaptor.getAllValues())
             .as("Check the logged AuditErrorMessage is from the 'Policy Service'")
             .hasSize(1)
