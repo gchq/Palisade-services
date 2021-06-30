@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
-import uk.gov.gchq.palisade.service.resource.domain.OrphanedChildJsonMixin;
+import uk.gov.gchq.palisade.service.resource.domain.AbstractOrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
@@ -286,7 +286,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     /**
      * Given a resource, get from persistence its grand*parents and set them up appropriately
      * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
-     * This is effectively undoing the effects of serialisation using the {@link OrphanedChildJsonMixin}
+     * This is effectively undoing the effects of serialisation using the {@link AbstractOrphanedChildJsonMixin}
      *
      * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
      * @param childResource the initial resource to recurse up from
