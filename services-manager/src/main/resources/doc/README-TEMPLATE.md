@@ -21,15 +21,13 @@ The source for this file can be found at `services-manager/src/resources/doc/REA
 
 # <img src="../logos/logo.svg" width="180">
 
-### Palisade Services Manager
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
-
+# Palisade Services Manager
 
 ## Documentation
 
 The documentation for the latest release can be found [here](https://gchq.github.io/Palisade).
-
-
 
 ## Getting started
 
