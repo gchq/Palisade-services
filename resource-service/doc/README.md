@@ -19,7 +19,6 @@ limitations under the License.
 The diagrams presented are compiled from .drawio files.
 See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image from the provided diagram files.
 
+See [resource-service.drawio](./resource-service.drawio) for the source for this diagram:
 
-### [Attribute-Masking-Service.drawio](attribute-masking-service.drawio)
-![attribute-masking-service.drawio](./attribute-masking-service.png)
-
+![Resource Service diagram](./resource-service.png)
