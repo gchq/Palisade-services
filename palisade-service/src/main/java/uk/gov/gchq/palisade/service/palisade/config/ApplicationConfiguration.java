@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 
 /**
@@ -33,7 +33,7 @@ import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 public class ApplicationConfiguration {
 
     @Bean
-    PalisadeService palisadeService(final Materializer materialiser) {
+    AbstractPalisadeService palisadeService(final Materializer materialiser) {
         return new UUIDPalisadeService(materialiser);
     }
 

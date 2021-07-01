@@ -53,13 +53,15 @@ import java.util.stream.StreamSupport;
 /**
  * Parse and convert Spring maps and lists to Akka configs.
  */
+@SuppressWarnings("java:S5998")
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
-    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
-    private static final int PROPERTY_PATH = 1;
-    private static final int PROPERTY_INDEX = 2;
-    private static final int PROPERTY_TAIL = 3;
+
+    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(?<tail>.*?)$");
+    private static final String PROPERTY_PATH = "path";
+    private static final String PROPERTY_INDEX = "index";
+    private static final String PROPERTY_TAIL = "tail";
     private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
-    private static final String LIST_ITEM_SEPERATOR = ",";
+    private static final String LIST_ITEM_SEPARATOR = ",";
 
     private String[] locations;
     private final ResourceLoader resourceLoader;
@@ -90,7 +92,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         envPropSources.forEach((PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
                 locations = ((String) propertySource.getProperty("application.properties.locations"))
-                        .split(LIST_ITEM_SEPERATOR);
+                        .split(LIST_ITEM_SEPARATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)
                                 .forEach(envPropSources::addFirst));
@@ -182,7 +184,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     private static String reductionKey(final String key) {
         Matcher mat = INDEXED_PROPERTY_PATTERN.matcher(key);
         // Early return if this is a simple key/value property
-        if (!mat.matches() || mat.groupCount() <= PROPERTY_INDEX) {
+        if (!mat.matches() || mat.groupCount() <= 2) {
             return "";
         }
         // Parse the index if the property was a list
