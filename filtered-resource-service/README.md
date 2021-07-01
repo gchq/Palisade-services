@@ -119,7 +119,7 @@ The Filtered-Resource Service requires a number of inputs from separate services
 The steps required are as follows:
 
 1. POST onto the masked-resource queue (`http://filtered-resource-service/api/masked-resource`) as if an output has come from the Attribute-Masking Service
-    * This includes an additional pair of empty `START` and `END` of stream messages before and after the data payload respectively
+    * This includes an additional pair of empty `START` and `END` of stream messages before and after the request payload respectively
     * Additionally, all three of these messages (and all further messages) will include a `test-token` in the header - this is our token from the Palisade Service
 1. POST onto the masked-resource-offset queue (`http://filtered-resource-service/api/masked-resource-offset`) the offset of our START marker
     * This doesn't have to be accurate, as long as it is less-than-or-equal-to the actual value - we will use `0` as our offset

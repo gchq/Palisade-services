@@ -51,7 +51,7 @@ If no record or resource level rules are found for this resource, a `NoSuchPolic
 An `AuditErrorMessage` is then built, containing the user information, context, resourceId, the error thrown, and any additional attributes. 
 This error object is then sent with the `PolicyRequest` to the [Audit service](../audit-service) to be audited appropriately.
 If, however, resource level rules are found, and when applied against the resource, the resource has not been redacted, then the Policy Service will check the cache for Record Level rules. 
-Record Level Rules are rules that can be applied against the data itself, and based off context can limit what the user can see in a particular resource.
+Record Level rules are rules that can be applied against the data itself, and based off context can limit what the user can see in a particular resource.
 These rules are not yet applied, but are attached to the original request and packaged as a `PolicyResponse` which then is finally built as a `AuditablePolicyResponse` object with no errors
 This is then sent, via Kafka, to the [Attribute-Masking Service](../attribute-masking-service) for further processing.
 
