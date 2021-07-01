@@ -86,8 +86,10 @@ class KafkaContractRestTest {
     void tearDown() {
         Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
                 .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
-                .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
-                .forEach(File::deleteOnExit);
+                .forEach((File file) -> {
+                    LOGGER.info("Deleting file {}", file.getName());
+                    file.deleteOnExit;
+                });
     }
 
     @Test
