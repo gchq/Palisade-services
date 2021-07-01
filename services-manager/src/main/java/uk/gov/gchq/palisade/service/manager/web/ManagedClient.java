@@ -30,12 +30,32 @@ import java.net.URI;
  */
 @FeignClient(name = "managed-client", url = "undefined")
 public interface ManagedClient {
+
+    /**
+     * A REST endpoint that gets the health of a service
+     *
+     * @param url the health endpoint value
+     * @return the response from the endpoint
+     */
     @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
 
+    /**
+     * A REST endpoint that updates the logging level on a service via an endpoint
+     *
+     * @param url the endpoint used to update the logging level
+     * @param module the package the logging level will be applied to
+     * @param configuredLevel the new logging level value
+     * @return the response from the endpoint
+     */
     @PostMapping(path = "/actuator/loggers/{module}", produces = "application/json", consumes = "application/json")
     Response setLoggers(final URI url, final @PathVariable("module") String module, final @RequestBody String configuredLevel);
 
+    /**
+     * A REST endpoint used to perform a shutdown task on a service
+     *
+     * @param url the shutdown endpoint of the service
+     */
     @PostMapping(path = "/actuator/shutdown")
     void shutdown(final URI url);
 }

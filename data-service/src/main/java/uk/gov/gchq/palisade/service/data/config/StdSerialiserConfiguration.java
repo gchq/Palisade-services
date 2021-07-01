@@ -40,6 +40,7 @@ public class StdSerialiserConfiguration {
      * Constructor with 0 arguments for a {@link StdSerialiserConfiguration} object
      */
     public StdSerialiserConfiguration() {
+        // no-args constructor
     }
 
     /**
@@ -48,7 +49,7 @@ public class StdSerialiserConfiguration {
      * @param serialisers a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
      */
     public StdSerialiserConfiguration(final List<StdSerialiserPrepopulationFactory> serialisers) {
-        this.serialisers = Collections.unmodifiableList(serialisers);
+        this.serialisers = List.copyOf(serialisers);
     }
 
     @Generated
@@ -59,7 +60,7 @@ public class StdSerialiserConfiguration {
     @Generated
     public void setSerialisers(final List<StdSerialiserPrepopulationFactory> serialisers) {
         requireNonNull(serialisers);
-        this.serialisers = Collections.unmodifiableList(serialisers);
+        this.serialisers = List.copyOf(serialisers);
     }
 
     @Override

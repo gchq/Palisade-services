@@ -46,7 +46,7 @@ import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.user.User;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.File;
 import java.util.Collections;
@@ -95,24 +95,24 @@ class ScenarioPersistenceTest {
      * </pre>
      */
 
-    private static final DirectoryResource ROOT_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH).toURI());
+    private static final DirectoryResource ROOT_DIR = (DirectoryResource) AbstractResourceBuilder.create(new File(ROOT_PATH).toURI());
 
-    private static final DirectoryResource TOP_LEVEL_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/").toURI());
-    private static final DirectoryResource EMPTY_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "empty-dir/").toURI());
+    private static final DirectoryResource TOP_LEVEL_DIR = (DirectoryResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/").toURI());
+    private static final DirectoryResource EMPTY_DIR = (DirectoryResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "empty-dir/").toURI());
 
-    private static final DirectoryResource MULTI_FILE_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/").toURI());
-    private static final DirectoryResource SINGLE_FILE_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/").toURI());
+    private static final DirectoryResource MULTI_FILE_DIR = (DirectoryResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/").toURI());
+    private static final DirectoryResource SINGLE_FILE_DIR = (DirectoryResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/").toURI());
 
-    private static final FileResource MULTI_FILE_ONE = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileOne.txt").toURI()))
+    private static final FileResource MULTI_FILE_ONE = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileOne.txt").toURI()))
             .type("java.lang.String")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);
-    private static final FileResource MULTI_FILE_TWO = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileTwo.txt").toURI()))
+    private static final FileResource MULTI_FILE_TWO = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileTwo.txt").toURI()))
             .type("java.lang.String")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);
 
-    private static final FileResource SINGLE_FILE = ((FileResource) ResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/singleFile.txt").toURI()))
+    private static final FileResource SINGLE_FILE = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/singleFile.txt").toURI()))
             .type("java.lang.String")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);

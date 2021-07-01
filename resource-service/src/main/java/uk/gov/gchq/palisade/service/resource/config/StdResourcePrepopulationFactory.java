@@ -20,7 +20,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.ConnectionDetail;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
- * A factory for {@link Resource} objects, wrapping the {@link ResourceBuilder} with a type and serialisedFormat
+ * A factory for {@link Resource} objects, wrapping the {@link AbstractResourceBuilder} with a type and serialisedFormat
  */
 public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     private String resourceId = "";
@@ -114,9 +114,9 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         String type = requireNonNull(attributes.get("type"), "Attribute 'type' cannot be null");
         String serialisedFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
         ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
-        Resource rootResource = ResourceBuilder.create(rootId);
-        String resourceIdUri = ResourceBuilder.create(this.resourceId).getId();
-        LeafResource leafResource = ((LeafResource) ResourceBuilder.create(resourceIdUri))
+        Resource rootResource = AbstractResourceBuilder.create(rootId);
+        String resourceIdUri = AbstractResourceBuilder.create(this.resourceId).getId();
+        LeafResource leafResource = ((LeafResource) AbstractResourceBuilder.create(resourceIdUri))
                 .connectionDetail(simpleConnectionDetail)
                 .type(type)
                 .serialisedFormat(serialisedFormat);

@@ -45,7 +45,7 @@ import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer
 import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.user.User;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.File;
 import java.util.List;
@@ -67,7 +67,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResourceServicePersistenceProxyTest {
 
     private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service");
-    private static final LeafResource FILE_1 = ((LeafResource) ResourceBuilder.create("file:/test/resourceId/data1.txt"))
+    private static final LeafResource FILE_1 = ((LeafResource) AbstractResourceBuilder.create("file:/test/resourceId/data1.txt"))
             .type("data")
             .serialisedFormat("txt")
             .connectionDetail(DETAIL);

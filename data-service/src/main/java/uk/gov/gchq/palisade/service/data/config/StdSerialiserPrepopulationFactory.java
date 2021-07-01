@@ -53,6 +53,7 @@ public class StdSerialiserPrepopulationFactory {
      * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object.
      */
     public StdSerialiserPrepopulationFactory() {
+        // no-args constructor
     }
 
     @Generated
