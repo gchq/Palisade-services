@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.repository }}{{ .Values.image.name }}:{{ .Values.image.base }}-{{ .Values.image.tag }}"
+        image: { { include "palisade-service.image.name" . } }
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
