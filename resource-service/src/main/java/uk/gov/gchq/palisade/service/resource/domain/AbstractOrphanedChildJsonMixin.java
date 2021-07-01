@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.resource.ParentResource;
 // Must be abstract class, not interface, to be used as mixin
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @SuppressWarnings("java:S1610")
-public abstract class OrphanedChildJsonMixin {
+public abstract class AbstractOrphanedChildJsonMixin {
     /**
      * Ignore the parent field when serialising to JSON.
      *

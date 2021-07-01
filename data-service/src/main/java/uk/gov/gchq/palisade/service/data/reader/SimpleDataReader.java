@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 /**
  * A simple data reader that connects to the data and streams the raw data
  */
-public class SimpleDataReader extends SerialisedDataReader {
+public class SimpleDataReader extends AbstractSerialisedDataReader {
     @Override
     protected InputStream readRaw(final LeafResource resource) {
         try {

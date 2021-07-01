@@ -29,14 +29,17 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Configuration class used for starting the services
+ */
 public class ServiceConfiguration {
     private static final String SPRING_LIST_SEP = ",";
 
     private String jar;
     private List<String> paths = Collections.emptyList();
     private List<String> profiles = Collections.singletonList("default");
-    private Optional<String> log = Optional.empty();
-    private Optional<String> err = Optional.empty();
+    private String log;
+    private String err;
     private Map<String, String> level = Collections.emptyMap();
 
     @Generated
@@ -52,44 +55,44 @@ public class ServiceConfiguration {
 
     @Generated
     public List<String> getPaths() {
-        return paths;
+        return Collections.unmodifiableList(paths);
     }
 
     @Generated
     public void setPaths(final List<String> paths) {
         requireNonNull(paths);
-        this.paths = paths;
+        this.paths = List.copyOf(paths);
     }
 
     @Generated
     public List<String> getProfiles() {
-        return profiles;
+        return Collections.unmodifiableList(profiles);
     }
 
     @Generated
     public void setProfiles(final List<String> profiles) {
         requireNonNull(profiles);
-        this.profiles = profiles;
+        this.profiles = List.copyOf(profiles);
     }
 
     @Generated
     public Optional<String> getLog() {
-        return log;
+        return Optional.of(log);
     }
 
     @Generated
-    public void setLog(final Optional<String> log) {
+    public void setLog(final String log) {
         requireNonNull(log);
         this.log = log;
     }
 
     @Generated
     public Optional<String> getErr() {
-        return err;
+        return Optional.of(err);
     }
 
     @Generated
-    public void setErr(final Optional<String> err) {
+    public void setErr(final String err) {
         requireNonNull(err);
         this.err = err;
     }
@@ -130,8 +133,8 @@ public class ServiceConfiguration {
         command.add(jar);
 
         ProcessBuilder pb = new ProcessBuilder().command(command);
-        log.ifPresent(logFile -> pb.redirectOutput(new File(logFile)));
-        err.ifPresent(errorFile -> pb.redirectError(new File(errorFile)));
+        Optional.of(log).ifPresent(logFile -> pb.redirectOutput(new File(logFile)));
+        Optional.of(err).ifPresent(errorFile -> pb.redirectError(new File(errorFile)));
 
         return pb;
     }

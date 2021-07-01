@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,14 +41,14 @@ import java.util.Map;
 public class PalisadeRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeRestController.class);
 
-    private final PalisadeService palisadeService;
+    private final AbstractPalisadeService palisadeService;
 
     /**
      * Constructor for the Palisade Service Controller.
      *
      * @param palisadeService service which processes the request
      */
-    public PalisadeRestController(final PalisadeService palisadeService) {
+    public PalisadeRestController(final AbstractPalisadeService palisadeService) {
         this.palisadeService = palisadeService;
     }
 
@@ -71,7 +71,7 @@ public class PalisadeRestController {
             token = palisadeService.registerDataRequest(request).join();
             palisadeClientResponse = new PalisadeClientResponse(token);
             LOGGER.debug("registerDataRequest token is {}", token);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("PalisadeRestController Exception thrown", e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             Map<String, Object> attributes = new HashMap<>();

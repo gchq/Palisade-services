@@ -30,7 +30,7 @@ import uk.gov.gchq.palisade.component.palisade.CommonTestData;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PalisadeServiceComponentTest extends CommonTestData {
 
     @Autowired
-    PalisadeService palisadeService;
+    AbstractPalisadeService palisadeService;
 
     LinkedList<TokenRequestPair> sinkCollection;
 

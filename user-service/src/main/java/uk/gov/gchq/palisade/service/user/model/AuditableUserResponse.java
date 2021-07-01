@@ -19,6 +19,8 @@ package uk.gov.gchq.palisade.service.user.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,7 +55,18 @@ public final class AuditableUserResponse {
                 .orElse(this);
     }
 
+    @Generated
+    public UserResponse getUserResponse() {
+        return userResponse;
+    }
+
+    @Generated
+    public AuditErrorMessage getAuditErrorMessage() {
+        return auditErrorMessage;
+    }
+
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -67,16 +80,9 @@ public final class AuditableUserResponse {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(userResponse, auditErrorMessage);
-    }
-
-    public UserResponse getUserResponse() {
-        return userResponse;
-    }
-
-    public AuditErrorMessage getAuditErrorMessage() {
-        return auditErrorMessage;
     }
 
     /**
@@ -130,7 +136,5 @@ public final class AuditableUserResponse {
              */
             AuditableUserResponse withResponseAndError(UserResponse response, AuditErrorMessage auditErrorMessage);
         }
-
     }
-
 }
