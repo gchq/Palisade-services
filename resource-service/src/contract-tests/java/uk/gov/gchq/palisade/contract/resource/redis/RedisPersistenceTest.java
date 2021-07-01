@@ -63,7 +63,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"}
 )
 @Import({KafkaTestConfiguration.class})
-@ContextConfiguration(initializers = {RedisInitializer.class})
+@ContextConfiguration(initializers = {RedisInitialiser.class})
 @ActiveProfiles({"redis", "akka-test", "testcontainers"})
 class RedisPersistenceTest {
 

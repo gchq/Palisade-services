@@ -27,8 +27,8 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
-public class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisInitializer.class);
+public class RedisInitialiser implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisInitialiser.class);
     private static final int REDIS_PORT = 6379;
 
     @Override
@@ -39,17 +39,17 @@ public class RedisInitializer implements ApplicationContextInitializer<Configura
         DockerImageName redisImageName;
         try {
             redisImageName = DockerImageName.parse(fullImageName)
-                .asCompatibleSubstituteFor(defaultImageName);
+                    .asCompatibleSubstituteFor(defaultImageName);
             redisImageName.assertValid();
         } catch (IllegalArgumentException ex) {
             LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
             redisImageName = DockerImageName.parse(defaultImageName);
         }
         final GenericContainer<?> redis = new GenericContainer<>(redisImageName)
-            .withExposedPorts(REDIS_PORT)
-            .withReuse(true)
-            .withStartupTimeout(Duration.ofMinutes(1))
-            .withStartupAttempts(3);
+                .withExposedPorts(REDIS_PORT)
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3);
 
         // Start container
         redis.start();
