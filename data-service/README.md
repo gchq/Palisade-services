@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --->
+# <img src="../logos/logo.svg" width="180">
+
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # Data Service
 
 The Data Service accepts client requests to retrieve resources that have been registered on their behalf.

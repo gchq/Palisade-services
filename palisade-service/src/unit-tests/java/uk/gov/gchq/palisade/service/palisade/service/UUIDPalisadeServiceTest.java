@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 class UUIDPalisadeServiceTest extends CommonTestData {
-    final PalisadeService uuidPalisadeService = Mockito.mock(UUIDPalisadeService.class);
+    final AbstractPalisadeService uuidPalisadeService = Mockito.mock(UUIDPalisadeService.class);
 
     @Test
     void testUUIDCreation() {

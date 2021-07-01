@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 
 import javax.annotation.PreDestroy;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -63,7 +62,7 @@ public class AuditApplication {
     public AuditApplication(final Set<RunnableGraph<?>> runners,
                             final Materializer materialiser,
                             @Qualifier("applicationTaskExecutor") final Executor executor) {
-        this.runners = Collections.unmodifiableSet(runners);
+        this.runners = Set.copyOf(runners);
         this.materialiser = materialiser;
         this.executor = executor;
     }

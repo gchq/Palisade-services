@@ -46,13 +46,13 @@ import java.util.function.Function;
  * @param <V> the value in the backing store
  * @param <K> the key in the backing store
  */
-public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCrudRepository<V, K> {
+public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements ReactiveCrudRepository<V, K> {
     public static final String KEY_SEP = "::";
     protected final String table;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
 
-    protected ReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table) {
+    protected AbstractReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table) {
         this.table = table;
         RedisSerializationContext<String, V> ctx = redisTemplate.getSerializationContext();
         this.hashOps = redisTemplate.opsForHash();
@@ -189,7 +189,7 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
     @Override
     @NonNull
     public final Mono<Void> delete(final @NonNull V entity) {
-        return this.deleteById(ReactiveRepositoryRedisAdapter.<V, K>reflectIdAnnotation(entity));
+        return this.deleteById(AbstractReactiveRepositoryRedisAdapter.<V, K>reflectIdAnnotation(entity));
     }
 
     @Override
@@ -217,7 +217,7 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
     /**
      * A class to allow {@link CompletenessEntity}s to be stored in a reactive repository
      */
-    public static class CompletenessRepositoryAdapter extends ReactiveRepositoryRedisAdapter<CompletenessEntity, Integer> implements CompletenessRepository {
+    public static class CompletenessRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<CompletenessEntity, Integer> implements CompletenessRepository {
 
         /**
          * {@link CompletenessRepositoryAdapter} constructor that takes a redis template
@@ -250,7 +250,7 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
     /**
      * A class to allow {@link ResourceEntity}s to be stored in a reactive repository
      */
-    public static class ResourceRepositoryAdapter extends ReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
+    public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
@@ -292,7 +292,7 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
     /**
      * A class to allow {@link SerialisedFormatEntity}s to be stored in a reactive repository
      */
-    public static class SerialisedFormatRepositoryAdapter extends ReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
+    public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
@@ -334,7 +334,7 @@ public abstract class ReactiveRepositoryRedisAdapter<V, K> implements ReactiveCr
     /**
      * A class to allow {@link TypeRepository}s to be stored in a reactive repository
      */
-    public static class TypeRepositoryAdapter extends ReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
+    public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template

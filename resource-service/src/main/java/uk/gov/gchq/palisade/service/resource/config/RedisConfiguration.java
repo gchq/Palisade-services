@@ -35,10 +35,10 @@ import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
-import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter.CompletenessRepositoryAdapter;
-import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter.ResourceRepositoryAdapter;
-import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter.SerialisedFormatRepositoryAdapter;
-import uk.gov.gchq.palisade.service.resource.repository.ReactiveRepositoryRedisAdapter.TypeRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.CompletenessRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.ResourceRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.SerialisedFormatRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.TypeRepositoryAdapter;
 
 /**
  * Additional Redis configuration to set key prefixes and serialisation context.

@@ -38,7 +38,7 @@ import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -62,7 +62,7 @@ class ReactivePersistenceLayerTest {
     @BeforeEach
     public void setUp() throws InterruptedException {
         // Given
-        resource = ((FileResource) ResourceBuilder.create("file:/root/test-file-id"))
+        resource = ((FileResource) AbstractResourceBuilder.create("file:/root/test-file-id"))
                 .type("test-type")
                 .serialisedFormat("test-format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));

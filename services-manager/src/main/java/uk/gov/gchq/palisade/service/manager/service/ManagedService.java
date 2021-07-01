@@ -40,6 +40,12 @@ public class ManagedService {
     private final ManagedClient managedClient;
     private final Supplier<Collection<URI>> uriSupplier;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managedClient the service client
+     * @param uriSupplier a collection of health endpoint {@link URI}s
+     */
     public ManagedService(final ManagedClient managedClient, final Supplier<Collection<URI>> uriSupplier) {
         this.managedClient = managedClient;
         this.uriSupplier = uriSupplier;
@@ -53,12 +59,13 @@ public class ManagedService {
     public boolean isHealthy() {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     int status = HttpStatus.NOT_FOUND.value();
                     try {
                         status = this.managedClient.getHealth(clientUri).status();
                     } catch (RetryableException ex) {
                         // Not up yet
+                        LOGGER.error("An error occurred while checking the service health", ex);
                     }
                     LOGGER.debug("Client uri {} has status {}", clientUri, status);
                     return status;
@@ -79,7 +86,7 @@ public class ManagedService {
     public void setLoggers(final String packageName, final String configuredLevel) throws IOException {
         Collection<URI> clientUris = this.uriSupplier.get();
         Optional<Response> failures = clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     Response response = this.managedClient.setLoggers(clientUri, packageName, configuredLevel);
                     LOGGER.debug("Client uri {} responded with {}", clientUri, response);
                     return response;

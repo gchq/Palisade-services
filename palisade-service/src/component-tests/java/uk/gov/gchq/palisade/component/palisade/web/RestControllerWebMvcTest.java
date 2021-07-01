@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.palisade.CommonTestData;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeRestController;
 
 import java.nio.charset.StandardCharsets;
@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RestControllerWebMvcTest extends CommonTestData {
 
     @MockBean
-    private PalisadeService palisadeService;
+    private AbstractPalisadeService palisadeService;
     @Autowired
     private PalisadeRestController controller;
     @Autowired
