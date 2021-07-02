@@ -78,7 +78,7 @@ class RestControllerWebMvcTest {
 
     @Test
     void testControllerReturnsAccepted() throws Exception {
-        String REQUEST_TOKEN = "test-request-token";
+        String requestToken = "test-request-token";
 
         var resourceRequest = ResourceRequest.Builder.create()
                 .withUserId("test-user-id")
@@ -88,7 +88,7 @@ class RestControllerWebMvcTest {
 
         // When a request comes in to the controller
         var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/resource")
-                .header(Token.HEADER, REQUEST_TOKEN)
+                .header(Token.HEADER, requestToken)
                 .content(MAPPER.writeValueAsBytes(resourceRequest))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted())
