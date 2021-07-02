@@ -27,7 +27,6 @@ image:
   versionNumber: @version.number@
   codeRelease: @project.parent.version@
   revision: @revision@
-  imageTag: @image.tag@
 
 resources:
   limits:
