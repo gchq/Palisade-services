@@ -46,7 +46,6 @@
         <version.number>0.5.0</version.number>
         <revision>SNAPSHOT</revision>
         <common.revision>SNAPSHOT</common.revision>
-        <image.tag>SNAPSHOT</image.tag>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <encoding>UTF-8</encoding>
