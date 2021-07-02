@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: { { include "data-service.image.name" . } }
+        image: {{ include "data-service.image.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web

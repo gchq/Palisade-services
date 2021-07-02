@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: { { include "filtered-resource-service.image.name" . } }
+        image: {{ include "filtered-resource-service.image.name" . }}
         command:
         - bash
         - "-c"
