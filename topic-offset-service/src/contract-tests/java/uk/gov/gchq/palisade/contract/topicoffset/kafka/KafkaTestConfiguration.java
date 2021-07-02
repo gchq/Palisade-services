@@ -83,7 +83,8 @@ public class KafkaTestConfiguration {
     }
 
     @Bean
-    @SuppressWarnings("java:S112") // Suppress specific exception smell
+    @SuppressWarnings("java:S112")
+        // Suppress specific exception smell
     KafkaContainer kafkaContainer() throws Exception {
         DockerImageName kafkaImageName;
         try {

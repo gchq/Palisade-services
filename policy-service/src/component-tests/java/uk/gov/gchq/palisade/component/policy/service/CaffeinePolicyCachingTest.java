@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.config.DefaultConfiguration;
@@ -142,8 +141,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         /// Given - the cache is overfilled
         Function<Integer, Resource> makeResource = i -> new FileResource()
                 .id(i.toString()).type(i.toString()).serialisedFormat(i.toString())
-                .connectionDetail(new SimpleConnectionDetail().serviceName(i.toString()))
-                .parent(new SystemResource().id(i.toString()));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(i.toString()));
         Function<Integer, Rules<LeafResource>> makeRule = i -> new Rules<LeafResource>().addRule(i.toString(), new PassThroughRule<>());
         for (int count = 0; count <= 100; ++count) {
             policyService.setResourceRules(makeResource.apply(count).getId(), makeRule.apply(count));

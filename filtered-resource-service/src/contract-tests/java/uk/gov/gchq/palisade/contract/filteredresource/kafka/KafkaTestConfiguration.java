@@ -85,16 +85,16 @@ public class KafkaTestConfiguration {
         DockerImageName kafkaImageName;
         try {
             kafkaImageName = DockerImageName.parse(fullImageName)
-                .asCompatibleSubstituteFor(defaultImageName);
+                    .asCompatibleSubstituteFor(defaultImageName);
             kafkaImageName.assertValid();
         } catch (IllegalArgumentException ex) {
             LOGGER.warn("Image name {} was invalid, falling back to default name {}", fullImageName, defaultImageName, ex);
             kafkaImageName = DockerImageName.parse(defaultImageName);
         }
         final KafkaContainer container = new KafkaContainer(kafkaImageName)
-            .withReuse(true)
-            .withStartupTimeout(Duration.ofMinutes(1))
-            .withStartupAttempts(3);
+                .withReuse(true)
+                .withStartupTimeout(Duration.ofMinutes(1))
+                .withStartupAttempts(3);
         container.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         container.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         container.start();

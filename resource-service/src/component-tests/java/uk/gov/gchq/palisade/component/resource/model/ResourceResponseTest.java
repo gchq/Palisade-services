@@ -22,7 +22,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.user.User;
 
@@ -38,8 +37,7 @@ class ResourceResponseTest {
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
-                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-                .parent(new SystemResource().id("/test"));
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
 
         ResourceResponse resourceResponse = ResourceResponse.Builder.create()
                 .withUserId("originalUserID")
