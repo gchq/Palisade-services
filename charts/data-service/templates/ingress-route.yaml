@@ -18,7 +18,6 @@ metadata:
   name: {{ include "data-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   entryPoints:
@@ -33,3 +32,25 @@ spec:
         - name: data-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
   tls: {}
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "data-service.name" . }}-insecure
+  namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "false"
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: PathPrefix(`{{ include "data-service.root" . }}/data`)
+    kind: Rule
+    services:
+    - name: {{ include "data-service.name" . }}
+      port: 80
+    middlewares:
+    - name: data-pathparam-regex
+      namespace: {{ include "palisade.namespace" . }}
