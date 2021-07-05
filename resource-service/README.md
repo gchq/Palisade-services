@@ -159,7 +159,7 @@ It may be that some example resources may need to be added to the backing store 
 
 ### Motivation
 
-To ease load on an external resource-service provider, a cache-like storage mechanism is used to return data for previously queried resources. The code for this can be found in the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [JpaPersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/JpaPersistenceLayer.java).
+To ease load on an external Resource Service provider, a cache-like storage mechanism is used to return data for previously queried resources. The code for this can be found in the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [JpaPersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/JpaPersistenceLayer.java).
 
 Due to the tree-structure of filesystems, native caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. For example, requesting `/some/directory/with-lots-of-files` may return (and cache) 1000 resources, but requesting `/some/directory` will result in a cache miss, as would `/some/directory/with-lots-of-files/big-subdirectory`. Instead, a persistence store is used to break resource trees apart into their individual nodes and store them separately, reconstructing parents and tree structure when requested again.
 
