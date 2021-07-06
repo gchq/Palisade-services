@@ -109,7 +109,7 @@ class KafkaContractRestTest {
 
     @Test
     @DirtiesContext
-    void testRestEndpointForGoodSuccessMessage() throws InterruptedException {
+    void testRestEndpointForSuccessMessage() throws InterruptedException {
 
         // When - we POST to the rest endpoint
         var responseEntity = post("/api/success", GOOD_SUCCESS_REQUEST_OBJ);
