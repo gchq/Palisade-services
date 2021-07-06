@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 /**
- * The response writer for the {@link SerialisedDataReader} which will apply the record level rules for Palisade.
+ * The response writer for the {@link AbstractSerialisedDataReader} which will apply the record level rules for Palisade.
  *
  * @param <T> the type of {@link SerialisingResponseWriter}
  */
@@ -117,8 +117,8 @@ public class SerialisingResponseWriter<T extends Serializable> implements Respon
 
         try {
 
-            /**
-             If no rules that apply, then just copy the bytes across
+            /*
+             If there are no rules that apply, then just copy the bytes across
              The value -1L is a convention to indicate deserialise/serialise is by-passed and the number of records
              processed and number of records returned will not be counted
              */

@@ -49,7 +49,7 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 
 import java.util.Collections;
@@ -80,7 +80,7 @@ class KafkaContractTest {
     public static final String REGISTER_DATA_REQUEST = "/api/registerDataRequest";
 
     @SpyBean
-    PalisadeService service;
+    AbstractPalisadeService service;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired

@@ -48,12 +48,23 @@ public class ScheduleRunner implements Runnable {
     private final List<Map.Entry<String, TaskConfiguration>> schedule;
     private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
+     */
     public ScheduleRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.rootDir = managerConfiguration.getRoot();
         this.schedule = managerConfiguration.getSchedule();
         this.serviceProducer = serviceProducer;
     }
 
+    /**
+     * Waits for the task to be completed
+     *
+     * @param taskCompleteIndicators supplier of {@link Boolean}s for whether some part of the task is 'done'
+     */
     // Suppress System.exit warning
     @SuppressWarnings("java:S1147")
     public void waitUntilComplete(final Map<String, List<Supplier<Boolean>>> taskCompleteIndicators) {

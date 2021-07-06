@@ -30,7 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 
 import javax.annotation.PreDestroy;
@@ -49,7 +49,7 @@ public class PalisadeApplication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeApplication.class);
     private final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner;
-    private final PalisadeService palisadeService;
+    private final AbstractPalisadeService palisadeService;
     private final Materializer materialiser;
     private CompletableFuture<?> runnerThread = new CompletableFuture<>();
 
@@ -63,7 +63,7 @@ public class PalisadeApplication {
     public PalisadeApplication(
             final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner,
             final Materializer materialiser,
-            final PalisadeService palisadeService) {
+            final AbstractPalisadeService palisadeService) {
         this.runner = runner;
         this.materialiser = materialiser;
         this.palisadeService = palisadeService;

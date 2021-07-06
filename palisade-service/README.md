@@ -16,14 +16,16 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
+## A Tool for Complex and Scalable Data Access Policy Enforcement
+
 # Palisade Service
 
 The Palisade Service is the entry point into the rest of the Palisade Services.
 It accepts a request from the client, containing the userId of the user requesting access, the resource the user wants access to, and the context as to why they require access. 
 The Palisade Service then creates a token, currently via the UUIDPalisadeService, but this can be extended in the future for specific token requirements. 
 The token is attached to the message in the form of a `PalisadeSystemResponse` to be sent to the User Service on the `user` kafka topic. 
-It is also sent back to the client directly as part of a `PalisadeClientResponse` so that the client can connect to the Filtered Resource Service to retrieve the processed data.
-As the data progresses through the other Palisade services, it is refined and enriched, the Palisade Service is the entry point for client requests.
+It is also sent back to the client directly as part of a `PalisadeClientResponse` so that the client can connect to the Filtered Resource Service to retrieve the processed request.
+As the request progresses through the other Palisade services, it is refined and enriched, the Palisade Service is the entry point for client requests.
 
 ## High-Level Architecture
 <!--- 
@@ -47,7 +49,7 @@ The routing of requests is shown in the diagram above. The yellow boxes indicate
 
 The service accepts a `PalisadeClientRequest`, containing the userId, resourceId and context, it then generates a token, using the `UUIDPalisadeService`, which along-side the original request information,
 is packaged in a `PalisadeSystemResponse` and sent onwards via the `user` kafka topic to the User service for further processing. 
-The token is also added to a `PalisadeClientResponse` object, which is sent back to the client, so that they can request the processed data from the Filtered Resource Service.
+The token is also added to a `PalisadeClientResponse` object, which is sent back to the client, so that they can get the processed request from the Filtered Resource Service.
 
 ## REST Interface
 

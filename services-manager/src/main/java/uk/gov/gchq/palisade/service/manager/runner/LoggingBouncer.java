@@ -37,11 +37,20 @@ public class LoggingBouncer implements Runnable {
     private final Map<String, ServiceConfiguration> loggingConfiguration;
     private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
+     */
     public LoggingBouncer(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.loggingConfiguration = managerConfiguration.getServices();
         this.serviceProducer = serviceProducer;
     }
 
+    /**
+     * Change the log-level of each service in the config map using the serviceProducer function to create REST requests
+     */
     public void run() {
         loggingConfiguration.forEach((String serviceName, ServiceConfiguration config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);

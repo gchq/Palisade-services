@@ -14,13 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --->
 
-# <img src="/logos/logo.svg" width="180">
+# <img src="../logos/logo.svg" width="180">
+
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
 # Filtered Resource Service
 
 ![Filtered-Resource Service High-Level Diagram](doc/Filtered-Resource-Service-HL.png)
 
-The Filtered-Resource Service sits at the end of the stream pipeline and has the task of returning resources (and their connection details) back to the client. 
+The Filtered-Resource Service sits at the end of the stream pipeline and has the task of returning information about resources (and their connection details) back to the client. 
 Given a token `$[token]` from the Palisade Service, it is accessed by a Websocket request to `ws://filtered-resource-service/resource/${token}`. 
 The service will return each resource discovered by the Palisade system one-by-one to the client as requested, auditing that the client is now aware of these resources. 
 
@@ -117,7 +119,7 @@ The Filtered-Resource Service requires a number of inputs from separate services
 The steps required are as follows:
 
 1. POST onto the masked-resource queue (`http://filtered-resource-service/api/masked-resource`) as if an output has come from the Attribute-Masking Service
-    * This includes an additional pair of empty `START` and `END` of stream messages before and after the data payload respectively
+    * This includes an additional pair of empty `START` and `END` of stream messages before and after the request payload respectively
     * Additionally, all three of these messages (and all further messages) will include a `test-token` in the header - this is our token from the Palisade Service
 1. POST onto the masked-resource-offset queue (`http://filtered-resource-service/api/masked-resource-offset`) the offset of our START marker
     * This doesn't have to be accurate, as long as it is less-than-or-equal-to the actual value - we will use `0` as our offset

@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class SimpleResourceService implements ResourceService {
             extension = file.getName().substring(i + 1);
         }
 
-        return ((LeafResource) ResourceBuilder.create(file.toURI()))
+        return ((LeafResource) AbstractResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type(this.resourceType)
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
