@@ -66,7 +66,7 @@ class SimpleAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditErrorMessage(USER_SERVICE));
         // Then
         assertThat(getMessages(event -> true).get(0))
-                .as("Check that the error message is a %s", AuditErrorMessage.class.getSimpleName())
+                .as("Check that the error message is an %s", AuditErrorMessage.class.getSimpleName())
                 .contains(AuditErrorMessage.class.getSimpleName());
     }
 
@@ -76,7 +76,7 @@ class SimpleAuditServiceTest {
         auditService.audit(TEST_TOKEN, auditSuccessMessage(DATA_SERVICE));
         // Then
         assertThat(getMessages(event -> true).get(0))
-                .as("Check that the error message is a %s", AuditSuccessMessage.class.getSimpleName())
+                .as("Check that the error message is an %s", AuditSuccessMessage.class.getSimpleName())
                 .contains(AuditSuccessMessage.class.getSimpleName());
     }
 
