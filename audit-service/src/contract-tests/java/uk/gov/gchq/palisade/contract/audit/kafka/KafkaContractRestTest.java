@@ -88,7 +88,7 @@ class KafkaContractRestTest {
                 .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
                 .forEach((File file) -> {
                     LOGGER.info("Deleting file {}", file.getName());
-                    file.deleteOnExit;
+                    file.deleteOnExit();
                 });
     }
 
