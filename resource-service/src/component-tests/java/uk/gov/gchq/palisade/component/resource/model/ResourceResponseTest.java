@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -35,13 +34,13 @@ class ResourceResponseTest {
     @Test
     void testSerialiseResourceResponseToJson() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        LeafResource resource = new FileResource().id("/test/file.format")
+        var resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
 
-        ResourceResponse resourceResponse = ResourceResponse.Builder.create()
+        var resourceResponse = ResourceResponse.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
                 .withContext(new Context().purpose("testContext"))

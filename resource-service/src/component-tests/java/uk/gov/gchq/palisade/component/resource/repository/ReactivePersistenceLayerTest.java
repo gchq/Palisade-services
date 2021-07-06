@@ -143,7 +143,7 @@ class ReactivePersistenceLayerTest {
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
         assertThat(formatResult)
-                .as("Check that when geting the resource by its format, the correct resource is returned")
+                .as("Check that when getting the resource by its format, the correct resource is returned")
                 .containsOnly(resource);
     }
 }

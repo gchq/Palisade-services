@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.component.user.web;
+package uk.gov.gchq.palisade.component.resource.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -29,32 +29,34 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import uk.gov.gchq.palisade.component.user.common.CommonTestData;
-import uk.gov.gchq.palisade.service.user.model.Token;
-import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.user.web.UserRestController;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
+import uk.gov.gchq.palisade.service.resource.model.Token;
+import uk.gov.gchq.palisade.service.resource.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.resource.web.ResourceRestController;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@WebMvcTest(controllers = {UserRestController.class})
-@ContextConfiguration(classes = {RestControllerWebMvcTest.class, UserRestController.class})
-class RestControllerWebMvcTest extends CommonTestData {
+@WebMvcTest(controllers = {ResourceRestController.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, ResourceRestController.class})
+class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
     KafkaProducerService kafkaProducerService;
 
     @Autowired
-    private UserRestController controller;
+    private ResourceRestController controller;
 
     @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        Mockito.when(kafkaProducerService.processRequest(Mockito.any(), Mockito.any()))
+        Mockito.when(kafkaProducerService.resourceRequestMulti(Mockito.any(), Mockito.any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
     }
 
@@ -76,10 +78,18 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @Test
     void testControllerReturnsAccepted() throws Exception {
+        String requestToken = "test-request-token";
+
+        var resourceRequest = ResourceRequest.Builder.create()
+                .withUserId("test-user-id")
+                .withResourceId("/test/resourceId")
+                .withContext(new Context().purpose("test-purpose"))
+                .withUser(new User().userId("test-user-id"));
+
         // When a request comes in to the controller
-        var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/user")
-                .header(Token.HEADER, REQUEST_TOKEN)
-                .content(MAPPER.writeValueAsBytes(USER_REQUEST))
+        var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/resource")
+                .header(Token.HEADER, requestToken)
+                .content(MAPPER.writeValueAsBytes(resourceRequest))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted())
                 .andReturn();
@@ -90,5 +100,4 @@ class RestControllerWebMvcTest extends CommonTestData {
                 .as("Check that the response body has been returned but is empty")
                 .isEmpty();
     }
-
 }
