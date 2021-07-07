@@ -96,7 +96,7 @@ class KafkaContractTest {
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
-    private Materializer akkaMaterializer;
+    private Materializer akkaMaterialiser;
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
     @Autowired
@@ -124,7 +124,7 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -132,7 +132,7 @@ class KafkaContractTest {
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
 
         // When - results are pulled from the output stream
@@ -153,6 +153,7 @@ class KafkaContractTest {
                         .as("Check the message contains the correct headers")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the byte value of the request-token header")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
@@ -175,10 +176,18 @@ class KafkaContractTest {
                 .extracting(ConsumerRecord::value)
                 .extracting(result -> result.get("resource"))
                 .allSatisfy(resource -> {
-                    assertThat(resource.get("id").asText()).isIn("file:/test/resourceId/data1.txt", "file:/test/resourceId/data2.txt");
-                    assertThat(resource.get("type").asText()).isEqualTo("type");
-                    assertThat(resource.get("serialisedFormat").asText()).isEqualTo("txt");
-                    assertThat(resource.get("connectionDetail").get("serviceName").asText()).isEqualTo("data-service");
+                    assertThat(resource.get("id").asText())
+                            .as("Check that resources have been returned successfully")
+                            .isIn("file:/test/resourceId/data1.txt", "file:/test/resourceId/data2.txt");
+                    assertThat(resource.get("type").asText())
+                            .as("Check that the type of the resource has been returned correctly")
+                            .isEqualTo("type");
+                    assertThat(resource.get("serialisedFormat").asText())
+                            .as("Check that the serialised format of the resource has been returned correctly")
+                            .isEqualTo("txt");
+                    assertThat(resource.get("connectionDetail").get("serviceName").asText())
+                            .as("Check that the service name has been set correctly")
+                            .isEqualTo("data-service");
                 });
     }
 
@@ -201,11 +210,11 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -213,7 +222,7 @@ class KafkaContractTest {
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterialiser)
                 .toCompletableFuture().join();
 
 
@@ -233,6 +242,7 @@ class KafkaContractTest {
                         .as("Check the token is in the header")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the byte value of the request-token header")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertAll(
@@ -272,6 +282,7 @@ class KafkaContractTest {
                         .as("Check the token is in the header")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the byte value of the request-token header")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
@@ -292,7 +303,7 @@ class KafkaContractTest {
 
         Probe<ConsumerRecord<String, ResourceRequest>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterialiser);
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
@@ -300,7 +311,9 @@ class KafkaContractTest {
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/resource", entity, Void.class);
 
         // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode())
+                .as("Check the response has been Accepted")
+                .isEqualTo(HttpStatus.ACCEPTED);
 
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, ResourceRequest>> resultSeq = probe.request(1);
@@ -316,6 +329,7 @@ class KafkaContractTest {
                         .hasSize(1),
 
                 () -> assertThat(results)
+                        .as("Check the returned messages")
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
                                     .as("Check that the token is in the header")
