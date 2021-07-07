@@ -45,6 +45,7 @@ import java.util.Map;
  */
 public class ResourceServicePersistenceProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceServicePersistenceProxy.class);
+    private static final String REQUEST_WAS = "Request was {}";
 
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
@@ -77,7 +78,8 @@ public class ResourceServicePersistenceProxy {
      * @return a {@link Source} of {@link LeafResource}s associated with the resourceId
      */
     public Source<AuditableResourceResponse, NotUsed> getResourcesById(final ResourceRequest request) {
-        LOGGER.info("Trying to get resourcesById for request {} from persistence", request);
+        LOGGER.info("Trying to get resourcesById for id {} from persistence", request.getResourceId());
+        LOGGER.debug(REQUEST_WAS, request);
         // Try first from persistence
         return Source.completionStageSource(persistence.getResourcesById(request.resourceId)
                 .thenApply(persistenceHit -> persistenceHit
@@ -123,7 +125,8 @@ public class ResourceServicePersistenceProxy {
                         )
                 ))
                 .map((AuditableResourceResponse resource) -> {
-                    LOGGER.debug("Got resource {} for request {}", resource, request);
+                    LOGGER.debug("Got resource {} for id {}", resource, request.getResourceId());
+                    LOGGER.trace(REQUEST_WAS, request);
                     return resource;
                 })
                 .mapMaterializedValue(ignored -> NotUsed.notUsed());
@@ -171,7 +174,8 @@ public class ResourceServicePersistenceProxy {
      */
     public Source<AuditableResourceResponse, NotUsed> getResourcesByType(final ResourceRequest request, final String type) {
         // Try first from persistence
-        LOGGER.info("Trying to get resourcesByType for request {} and type {} from persistence", request, type);
+        LOGGER.info("Trying to get resourcesByType for type {} from persistence", type);
+        LOGGER.debug(REQUEST_WAS, request);
         return Source.completionStageSource(persistence.getResourcesByType(type)
                 .thenApply(persistenceHit -> persistenceHit
                         .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesByType(type))
@@ -182,7 +186,8 @@ public class ResourceServicePersistenceProxy {
                                         .withResource(leafResource)))
                 ))
                 .map((AuditableResourceResponse resource) -> {
-                    LOGGER.debug("Got resource {} for request {} and type {}", resource, request, type);
+                    LOGGER.debug("Got resource {} for type {}", resource, type);
+                    LOGGER.trace(REQUEST_WAS, request);
                     return resource;
                 })
                 .mapMaterializedValue(ignored -> NotUsed.notUsed());
@@ -197,7 +202,8 @@ public class ResourceServicePersistenceProxy {
      */
     public Source<AuditableResourceResponse, NotUsed> getResourcesBySerialisedFormat(final ResourceRequest request, final String serialisedFormat) {
         // Try first from persistence
-        LOGGER.info("Trying to get resourcesBySerialisedFormat for request {} and format {} from persistence", request, serialisedFormat);
+        LOGGER.info("Trying to get resourcesBySerialisedFormat for format {} from persistence", serialisedFormat);
+        LOGGER.debug(REQUEST_WAS, request);
         return Source.completionStageSource(persistence.getResourcesBySerialisedFormat(serialisedFormat)
                 .thenApply(persistenceHit -> persistenceHit
                         .orElseGet(() -> Source.fromIterator(() -> delegate.getResourcesBySerialisedFormat(serialisedFormat))
@@ -208,7 +214,8 @@ public class ResourceServicePersistenceProxy {
                                         .withResource(leafResource)))
                 ))
                 .map((AuditableResourceResponse resource) -> {
-                    LOGGER.debug("Got resource {} for request {} and format {}", resource, request, serialisedFormat);
+                    LOGGER.debug("Got resource {} for format {}", resource, serialisedFormat);
+                    LOGGER.trace(REQUEST_WAS, request);
                     return resource;
                 })
                 .mapMaterializedValue(ignored -> NotUsed.notUsed());
@@ -225,6 +232,10 @@ public class ResourceServicePersistenceProxy {
                 .via(persistence.withPersistenceById(request.resourceId))
                 .map(leafResource -> AuditableResourceResponse.Builder.create()
                         .withResourceResponse(ResourceResponse.Builder.create(request)
-                                .withResource(leafResource)));
+                                .withResource(leafResource)))
+                .map((AuditableResourceResponse resource) -> {
+                    LOGGER.debug("Persisted resource {} for request {}", resource, request);
+                    return resource;
+                });
     }
 }
