@@ -39,10 +39,11 @@ class ApplicationConfigurationTest {
     @Test
     void testConfigurationDefinesLoadedServices(@Autowired final Map<String, AuditService> auditServices) {
         assertThat(auditServices.values())
-            .extracting(as -> (Class) as.getClass())
-            .containsExactlyInAnyOrder(
-                LoggerAuditService.class,
-                StroomAuditService.class,
-                SimpleAuditService.class);
+                .as("Check that all 3 implementations of the Audit Service are loaded up")
+                .extracting(as -> (Class) as.getClass())
+                .containsOnly(
+                        LoggerAuditService.class,
+                        StroomAuditService.class,
+                        SimpleAuditService.class);
     }
 }
