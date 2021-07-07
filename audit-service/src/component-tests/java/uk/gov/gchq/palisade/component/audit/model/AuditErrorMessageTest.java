@@ -55,6 +55,5 @@ class AuditErrorMessageTest extends AbstractSerialisationTest {
         // THEN confirm that it can be serialised and then deserialised successfully.
 
         assertSerialisation(expected.getClass(), expected);
-
     }
 }
