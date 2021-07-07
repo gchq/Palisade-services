@@ -49,21 +49,21 @@ import java.util.stream.Collectors;
 public class KafkaProducerService {
     private final Sink<ProducerRecord<String, ResourceRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
-    private final Materializer materializer;
+    private final Materializer materialiser;
 
     /**
      * Autowired constructor for the rest controller
      *
      * @param upstreamSink   a sink to the upstream topic
      * @param upstreamConfig the config for the topic (name, partitions, ...)
-     * @param materializer   the akka system materializer
+     * @param materialiser   the akka system materialiser responsible for turning a stream blueprint into a running stream.
      */
     public KafkaProducerService(final Sink<ProducerRecord<String, ResourceRequest>, CompletionStage<Done>> upstreamSink,
                                 final ConsumerTopicConfiguration upstreamConfig,
-                                final Materializer materializer) {
+                                final Materializer materialiser) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
-        this.materializer = materializer;
+        this.materialiser = materialiser;
     }
 
     /**
@@ -102,7 +102,7 @@ public class KafkaProducerService {
                 .toMat(this.upstreamSink, Keep.right())
 
                 // Run the graph
-                .run(this.materializer)
+                .run(this.materialiser)
 
                 // Return a CompletableFuture<Void> result
                 .toCompletableFuture()

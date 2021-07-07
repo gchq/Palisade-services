@@ -27,8 +27,8 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
-public class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisInitializer.class);
+public class RedisInitialiser implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisInitialiser.class);
     private static final int REDIS_PORT = 6379;
 
     @Override
