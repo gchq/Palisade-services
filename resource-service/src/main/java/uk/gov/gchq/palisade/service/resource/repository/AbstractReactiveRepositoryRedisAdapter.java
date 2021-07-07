@@ -21,6 +21,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.ReactiveHashOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ReactiveSetOperations;
+import org.springframework.data.redis.core.ReactiveValueOperations;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
@@ -51,6 +52,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     protected final String table;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
+    protected final ReactiveValueOperations<String, V> valueOps;
 
     protected AbstractReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table) {
         this.table = table;
@@ -62,6 +64,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
                 .hashKey(ctx.getHashKeySerializationPair())
                 .hashValue(ctx.getHashValueSerializationPair())
                 .build());
+        this.valueOps = redisTemplate.opsForValue(ctx);
     }
 
     protected static <S, K> K reflectIdAnnotation(final S entity) {
@@ -237,7 +240,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends CompletenessEntity> Mono<S> save(final @NonNull S entity) {
-            return this.saveDefault(entity);
+            return this.valueOps.set(this.table + KEY_SEP + entity.getId(), entity)
+                    .then(super.saveDefault(entity));
         }
 
         @Override
