@@ -17,7 +17,7 @@ spring:
   cache:
     type: caffeine
     caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
+      spec: expireAfterWrite=12h, maximumSize=500
   autoconfigure:
     exclude:
     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration

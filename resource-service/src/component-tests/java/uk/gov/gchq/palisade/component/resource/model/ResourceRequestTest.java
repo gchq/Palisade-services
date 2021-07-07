@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResourceRequestTest {
 
     @Test
-    void testResourceRequestSerializingAndDeseralizing() throws IOException {
+    void testResourceRequestSerializingAndDeseralising() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ResourceRequest resourceRequest = ResourceRequest.Builder.create()
                 .withUserId("originalUserId")
