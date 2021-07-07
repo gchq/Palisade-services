@@ -19,7 +19,7 @@ spring:
   cache:
     type: redis
     redis:
-      timeToLive: 60m
+      timeToLive: 12h
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
