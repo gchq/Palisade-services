@@ -11,53 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-spring:
-  profiles:
-    include:
-    - akka
-    - default-config
----
-
-spring:
-  profiles: default-config
-
-  application:
-    name: data-service
-  output:
-    ansi:
-      enabled: always
-  main:
-    allow-bean-definition-overriding: true
-
-server:
-  port: 8082
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    shutdown:
-      enabled: true
-  health:
-    redis:
-      enabled: false
-    kafka:
-      enabled: true
 
 data:
   implementation: simple
 
 population:
-  serialiserProvder: std
-
-async:
-  webMvcTimeout: 300000
-  corePoolSize: 6
-
-logging:
-  level:
-    org.apache.kafka: WARN
-
+  serialiserProvider: std
+  serialisers:
+  - flavourFormat: "string"
+    flavourType: "java.lang.String"
+    serialiserClass: "uk.gov.gchq.palisade.component.data.service.TestSerialiser"
