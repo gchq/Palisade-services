@@ -22,12 +22,12 @@ service:
 image:
   name: topic-offset-service
   base: jre
-  tag: RELEASE-955749b
+  tag: SNAPSHOT-cb944d8
   pullPolicy: IfNotPresent
-  gitHash: 955749b
+  gitHash: cb944d8
   versionNumber: 0.5.0
-  codeRelease: 0.5.0-RELEASE
-  revision: RELEASE
+  codeRelease: 0.5.1-SNAPSHOT
+  revision: SNAPSHOT
 
 resources:
   limits:

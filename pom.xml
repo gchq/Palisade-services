@@ -27,7 +27,7 @@
 
     <groupId>uk.gov.gchq.palisade</groupId>
     <artifactId>service</artifactId>
-    <version>0.5.0-${revision}</version>
+    <version>0.5.1-${revision}</version>
     <name>GCHQ Palisade Services Parent</name>
     <description>Palisade services interfaces, data-types and core feature implementations</description>
     <url>https://github.com/gchq/Palisade-services</url>
