@@ -22,9 +22,12 @@ service:
 image:
   name: resource-service
   base: jre
-  tag: SNAPSHOT-d20a85d
+  tag: RELEASE-955749b
   pullPolicy: IfNotPresent
-  codeRelease: 0.5.0-SNAPSHOT
+  gitHash: 955749b
+  versionNumber: 0.5.0
+  codeRelease: 0.5.0-RELEASE
+  revision: RELEASE
 
 resources:
   limits:
