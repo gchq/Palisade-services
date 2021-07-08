@@ -106,3 +106,15 @@ Calculate a storage name based on the code release artifact id or the supplied v
 {{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
+
+{{/*
+Create the image name
+*/}}
+{{- define "palisade-service.image.name" }}
+{{- if contains .Values.image.revision .Values.global.releaseTag -}}
+{{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.versionNumber }}
+{{- else -}}
+{{- printf "%s%s:%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.tag }}
+{{- end -}}
+{{- end -}}
+

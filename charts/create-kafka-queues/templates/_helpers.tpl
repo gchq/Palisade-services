@@ -81,3 +81,13 @@ Determine queues root url
 {{- end -}}
 {{- end -}}
 
+{{/*
+Create the image name
+*/}}
+{{- define "create-kafka-queues.image.name" }}
+{{- if contains .Values.image.revision .Values.global.releaseTag -}}
+{{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.versionNumber }}
+{{- else -}}
+{{- printf "%s%s:%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.tag }}
+{{- end -}}
+{{- end -}}
