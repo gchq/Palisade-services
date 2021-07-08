@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 
 spring:
   autoconfigure:
-    exclude: []
+    exclude:
+    - com.github.benmanes
   cache:
     type: redis
     redis:
-      timeToLive: 60m
+      timeToLive: 12h
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs

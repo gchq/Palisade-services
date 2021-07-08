@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,54 +17,66 @@ package uk.gov.gchq.palisade.service.resource.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.ReadingConverter;
+import org.springframework.data.convert.WritingConverter;
+import org.springframework.lang.NonNull;
 
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
-import javax.persistence.AttributeConverter;
-
 import java.io.IOException;
-import java.util.Objects;
 
-public class ResourceConverter implements AttributeConverter<Resource, String> {
+/**
+ * Contains classes to help with converting {@link Resource} objects to and from {@link String} values
+ */
+public final class ResourceConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceConverter.class);
+    public static final ObjectMapper RESOURCE_MAPPER;
 
-    private final ObjectMapper resourceMapper;
-
-    public ResourceConverter() {
+    static {
         // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
         // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
-        this.resourceMapper = JsonMapper.builder()
-                .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class)
-                .build();
+        RESOURCE_MAPPER = new ObjectMapper()
+                .addMixIn(ChildResource.class, AbstractOrphanedChildJsonMixin.class);
     }
 
-    @Override
-    public String convertToDatabaseColumn(final Resource resource) {
-        if (Objects.isNull(resource)) {
-            return null;
-        }
-        try {
-            return this.resourceMapper.writeValueAsString(resource);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Could not convert resource to json string.", e);
-            return null;
+    private ResourceConverter() {
+        // Utility class
+    }
+
+    /**
+     * Converts the {@link String} value to a {@link Resource}
+     */
+    @ReadingConverter
+    public static class Reading implements Converter<String, Resource> {
+        @Override
+        public Resource convert(final @NonNull String json) {
+            try {
+                return RESOURCE_MAPPER.readValue(json, Resource.class);
+            } catch (IOException e) {
+                LOGGER.error("Conversion error while trying to convert json string to resource.", e);
+                return null;
+            }
         }
     }
 
-    @Override
-    public Resource convertToEntityAttribute(final String attribute) {
-        if (Objects.isNull(attribute)) {
-            return null;
-        }
-        try {
-            return this.resourceMapper.readValue(attribute, Resource.class);
-        } catch (IOException e) {
-            LOGGER.error("Conversion error while trying to convert json string to resource.", e);
-            return null;
+    /**
+     * Converts the {@link Resource} value to a {@link String}
+     */
+    @WritingConverter
+    public static class Writing implements Converter<Resource, String> {
+        @Override
+        public String convert(final @NonNull Resource resource) {
+            try {
+                return RESOURCE_MAPPER.writeValueAsString(resource);
+            } catch (
+                    JsonProcessingException e) {
+                LOGGER.error("Could not convert resource to json string.", e);
+                return null;
+            }
         }
     }
 }

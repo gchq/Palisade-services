@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 spring:
   profiles:
     include:
-    - h2
     - static-config
 
 ---
@@ -25,10 +24,11 @@ spring:
 spring:
   profiles: static-config
 
-# No Discovery static configuration
-web:
-  client:
-    audit-service: http://localhost:8089
-    policy-service: http://localhost:8085
-    resource-service: http://localhost:8086
-    user-service: http://localhost:8087
+akka:
+  kafka:
+    producer.topics:
+      output-topic.partitions: 1
+      error-topic.partitions: 1
+  discovery.config.services.kafka.endpoints:
+  - host: localhost
+    port: 9092

@@ -1,0 +1,60 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{{- $namespace := include "palisade.namespace" . }}
+{{- $kafkaname := include "kafka.fullname" . }}
+  {{- if (index .Values.global.persistence "stateful-set").pv.enabled }}
+{{- $config := .Values.global.persistence.kafka }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+{{- if eq $provisioning "static" }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
+{{ range $index := until (.Values.replicas | int) }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
+  {{- if eq $sc "ebs-sc" }}
+  labels:
+    type: amazonEBS
+  {{- else if eq $sc "efs-sc" }}
+  labels:
+    type: amazonEFS
+  {{- end }}
+  labels:
+    selectorFilter: {{ $config.name }}-{{ $namespace }}
+  annotations:
+    "helm.sh/hook": "pre-install"
+spec:
+  accessModes:
+  - ReadWriteMany
+  claimRef:
+    namespace: {{ $namespace }}
+    name: {{ $config.name }}-{{ $kafkaname }}-{{ $index }}
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
+  capacity:
+    storage: {{ $config.storage }}
+  {{- if eq $sc "hostpath" }}
+  hostPath:
+    path: {{ $config.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
+    type: DirectoryOrCreate
+  {{- else if eq $sc "efs-sc" }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

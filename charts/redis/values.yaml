@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ image:
 
 ## Cluster settings
 cluster:
-  enabled: true
+  enabled: false
   slaveCount: 3
 
 ## Use redis sentinel in the redis pod. This will disable the master and slave services and
@@ -253,7 +253,10 @@ master:
 
   ## Redis Master additional pod labels and annotations
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  podLabels: {}
+  podLabels:
+    # Add label to advertise this POD as providing palisade-redis services
+    service: "palisade-redis"
+
   podAnnotations: {}
 
   ## Redis Master resource requests and limits

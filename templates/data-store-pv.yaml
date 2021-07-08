@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,35 +23,39 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $provisioning := pluck $.Values.global.hosting $value.provisioning | first | default $value.provisioning._default }}
+{{- if eq $provisioning "static" }}
+{{- $sc := pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}-{{ $namespace }}
   labels:
-    {{- if eq $.Values.global.hosting "aws" }}
-    type: amazonEBS
-    {{- end }}
     selectorFilter: {{ $name }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
+    type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
-    storage: {{ $value.storage }}
-  {{- if eq $.Values.global.hosting "local" }}
+    storage: 4Gi
+  {{- if eq $sc "hostpath" }}
   hostPath:
     path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq $.Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ $value.aws.volumePath }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}:{{ $value.aws.volumePath }}
   {{- end }}
 ---
+{{- end }}
 {{- end }}

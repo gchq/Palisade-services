@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,41 +19,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.user.UserId;
 
 /**
- * A {@code NoSuchUserIdException} is a {@link RuntimeException} thrown by a
- * {@link UserService} implementation to
- * indicate that the requested {@link uk.gov.gchq.palisade.UserId} doesn't exist,
- * or is not known to that {@code Service} instance.
+ * A {@code NoSuchUserIdException} is a {@link RuntimeException} thrown by a {@link UserService} implementation to
+ * indicate that the requested {@link UserId} doesn't exist, or is not known to that {@code UserService} instance.
  */
 public class NoSuchUserIdException extends RuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoSuchUserIdException.class);
 
 
     /**
-     * Initialises this exception with no message or cause.
+     * Initializes this exception with no message or cause.
      */
     public NoSuchUserIdException() {
     }
 
     /**
-     * Initialises this exception with the given message.
+     * Initializes this exception with the given message.
      *
      * @param message message for the exception
      */
     public NoSuchUserIdException(final String message) {
         super(message);
-        LOGGER.info("NoSuchUserIdException thrown with {} message", message);
+        LOGGER.info("NoSuchUserIdException thrown with '{}'", message);
     }
 
     /**
-     * Initialises this exception with the given message and cause.
+     * Initializes this exception with the given message and cause.
      *
      * @param message   message to report
      * @param throwable the underlying cause of this exception
      */
     public NoSuchUserIdException(final String message, final Throwable throwable) {
         super(message, throwable);
-        LOGGER.error("NoSuchUserIdException thrown with {} message", message);
+        LOGGER.error("NoSuchUserIdException thrown with '{}'", message);
     }
 }

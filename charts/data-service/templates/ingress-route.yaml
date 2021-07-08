@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@ kind: IngressRoute
 metadata:
   name: {{ include "data-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   entryPoints:
-    - web
+    - tls
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "data-service.root" . }}/data`)
+    - match: PathPrefix(`{{ include "data-service.root" . }}/data`)
       kind: Rule
       services:
         - name: {{ include "data-service.name" . }}
@@ -29,3 +31,26 @@ spec:
       middlewares:
         - name: data-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
+  tls: {}
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "data-service.name" . }}-insecure
+  namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "false"
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: PathPrefix(`{{ include "data-service.root" . }}/data`)
+    kind: Rule
+    services:
+    - name: {{ include "data-service.name" . }}
+      port: 80
+    middlewares:
+    - name: data-pathparam-regex
+      namespace: {{ include "palisade.namespace" . }}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,25 @@ public class LoggingBouncer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);
 
     // Autowired through constructor
-    private Map<String, ServiceConfiguration> loggingConfiguration;
-    private Function<String, ManagedService> serviceProducer;
+    private final Map<String, ServiceConfiguration> loggingConfiguration;
+    private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
+     */
     public LoggingBouncer(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.loggingConfiguration = managerConfiguration.getServices();
         this.serviceProducer = serviceProducer;
     }
 
+    /**
+     * Change the log-level of each service in the config map using the serviceProducer function to create REST requests
+     */
     public void run() {
-        loggingConfiguration.forEach((serviceName, config) -> {
+        loggingConfiguration.forEach((String serviceName, ServiceConfiguration config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
             config.getLevel().forEach((String packageName, String level) -> {

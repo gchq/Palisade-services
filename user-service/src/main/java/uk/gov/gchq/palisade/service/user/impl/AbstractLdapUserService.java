@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 package uk.gov.gchq.palisade.service.user.impl;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.user.User;
+import uk.gov.gchq.palisade.user.UserId;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -35,6 +34,7 @@ import javax.naming.ldap.LdapContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -70,7 +70,6 @@ public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
     protected final LdapContext context;
-    private final String ldapConfigPath;
 
     /**
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
@@ -78,9 +77,8 @@ public abstract class AbstractLdapUserService implements UserService {
      *
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
-    public AbstractLdapUserService(final LdapContext context) {
+    protected AbstractLdapUserService(final LdapContext context) {
         this.context = context;
-        this.ldapConfigPath = null;
     }
 
     /**
@@ -88,28 +86,38 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
      * </p>
      *
-     * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
-     * @throws IOException     if IO issues occur whilst loading the LDAP config.
-     * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
+     * @param ldapConfigPath the path to config for initializing {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
+     * @throws IOException     if an IOException issue occurs whilst loading the LDAP config.
+     * @throws NamingException if a NamingException is encountered whilst constructing the LDAP context
      */
-    public AbstractLdapUserService(final String ldapConfigPath)
+    protected AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
-        this.ldapConfigPath = ldapConfigPath;
-        this.context = createContext(ldapConfigPath);
+
+        // Create the LDAP config
+        Properties config = new Properties();
+        if (new File(ldapConfigPath).exists()) {
+            try (InputStream inputStream = Files.newInputStream(Paths.get(ldapConfigPath))) {
+                config.load(inputStream);
+            }
+        } else {
+            config.load(getClass().getResourceAsStream(ldapConfigPath));
+        }
+
+        this.context = new InitialLdapContext(config, null);
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
 
     @Override
-    public User getUser(final UserId userId) {
-        requireNonNull(userId, "userId has not been set");
-        requireNonNull(userId.getId(), "userId has not been set");
+    public User getUser(final String userId) {
+        requireNonNull(userId, "userId is null");
         LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
         try {
-            Map<String, Object> userAttrs = getAttributes(userId);
-            return new User().userId(userId).auths(getAuths(userId, userAttrs, context)).roles(getRoles(userId, userAttrs, context));
+            Map<String, Object> userAttrs = getAttributes(new UserId().id(userId));
+            return new User().userId(new UserId().id(userId))
+                    .auths(getAuths(new UserId().id(userId), userAttrs, context))
+                    .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
-            LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
         }
     }
@@ -124,7 +132,7 @@ public abstract class AbstractLdapUserService implements UserService {
      * Returns an array of attribute names to be fetched from LDAP. This could contain
      * user auth attributes and user role attributes. This will avoid having
      * to make multiple calls to LDAP to look up different attributes.
-     * If this returns null or an empty array then the LDAP request will not be made.
+     * If this returns null, or an empty array then the LDAP request will not be made.
      *
      * @return the attributes to be fetched from LDAP.
      */
@@ -162,31 +170,27 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected abstract Set<String> getRoles(final UserId userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException;
 
-    protected LdapContext createContext(final String ldapConfigPath) throws IOException, NamingException {
-        final Properties config = new Properties();
-        if (new File(ldapConfigPath).exists()) {
-            config.load(Files.newInputStream(Paths.get(ldapConfigPath)));
-        } else {
-            config.load(getClass().getResourceAsStream(ldapConfigPath));
-        }
-        return new InitialLdapContext(config, null);
-    }
-
     protected Map<String, Object> getAttributes(final UserId userId) throws NamingException {
-        final Map<String, Object> attributes = new HashMap<>();
+        Map<String, Object> attributes = new HashMap<>();
         final String[] requestAttrs = getAttributeNames();
         if (null != requestAttrs && requestAttrs.length > 0) {
             final Attributes userAttrs = context.getAttributes(formatInput(userId.getId()), requestAttrs);
             if (null != userAttrs) {
                 for (final String requestAttr : requestAttrs) {
-                    final Attribute attribute = userAttrs.get(requestAttr);
-                    if (null != attribute) {
-                        final NamingEnumeration<?> all = attribute.getAll();
-                        if (all.hasMore()) {
-                            attributes.put(requestAttr, all.next());
-                        }
-                    }
+                    attributes = addAttribute(attributes, userAttrs, requestAttr);
                 }
+            }
+        }
+        return attributes;
+    }
+
+    protected Map<String, Object> addAttribute(final Map<String, Object> attributes, final Attributes userAttrs,
+                                                final String requestAttr) throws NamingException {
+        final Attribute attribute = userAttrs.get(requestAttr);
+        if (null != attribute) {
+            NamingEnumeration<?> all = attribute.getAll();
+            if (all.hasMore()) {
+                attributes.put(requestAttr, all.next());
             }
         }
         return attributes;
@@ -204,7 +208,7 @@ public abstract class AbstractLdapUserService implements UserService {
      */
     protected Set<Object> basicSearch(final UserId userId,
                                       final String name, final String attrIdForUserId,
-                                      final String... attrs) throws NamingException {
+                                      final String[] attrs) throws NamingException {
         LOGGER.debug("Performing basic search using {}, {}, {}, {}", userId, name, attrIdForUserId, attrs);
         final NamingEnumeration<SearchResult> attrResults = context.search(
                 name,
@@ -212,24 +216,29 @@ public abstract class AbstractLdapUserService implements UserService {
                 attrs
         );
 
-        final Set<Object> results = new HashSet<>();
+        Set<Object> results = new HashSet<>();
         while (attrResults.hasMore()) {
             final SearchResult result = attrResults.next();
             final Attributes resultAttrs = result.getAttributes();
             if (null != resultAttrs) {
-                final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
-                if (null != all) {
-                    while (all.hasMore()) {
-                        final Attribute next = all.next();
-                        final Object nextValue = next.get();
-                        if (null != nextValue) {
-                            results.add(nextValue);
-                        }
-                    }
-                }
+                results = getValues(resultAttrs, results);
             }
         }
         return results;
+    }
+
+    protected Set<Object> getValues(final Attributes resultAttrs, final Set<Object> values) throws NamingException {
+        final NamingEnumeration<? extends Attribute> all = resultAttrs.getAll();
+        if (null != all) {
+            while (all.hasMore()) {
+                final Attribute next = all.next();
+                final Object nextValue = next.get();
+                if (null != nextValue) {
+                    values.add(nextValue);
+                }
+            }
+        }
+        return values;
     }
 
     /**

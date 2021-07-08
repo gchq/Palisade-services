@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 # Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
 
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
-  install: false
+  install: true
 metrics-server:
   # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
@@ -36,13 +35,24 @@ global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
 
+  kafka:
+    # install: install kafka streaming platform
+    install: true
+    # imported from sub-chart, default values here are overridden by sub-chart values
+    exports:
+      nameOverride: "kafka-proxy"
+
+  zookeeper:
+    exports:
+      nameOverride: "zookeeper-proxy"
+
   redis:
     # install: install redis persistence and caching data storage platform
     install: true
-    # config: configure services to connect to (previously installed?) redis (if unset, use install value)
-    # config: true
+    # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
-      nameOverride: "redis"
+      # By default always use the redis-proxy kubernetes service to resolve the redis endpoint
+      nameOverride: "redis-proxy"
     master:
       service:
         port: 6379
@@ -50,11 +60,9 @@ global:
   redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
-    # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
-    # config: false
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
-      nameOverride: "redis"
+      nameOverride: "redis-proxy"
       redisPort: 6379
     cluster:
       nodes: 6
@@ -62,8 +70,9 @@ global:
   # hosting: [local | aws | metal] the target environment to deploy to
   hosting: local
 
-  # Set to true to enable redis cluster. leave as false for master/worker
-  redisClusterEnabled: false
+  # Set to true to configures services for redis-cluster. leave as false for master/worker
+  # Should match up with redis.install or redis-cluster.install
+  redis-cluster-enabled: false
 
   # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
@@ -75,7 +84,10 @@ global:
   uniqueNamespace: false
 
   # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
-  repository: palisade
+  repository: "gchq/palisade-"
+
+  # releaseTag: name used to identify image tags used in a release (as opposed to a SNAPSHOT)
+  releaseTag: RELEASE
 
   # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
   deployment: codeRelease
@@ -86,21 +98,35 @@ global:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "k8s"
 
+  # additionalConfigMaps: {}
+
   # persistent-volume and associated claims configurations
   persistence:
     storageClassDeploy: false
 
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
+      name: palisade-classpath-jars
+      # storageClassName: the name of the storage-class to use for the given "hosting" type
       storageClassName:
         _default: hostpath
         local: hostpath
+        # When in AWS, ebs cannot be shared, and efs cannot be dynamically provisioned
         aws: efs-sc
-      name: palisade-classpath-jars
+      # provisioning: [static | dynamic] whether to use static or dynamic provisioning
+      provisioning:
+        _default: static
+        local: static
+        aws: static
+      # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
+      mode:
+        _default: ReadWriteMany
+        local: ReadWriteMany
+        aws: ReadWriteMany
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
-      storage: 1Gi
+      storage: 2Gi
       # environment-specific tags
       local:
         # hostPath: external host directory to be mounted
@@ -121,6 +147,14 @@ global:
           _default: hostpath
           local: hostpath
           aws: efs-sc
+        provisioning:
+          _default: static
+          local: static
+          aws: static
+        mode:
+          _default: ReadWriteMany
+          local: ReadWriteMany
+          aws: ReadWriteMany
         mountPath: "/data/local-data-store"
         storage: 4Gi
         local:
@@ -129,26 +163,109 @@ global:
           volumeHandle: data
           volumePath: "/"
 
-    # redis: Store used by redis and redis-cluster for persistence and caching
-    redisMaster:
+    # kafka: Store used by kafka for persisting stream logs
+    kafka:
+      name: kafka-persistence
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # zookeeper: Store used by zookeeper for persisting stream logs
+    zookeeper:
+      name: zookeeper-persistence
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: ebs-sc
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 2Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # redis-master: Writeable store used by redis master node for persistence and caching
+    redis-master:
       name: redis-persistence-master
-      storage: 4Gi
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: ebs-sc
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
 
-    redisSlave:
-      storageClassName:
-        _default: hostpath
-        local: hostpath
-        aws: efs-sc
+    # redis-slave: Readable store used by redis slave nodes for persistence and caching
+    redis-slave:
       name: redis-persistence-slave
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: ebs-sc
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # redis-cluster: Read/writeable store used by redis cluster nodes for persistence and caching
+    redis-cluster:
+      name: redis-persistence-cluster
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: ebs-sc
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 4Gi
       local:
         hostPath: "/"
@@ -156,18 +273,10 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    redisCluster:
-      storageClassName:
-        _default: hostpath
-        local: hostpath
-        aws: efs-sc
-      name: redis-persistence-cluster
-      storage: 4Gi
-      local:
-        hostPath: "/"
-      aws:
-        volumeHandle: null
-        volumePath: "/"
+    # global.persistence.stateful-set.pv.enabled: Global variable that controls the generation of stateful-set pv/pvc(s)
+    stateful-set:
+      pv:
+        enabled: true
 
   # must be last for file to be appended with addresses
   globalIPAddresses:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,94 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.gov.gchq.palisade.service.palisade;
 
+import akka.Done;
+import akka.NotUsed;
+import akka.stream.Materializer;
+import akka.stream.javadsl.RunnableGraph;
+import akka.stream.javadsl.Sink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.event.EventListener;
 
-import java.util.Arrays;
+import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
+import uk.gov.gchq.palisade.service.palisade.service.AbstractPalisadeService;
+import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 
-@EnableDiscoveryClient
-@EnableFeignClients
+import javax.annotation.PreDestroy;
+
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Loads the Palisade Service.  This  will provide a RESTful service for clients to register a data request.
+ * The response will provide a unique URL (at the filtered-resource-service) for resources available for viewing.
+ * This is the first in a chain of services that will process the request, with each taking on a singular task
+ * accumulating at the end with the data that is permitted, filtered, or redacted for each specific request.
+ */
 @SpringBootApplication
+@EnableConfigurationProperties({ProducerTopicConfiguration.class})
 public class PalisadeApplication {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeApplication.class);
+    private final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner;
+    private final AbstractPalisadeService palisadeService;
+    private final Materializer materialiser;
+    private CompletableFuture<?> runnerThread = new CompletableFuture<>();
 
+    /**
+     * Autowire Akka objects in constructor for application ready event
+     *
+     * @param runner          the runner
+     * @param materialiser    the Akka {@link Materializer} configured to be used
+     * @param palisadeService the palisade service
+     */
+    public PalisadeApplication(
+            final RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner,
+            final Materializer materialiser,
+            final AbstractPalisadeService palisadeService) {
+        this.runner = runner;
+        this.materialiser = materialiser;
+        this.palisadeService = palisadeService;
+    }
+
+    /**
+     * Application entrypoint, creates and runs a spring application, passing in the given command-line args
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
-        LOGGER.debug("PalisadeApplication started with: {}", Arrays.toString(args));
-
+        LOGGER.debug("PalisadeApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(PalisadeApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 
+    /**
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     * It will run after the application is 'ready' and fully loaded.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void serveForever() {
+        runnerThread = CompletableFuture.supplyAsync(() -> runner.run(materialiser));
+        palisadeService.registerRequestSink(runner.run(materialiser)
+                .mapMaterializedValue(notUsed -> CompletableFuture.completedFuture(Done.done())));
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThread.cancel(true);
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
+    }
 }
+

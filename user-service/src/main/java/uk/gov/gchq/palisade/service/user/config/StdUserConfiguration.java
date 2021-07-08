@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,18 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link UserConfiguration} that uses Spring to configure a list of users from a yaml file
- * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
- * These users will be used for prepopulating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
+ * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link User}s
+ * These users will be used for pre-populating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
  */
 public class StdUserConfiguration implements UserConfiguration {
     private List<StdUserPrepopulationFactory> users;
@@ -47,22 +45,21 @@ public class StdUserConfiguration implements UserConfiguration {
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
+     * @param users a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
     public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
-        this.users = users;
+        this.users = List.copyOf(users);
     }
 
     @Override
     @Generated
     public List<StdUserPrepopulationFactory> getUsers() {
-        return users;
+        return Collections.unmodifiableList(users);
     }
 
     @Generated
     public void setUsers(final List<StdUserPrepopulationFactory> users) {
-        requireNonNull(users);
-        this.users = users;
+        this.users = Optional.ofNullable(users).orElseThrow(() -> new IllegalArgumentException("users cannot be null"));
     }
 
     @Override

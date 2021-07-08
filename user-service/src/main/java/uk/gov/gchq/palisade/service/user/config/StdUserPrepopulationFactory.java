@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package uk.gov.gchq.palisade.service.user.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.user.User;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -29,9 +32,10 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link UserPrepopulationFactory} that uses Spring to configure a user from a yaml file
- * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles
+ * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles.
  */
 public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StdUserPrepopulationFactory.class);
 
     private String userId;
     private Set<String> auths;
@@ -51,14 +55,14 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * Constructor with 3 arguments for a standard implementation
      * of the {@link UserPrepopulationFactory} interface.
      *
-     * @param userId    a {@link String} value of a user.
-     * @param roles     a {@link Set} of {@link String} role values for the user.
-     * @param auths     a {@link Set} of {@link String} auth values for the user.
+     * @param userId a {@link String} value of a user.
+     * @param roles  a {@link Set} of {@link String} role values for the user.
+     * @param auths  a {@link Set} of {@link String} auth values for the user.
      */
     public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
-        this.auths = auths;
-        this.roles = roles;
+        this.auths = new HashSet<>(auths);
+        this.roles = new HashSet<>(roles);
     }
 
     @Generated
@@ -73,34 +77,36 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     @Generated
     public Set<String> getAuths() {
-        return auths;
+        return new HashSet<>(auths);
     }
 
     @Generated
     public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
-        this.auths = auths;
+        this.auths = new HashSet<>(auths);
         return this;
     }
 
     @Generated
     public Set<String> getRoles() {
-        return roles;
+        return new HashSet<>(roles);
     }
 
     @Generated
     public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
-        this.roles = roles;
+        this.roles = new HashSet<>(roles);
         return this;
     }
 
     @Override
     public User build() {
-        return new User()
+        User user = new User()
                 .userId(this.getUserId())
                 .roles(this.getRoles())
                 .auths(this.getAuths());
+        LOGGER.debug("Built user {}", user);
+        return user;
     }
 
     @Override

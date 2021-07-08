@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2020 Crown Copyright
+  ~ Copyright 2018-2021 Crown Copyright
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -22,67 +22,56 @@
     <parent>
         <groupId>uk.gov.gchq.palisade</groupId>
         <artifactId>service</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>services-manager</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/serives-manager</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
+    <name>GCHQ Palisade - Services Manager</name>
+    <description>
+        The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs.
+    </description>
+    <!--  *********** Artifact ID ***********    -->
+
+    <scm>
+        <url>${scm.url}</url>
+        <connection>${scm.connection}</connection>
+        <developerConnection>${scm.developer.connection}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
-        <eureka.version>1.9.16</eureka.version>
-        <jetcd.core>0.3.0</jetcd.core>
+        <examples.app.version>0.5.0-${revision}</examples.app.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.eureka</groupId>
-            <artifactId>eureka-client</artifactId>
-            <version>${eureka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+            <version>0.5.0-${common.revision}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-eureka-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.yaml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
@@ -97,21 +86,22 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
+                    <!--  human-readable part of the version number -->
+                    <dateFormat>yyyyMMdd-HHmmss</dateFormat>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
             <!-- a number of stages for generating a README.md with correct versions (iptc. services-manager-VERSION-exec.jar -->
-            <!--  -->
             <plugin>
                 <groupId>com.coderplus.maven.plugins</groupId>
                 <artifactId>copy-rename-maven-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>copy-and-rename-file</id>
+                        <id>copy-and-rename-readme-file</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy</goal>
@@ -119,6 +109,17 @@
                         <configuration>
                             <sourceFile>${basedir}/src/main/resources/doc/README-TEMPLATE.md</sourceFile>
                             <destinationFile>${basedir}/README.md</destinationFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-banner-file</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${basedir}/src/main/resources/banner.txt</sourceFile>
+                            <destinationFile>${basedir}/target/classes/banner.txt</destinationFile>
                         </configuration>
                     </execution>
                 </executions>

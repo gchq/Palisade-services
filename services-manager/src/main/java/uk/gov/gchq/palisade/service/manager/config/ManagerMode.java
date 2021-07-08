@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,12 @@ package uk.gov.gchq.palisade.service.manager.config;
  * Possible modes to run the service manager, see each entry for equivalent ApplicationRunner
  */
 public enum ManagerMode {
-    CONFIG, // runner.ConfigPrinter
-    RUN, // runner.ScheduleRunner (which further uses runner.TaskRunner)
-    SHUTDOWN, // runner.ScheduleShutdown
-    LOGGERS, // runner.LoggingBouncer
+    // runner.ConfigPrinter
+    CONFIG,
+    // runner.ScheduleRunner (which further uses runner.TaskRunner)
+    RUN,
+    // runner.ScheduleShutdown
+    SHUTDOWN,
+    // runner.LoggingBouncer
+    LOGGERS,
 }

@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -198,7 +198,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisCluster.name }}
+            - name: {{ (index .Values.global.persistence "redis-cluster").name }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
             - name: default-config
@@ -259,7 +259,7 @@ spec:
           resources:
           {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           volumeMounts:
-            - name: {{ .Values.global.persistence.redisCluster.name }}
+            - name: {{ (index .Values.global.persistence "redis-cluster").name }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
         {{- end }}
@@ -323,20 +323,27 @@ spec:
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ .Values.global.persistence.redisCluster.name }}
+        name: {{ (index .Values.global.persistence "redis-cluster").name }}
       spec:
         accessModes:
-        - ReadWriteMany
-        storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.storageClassName | first | default .Values.global.persistence.redisCluster.storageClassName._default | indent 1 }}
+        - {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-cluster").mode | first | default (index .Values.global.persistence "redis-cluster").mode._default | indent 1 }}
+        storageClassName: {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-cluster").storageClassName | first | default (index .Values.global.persistence "redis-cluster").storageClassName._default | indent 1 }}
         resources:
           requests:
-            storage: {{ .Values.global.persistence.redisCluster.storage | quote }}
+            storage: {{ (index .Values.global.persistence "redis-cluster").storage | quote }}
+        {{- $config := (index .Values.global.persistence "redis-cluster") }}
+        {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+        {{- if eq $provisioning "static" }}
+        selector:
+          matchLabels:
+            selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+        {{- end }}
   {{- end }}
   updateStrategy:
     type: {{ .Values.statefulset.updateStrategy }}
     {{- if .Values.statefulset.rollingUpdatePartition }}
     {{- if (eq "Recreate" .Values.statefulset.updateStrategy) }}
-    rollingUpdate: null
+    rollingUpdate: {}
     {{- else }}
     rollingUpdate:
       partition: {{ .Values.statefulset.rollingUpdatePartition }}

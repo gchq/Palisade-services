@@ -1,5 +1,5 @@
 <!---
-Copyright 2020 Crown Copyright
+Copyright 2018-2021 Crown Copyright
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,48 @@ limitations under the License.
 
 # <img src="logos/logo.svg" width="180">
 
-## Scalable Data Access Policy Management and Enforcement
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
-### Project Build
+## Overview
+
+From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
+This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
+
+Under the hood, the request involves sending a message that is processed sequentially by a set of micro-services starting first with Palisade Service.
+The Palisade Service will perform two tasks.
+First it will return a reference, a token back to the client that will uniquely identify this request.
+This token is used throughout the application to tie every aspect of the process to this unique identifier and is later used by the client to retrieve the resources available for this request. 
+The second task for the Palisade Service is to initiate the processing of the request by forwarding it onto the next service in the sequence (in this case the User Service).
+The service will perform its required task and then forward the message onto the next service with the end goal of producing resources ready to be viewed by the client.
+This sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed request.
+In the subsequent request by the client to the Filtered-Resource Service, the service returns, one-by-one upon request over a websocket, metadata for a single resource (e.g. a file) they are authorised to view in some capacity.
+These resources can then be read from the Data Service.
+The following diagram shows at a high level the services and their relative relationships with each other. 
+Communications between the services and their related support servers utilise Kafka streaming. 
+
+For a detailed description of the services see [Appendix I - Architecture Diagrams](#appendix-i-architecture-diagrams).  
+For a more technical description of each of the services, follow the links below.
+
+<!--- 
+See doc/services.drawio for the source of this diagram
+--->
+![Service Sequence diagram](doc/services.png)
+
+[Palisade Service](palisade-service/README.md) recieves a clients request, returns a unique token and initiates the processing of resources.
+[User Service](user-service/README.md) connects to User Service providers to ensure the user exists.  
+[Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
+[Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
+[Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
+[Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
+[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
+
+[Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
+
+[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request. 
+
+For an overview of all Palisade components, see the root [Palisade README](https://github.com/gchq/Palisade#readme). 
+
+## Project Build
 
 This is a classic multi-module maven java project with a Spring Boot Parent.
 Each module defines an individual service endpoint within Palisade (except for the services-manager module).
@@ -69,19 +108,27 @@ kubectl config use-context <name>
 
 Example first deployment to a local cluster (from the project root directory):
 ```  
- helm upgrade --install palisade . \
-  --set global.persistence.classpathJars.local.hostPath=$(pwd),global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd),global.persistence.redisMaster.local.hostPath=$(pwd),global.persistence.redisSlave.local.hostPath=$(pwd),traefik.install=true,redis.install=true,global.hosting=local,redis-cluster.install=false --timeout=200s
+helm upgrade --install palisade . \
+  --set global.persistence.dataStores.palisade-data-store.local.hostPath=${pwd}  \
+  --set global.persistence.classpathJars.local.hostPath=${pwd}  \
+  --timeout=200s
 ```
-This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the default namespace.
-The application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
-The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars and for redis persistence.
+The working directory from `$(pwd)` will be used as the mount-point for the Data Service, as well as for finding classpath-jars.
+Kafka and redis persistence is mounted using the `/tmp` directory by default.
+
+An example second deployment may want to use traefik to enable access into the cluster.
+This can be done by adding the additional flag:
+```
+  --set traefik.install=true
+```
+This will deploy the traefik ingress controller - the application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
 
 Multiple instances of Palisade may be deployed on the same cluster, separated by namespace.
 The ingress controller will be configured to provide a route via that namespace.
 It is required that the namespace exists prior to the installation:
 ```
 kubectl create namespace testing
-helm upgrade --install test . --namespace testing
+helm upgrade --install test . --namespace testing --set traefik.install=true
 ```
 
 This will deploy an additional instance of Palisade called `test` which may be accessed at `http://localhost/testing/palisade`
@@ -104,7 +151,7 @@ Some more important arguments are as follows:
 
 | Argument                                | Definition
 |:----------------------------------------|:----------------------------------------
-| --timeout                               | Increases the timeout, **default is 60s**, **recommendation is 200s**
+| --timeout                               | If the post-install create-kafka-queues job fails, increase the timeout, **default is 60s**, **recommendation is 200s**
 | **Local Deployments**                   |
 | global.persistence.**xxx**.hostPath     | The host directory to use as a mount point for internal volumes
 | **AWS Deployments**                     |
@@ -114,9 +161,24 @@ Some more important arguments are as follows:
 | traefik.install                         | Install the traefik ingress controller, **default=false**
 | metrics-server.install                  | Install the metrics-server to enable horizontal scaling, **default=false**
 | dashboard.install                       | Install the kubernetes dashboard, **default=false**
+| global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
-| global.redisClusterEnabled              | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
+| global.redis-cluster-enabled            | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
+
+#### Base Image Variants
+The base image used can be customised using the maven property `dockerfile.base.image` and labelled with `dockerfile.base.tag`.
+By default, this base image is `openjdk:11.0-jre-slim` but debugging may require a more-featured image such as `openjdk:11.0-jdk-slim`
+Either of these two images can be selected using the profiles `-P jrei` and `-P jdki` for JRE and JDK respectively.
+Alternatively, a custom base image can be specified as follows:
+```
+mvn clean install -pl <module name> -Ddockerfile.base.image=openjdk:<image tag> -Ddockerfile.base.tag=<my label>
+```
+This label can then be used at the time of `helm install` to deploy this variant image.
+By default, the labels `jre` and `jdk` can be used for JRE and JDK respectively.
+```
+helm upgrade --install palisade . --set <service name>.image.base=<my label>
+```
 
 #### Redis vs Redis-Cluster
 The key difference is scalability, write-points, sharding and partitioning.
@@ -145,3 +207,16 @@ kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-s
 ```
 
 Use the `-h` flag to see usage instructions.
+
+
+## Appendix I Architecture Diagrams
+
+## Services Description
+![Palisade Services Description](doc/services-description.png)
+
+## Audit Service
+![Palisade Audit Service](doc/audit-service.png)
+
+## Palisade Flow Diagram
+![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
+

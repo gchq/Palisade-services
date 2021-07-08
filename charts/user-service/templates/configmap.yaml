@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,27 +23,51 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
+  application-akka.yaml: |
+    akka:
+      kafka:
+        consumer.topics:
+          input-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}input-topic.name: {{ .Values.global.topicPrefix }}request {{ end }}
+        producer.topics:
+          output-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}output-topic.name: {{ .Values.global.topicPrefix }}user {{ end }}
+          error-topic.partitions: {{ .Values.replicaCount }}
+          {{ if .Values.global.topicPrefix }}error-topic.name: {{ .Values.global.topicPrefix }}error {{ end }}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "palisade.kafka.fullname" . }}
+        port: 9092
   application-redis.yaml: |
-    {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
-      {{- fail "Cannot install Redis (master/worker) and Redis Cluster at the same time" }}
-    {{- end }}
-    {{- if $.Values.global.redisClusterEnabled }}
-      {{- if $.Values.global.redis.install }}
-        {{- fail "Cannot install Redis (master/worker) if Redis Cluster is selected" }}
-      {{- end }}
-    {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
     spring:
+      {{- if .Values.global.topicPrefix }}
+      cache:
+        redis:
+          key-prefix: {{ printf "%s:" .Values.global.topicPrefix | quote }}
+      {{ end }}
+      {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
+        {{- fail "Cannot install Redis (master/worker) and Redis Cluster at the same time" }}
+      {{- end }}
+      {{- if (index $.Values.global "redis-cluster-enabled") }}
+        {{- if $.Values.global.redis.install }}
+          {{- fail "Cannot install Redis (master/worker) if Redis Cluster is selected" }}
+        {{- end }}
+      {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
       redis:
         cluster:
           nodes: {{ $clusterNodes }}
-    {{- else }}
-      {{- if (index $.Values.global "redis-cluster").install }}
-        {{- fail "Cannot install Redis Cluster if Redis (master/worker) is selected" }}
-      {{- end }}
-    {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
-    {{- $masterPort := int $.Values.global.redis.master.service.port }}
-    spring:
+      {{- else }}
+        {{- if (index $.Values.global "redis-cluster").install }}
+          {{- fail "Cannot install Redis Cluster if Redis (master/worker) is selected" }}
+        {{- end }}
+      {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
+      {{- $masterPort := int $.Values.global.redis.master.service.port }}
       redis:
         host: {{ $masterFullname }}
         port: {{ $masterPort }}
-    {{- end }}
+      {{- end }}
+  {{- if .Values.global.additionalConfigMaps }}
+  {{- range $name, $value := .Values.global.additionalConfigMaps }}
+  {{ $name }}: |
+  {{- $value | nindent 4 }}
+  {{- end }}
+  {{- end }}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package uk.gov.gchq.palisade.service.policy.config;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.PolicyConfiguration;
-import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,9 +31,9 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link PolicyConfiguration} that uses Spring to configure a list of policies from a yaml file
- * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.service.request.Policy}s
- * These will be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
- * These policies will be used for prepopulating the {@link uk.gov.gchq.palisade.service.policy.service.PolicyService}
+ * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating policies by mapping {@link Resource} to {@link Rules}
+ * These will be populated further using a UserConfiguration and ResourceConfiguration
+ * These policies will be used for pre-populating the {@link PolicyService}
  */
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
@@ -49,22 +51,22 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with one argument for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
+     * @param policies a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
     public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
-        this.policies = policies;
+        this.policies = new ArrayList<>(policies);
     }
 
     @Override
     @Generated
     public List<StdPolicyPrepopulationFactory> getPolicies() {
-        return policies;
+        return new ArrayList<>(policies);
     }
 
     @Generated
     public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
         requireNonNull(policies);
-        this.policies = policies;
+        this.policies = new ArrayList<>(policies);
     }
 
     @Override

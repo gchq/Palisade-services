@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.manager.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,11 +37,15 @@ import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 import java.io.File;
 import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -48,6 +53,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Bean configuration and dependency injection graph
+ */
 @Configuration
 @EnableConfigurationProperties
 @EnableAutoConfiguration
@@ -66,8 +74,7 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Used for resolving *all* service URIs with eureka or through yaml
-     * This behaviour seems to be a little beyond feign's capabilities
+     * Used for resolving *all* service URIs for a given service name
      *
      * @return A WebConfiguration capable of resolving a service name to a *collection* of URIs
      */
@@ -82,10 +89,11 @@ public class ApplicationConfiguration {
      * This determines the behaviour of the application and is specified through --manager.mode=...
      *
      * @param managerConfiguration dependency-injected ManagerConfiguration loaded from the yaml
-     * @param serviceProducer a mapping from service names to ManagedServices, providing a REST client abstraction
+     * @param serviceProducer      a mapping from service names to ManagedServices, providing a REST client abstraction
      * @return the ApplicationRunner to use as an entry-point for this spring application
      */
     @Bean
+    @SuppressWarnings("java:S1147") // System.exit
     public ApplicationRunner managerApplicationRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         Runnable runner;
         switch (managerConfiguration.getMode()) {
@@ -105,7 +113,7 @@ public class ApplicationConfiguration {
         }
         LOGGER.info("Constructed runner for {} mode: {}", managerConfiguration.getMode(), runner);
 
-        return args -> {
+        return (ApplicationArguments args) -> {
             LOGGER.info("Running runner for manager: {}", runner);
             runner.run();
             System.exit(0);
@@ -115,15 +123,15 @@ public class ApplicationConfiguration {
     /**
      * A mapping from service names to ManagedServices, providing a REST client abstraction
      *
-     * @param client a feign client with all available RESTful interfaces (health, logging changes, etc)
-     * @param clientConfig a mapping from service names to URIs through either eureka or static yaml config
+     * @param client       a feign client with all available RESTful interfaces (health, logging changes, etc)
+     * @param clientConfig a mapping from service names to URIs
      * @return a ManagedService factory requiring a service name and producing a REST client for a number of service instances
      */
     @Bean("managedServiceProducer")
     public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final ClientConfiguration clientConfig) {
-        return serviceName -> {
+        return (String serviceName) -> {
             Supplier<Collection<URI>> uriSupplier = () -> {
-                Collection<URI> clientUris = clientConfig.getClientUri(serviceName);
+                Collection<URI> clientUris = clientConfig.getClient().getOrDefault(serviceName, Collections.emptyList());
                 LOGGER.debug("Service {} has client uris {}", serviceName, clientUris);
                 return clientUris;
             };
@@ -135,13 +143,11 @@ public class ApplicationConfiguration {
 
     /**
      * Intentionally-used inner-class
-     *
      * Due to the nested type in the yaml (services: Map (String, ServiceConfiguration)), both the ManagerConfiguration
      * and ServiceConfiguration must be known to Spring. Additionally, there isn't a simple one-to-one mapping for
      * ServiceConfigurations, instead there will be multiple in a collection (a Map). The easiest way to have this yaml
      * loaded appropriately is with an inner-class in this (spring-aware) @Configuration rather than messing around with
      * EnableConfigurationProperties({...}) and ConfigurationProperties annotations.
-     *
      * Using this approach, all classes can remain unannotated. This appears to be the favoured approach once yaml
      * objects start getting more complex and nested.
      */
@@ -167,7 +173,7 @@ public class ApplicationConfiguration {
         }
 
         public ManagerMode getMode() {
-            return ManagerMode.valueOf(mode.toUpperCase());
+            return ManagerMode.valueOf(mode.toUpperCase(Locale.ENGLISH));
         }
 
         @Generated
@@ -185,16 +191,16 @@ public class ApplicationConfiguration {
         @Generated
         public void setSchedule(final List<String> schedule) {
             requireNonNull(schedule);
-            this.schedule = schedule;
+            this.schedule = new ArrayList<>(schedule);
         }
 
         public Map<String, TaskConfiguration> getTasks() {
             return tasks.entrySet().stream()
-                    .map(taskEntry -> {
+                    .map((Entry<String, List<String>> taskEntry) -> {
                         try {
                             LOGGER.debug("Processing task :: {}", taskEntry);
                             return new SimpleImmutableEntry<>(taskEntry.getKey(), new TaskConfiguration(taskEntry.getValue(), getServices()));
-                        } catch (Exception e) {
+                        } catch (RuntimeException e) {
                             LOGGER.error("An error occurred: ", e);
                             System.exit(-1);
                             return null;

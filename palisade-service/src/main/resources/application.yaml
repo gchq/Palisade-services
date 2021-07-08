@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+---
 
 spring:
+  profiles: default-config
   application:
     name: palisade-service
   output:
@@ -21,17 +28,9 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
 
 server:
   port: 8084
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -43,20 +42,9 @@ management:
       show-details: always
     shutdown:
       enabled: true
+    kafka:
+      enabled: true
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 60000
-        loggerLevel: basic
-    default-config: default
-
-# Default development & testing static config, not suitable for production
-web:
-  client:
-    audit-service: http://localhost:8089
-    policy-service: http://localhost:8085
-    resource-service: http://localhost:8086
-    user-service: http://localhost:8087
+logging:
+  level:
+    org.apache.kafka: WARN

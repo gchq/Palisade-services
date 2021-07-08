@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.io.IOException;
@@ -36,12 +35,17 @@ import java.util.function.Supplier;
  * Wrapper around a Feign client to call out to a collection of URIs rather than a single REST service
  * Allows multiple instances of a service to be running and all of them to be effected by shutdown, logging changes, etc.
  */
-public class ManagedService implements Service {
-
+public class ManagedService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
     private final ManagedClient managedClient;
     private final Supplier<Collection<URI>> uriSupplier;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managedClient the service client
+     * @param uriSupplier a collection of health endpoint {@link URI}s
+     */
     public ManagedService(final ManagedClient managedClient, final Supplier<Collection<URI>> uriSupplier) {
         this.managedClient = managedClient;
         this.uriSupplier = uriSupplier;
@@ -55,12 +59,13 @@ public class ManagedService implements Service {
     public boolean isHealthy() {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     int status = HttpStatus.NOT_FOUND.value();
                     try {
                         status = this.managedClient.getHealth(clientUri).status();
                     } catch (RetryableException ex) {
                         // Not up yet
+                        LOGGER.error("An error occurred while checking the service health", ex);
                     }
                     LOGGER.debug("Client uri {} has status {}", clientUri, status);
                     return status;
@@ -74,14 +79,14 @@ public class ManagedService implements Service {
     /**
      * Set the logging level for a given java package
      *
-     * @param packageName the name of the package (eg. uk.gov, root, java.util)
+     * @param packageName     the name of the package (eg. uk.gov, root, java.util)
      * @param configuredLevel the level to log to stdout for the named package (TRACE, DEBUG, INFO, WARN, ERROR)
      * @throws IOException if any service did not report 200-OK after the REST POST request
      */
     public void setLoggers(final String packageName, final String configuredLevel) throws IOException {
         Collection<URI> clientUris = this.uriSupplier.get();
         Optional<Response> failures = clientUris.stream()
-                .map(clientUri -> {
+                .map((URI clientUri) -> {
                     Response response = this.managedClient.setLoggers(clientUri, packageName, configuredLevel);
                     LOGGER.debug("Client uri {} responded with {}", clientUri, response);
                     return response;

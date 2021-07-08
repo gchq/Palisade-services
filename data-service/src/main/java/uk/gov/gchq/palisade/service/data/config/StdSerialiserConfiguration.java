@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of policies from a yaml file
- * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s
- * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
+ * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of serialisers from a yaml file.
+ * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating
+ * {@link uk.gov.gchq.palisade.data.serialise.Serialiser}.  These serialisers will be used for pre-populating the
+ * {@link uk.gov.gchq.palisade.service.data.service.DataService}.
  */
 public class StdSerialiserConfiguration {
 
@@ -39,15 +40,16 @@ public class StdSerialiserConfiguration {
      * Constructor with 0 arguments for a {@link StdSerialiserConfiguration} object
      */
     public StdSerialiserConfiguration() {
+        // no-args constructor
     }
 
     /**
-     * Constructor with 1 arguments for a {@link StdSerialiserConfiguration} object
+     * Constructor with 1 arguments for a {@link StdSerialiserConfiguration} object.
      *
-     * @param serialisers   a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
+     * @param serialisers a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
      */
     public StdSerialiserConfiguration(final List<StdSerialiserPrepopulationFactory> serialisers) {
-        this.serialisers = Collections.unmodifiableList(serialisers);
+        this.serialisers = List.copyOf(serialisers);
     }
 
     @Generated
@@ -58,7 +60,7 @@ public class StdSerialiserConfiguration {
     @Generated
     public void setSerialisers(final List<StdSerialiserPrepopulationFactory> serialisers) {
         requireNonNull(serialisers);
-        this.serialisers = Collections.unmodifiableList(serialisers);
+        this.serialisers = List.copyOf(serialisers);
     }
 
     @Override

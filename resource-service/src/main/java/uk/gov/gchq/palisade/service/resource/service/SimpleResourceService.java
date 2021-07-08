@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.ResourceService;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,15 +32,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+ * The Simple implementation of type {@link ResourceService}
  */
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
-
     private final String dataServiceName;
     private final String resourceType;
 
@@ -58,11 +58,13 @@ public class SimpleResourceService implements ResourceService {
         this.resourceType = resourceType;
     }
 
-    private Stream<File> filesOf(final Path path) {
+    @SuppressWarnings("java:S2095") // resource is closed
+    private static FunctionalIterator<File> filesOf(final Path path) {
         try {
-            return Files.walk(path)
+            Stream<Path> filesWalk = Files.walk(path);
+            return new StreamClosingIterator<>(filesWalk)
                     .map(Path::toFile)
-                    .map(file -> {
+                    .map((File file) -> {
                         try {
                             return file.getCanonicalFile();
                         } catch (IOException e) {
@@ -72,9 +74,7 @@ public class SimpleResourceService implements ResourceService {
                     })
                     .filter(File::isFile);
         } catch (IOException ex) {
-            LOGGER.error("Could not walk {}", path);
-            LOGGER.error("Error was: ", ex);
-            return Stream.empty();
+            throw new NoSuchResourceException("Failed to walk path " + path, ex);
         }
     }
 
@@ -85,7 +85,7 @@ public class SimpleResourceService implements ResourceService {
             extension = file.getName().substring(i + 1);
         }
 
-        return ((FileResource) ResourceBuilder.create(file.toURI()))
+        return ((LeafResource) AbstractResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type(this.resourceType)
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
@@ -98,13 +98,13 @@ public class SimpleResourceService implements ResourceService {
      * @param pred the predicate of {@link LeafResource}
      * @return the stream of {@link LeafResource}
      */
-    protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
+    protected Iterator<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
                 .filter(pred);
     }
 
-    private URI stringToURI(final String uriString) {
+    private static URI stringToURI(final String uriString) {
         try {
             return new URI(uriString);
         } catch (URISyntaxException ex) {
@@ -112,36 +112,58 @@ public class SimpleResourceService implements ResourceService {
         }
     }
 
-    private URI filesystemURI(final String fileString) {
+    private static URI filesystemURI(final String fileString) {
         try {
             return new File(fileString).getCanonicalFile().toURI();
         } catch (IOException ex) {
+            LOGGER.warn("Failed to get canonical file for {}, falling back to absolute file", fileString, ex);
             return new File(fileString).getAbsoluteFile().toURI();
         }
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByResource(final Resource resource) {
+    public Iterator<LeafResource> getResourcesByResource(final Resource resource) {
         return query(stringToURI(resource.getId()), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesById(final String resourceId) {
+    public Iterator<LeafResource> getResourcesById(final String resourceId) {
         return query(stringToURI(resourceId), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByType(final String type) {
+    public Iterator<LeafResource> getResourcesByType(final String type) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getType().equals(type));
     }
 
     @Override
-    public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
+    public Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 
     @Override
     public Boolean addResource(final LeafResource leafResource) {
         return false;
+    }
+
+    /**
+     * A {@link FunctionalIterator} implementation wrapping a stream.
+     * Avoid using unless essential, which in this case is because of {@link Files#walk}.
+     *
+     * @param <T> iterator and stream type
+     */
+    private static class StreamClosingIterator<T> extends PlainIterator<T> {
+
+        private final Stream<T> closeableStream;
+
+        StreamClosingIterator(final Stream<T> stream) {
+            super(stream.iterator());
+            this.closeableStream = stream;
+        }
+
+        @Override
+        public void close() {
+            this.closeableStream.close();
+        }
     }
 }

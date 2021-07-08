@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 apiVersion: v1
 kind: Service
@@ -23,10 +22,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 8089
-      protocol: TCP
-      name: web
+  - name: web
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

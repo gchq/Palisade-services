@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 spring:
   application:
@@ -42,18 +41,18 @@ manager:
 
   # Configuration for what happens during a "services-manager --manager.mode=run"
   # List<taskName: String>
-  schedule: []
+  schedule: [ ]
     ###
     # Example configuration for running a setup task, then all other services
     # nb. all listed task names must be configured under manager.tasks
     #
     # - setup
     # - run-services
-    ###
+  ###
 
   # Definitions mapping the above task names to a collection of services
   # Map<taskName: String, services: List<serviceName: String>>
-  tasks: {}
+  tasks: { }
     ###
     # Examples for running "my-setup" under a "setup" task, "my-service" and "my-other-service" in parallel under a "run-services" task
     # The services-manager moves on to the next task once all services for the current task are either running healthily (/actuator/health) or exited with code 0
@@ -65,29 +64,25 @@ manager:
     # run-services:
     #   - my-service
     #   - my-other-service
-    ###
+  ###
 
   # Map<serviceName: String, config: ServiceConfiguration>
-  services: {}
+  services: { }
     ###
     # Example configuration for a service "my-service", starting a my-service.jar with a runtime-loaded /data/types.jar
     # Where appropriate, each entry is formatted as "TAG: [EXAMPLE-VALUE] :: IMPLEMENTATION-DETAIL   - DESCRIPTION"
     #
-    # my-service:                                               :: "spring.application.name=${my-service}"   - tag for the service being managed, should match with the service's web.client key (the value will then be resolved later, see eureka vs static)
-    #   jar: my-service.jar                                     :: "java -jar ${jar}"   - executable jar file with main entry point
+    # my-service:                                               :: "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's web.client key
+    #   jar: my-service.jar                                     :: "java -jar ${jar}" - executable jar file with main entry point
     #   paths:                                                  :: Additional (external) libraries to dynamically load at runtime (e.g. example library)
     #     - "/data/types.jar"                                   :: "java -Dloader.path=${paths[0]},${paths[1]}"
     #   profiles:                                               :: Spring Boot profiles to enable, comma-separated list
     #     - default                                             :: "java -Dspring.profiles.active=${profiles[0]},${profiles[1]}"
-    #   log: my-service.log                                     :: "java [args] > ${log}"   - logging output filepath, singleton filepath
-    #   err: my-service.err                                     :: "java [args] 2> ${err}"   - error output filepath, singleton filepath
-    #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}"   - same format as spring's standard logging changes, classpath-loglevel map
-    #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}"   - classpath to change and logging level to change to
-    ###
-
-eureka:
-  client:
-    enabled: false
+    #   log: my-service.log                                     :: "java [args] > ${log}" - logging output filepath, singleton filepath
+    #   err: my-service.err                                     :: "java [args] 2> ${err}" - error output filepath, singleton filepath
+    #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}" - same format as spring's standard logging changes, classpath-loglevel map
+    #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}" - classpath to change and logging level to change to
+  ###
 
 feign:
   client:

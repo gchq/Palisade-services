@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 /**
  * An ApplicationRunner to shutdown all available services in the reverse-order to the start-up schedule
- *
  * There is no verification that services have successfully shut down
  * This could be implemented by checking the health endpoint
  */
@@ -38,9 +37,15 @@ public class ScheduleShutdown implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleShutdown.class);
 
     // Autowired through constructor
-    private List<String> serviceNames;
-    private Function<String, ManagedService> serviceProducer;
+    private final List<String> serviceNames;
+    private final Function<String, ManagedService> serviceProducer;
 
+    /**
+     * Constructor taking 2 arguments
+     *
+     * @param managerConfiguration the configuration for the service manager
+     * @param serviceProducer the function mapping service-names to {@link ManagedService} REST API connections
+     */
     public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         // Initially not reversed
         List<String> reversedServiceNames = managerConfiguration.getSchedule().stream()
@@ -55,7 +60,7 @@ public class ScheduleShutdown implements Runnable {
     }
 
     public void run() {
-        serviceNames.forEach(serviceName -> {
+        serviceNames.forEach((String serviceName) -> {
             LOGGER.info("Shutting down {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
             service.shutdown();

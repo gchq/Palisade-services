@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,66 +16,104 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.redis.core.index.Indexed;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.lang.Nullable;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
+import java.io.Serializable;
+import java.util.Optional;
 import java.util.StringJoiner;
 
-@Entity
-@Table(name = "resources",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "resource_id")
-        },
-        indexes = {
-                @Index(name = "resource_id", columnList = "resource_id", unique = true),
-                @Index(name = "parent_id", columnList = "parent_id"),
-        })
-public class ResourceEntity {
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the ResourceID and ResourceEntity make up the key
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
+@Table("resources")
+public class ResourceEntity implements Serializable, Persistable<String> {
+    private static final long serialVersionUID = 1L;
+
     @Id
-    @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
-    private String resourceId;
+    @Indexed
+    @Column("resource_id")
+    private final String resourceId;
 
-    @Column(name = "parent_id", columnDefinition = "varchar(255)")
-    private String parentId;
+    @Indexed
+    @Column("parent_id")
+    private final String parentId;
 
-    @Column(name = "resource", columnDefinition = "clob", nullable = false)
-    @Convert(converter = ResourceConverter.class)
-    private Resource resource;
+    @Column("resource")
+    private final Resource resource;
 
-    public ResourceEntity() {
+    @Transient
+    private final boolean isNew;
+
+    @PersistenceConstructor
+    @JsonCreator
+    private ResourceEntity(final @JsonProperty("resourceId") String resourceId,
+                           final @JsonProperty("parentId") String parentId,
+                           final @JsonProperty("resource") Resource resource) {
+        this(resourceId, parentId, resource, false);
     }
 
-    private ResourceEntity(final String resourceId, final String parentId, final Resource resource) {
+    private ResourceEntity(final String resourceId, final String parentId, final Resource resource, final boolean isNew) {
         this.resourceId = resourceId;
         this.parentId = parentId;
         this.resource = resource;
+        this.isNew = isNew;
     }
 
+    /**
+     * Constructor used for the Database that takes a Resource and extracts the values
+     * Used for inserting objects into the backing store
+     *
+     * @param resource specified to insert into the backing store
+     */
     public ResourceEntity(final Resource resource) {
         this(
                 resource.getId(),
-                resource instanceof ChildResource ? ((ChildResource) resource).getParent().getId() : null,
-                resource
+                Optional.of(resource)
+                        .filter(rsc -> rsc instanceof ChildResource)
+                        .map(rsc -> ((ChildResource) rsc).getParent().getId())
+                        .orElse(null),
+                resource,
+                true
         );
+    }
+
+    @Override
+    @JsonIgnore
+    public String getId() {
+        return resourceId;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @Generated
+    @Nullable
+    public String getParentId() {
+        return parentId;
     }
 
     @Generated
     public String getResourceId() {
-        return resourceId;
-    }
-
-    @Generated
-    public String getParentId() {
-        return parentId;
+        return getId();
     }
 
     @Generated

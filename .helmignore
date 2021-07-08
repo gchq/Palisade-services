@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,39 +20,46 @@
 .git/
 .github/
 .gitignore
+.gitattributes
 *.tmp
 *.iml
 *~
 Jenkinsfile
 mvn_dependency_tree.txt
-hadolint.yaml
+.hadolint.yaml
 pom.xml
 *.md
 velocity*
+
 # Various IDEs
 .project
 .idea/
-*.iml
 *.tmproj
 .vscode/
+
 # Non-service directories
+/doc/
 /logos/
 /licences/
 /target/
 /licenses/
 /code-style/
 *.lock
+*.db
+
 # Previous helm packages
 Palisade-services-*.tgz
+
 # Add the directory for every service module here
-/discovery-service/
+/attribute-masking-service/
 /audit-service/
+/create-kafka-queues/
 /data-service/
+/discovery-service/
+/filtered-resource-service/
 /palisade-service/
 /policy-service/
 /resource-service/
-/services-manager/
+/topic-offset-service/
 /user-service/
-/query-scope-service/
-/results-service/
-/services-launcher/
+/services-manager/

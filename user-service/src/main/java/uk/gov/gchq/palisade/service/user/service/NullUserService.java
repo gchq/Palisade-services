@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,19 @@
  */
 package uk.gov.gchq.palisade.service.user.service;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.user.User;
 
+/**
+ * A default do-nothing User Service designed to work with the Caching and Hierarchy layers.
+ * Within cache TTL and cache size, the addUser method will add to the cache, getUser will return a NoSuchUserIdException
+ * as the user would not have been in the cache.
+ * After cache TTL timeout, the service will effectively be reset and empty
+ */
 public class NullUserService implements UserService {
 
     @Override
-    public User getUser(final UserId userId) {
+    public User getUser(final String userId) {
         throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
     }
 

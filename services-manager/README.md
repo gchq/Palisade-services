@@ -1,5 +1,5 @@
 <!---
-Copyright 2020 Crown Copyright
+Copyright 2018-2021 Crown Copyright
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,21 +15,19 @@ limitations under the License.
 --->
 
 <!---
-The contents of this file are under substitution in the build process - maven's `process-resources` stage will substitute executable(dot)jar for this: services-manager-0.4.0-exec.jar
+The contents of this file are under substitution in the build process - maven's `process-resources` stage will substitute executable(dot)jar for this: services-manager-0.5.0-RELEASE-exec.jar
 The source for this file can be found at `services-manager/src/resources/doc/README-TEMPLATE.md`
 --->
 
 # <img src="../logos/logo.svg" width="180">
 
-### Palisade Services Manager
+## A Tool for Complex and Scalable Data Access Policy Enforcement
 
-
+# Palisade Services Manager
 
 ## Documentation
 
 The documentation for the latest release can be found [here](https://gchq.github.io/Palisade).
-
-
 
 ## Getting started
 
@@ -71,52 +69,24 @@ To complete successfully, a service either halts with success or responds `200 O
 ### Starting Services (`--manager.mode=run` / `--manager.mode=shutdown`)
 Using the built-in profiles, the services-manager can be used to perform a number of common tasks, starting the services in different environments for different use-cases:  
 
-#### `discovery` / `palisade` - Default configuration of discovery service / palisade services
-```bash
-java -jar -Dspring.profiles.active=discovery target/services-manager-0.4.0-exec.jar
-# or
-java -jar -Dspring.profiles.active=palisade target/services-manager-0.4.0-exec.jar
-```
- * Will start just the discovery-service / all other palisade services respectively
- * Mostly used as a dependency and common set of configurations by other profiles
-
-
 #### `static` - Simple setup with static 808x port numbers
 ```bash
-java -jar -Dspring.profiles.active=static target/services-manager-0.4.0-exec.jar
+java -jar -Dspring.profiles.active=static target/services-manager-0.5.0-RELEASE-exec.jar
 ```
  * By default, palisade-service will be at `localhost:8084` and data-service will be at `localhost:8082`
- * No eureka dashboard here, but take a look at the /actuator endpoints for some metadata
  
  
-#### `eureka` - Eureka discovery, dynamic ports, 'scalable'
+#### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/develop/example-library))
 ```bash
-java -jar -Dspring.profiles.active=discovery target/services-manager-0.4.0-exec.jar # start discovery-service without eureka (it is eureka)
-java -jar -Dspring.profiles.active=eureka target/services-manager-0.4.0-exec.jar    # start all other services with eureka
+java -jar -Dspring.profiles.active=example-libs target/services-manager-0.5.0-RELEASE-exec.jar
 ```
- * Once the manager has finished running, check the eureka dashboard at `localhost:8083`
- * These two commands will only exit once all services are ready, so the two `java -jar ...` commands can be chained together as `java .. discovery -jar .. && java .. eureka -jar ...`
-
-
----
-***All further profiles require the discovery service to be running, or require some tweaking to use the static setup.***  
-**The choice here between `eureka` or `static` profiles will be referred to unilaterally as the `environment` profile - make sure to substitute as appropriate.**  
----
-
-
-#### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/main/example-library))
-```bash
-java -jar -Dspring.profiles.active=example-libs target/services-manager-0.4.0-exec.jar
-```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
 
 
-#### `example-model` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/main/example-model))
+#### `example-runner` - Automated execution of Palisade client on example data (see [example-runner](https://github.com/gchq/Palisade-examples/tree/develop/example-runner))
 ```bash
-java -jar -Dspring.profiles.active=example-model target/services-manager-0.4.0-exec.jar
+java -jar -Dspring.profiles.active=example-runner target/services-manager-0.5.0-RELEASE-exec.jar
 ```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
  * The rest-example will run once all services have started
  * Check `rest-example.log` for output data
@@ -124,11 +94,10 @@ java -jar -Dspring.profiles.active=example-model target/services-manager-0.4.0-e
 The data used in this example comes checked-in to the repo and does not need generating
  
  
-#### `example-perf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/main/performance))
+#### `example-perf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/develop/performance))
 ```bash
-java -jar -Dspring.profiles.active=example-perf target/services-manager-0.4.0-exec.jar
+java -jar -Dspring.profiles.active=example-perf target/services-manager-0.5.0-RELEASE-exec.jar
 ```
- * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
  * The performance-test will run once all services have started
  * Check `performance-test.log` for output data
@@ -139,7 +108,7 @@ Instead, they must be generated before running the performance tests.
 Either enable generation of performance test data as part of the services-manager `example-perf` configuration:
  * Change the above command to include the (previously unused) `performance-create-task`:
     ```bash
-    java -jar -Dspring.profiles.active=example-perf target/services-manager-0.4.0-exec.jar --manager.schedule=performance-create-task,palisade-task,performance-test-task
+    java -jar -Dspring.profiles.active=example-perf target/services-manager-0.5.0-RELEASE-exec.jar --manager.schedule=performance-create-task,palisade-task,performance-test-task
     ```
 Or manually generate the data:  
  * From the [Palisade-examples](https://github.com/gchq/Palisade-examples/) directory, run the following command:
@@ -153,24 +122,23 @@ Or manually generate the data:
 
 #### At Start-Time
 If services are not running, or debug logging is required from startup, using the built-in profiles:  
- * *For the appropriate `environment`*, add the `debug` profile during the manager's run command - `java -jar -Dspring.profiles.active=environment,debug target/services-manager-0.4.0-exec.jar --manager.mode=run`
+ * Add the `debug` profile during the manager's run command - `java -jar -Dspring.profiles.active=static,debug target/services-manager-0.5.0-RELEASE-exec.jar --manager.mode=run` 
  * The `logging.level.uk.gov.gchq.palisade=DEBUG` configuration value will be set for all services at start-time 
    * Services should now log at `DEBUG` level from startup  
 
 #### During Runtime
 If services are already running, using the built-in profiles:  
- * *For the appropriate `environment`*, add the `debug` profile and use the manager's logging command - `java -jar -Dspring.profiles.active=environment,debug target/services-manager-0.4.0-exec.jar --manager.mode=loggers`
+ * Add the `debug` profile and use the manager's logging command - `java -jar -Dspring.profiles.active=static,debug target/services-manager-0.5.0-RELEASE-exec.jar --manager.mode=loggers`
  * A POST request will be made to Spring logging actuators 
    * Running services should now begin logging at `DEBUG` level (note that this will not include past debug log content, only debug messages created from now onwards)  
-
 
 
 ### Creating a new Configuration (`--manager.mode=config`)
 Take a look at the [default configuration file](/services-manager/src/main/resources/application.yaml)  
 When testing your new configuration, you may find the config flag useful:
  1. Write a new configuration `application-mynewprofile.yaml`
- 1. See what the services-manager has been given by Spring - `java -jar -Dspring.profiles.active=mynewprofile target/services-manager-0.4.0-exec.jar --manager.mode=config` (the Java object representing the configuration should be printed to screen)
- 1. Need a little more? Also add the `debug` profile - `java -jar -Dspring.profiles.active=mynewprofile,debug target/services-manager-0.4.0-exec.jar --manager.mode=config`
+ 1. See what the services-manager has been given by Spring - `java -jar -Dspring.profiles.active=mynewprofile target/services-manager-0.5.0-RELEASE-exec.jar --manager.mode=config` (the Java object representing the configuration should be printed to screen)  
+ 1. Need a little more? Also add the `debug` profile - `java -jar -Dspring.profiles.active=mynewprofile,debug target/services-manager-0.5.0-RELEASE-exec.jar --manager.mode=config`  
 
 
 

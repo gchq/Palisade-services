@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 
-{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
@@ -86,25 +85,46 @@ Determine ingress root url
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "data-service.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
-{{- else }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
+{{- printf "%s/%s" (include "data-service.classpathJars.mount" .) (include "data-service.deployment.revision" .) }}
 {{- end }}
+
+{{/*
+Calculate the service config location
+*/}}
+{{- define "data-service.config.path" }}
+{{- printf "/usr/share/%s/config/" .Chart.Name }}
+{{- end }}
+
+{{/*
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "data-service.classpathJars.name" }}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
+{{- end }}
+
+{{/*
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "data-service.classpathJars.mount" }}
+{{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
 {{- end }}
 
 {{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "data-service.deployment.name" }}
-{{- include "data-service.deployment.path" . | base }}
+{{- define "data-service.deployment.revision" }}
+{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 
 {{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
+Create the image name
 */}}
-{{- define "data-service.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "data-service.deployment.name" . }}
-{{- end }}
+{{- define "data-service.image.name" }}
+{{- if contains .Values.image.revision .Values.global.releaseTag -}}
+{{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.versionNumber }}
+{{- else -}}
+{{- printf "%s%s:%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.tag }}
+{{- end -}}
+{{- end -}}
+

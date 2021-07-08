@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,40 +20,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.request.Policy;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.StringJoiner;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Optional;
 
 /**
- * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
- * A factory for {@link uk.gov.gchq.palisade.service.request.Policy} objects, using:
- * - a {@link uk.gov.gchq.palisade.resource.Resource} resource
- * - a {@link uk.gov.gchq.palisade.User} owner
- * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
- * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
+ * Implementation of a {@link PolicyPrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * A factory for objects, using:
+ * - a String reference of a {@link Resource} resource
+ * - a map of {@link Rule} resource-level rules operating on a {@link Resource}
+ * - a map of {@link Rule} record-level rules operating on the type of a {@link LeafResource}
  */
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
-    private String resource;
-    private String owner;
+    private String resourceId;
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
 
@@ -61,8 +53,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
      * Empty constructor
      */
     public StdPolicyPrepopulationFactory() {
-        resource = "";
-        owner = "";
+        resourceId = "";
         resourceRules = Collections.emptyMap();
         recordRules = Collections.emptyMap();
     }
@@ -70,38 +61,36 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     /**
      * Create a StdPolicyPrepopulationFactory, passing each member as an argument
      *
-     * @param resource the {@link Resource} to attach a {@link Policy} to
-     * @param owner the {@link User} of this {@link Policy}
+     * @param resourceId    the id of the {@link Resource} to attach a policy to
      * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
-     * @param recordRules the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
+     * @param recordRules   the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the Data Service
      */
-    public StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
-        this.resource = resource;
-        this.owner = owner;
+    public StdPolicyPrepopulationFactory(final String resourceId, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+        this.resourceId = resourceId;
         this.resourceRules = resourceRules;
         this.recordRules = recordRules;
     }
 
-    @Generated
-    public String getResource() {
-        return resource;
+    @SuppressWarnings({"java:S3740", "rawtypes"}) //Suppress parameterized type for generic class smell
+    private static Rule createRule(final String rule) {
+        try {
+            LOGGER.debug("Adding rule {}", rule);
+            return (Rule<?>) Class.forName(rule).getConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error(String.format("Error creating rule %s", rule), ex);
+            return null;
+        }
     }
 
     @Generated
-    public void setResource(final String resource) {
-        requireNonNull(resource);
-        this.resource = resource;
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
-    public String getOwner() {
-        return owner;
-    }
-
-    @Generated
-    public void setOwner(final String owner) {
-        requireNonNull(owner);
-        this.owner = owner;
+    public void setResourceId(final String resourceId) {
+        this.resourceId = Optional.ofNullable(resourceId)
+                .orElseThrow(() -> new IllegalArgumentException("resource cannot be null"));
     }
 
     @Generated
@@ -111,8 +100,8 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
     @Generated
     public void setResourceRules(final Map<String, String> resourceRules) {
-        requireNonNull(resourceRules);
-        this.resourceRules = resourceRules;
+        this.resourceRules = Optional.ofNullable(resourceRules)
+                .orElseThrow(() -> new IllegalArgumentException("resourceRules cannot be null"));
     }
 
     @Generated
@@ -122,41 +111,30 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
     @Generated
     public void setRecordRules(final Map<String, String> recordRules) {
-        requireNonNull(recordRules);
-        this.recordRules = recordRules;
+        this.recordRules = Optional.ofNullable(recordRules)
+                .orElseThrow(() -> new IllegalArgumentException("recordRules cannot be null"));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Entry<Resource, Policy> build(final List<? extends UserPrepopulationFactory> users, final List<? extends ResourcePrepopulationFactory> resources) {
-        Policy<?> policy = new Policy<>();
+    public Entry<String, Rules<LeafResource>> buildResourceRules() {
+        Rules<LeafResource> rules = new Rules<>();
+        resourceRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
-        resourceRules.forEach((message, rule) -> policy.resourceLevelRule(message, createRule(rule)));
-        recordRules.forEach((message, rule) -> policy.recordLevelRule(message, createRule(rule)));
-
-        Resource unconfiguredResource = ResourceBuilder.create(this.resource);
-        Resource policyResource = resources.stream()
-                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().serviceName("")).getValue())
-                .filter(builtResource -> builtResource.getId().equals(unconfiguredResource.getId()))
-                .findFirst()
-                .orElse(unconfiguredResource);
-
-        User policyOwner = users.stream()
-                .map(UserPrepopulationFactory::build)
-                .filter(user -> user.getUserId().getId().equals(this.owner))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Cannot find user with id: " + this.owner));
-
-        return new SimpleImmutableEntry<>(policyResource, policy.owner(policyOwner));
+        // Interpret relative paths and prepend 'file:'
+        String resourceUriId = AbstractResourceBuilder.create(resourceId).getId();
+        return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
-    private static Rule createRule(final String rule) {
-        try {
-            LOGGER.debug("Adding rule {}", rule);
-            return (Rule<?>) Class.forName(rule).getConstructor().newInstance();
-        } catch (Exception ex) {
-            LOGGER.error(String.format("Error creating rule %s", rule), ex);
-            return null;
-        }
+    @SuppressWarnings("unchecked")
+    @Override
+    public Entry<String, Rules<Serializable>> buildRecordRules() {
+        Rules<Serializable> rules = new Rules<>();
+        recordRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
+
+        // Interpret relative paths and prepend 'file:'
+        String resourceUriId = AbstractResourceBuilder.create(resourceId).getId();
+        return new SimpleImmutableEntry<>(resourceUriId, rules);
     }
 
     @Override
@@ -165,12 +143,11 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StdPolicyPrepopulationFactory)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         final StdPolicyPrepopulationFactory that = (StdPolicyPrepopulationFactory) o;
-        return Objects.equals(resource, that.resource) &&
-                Objects.equals(owner, that.owner) &&
+        return Objects.equals(resourceId, that.resourceId) &&
                 Objects.equals(resourceRules, that.resourceRules) &&
                 Objects.equals(recordRules, that.recordRules);
     }
@@ -178,18 +155,6 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(resource, owner, resourceRules, recordRules);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", StdPolicyPrepopulationFactory.class.getSimpleName() + "[", "]")
-                .add("resource='" + resource + "'")
-                .add("owner='" + owner + "'")
-                .add("resourceRules=" + resourceRules)
-                .add("recordRules=" + recordRules)
-                .add(super.toString())
-                .toString();
+        return Objects.hash(resourceId, resourceRules, recordRules);
     }
 }

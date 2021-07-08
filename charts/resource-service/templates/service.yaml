@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.port }}
-    targetPort: 8086
-    protocol: TCP
-    name: web
+  - name: web
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "resource-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ spec:
   {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
-      name: {{ .Values.global.persistence.redisMaster.name }}
+      name: {{ (index .Values.global.persistence "redis-master").name }}
       labels:
         app: {{ template "redis.name" . }}
         release: {{ .Release.Name }}
@@ -42,11 +42,21 @@ spec:
         component: master
     spec:
       accessModes:
-      - ReadWriteMany
+      - {{ pluck .Values.global.hosting (index .Values.global.persistence "redis-master").mode | first | default (index .Values.global.persistence "redis-master").mode._default }}
       resources:
         requests:
-          storage: {{ $.Values.global.persistence.redisMaster.storage }}
-      storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.redisMaster.storageClassName | first | default .Values.global.persistence.redisMaster.storageClassName._default }}
+          storage: {{ (index .Values.global.persistence "redis-master").storage }}
+      storageClassName: {{ pluck .Values.global.hosting (index .Values.global.persistence "redis-master").storageClassName | first | default (index .Values.global.persistence "redis-master").storageClassName._default }}
+      {{- $config := (index .Values.global.persistence "redis-master") }}
+      {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+      selector:
+        {{- if eq $provisioning "static" }}
+        matchLabels:
+          selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+        {{- end }}
+        {{- if .Values.master.persistence.matchExpressions }}
+        matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
+        {{- end }}
   {{- end }}
   serviceName: {{ template "redis.fullname" . }}-headless
   template:
@@ -203,7 +213,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisMaster.name }}
+            - name: {{ (index .Values.global.persistence "redis-master").name }}
               mountPath: {{ .Values.master.persistence.path }}
               subPath: {{ .Values.master.persistence.subPath }}
             - name: config
@@ -303,7 +313,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisMaster.name }}
+            - name: {{ (index .Values.global.persistence "redis-master").name }}
               mountPath: {{ .Values.master.persistence.path }}
               subPath: {{ .Values.master.persistence.subPath }}
             - name: config
@@ -355,7 +365,7 @@ spec:
           runAsUser: 0
         resources: {{- toYaml .Values.volumePermissions.resources | nindent 10 }}
         volumeMounts:
-          - name: {{ .Values.global.persistence.redisMaster.name }}
+          - name: {{ (index .Values.global.persistence "redis-master").name }}
             mountPath: {{ .Values.master.persistence.path }}
             subPath: {{ .Values.master.persistence.subPath }}
       {{- end }}
@@ -416,7 +426,7 @@ spec:
     type: {{ .Values.master.statefulset.updateStrategy }}
     {{- if .Values.master.statefulset.rollingUpdatePartition }}
     {{- if (eq "Recreate" .Values.master.statefulset.updateStrategy) }}
-    rollingUpdate: null
+    rollingUpdate: {}
     {{- else }}
     rollingUpdate:
       partition: {{ .Values.master.statefulset.rollingUpdatePartition }}

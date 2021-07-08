@@ -71,11 +71,11 @@ cluster:
   activeDeadlineSeconds: 600
   ## Number of Redis nodes to be deployed
   ##
-  nodes: 6
+  nodes: 2
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created
   ##
-  replicas: 1
+  replicas: 0
   ## The busPort should be obtained adding 10000 to the redisPort. By default: 10000 + 6379 = 16379
   ##
   busPort: 16379
@@ -339,7 +339,9 @@ metrics:
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9121"
-  # podLabels: {}
+  podLabels:
+    # Add label to advertise this POD as providing palisade-redis-cluster services
+    service: palisade-redis-cluster
 
   # Enable this if you're using https://github.com/coreos/prometheus-operator
   serviceMonitor:

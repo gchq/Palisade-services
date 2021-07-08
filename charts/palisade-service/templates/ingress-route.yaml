@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,42 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: palisade-service
+  name: {{ include "palisade-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   entryPoints:
-    - web
+    - tls
   routes:
-    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
+    - match: PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
       kind: Rule
       services:
-        - name: palisade-service
+        - name: {{ include "palisade-service.name" . }}
           port: 80
       middlewares:
         - name: palisade-pathparam-regex
           namespace: {{ include "palisade.namespace" . }}
+  tls: {}
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "palisade-service.name" . }}-insecure
+  namespace: {{ include "palisade.namespace" . }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "false"
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
+    kind: Rule
+    services:
+    - name: {{ include "palisade-service.name" . }}
+      port: 80
+    middlewares:
+    - name: palisade-pathparam-regex
+      namespace: {{ include "palisade.namespace" . }}

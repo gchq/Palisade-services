@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,4 +16,4 @@ apiVersion: v2
 appVersion: "1.0"
 description: A Helm chart for the Resource Service
 name: resource-service
-version: 0.4.0
+version: 0.5.0

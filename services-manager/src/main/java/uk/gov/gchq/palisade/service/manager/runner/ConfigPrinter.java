@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,18 @@ public class ConfigPrinter implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPrinter.class);
 
     // Autowired through constructor
-    private ManagerConfiguration config;
+    private final ManagerConfiguration config;
 
+    /**
+     * Constructor taking 1 argument
+     *
+     * @param config the configuration for the manager
+     */
     public ConfigPrinter(final ManagerConfiguration config) {
         this.config = config;
     }
 
     public void run() {
-        LOGGER.info("Loaded config...\n{}", config.toString());
+        LOGGER.info("Loaded config...\n{}", config);
     }
 }

@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: {{ include "data-service.image.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
@@ -47,40 +47,47 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/health
             port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
+          initialDelaySeconds: 90
+          failureThreshold: 3
+          periodSeconds: 10
           timeoutSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
         - name: "LOADER_PATH"
           value: {{ include "data-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "data-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}
           value: {{ $item.value }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "data-service.deployment.fullname" . }}
-          mountPath: {{ include "data-service.deployment.path" . }}
+        - name: {{ include "data-service.classpathJars.name" . }}
+          mountPath: {{ include "data-service.classpathJars.mount" . }}
+        - name: config-volume
+          mountPath: {{ include "data-service.config.path" . }}
         {{- range $name, $value := .Values.global.persistence.dataStores }}
         - name: {{ $name }}
           mountPath: {{ $value.mountPath }}
         {{- end }}
       volumes:
-      - name: {{ include "data-service.deployment.fullname" . }}
+      - name: {{ include "data-service.classpathJars.name" . }}
         persistentVolumeClaim:
-          claimName: {{ include "data-service.deployment.fullname" . }}
+          claimName: {{ include "data-service.classpathJars.name" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "data-service.name" . }}-configmap
       {{- range $name, $_ := .Values.global.persistence.dataStores }}
       - name: {{ $name }}
         persistentVolumeClaim:

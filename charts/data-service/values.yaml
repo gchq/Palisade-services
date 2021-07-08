@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,9 +20,13 @@ service:
 
 image:
   name: data-service
-  tag: 960205c-RELEASE
+  base: jre
+  tag: RELEASE-955749b
   pullPolicy: IfNotPresent
-  codeRelease: 0.4.0
+  gitHash: 955749b
+  versionNumber: 0.5.0
+  codeRelease: 0.5.0-RELEASE
+  revision: RELEASE
 
 resources:
   limits:

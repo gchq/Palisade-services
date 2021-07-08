@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2020 Crown Copyright
+  ~ Copyright 2018-2021 Crown Copyright
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -22,73 +22,147 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <!--  *********** Aritfact ID ***********    -->
+    <developers>
+        <developer>
+            <name>PalisadeDevelopers</name>
+            <organization>GCHQ</organization>
+            <organizationUrl>https://github.com/gchq</organizationUrl>
+        </developer>
+    </developers>
+
+    <!--  *********** Artifact ID ***********    -->
     <artifactId>resource-service</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/resource-service</url>
-    <!--  *********** Aritfact ID ***********    -->
+    <url>https://github.com/gchq/Palisade-services/tree/develop/resource-service</url>
+    <name>GCHQ Palisade - Resource Service</name>
+    <description>
+        The Resource Service will accept a request for a resourceId that is being accessed (file or directory) and produce responses for each resource (file) found.
+    </description>
+    <!--  *********** Artifact ID ***********    -->
+
+    <scm>
+        <url>${scm.url}</url>
+        <connection>${scm.connection}</connection>
+        <developerConnection>${scm.developer.connection}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
-        <jackson.version>2.10.4</jackson.version>
-        <hadoop.version>3.2.1</hadoop.version>
+        <!-- Dependency versions -->
+        <scala.version>2.13</scala.version>
+        <akka.version>2.6.10</akka.version>
+        <alpakka.kafka.version>2.1.0-M1</alpakka.kafka.version>
+
+        <!-- Test dependency versions -->
+        <testcontainers.version>1.15.3</testcontainers.version>
+        <!-- Testcontainers images -->
+        <testcontainers.kafka.image>confluentinc/cp-kafka:5.5.1</testcontainers.kafka.image>
+        <testcontainers.redis.image>redis:6-alpine</testcontainers.redis.image>
+
+        <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
+        <dockerfile.base.image>openjdk@sha256:775cd07d9c8c44db4a329269b128065dd86549675ea4db70b6201f3081eb2d89</dockerfile.base.image>
+        <!-- Prefix image tag with image type being used -->
+        <dockerfile.base.tag>jre</dockerfile.base.tag>
     </properties>
 
     <dependencies>
+        <!--
+        ~ Palisade
+        -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <!-- Common types (User, Resource, Context) -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
+        </dependency>
+
+        <!--
+        ~ Akka and Alpakka (Kafka)
+        -->
+        <dependency>
+            <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_${scala.version}</artifactId>
+            <version>${akka.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <!-- Alpakka Kafka connectors -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka_${scala.version}</artifactId>
+            <version>${alpakka.kafka.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
+            <!-- Akka/SLF4j logging connector -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.version}</artifactId>
+            <version>${akka.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
+            <!-- Smarter discovery of Kafka servers -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-discovery_${scala.version}</artifactId>
+            <version>${akka.version}</version>
         </dependency>
+        <!--
+        ~ Spring Boot
+        -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <!-- Rest controller -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <!-- Caching/Persistence stores -->
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <!-- R2DBC implementation of ReactiveCrudRepositories -->
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-h2</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
+            <!-- Reactive Redis (ReactiveCrudRepository impl done manually) -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
+
+        <!--
+        ~ Test dependencies
+        -->
         <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>hadoop-resource</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
+            <!-- JUnit, Jupiter, SpringBootTest etc... -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Kafka contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-testkit_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka Kafka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
+            <version>${alpakka.kafka.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -119,6 +193,22 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <!-- Use a JRE image, openjdk:11-jre-slim linux/amd64, mirrors base config -->
+            <id>jrei</id>
+            <properties>
+                <dockerfile.base.image>openjdk@sha256:775cd07d9c8c44db4a329269b128065dd86549675ea4db70b6201f3081eb2d89</dockerfile.base.image>
+                <dockerfile.base.tag>jre</dockerfile.base.tag>
+            </properties>
+        </profile>
+        <profile>
+            <!-- Use a JDK image, openjdk:11-jdk-slim linux/amd64 -->
+            <id>jdki</id>
+            <properties>
+                <dockerfile.base.image>openjdk@sha256:1ee84ab87de99d6edf3592acde24ec909ec9814a8fb24db76a510ddb643b470c</dockerfile.base.image>
+                <dockerfile.base.tag>jdk</dockerfile.base.tag>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
@@ -138,6 +228,16 @@
                 </excludes>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <!-- Substitute maven properties in tests yaml -->
+                <filtering>true</filtering>
+                <directory>src/*-tests/resources</directory>
+                <includes>
+                    <include>**/*.yaml</include>
+                </includes>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
@@ -239,7 +339,7 @@
                 <version>1.4.10</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>post-integration-test</phase>
                         <id>cache</id>
                         <goals>
                             <goal>build</goal>
@@ -249,7 +349,6 @@
                         <phase>deploy</phase>
                         <id>ar</id>
                         <goals>
-                            <goal>build</goal>
                             <goal>push</goal>
                         </goals>
                     </execution>
@@ -258,9 +357,10 @@
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
-                    <tag>${image.tag}</tag>
+                    <tag>${dockerfile.base.tag}-${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
+                        <BASE_IMG>${dockerfile.base.image}</BASE_IMG>
                         <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
@@ -290,7 +390,44 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/unit-tests/java</source>
+                                <source>src/component-tests/java</source>
+                                <source>src/contract-tests/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <filtering>true</filtering>
+                                    <directory>src/unit-tests/resources</directory>
+                                    <directory>src/component-tests/resources</directory>
+                                    <directory>src/contract-tests/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
 </project>

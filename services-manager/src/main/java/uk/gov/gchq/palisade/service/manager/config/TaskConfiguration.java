@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -58,7 +59,7 @@ public class TaskConfiguration {
      */
     public Map<String, ProcessBuilder> getProcessBuilders(final File builderDirectory) {
         return services.entrySet().stream()
-                .map(e -> {
+                .map((Entry<String, ServiceConfiguration> e) -> {
                     ServiceConfiguration config = e.getValue();
                     ProcessBuilder builder = config.getProcessBuilder();
                     builder.directory(builderDirectory);

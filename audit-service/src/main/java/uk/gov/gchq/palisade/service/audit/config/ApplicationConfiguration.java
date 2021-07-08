@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
+
+import java.util.Map;
 
 /**
  * Bean configuration and dependency injection graph
@@ -59,9 +62,14 @@ public class ApplicationConfiguration {
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
+    @Bean
+    AuditServiceAsyncProxy auditServiceAsyncProxy(final Map<String, AuditService> services) {
+        return new AuditServiceAsyncProxy(services);
+    }
+
     @Primary
     @Bean
     ObjectMapper objectMapper() {
-        return JSONSerialiser.createDefaultMapper();
+        return new ObjectMapper();
     }
 }

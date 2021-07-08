@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+
+---
 
 spring:
+  profiles: default-config
   application:
     name: resource-service
   output:
@@ -21,17 +29,13 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
+  data:
+    redis:
+      repositories:
         enabled: false
 
 server:
   port: 8086
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -40,6 +44,11 @@ management:
         include: "*"
   endpoint:
     shutdown:
+      enabled: true
+  health:
+    redis:
+      enabled: false
+    kafka:
       enabled: true
 
 population:
@@ -58,3 +67,7 @@ web:
 async:
   webMvcTimeout: 60000
   corePoolSize: 6
+
+logging:
+  level:
+    org.apache.kafka: WARN

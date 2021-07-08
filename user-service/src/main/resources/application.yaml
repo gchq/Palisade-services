@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,15 @@
 # limitations under the License.
 #
 spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+
+---
+
+spring:
+  profiles: default-config
   application:
     name: user-service
   output:
@@ -20,20 +29,9 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
 server:
   port: 8087
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -44,17 +42,18 @@ management:
     shutdown:
       enabled: true
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-    default-config: default
-
-user-service:
-  implementation: null-user-service
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
 
 population:
   userProvider: std
+
+logging:
+  level:
+    org.apache.kafka: WARN
+
+user-service:
+  implementation: null-user-service

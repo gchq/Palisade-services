@@ -1,0 +1,72 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+replicaCount: 1
+
+service:
+  port: 80
+
+kafkaCreateTopics:
+- name: request
+  replicationFactor: 1
+  partitions: 1
+- name: user
+  replicationFactor: 1
+  partitions: 1
+- name: resource
+  replicationFactor: 1
+  partitions: 1
+- name: rule
+  replicationFactor: 1
+  partitions: 1
+- name: masked-resource
+  replicationFactor: 1
+  partitions: 1
+- name: masked-resource-offset
+  replicationFactor: 1
+  partitions: 1
+- name: error
+  replicationFactor: 1
+  partitions: 1
+- name: success
+  replicationFactor: 1
+  partitions: 1
+
+waitForServices:
+- name: kafka
+  tpl: "palisade.kafka.url"
+- name: zookeeper
+  tpl: "palisade.zookeeper.url"
+
+image:
+  name: @artifactId@
+  base: @dockerfile.base.tag@
+  tag: @revision@-@git.commit.id.abbrev@
+  pullPolicy: IfNotPresent
+  gitHash: @git.commit.id.abbrev@
+  versionNumber: @version.number@
+  codeRelease: @project.parent.version@
+  revision: @revision@
+
+resources:
+  limits:
+    cpu: 750m
+    memory: 2.5Gi
+  requests:
+    cpu: 250m
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

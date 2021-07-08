@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,38 +42,27 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade.deployment.path" }}
-{{- if eq .Values.global.deployment "codeRelease" }}
-{{- if eq .Values.global.hosting "local" }}
-{{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
-{{- else if eq .Values.global.hosting "aws" }}
-{{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
+{{- define "palisade.classpathJars.name" }}
+{{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
-{{- else }}
+
+{{/*
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "palisade.classpathJars.mounts" }}
 {{- if eq .Values.global.hosting "local" }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath (include "palisade.deployment.revision" .) }}
 {{- else if eq .Values.global.hosting "aws" }}
-{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
-{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
-{{- end }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath (include "palisade.deployment.revision" .) }}
 {{- end }}
 {{- end }}
 
 {{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
-{{- define "palisade.deployment.name" }}
-{{- include "palisade.deployment.path" . | base }}
-{{- end }}
-
-{{/*
-Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
-*/}}
-{{- define "palisade.deployment.fullname" }}
-{{- .Values.global.persistence.classpathJars.name }}-{{- include "palisade.deployment.name" . }}
+{{- define "palisade.deployment.revision" }}
+{{- $revision := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 
 {{/*
@@ -116,7 +105,7 @@ Create the service name of the redis master
 {{- if .Values.global.redis.exports.fullnameOverride -}}
 {{- .Values.global.redis.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.global.redis.exports.nameOverride -}}
+{{- $name := default "redis" .Values.global.redis.exports.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -144,11 +133,61 @@ Create the service name of the redis cluster
 {{- if (index .Values.global "redis-cluster").exports.fullnameOverride -}}
 {{- (index .Values.global "redis-cluster").exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name (index .Values.global "redis-cluster").exports.nameOverride -}}
+{{- $name := default "redis-cluster" (index .Values.global "redis-cluster").exports.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Create the service name of kafka
+*/}}
+{{- define "palisade.kafka.fullname" -}}
+{{- if .Values.global.kafka.exports.fullnameOverride -}}
+{{- .Values.global.kafka.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "kafka" .Values.global.kafka.exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the service url (including port) of kafka
+*/}}
+{{- define "palisade.kafka.url" -}}
+{{- $serviceName := (include "palisade.kafka.fullname" .) -}}
+{{- $servicePort := default 9092 .Values.global.kafka.exports.port -}}
+{{- printf "%s:%d" $serviceName ($servicePort | int) -}}
+{{- end -}}
+
+{{/*
+Create the service name of zookeeper
+*/}}
+{{- define "palisade.zookeeper.fullname" -}}
+{{- if .Values.global.zookeeper.exports.fullnameOverride -}}
+{{- .Values.global.zookeeper.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "zookeeper" .Values.global.zookeeper.exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the service url (including port) of zookeeper
+*/}}
+{{- define "palisade.zookeeper.url" -}}
+{{- $serviceName := (include "palisade.zookeeper.fullname" .) -}}
+{{- $servicePort := default 2181 .Values.global.zookeeper.exports.port -}}
+{{- printf "%s:%d" $serviceName ($servicePort | int) -}}
 {{- end -}}

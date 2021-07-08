@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
+
+ARG BASE_IMG
+FROM $BASE_IMG
+
 VOLUME /tmp
 
 ARG JAR_FILE
-
 COPY $JAR_FILE /usr/share/policy-service/policy-service.jar
 
 LABEL service="policy" project="palisade"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,76 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import akka.NotUsed;
+import akka.stream.javadsl.Source;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
  * for more details
  */
-public interface ResourceRepository extends CrudRepository<ResourceEntity, String> {
+public interface ResourceRepository extends ReactiveCrudRepository<ResourceEntity, String> {
 
-    Optional<ResourceEntity> findByResourceId(String resourceId);
+    /**
+     * Find resource in backing store by ResourceId
+     *
+     * @param resourceId the resource id of the resource in the backing store
+     * @return {@link Mono} value of ResourceEntity stored in the backing store
+     */
+    Mono<ResourceEntity> findOneByResourceId(String resourceId);
 
-    Stream<ResourceEntity> findAllByParentId(String parentId);
+    /**
+     * Converts the {@code findOneByResourceId} result to an akka {@link Source}
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link Source} of the returned {@link ResourceEntity}
+     */
+    default Source<ResourceEntity, NotUsed> streamFindOneByResourceId(String resourceId) {
+        return Source.fromPublisher(this.findOneByResourceId(resourceId));
+    }
 
+    /**
+     * Checks if there is a {@link ResourceEntity} for a resource id
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link CompletableFuture} of a {@link Boolean} if a ResourceEntity is returned
+     */
+    default CompletableFuture<Boolean> futureExistsByResourceId(String resourceId) {
+        return this.findOneByResourceId(resourceId).hasElement().toFuture();
+    }
+
+    /**
+     * A {@link Flux} of resources by parentId
+     *
+     * @param parentId the parent id of the Resource
+     * @return a {@link Flux} of ResourceEntity resources from the backing store
+     */
+    Flux<ResourceEntity> findAllByParentId(String parentId);
+
+    /**
+     * Converts the {@code findAllByParentId} result to an akka {@link Source}
+     *
+     * @param parentId the parent id of the Resource
+     * @return a {@link Source} of the returned {@link ResourceEntity}s
+     */
+    default Source<ResourceEntity, NotUsed> streamFindAllByParentId(String parentId) {
+        return Source.fromPublisher(this.findAllByParentId(parentId));
+    }
+
+    /**
+     * Saves (aka inserts) the object into the backing store via a {@link CrudRepository}
+     *
+     * @param entity Information about the resource Object
+     * @return the {@link ResourceEntity} that was saved in the backing store
+     */
+    default CompletableFuture<ResourceEntity> futureSave(ResourceEntity entity) {
+        return this.save(entity).toFuture();
+    }
 }

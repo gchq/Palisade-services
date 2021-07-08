@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisSlave.name }}
+            - name: {{ (index .Values.global.persistence "redis-slave").name }}
               mountPath: {{ .Values.slave.persistence.path }}
               subPath: {{ .Values.slave.persistence.subPath }}
             - name: config
@@ -310,7 +310,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisSlave.name }}
+            - name: {{ (index .Values.global.persistence "redis-slave").name }}
               mountPath: {{ .Values.slave.persistence.path }}
               subPath: {{ .Values.slave.persistence.subPath }}
             - name: config
@@ -362,7 +362,7 @@ spec:
             runAsUser: 0
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           volumeMounts:
-            - name: {{ .Values.global.persistence.redisSlave.name }}
+            - name: {{ (index .Values.global.persistence "redis-slave").name }}
               mountPath: {{ .Values.slave.persistence.path }}
               subPath: {{ .Values.slave.persistence.subPath }}
         {{- end }}
@@ -407,13 +407,13 @@ spec:
           emptyDir: {}
         - name: redis-tmp-conf
           emptyDir: {}
-    {{- if not .Values.slave.persistence.enabled }}
+  {{- if not .Values.slave.persistence.enabled }}
         - name: redis-data
           emptyDir: {}
-    {{- else }}
+  {{- else }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ .Values.global.persistence.redisSlave.name }}
+        name: {{ (index .Values.global.persistence "redis-slave").name }}
         labels:
           app: {{ template "redis.name" . }}
           release: {{ .Release.Name }}
@@ -421,24 +421,27 @@ spec:
           component: slave
       spec:
         accessModes:
-        - ReadWriteMany
-        storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisSlave.storageClassName | first | default .Values.global.persistence.redisSlave.storageClassName._default | indent 1 }}
+        - {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-slave").mode | first | default (index .Values.global.persistence "redis-slave").mode._default | indent 1 }}
+        storageClassName: {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-slave").storageClassName | first | default (index .Values.global.persistence "redis-slave").storageClassName._default | indent 1 }}
         resources:
           requests:
-            storage: {{ $.Values.global.persistence.redisSlave.storage }}
-        {{ include "redis.slave.storageClass" . }}
+            storage: {{ (index .Values.global.persistence "redis-slave").storage }}
+        {{- $config := (index .Values.global.persistence "redis-slave") }}
+        {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
         selector:
+          {{- if eq $provisioning "static" }}
           matchLabels:
-            selectorFilter: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
-        {{- if .Values.slave.persistence.matchExpressions }}
+            selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+          {{- end }}
+          {{- if .Values.slave.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.slave.persistence.matchExpressions | nindent 12 }}
-        {{- end -}}
+          {{- end -}}
   {{- end }}
   updateStrategy:
     type: {{ .Values.slave.statefulset.updateStrategy }}
     {{- if .Values.slave.statefulset.rollingUpdatePartition }}
     {{- if (eq "Recreate" .Values.slave.statefulset.updateStrategy) }}
-    rollingUpdate: null
+    rollingUpdate: {}
     {{- else }}
     rollingUpdate:
       partition: {{ .Values.slave.statefulset.rollingUpdatePartition }}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,28 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.service.data.service.DataService;
-
-import java.io.IOException;
-
 /**
- * {@link RuntimeException} to be thrown by a {@link DataService} to indicate a failure while processing a request.
- * This failure should be caught and audited with the audit service.
+ * Specialised exception thrown by the Data Service when an IOException occurred while reading
+ * from the data-reader.
  */
-public class ReadException extends IOException {
+public class ReadException extends RuntimeException {
 
     /**
-     * Instantiates a new Read exception with a {@link Throwable} cause
-     * which will call super and throw a {@link RuntimeException}
+     * Initialises this exception with the given message.
      *
-     * @param cause the reason for throwing the exception
+     * @param message message for the exception
      */
-    public ReadException(final Throwable cause) {
-        super(cause);
+    public ReadException(final String message) {
+        super(message);
+    }
+
+    /**
+     * Initialises this exception with the given message and cause.
+     *
+     * @param message   message to report
+     * @param throwable the underlying cause of this exception
+     */
+    public ReadException(final String message, final Throwable throwable) {
+        super(message, throwable);
     }
 }

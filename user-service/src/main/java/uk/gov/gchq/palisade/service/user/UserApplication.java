@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,118 @@
 
 package uk.gov.gchq.palisade.service.user;
 
+import akka.stream.Materializer;
+import akka.stream.javadsl.RunnableGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.event.EventListener;
 
-@EnableDiscoveryClient
-@EnableCaching
+import uk.gov.gchq.palisade.service.user.config.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.config.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
+import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.user.User;
+
+import javax.annotation.PreDestroy;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+
+/**
+ * SpringBoot application entry-point method for the {@link UserApplication} executable
+ */
 @SpringBootApplication
+@EnableCaching
+@EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
 
+    private final Set<RunnableGraph<?>> runners;
+    private final Materializer materialiser;
+    private final Executor executor;
+    private final UserServiceCachingProxy service;
+    private final UserConfiguration userConfig;
+    private final Set<CompletableFuture<?>> runnerThreads = new HashSet<>();
+
+    /**
+     * Autowire Akka objects in constructor for application ready event
+     *
+     * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materialiser  the Akka {@link Materializer} configured to be used
+     * @param service       the specific {@link UserService} implementation
+     * @param configuration the {@link UserConfiguration} required for loading {@link User}s into the service
+     * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     */
+    public UserApplication(
+            final Collection<RunnableGraph<?>> runners,
+            final Materializer materialiser,
+            final UserServiceCachingProxy service,
+            @Qualifier("userConfiguration") final UserConfiguration configuration,
+            @Qualifier("threadPoolTaskExecutor") final Executor executor) {
+        this.service = service;
+        this.userConfig = configuration;
+        this.runners = new HashSet<>(runners);
+        this.materialiser = materialiser;
+        this.executor = executor;
+    }
+
+    /**
+     * Application entrypoint, creates and runs a spring application, passing in the given command-line args
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
-        LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);
+        LOGGER.debug("UserApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
+    }
+
+    /**
+     * First pre-populates the cache using a configuration yaml file
+     * Then runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void serveForever() {
+        // First pre-populate the cache
+        LOGGER.info("Pre-populating using user config: {}", userConfig.getClass());
+        // Add example users to the user-service cache
+        userConfig.getUsers().stream()
+                .map(UserPrepopulationFactory::build)
+                .forEach((User user) -> {
+                    LOGGER.info("Cache add for {} -> {}", user.getUserId().getId(), user);
+                    service.addUser(user);
+                });
+
+        // Then start up all runners
+        runnerThreads.addAll(runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor))
+                .collect(Collectors.toSet()));
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+        runnerThreads.forEach(CompletableFuture::join);
+    }
+
+    /**
+     * Cancels any futures that are running and then terminates the Akka Actor so the service can be terminated safely
+     */
+    @PreDestroy
+    public void onExit() {
+        LOGGER.info("Cancelling running futures");
+        runnerThreads.forEach(thread -> thread.cancel(true));
+        LOGGER.info("Terminating actor system");
+        materialiser.system().terminate();
     }
 }

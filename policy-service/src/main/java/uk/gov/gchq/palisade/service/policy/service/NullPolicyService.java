@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,37 @@
 
 package uk.gov.gchq.palisade.service.policy.service;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
  * A default do-nothing Policy Service designed to work with the Caching and Hierarchy layers.
- * Within cache TTL and cache size, the set...Policy methods will add to the cache, getPolicy will get from the cache
+ * Within the cache TTL and cache size, the set...Rules methods will add to the cache, get...Rules will get from the cache,
  * and the service will declare all Resources available unless Policy dictates otherwise.
- * After cache TTL timeout, the service will effectively be reset and empty
+ * After the cache TTL timeout, the service will effectively be reset and emptied.
  */
 public class NullPolicyService implements PolicyService {
-    @Override
-    public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
-        // By default, all resources can be accessed (this may be overruled by hierarchy and policies on the resource)
-        return Optional.of(resource);
-    }
 
     @Override
-    public Optional<Policy> getPolicy(final Resource resource) {
-        // No policies ever exist, so none are returned when requested (actual returns may come from cache)
+    public Optional<Rules<LeafResource>> getResourceRules(final String resourceId) {
         return Optional.empty();
     }
 
     @Override
-    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        // Policies cannot be stored, but pretend that they are (they will be cached)
-        return policy;
+    public Optional<Rules<Serializable>> getRecordRules(final String resourceId) {
+        return Optional.empty();
     }
 
     @Override
-    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
-        // Policies cannot be stored, but pretend that they are (they will be cached)
-        throw new RuntimeException(String.format("%s::setTypePolicy not implemented", this.getClass()));
+    public Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules) {
+        return Optional.of(rules);
+    }
+
+    @Override
+    public Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules) {
+        return Optional.of(rules);
     }
 }

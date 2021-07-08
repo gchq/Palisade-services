@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,24 +25,30 @@
 # as to the slightly anomalous behaviour
 
 {{- $namespace := include "palisade.namespace" . }}
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "palisade.deployment.fullname" . }}
+  name: {{ include "palisade.classpathJars.name" . }}
   labels:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   namespace: {{ $namespace }}
   annotations:
-    "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
-  - ReadWriteMany
+  - {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.mode | first | default .Values.global.persistence.classpathJars.mode._default }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   storageClassName: {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
+  {{- if eq $provisioning "static" }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+      selectorFilter: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
+  {{- end }}

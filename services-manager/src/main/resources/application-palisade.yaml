@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,14 +26,21 @@ manager:
 
   tasks:
     palisade-task:
+      - attribute-masking-service
       - audit-service
       - data-service
+      - filtered-resource-service
       - palisade-service
       - policy-service
       - resource-service
+      - topic-offset-service
       - user-service
 
   services:
+    attribute-masking-service:
+      jar: attribute-masking-service/target/attribute-masking-service-${app.version}-exec.jar
+      log: attribute-masking-service.log
+
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
       log: audit-service.log
@@ -41,6 +48,10 @@ manager:
     data-service:
       jar: data-service/target/data-service-${app.version}-exec.jar
       log: data-service.log
+
+    filtered-resource-service:
+      jar: filtered-resource-service/target/filtered-resource-service-${app.version}-exec.jar
+      log: filtered-resource-service.log
 
     palisade-service:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
@@ -53,6 +64,10 @@ manager:
     resource-service:
       jar: resource-service/target/resource-service-${app.version}-exec.jar
       log: resource-service.log
+
+    topic-offset-service:
+      jar: topic-offset-service/target/topic-offset-service-${app.version}-exec.jar
+      log: topic-offset-service.log
 
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar

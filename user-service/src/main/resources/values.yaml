@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@ replicaCount: 1
 
 service:
   port: 80
+  internalPort: 8087
   type: ClusterIP
 
 image:
   name: @artifactId@
-  tag: @git.commit.id.abbrev@-@revision@
+  base: @dockerfile.base.tag@
+  tag: @revision@-@git.commit.id.abbrev@
   pullPolicy: IfNotPresent
+  gitHash: @git.commit.id.abbrev@
+  versionNumber: @version.number@
   codeRelease: @project.parent.version@
+  revision: @revision@
 
 resources:
   limits:

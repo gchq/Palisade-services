@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,39 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
+# N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
+# however, the CSI driver's plugin GetVolumeHandle method determines whether
+# the volume is actually used by other pods as a different mode
+# there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+# as to the slightly anomalous behaviour
+
 {{- $namespace := include "palisade.namespace" . }}
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+{{- if eq $provisioning "static" }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  name: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
   labels:
-  {{- if eq .Values.global.hosting "aws" }}
+    selectorFilter: {{ include "palisade.classpathJars.name" . }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
-  {{- end }}
-    selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
-  {{- if eq .Values.global.hosting "local" }}
+  {{- if eq $sc "hostpath" }}
   hostPath:
-    path: {{ include "palisade.deployment.path" . }}
+    path: {{ required "A valid local hostpath must be specified" .Values.global.persistence.classpathJars.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ include "palisade.deployment.path" . }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ required "A valid AWS EFS volume path must be specified" .Values.global.persistence.classpathJars.aws.volumePath }}
   {{- end }}
+{{- end }}
