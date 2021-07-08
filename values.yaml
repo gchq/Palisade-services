@@ -86,6 +86,9 @@ global:
   # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
   repository: "gchq/palisade-"
 
+  # releaseTag: name used to identify image tags used in a release (as opposed to a SNAPSHOT)
+  releaseTag: RELEASE
+
   # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
   deployment: codeRelease
 
