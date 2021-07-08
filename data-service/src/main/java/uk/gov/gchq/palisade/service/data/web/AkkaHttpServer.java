@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web;
+package uk.gov.gchq.palisade.service.data.web;
 
 import akka.actor.ActorSystem;
-import akka.http.javadsl.HandlerProvider;
+import akka.http.javadsl.ConnectHttp;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.ServerBinding;
 import akka.http.javadsl.server.Directives;
+import akka.stream.Materializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
+import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +45,6 @@ public class AkkaHttpServer {
     private final String hostname;
     private final int port;
     private final Collection<RouteSupplier> routeSuppliers;
-    private final HandlerProvider bindings;
 
     private CompletableFuture<ServerBinding> serverBinding = new CompletableFuture<>();
 
@@ -59,10 +60,11 @@ public class AkkaHttpServer {
         this.hostname = hostname;
         this.port = port;
         this.routeSuppliers = Collections.unmodifiableCollection(routeSuppliers);
-        this.bindings = this.routeSuppliers.stream()
-                .map(Supplier::get)
-                .reduce(Directives::concat)
-                .orElseThrow(() -> new IllegalArgumentException("No route suppliers found to create HTTP server bindings, check your config."));
+    }
+
+    @Generated
+    public CompletableFuture<ServerBinding> getServerBinding() {
+        return serverBinding;
     }
 
     /**
@@ -72,9 +74,15 @@ public class AkkaHttpServer {
      * @param system the akka actor system (effectively providing the thread-pool to run this server on)
      */
     public void serveForever(final ActorSystem system) {
+        var mat = Materializer.createMaterializer(system);
+        var bindings = this.routeSuppliers.stream()
+                .map(Supplier::get)
+                .reduce(Directives::concat)
+                .orElseThrow(() -> new IllegalArgumentException("No route suppliers found to create HTTP server bindings, check your config."))
+                .flow(system, mat);
+        var connectToHost = ConnectHttp.toHost(this.hostname, this.port);
         this.serverBinding = Http.get(system)
-                .newServerAt(this.hostname, this.port)
-                .bind(this.bindings)
+                .bindAndHandle(bindings, connectToHost, mat)
                 .toCompletableFuture();
 
         LOGGER.info("Started Akka Http server at {} with {} bindings", serverBinding.join().localAddress(), this.routeSuppliers.size());

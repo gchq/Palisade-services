@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.client.s3.web;
+package uk.gov.gchq.palisade.service.data.web;
 
 import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
@@ -27,7 +27,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Arrays;
 
-final class LeafResourceContentType {
+public final class LeafResourceContentType {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeafResourceContentType.class);
 
     private LeafResourceContentType() {
@@ -43,7 +43,7 @@ final class LeafResourceContentType {
     public static MediaType.Binary mediaType(final String mediaTypeStr) {
         String[] parts = mediaTypeStr.split("/");
         if (parts.length != 2) {
-            throw new IllegalArgumentException("Parts for format '" + mediaTypeStr + "' was now two: " + Arrays.toString(parts));
+            throw new IllegalArgumentException("Parts for format '" + mediaTypeStr + "' was not two: " + Arrays.toString(parts));
         }
 
         String mainType = parts[0];

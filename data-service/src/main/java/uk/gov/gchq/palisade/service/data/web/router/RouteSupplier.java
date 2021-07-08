@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router;
+package uk.gov.gchq.palisade.service.data.web.router;
 
 import akka.http.javadsl.server.Route;
 

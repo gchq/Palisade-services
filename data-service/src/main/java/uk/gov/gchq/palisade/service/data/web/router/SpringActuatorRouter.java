@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router;
+package uk.gov.gchq.palisade.service.data.web.router;
 
 import akka.http.javadsl.server.Directives;
 import akka.http.javadsl.server.Route;
 
-import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.ActuatorSupplier;
+import uk.gov.gchq.palisade.service.data.web.router.actuator.ActuatorSupplier;
 
 import java.util.Collection;
 import java.util.Collections;

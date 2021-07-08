@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.config;
+package uk.gov.gchq.palisade.service.data.web.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.actuate.context.ShutdownEndpoint;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.logging.LoggersEndpoint;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.availability.ApplicationAvailability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
-import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.KafkaRestWriterRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringActuatorRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.ActuatorSupplier;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringHealthRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringLoggersRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringShutdownRouter;
+import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
+import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
+import uk.gov.gchq.palisade.service.data.web.router.ChunkedHttpWriter;
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
+import uk.gov.gchq.palisade.service.data.web.router.SpringActuatorRouter;
+import uk.gov.gchq.palisade.service.data.web.router.actuator.ActuatorSupplier;
+import uk.gov.gchq.palisade.service.data.web.router.actuator.SpringHealthRouter;
+import uk.gov.gchq.palisade.service.data.web.router.actuator.SpringLoggersRouter;
+import uk.gov.gchq.palisade.service.data.web.router.actuator.SpringShutdownRouter;
 
 import java.net.InetAddress;
 import java.util.Collection;
@@ -65,28 +62,9 @@ public class EndpointConfiguration {
         return new AkkaHttpServer(hostname, properties.getPort(), routeSuppliers);
     }
 
-    /**
-     * Route for "/resource/{token}" to the {@link WebSocketEventService}
-     *
-     * @param websocketEventService the websocket event service to connect to
-     * @param objectMapper          an object mapper for object serialisation
-     * @return the websocket router
-     */
     @Bean
-    WebSocketRouter websocketRouter(final WebSocketEventService websocketEventService, final ObjectMapper objectMapper) {
-        return new WebSocketRouter(websocketEventService, objectMapper);
-    }
-
-    /**
-     * Route for "/api/{topic}" to the {@link KafkaProducerService}
-     *
-     * @param kafkaProducerService the kafka producer service to connect to
-     * @return the kafka rest writer router
-     */
-    @Bean
-    @ConditionalOnBean(KafkaProducerService.class)
-    KafkaRestWriterRouter kafkaRestWriterRouter(final KafkaProducerService kafkaProducerService) {
-        return new KafkaRestWriterRouter(kafkaProducerService);
+    ChunkedHttpWriter chunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
+        return new ChunkedHttpWriter(auditableDataService, auditMessageService);
     }
 
     /**

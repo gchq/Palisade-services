@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
+package uk.gov.gchq.palisade.service.data.web.router.actuator;
 
 import akka.http.javadsl.server.Route;
+
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 
 import java.util.function.Supplier;
 
 /**
  * Interface for supplying akka routes.
- * Functionally equivalent to {@link uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier}
+ * Functionally equivalent to {@link RouteSupplier}
  * but allows Spring to differentiate between routes under localhost/... and actuators under localhost/actuator/...
  */
 public interface ActuatorSupplier extends Supplier<Route> {

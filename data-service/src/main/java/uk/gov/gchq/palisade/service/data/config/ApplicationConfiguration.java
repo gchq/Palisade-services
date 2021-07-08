@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -46,6 +48,7 @@ import java.util.concurrent.Executor;
  * Bean configuration and dependency injection graph.
  */
 @Configuration
+@EnableConfigurationProperties(ServerProperties.class)
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
@@ -95,7 +98,7 @@ public class ApplicationConfiguration {
      */
     @Bean
     JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
-                                            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+                                            final @Qualifier("applicationTaskExecutor") Executor executor) {
         return new JpaPersistenceLayer(requestsRepository, executor);
     }
 
@@ -135,7 +138,7 @@ public class ApplicationConfiguration {
         return new ObjectMapper();
     }
 
-    @Bean("threadPoolTaskExecutor")
+    @Bean("applicationTaskExecutor")
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");

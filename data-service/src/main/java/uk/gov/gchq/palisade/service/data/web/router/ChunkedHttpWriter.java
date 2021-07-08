@@ -16,73 +16,107 @@
 
 package uk.gov.gchq.palisade.service.data.web.router;
 
-import akka.http.javadsl.model.ws.TextMessage;
+import akka.http.javadsl.marshallers.jackson.Jackson;
+import akka.http.javadsl.model.HttpEntities;
+import akka.http.javadsl.model.HttpHeader;
+import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.model.StatusCodes;
+import akka.http.javadsl.model.headers.RawHeader;
 import akka.http.javadsl.server.Directives;
 import akka.http.javadsl.server.Route;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import akka.stream.javadsl.StreamConverters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
-import uk.gov.gchq.palisade.service.data.service.WebSocketEventService;
+import uk.gov.gchq.palisade.service.data.web.LeafResourceContentType;
 
-import java.io.OutputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Route for "/read/chunked
  */
-public class HttpStreamWriter implements RouteSupplier {
+public class ChunkedHttpWriter implements RouteSupplier {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChunkedHttpWriter.class);
     private final AuditableDataService auditableDataService;
     private final AuditMessageService auditMessageService;
-    private final ObjectMapper mapper;
 
+    public ChunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
+        this.auditableDataService = auditableDataService;
+        this.auditMessageService = auditMessageService;
+    }
 
     @Override
     public Route get() {
         // http://data-service/read/chunked -> stream of bytes
-        return Directives.pathPrefix("resource", () -> Directives.path((String token) -> {
-            LOGGER.info("Invoking read (chunked): {}", dataRequest);
+        return Directives.pathPrefix("read", () -> Directives.path("chunked", () -> Directives.withRangeSupport(() ->
+                Directives.post(() -> Directives.entity(Jackson.unmarshaller(DataRequest.class), dataRequest -> {
+                    LOGGER.info("Invoking read (chunked): {}", dataRequest);
 
-            HttpStatus httpStatus = HttpStatus.OK;
-            StreamingResponseBody stream = null;
+                    // first with the client information about the request, retrieve the authorised resource information
+                    AuditableAuthorisedDataRequest auditableAuthorisedDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
+                    AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
-            //first with the client information about the request, retrieve the authorised resource information
-            AuditableAuthorisedDataRequest auditableAuthorisedDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
-            AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
+                    if (authorisationErrorMessage != null) {
+                        LOGGER.error("Error occurred processing the authoriseRequest : ", authorisationErrorMessage.getError());
+                        auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                .withToken(dataRequest.getToken())
+                                .withAuditMessage(authorisationErrorMessage));
+                        return Directives.complete(StatusCodes.FORBIDDEN);
+                    } else {
+                        // Create a consumer of the REST response's OutputStream, writing resource data to it
+                        var leafResource = auditableAuthorisedDataRequest.getAuthorisedDataRequest().getResource();
 
-            if (authorisationErrorMessage != null) {
-                LOGGER.error("Error occurred processing the authoriseRequest : ", authorisationErrorMessage.getError());
-                httpStatus = (HttpStatus.INTERNAL_SERVER_ERROR);
-                auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                        .withToken(dataRequest.getToken())
-                        .withAuditMessage(authorisationErrorMessage));
-            } else {
-                // Create a consumer of the REST response's OutputStream, writing resource data to it
-                stream = (OutputStream outputStream) -> {
-                    AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
-                    auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                            .withToken(dataRequest.getToken())
-                            //send a message to the audit service of successfully processed request
-                            .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
+                        // Maintain existing data-service API for now, create connected InputStream and OutputStream pair
+                        var inputStream = new PipedInputStream();
+                        var outputStream = new PipedOutputStream();
+                        try {
+                            outputStream.connect(inputStream);
+                        } catch (IOException e) {
+                            return Directives.complete(StatusCodes.INTERNAL_SERVER_ERROR);
+                        }
 
-                    Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
-                            .ifPresent((AuditErrorMessage errorMessage) -> {
-                                //send a message to the audit service of an error occurred in processing a request
-                                LOGGER.error("Error occurred processing the read : ", errorMessage.getError());
-                                auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                                        .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
-                            });
-                };
-            }
-            return new ResponseEntity<>(stream, httpStatus);
-        }));
+                        AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream)
+                                .join();
+                        auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                .withToken(dataRequest.getToken())
+                                //send a message to the audit service of successfully processed request
+                                .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
+
+                        Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
+                                .ifPresent((AuditErrorMessage errorMessage) -> {
+                                    //send a message to the audit service of an error occurred in processing a request
+                                    LOGGER.error("Error occurred processing the read : ", errorMessage.getError());
+                                    auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                            .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
+                                });
+
+                        var entity = HttpEntities.create(LeafResourceContentType.create(leafResource), StreamConverters.fromInputStream(() -> inputStream));
+                        return Directives.complete(HttpResponse.create()
+                                .withStatus(StatusCodes.OK)
+                                .addHeaders(getDefaultHeadersForFoundResource(leafResource))
+                                // Return the object data as a chunked stream instead of strict
+                                .withEntity(entity));
+                    }
+                }))
+        )));
+    }
+
+    private List<HttpHeader> getDefaultHeadersForFoundResource(final LeafResource leafResource) {
+        var attributeHeaders = leafResource.getAttributes().entrySet().stream()
+                .map(entry -> RawHeader.create(entry.getKey(), entry.getValue()));
+        return attributeHeaders.collect(Collectors.toList());
     }
 }

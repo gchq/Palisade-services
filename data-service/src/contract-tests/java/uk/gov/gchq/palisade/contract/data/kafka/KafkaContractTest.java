@@ -32,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,9 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.Token;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
 
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -78,7 +81,7 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
  */
 @SpringBootTest(
         classes = DataApplication.class,
-        webEnvironment = WebEnvironment.RANDOM_PORT,
+        webEnvironment = WebEnvironment.MOCK,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import({KafkaTestConfiguration.class})
@@ -86,7 +89,6 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
 class KafkaContractTest {
     public static final String READ_CHUNKED = "/read/chunked";
 
-    @Autowired
     private TestRestTemplate restTemplate;
     @MockBean
     private AuditableDataService serviceMock;
@@ -98,12 +100,17 @@ class KafkaContractTest {
     private Materializer akkaMaterializer;
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
+    @Autowired
+    private AkkaHttpServer akkaHttpServer;
 
     @BeforeEach
     void setUp() {
+        var localAddress = akkaHttpServer.getServerBinding().join().localAddress();
+        var rootUri = "http://localhost:" + localAddress.getPort();
+        restTemplate = new TestRestTemplate(new RestTemplateBuilder().rootUri(rootUri));
+
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(
-                Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
+        converter.setSupportedMediaTypes(List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
         restTemplate.getRestTemplate().setMessageConverters(Arrays.asList(converter, new FormHttpMessageConverter()));
     }
 
@@ -134,7 +141,7 @@ class KafkaContractTest {
         ResponseEntity<Void> response = restTemplate.postForEntity(READ_CHUNKED, entity, Void.class);
 
         // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = errorProbe.request(1);
 
@@ -175,7 +182,11 @@ class KafkaContractTest {
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
         when(serviceMock.read(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
+                .then(invocation -> {
+                    var os = invocation.getArgument(1, OutputStream.class);
+                    os.close();
+                    return CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE);
+                });
 
         // Given - we are already listening to the service success output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings

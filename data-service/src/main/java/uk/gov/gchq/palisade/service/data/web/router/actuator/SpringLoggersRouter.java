@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.filteredresource.web.router.actuator;
+package uk.gov.gchq.palisade.service.data.web.router.actuator;
 
 import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.server.Directives;
