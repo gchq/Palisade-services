@@ -52,6 +52,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements ReactiveCrudRepository<V, K> {
     public static final String KEY_SEP = "::";
     private static final String ID_KEYSPACE = "id";
+    private static final String PARENT_KEYSPACE = "parent";
+    private static final String FORMAT_KEYSPACE = "format";
+    private static final String TYPE_KEYSPACE = "type";
     protected final String table;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
@@ -251,7 +254,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public <S extends CompletenessEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + KEY_SEP + entity.getId();
-            // The ttl set here should be moved to configuration
+            // The ttl set here should use the value from the application-redis configuration yaml
             return this.valueOps.set(id, entity)
                     .then(this.redisTemplate.expire(id, Duration.ofMinutes(3L)))
                     .thenReturn(entity);
@@ -270,7 +273,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
 
-        private static final String PARENT_KEYSPACE = "parent";
+        private static final String SEPARATOR = KEY_SEP + PARENT_KEYSPACE + KEY_SEP;
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
@@ -290,8 +293,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends ResourceEntity> Mono<S> save(final @NonNull S entity) {
-            final String id = this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + entity.getParentId();
-            // The ttl set here should be moved to configuration
+            final String id = this.table + SEPARATOR + entity.getParentId();
+            // The ttl set here should use the value from the application-redis configuration yaml
             return this.setOps.add(id, entity.getId())
                     .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
                     .then(this.saveDefault(entity));
@@ -299,7 +302,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Flux<ResourceEntity> findAllByParentId(final String parentId) {
-            return this.setOps.members(this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + parentId)
+            return this.setOps.members(this.table + SEPARATOR + parentId)
                     .flatMap(this::findById);
         }
 
@@ -307,7 +310,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + entity.getParentId()))
+                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getParentId()))
                     .then(this.deleteByIdDefault(key));
         }
     }
@@ -317,7 +320,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
 
-        private static final String FORMAT_KEYSPACE = "format";
+        private static final String SEPARATOR = KEY_SEP + FORMAT_KEYSPACE + KEY_SEP;
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
@@ -337,16 +340,15 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends SerialisedFormatEntity> Mono<S> save(final @NonNull S entity) {
-            final String id = this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + entity.getSerialisedFormat();
-            // The ttl set here should be moved to configuration
-            return this.setOps.add(id, entity.getId())
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
+            // The ttl set here should use the value from the application-redis configuration yaml
+            return this.setOps.add(this.table + SEPARATOR + entity.getSerialisedFormat(), entity.getId())
+                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), Duration.ofMinutes(5L)))
                     .then(this.saveDefault(entity));
         }
 
         @Override
         public Flux<SerialisedFormatEntity> findAllBySerialisedFormat(final String serialisedFormat) {
-            return this.setOps.members(this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + serialisedFormat)
+            return this.setOps.members(this.table + SEPARATOR + serialisedFormat)
                     .flatMap(this::findById);
         }
 
@@ -354,7 +356,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + entity.getSerialisedFormat()))
+                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getSerialisedFormat()))
                     .then(this.deleteByIdDefault(key));
         }
     }
@@ -364,7 +366,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
 
-        private static final String TYPE_KEYSPACE = "type";
+        private static final String SEPARATOR = KEY_SEP + TYPE_KEYSPACE + KEY_SEP;
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
@@ -384,8 +386,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends TypeEntity> Mono<S> save(final @NonNull S entity) {
-            final String id = this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + entity.getType();
-            // The ttl set here should be moved to configuration
+            final String id = this.table + SEPARATOR + entity.getType();
+            // The ttl set here should use the value from the application-redis configuration yaml
             return this.setOps.add(id, entity.getId())
                     .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
                     .then(super.saveDefault(entity));
@@ -393,7 +395,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Flux<TypeEntity> findAllByType(final String type) {
-            return this.setOps.members(this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + type)
+            return this.setOps.members(this.table + SEPARATOR + type)
                     .flatMap(this::findById);
         }
 
@@ -401,7 +403,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + entity.getType()))
+                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getType()))
                     .then(super.deleteByIdDefault(key));
         }
     }

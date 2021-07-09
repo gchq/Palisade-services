@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# The time before you start getting cache misses, the traditional sense of TTL.
+# Default value should be 24h
+#effectiveTtl: 10m
+
+# The maximum time you'd expect the Resource service to process a single request.
+# Any request that takes longer to read persistence will see weird errors.
+# These errors could be avoided and explicitly managed with akka `.takeDuring(Duration)`.
+# Default value could be 1h
+#inFlightTtl: 1m
+
 spring:
   autoconfigure:
     exclude:
@@ -20,6 +30,12 @@ spring:
     redis:
       repositories:
         enabled: true
+        # Set the TTL on all the repositories that are used within the Resource service using the effectiveTtl and inFlightTtl values defined above
+        #timeToLive:
+          #CompletenessEntity: ${effectiveTtl}
+          #TypeEntity: ${effectiveTtl} + ${inFlightTtl}
+          #SerialisedFormatEntity: ${effectiveTtl} + ${inFlightTtl}
+          #ResourceEntity: ${effectiveTtl} + 2 * ${inFlightTtl}
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
