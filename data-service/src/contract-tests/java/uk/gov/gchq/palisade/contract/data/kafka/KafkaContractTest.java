@@ -82,7 +82,7 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
 @SpringBootTest(
         classes = DataApplication.class,
         webEnvironment = WebEnvironment.MOCK,
-        properties = {"akka.discovery.config.services.kafka.from-config=false"}
+        properties = {"akka.discovery.config.services.kafka.from-config=false", "server.port=0"}
 )
 @Import({KafkaTestConfiguration.class})
 @ActiveProfiles({"akka-test", "testcontainers"})

@@ -37,8 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 @SpringBootTest(
         classes = {DataApplication.class},
-        webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"management.health.kafka.enabled=false"}
+        webEnvironment = WebEnvironment.MOCK,
+        properties = {"management.health.kafka.enabled=false", "server.port=0"}
 )
 @ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
