@@ -37,9 +37,11 @@ import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
 import uk.gov.gchq.palisade.service.resource.exception.ReactiveRepositoryReflectionException;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A class that implements a {@link ReactiveCrudRepository} for Redis backing store
@@ -49,12 +51,15 @@ import java.util.function.Function;
  */
 public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements ReactiveCrudRepository<V, K> {
     public static final String KEY_SEP = "::";
+    private static final String ID_KEYSPACE = "id";
     protected final String table;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
     protected final ReactiveValueOperations<String, V> valueOps;
+    protected final ReactiveRedisTemplate<String, V> redisTemplate;
 
     protected AbstractReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table) {
+        this.redisTemplate = redisTemplate;
         this.table = table;
         RedisSerializationContext<String, V> ctx = redisTemplate.getSerializationContext();
         this.hashOps = redisTemplate.opsForHash();
@@ -93,7 +98,9 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
     protected <S extends V> Mono<S> saveDefault(final @NonNull S entity) {
         K id = reflectIdAnnotation(entity);
-        return this.hashOps.put(this.table, id, entity)
+        // The ttl set here should be moved to configuration
+        return this.valueOps.set(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, entity)
+                .then(this.redisTemplate.expire(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, Duration.ofMinutes(5L)))
                 .filter(bool -> bool)
                 .map(bool -> entity);
     }
@@ -115,7 +122,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     @Override
     @NonNull
     public Mono<V> findById(final @NonNull K key) {
-        return this.hashOps.get(this.table, key);
+        return this.valueOps.get(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + key);
     }
 
     @Override
@@ -128,7 +135,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     @Override
     @NonNull
     public Mono<Boolean> existsById(final @NonNull K key) {
-        return this.hashOps.hasKey(this.table, key);
+        return this.valueOps.get(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + key)
+                .hasElement();
     }
 
     @Override
@@ -141,7 +149,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     @Override
     @NonNull
     public Flux<V> findAll() {
-        return this.hashOps.values(this.table);
+        return this.redisTemplate.keys(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + "*")
+                .flatMap(key -> this.findById((K) key));
     }
 
     @Override
@@ -149,7 +158,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     public Flux<V> findAllById(final @NonNull Iterable<K> ids) {
         LinkedList<K> idsList = new LinkedList<>();
         ids.forEach(idsList::add);
-        return this.hashOps.multiGet(this.table, idsList)
+        return this.valueOps.multiGet(idsList.stream()
+                .map(id -> this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id).collect(Collectors.toList()))
                 .flux()
                 .flatMapIterable(Function.identity());
     }
@@ -164,7 +174,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     @Override
     @NonNull
     public Mono<Long> count() {
-        return this.hashOps.size(this.table);
+        return this.findAll().count();
     }
 
     @Override
@@ -178,7 +188,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * @return a {@link Mono} of type {@link Void}
      */
     public Mono<Void> deleteByIdDefault(final @NonNull K key) {
-        return this.hashOps.remove(this.table, key)
+        return this.valueOps.delete(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + key)
                 .then();
     }
 
@@ -198,22 +208,22 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     @Override
     @NonNull
     public Mono<Void> deleteAll(final @NonNull Iterable<? extends V> entities) {
-        return this.hashOps.remove(this.table, entities)
-                .then();
+        return this.deleteAll(Flux.fromIterable(entities));
     }
 
     @Override
     @NonNull
     public final Mono<Void> deleteAll(final @NonNull Publisher<? extends V> entityStream) {
         return Flux.from(entityStream)
-                .map(this::delete)
+                .flatMap(this::delete)
                 .then();
     }
 
     @Override
     @NonNull
     public Mono<Void> deleteAll() {
-        return this.hashOps.delete(this.table)
+        return this.findAll()
+                .flatMap(this::delete)
                 .then();
     }
 
@@ -234,20 +244,24 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Mono<CompletenessEntity> findOneByEntityTypeAndEntityId(final EntityType entityType, final String entityId) {
-            return this.findById(CompletenessEntity.idFor(entityType, entityId));
+            return this.valueOps.get(this.table + KEY_SEP + CompletenessEntity.idFor(entityType, entityId).toString());
         }
 
         @Override
         @NonNull
         public <S extends CompletenessEntity> Mono<S> save(final @NonNull S entity) {
-            return this.valueOps.set(this.table + KEY_SEP + entity.getId(), entity)
-                    .then(super.saveDefault(entity));
+            final String id = this.table + KEY_SEP + entity.getId();
+            // The ttl set here should be moved to configuration
+            return this.valueOps.set(id, entity)
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(3L)))
+                    .thenReturn(entity);
         }
 
         @Override
         @NonNull
         public Mono<Void> deleteById(final @NonNull Integer key) {
-            return this.deleteByIdDefault(key);
+            return this.valueOps.delete(this.table + KEY_SEP + key.toString())
+                    .then();
         }
     }
 
@@ -255,6 +269,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link ResourceEntity}s to be stored in a reactive repository
      */
     public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
+
+        private static final String PARENT_KEYSPACE = "parent";
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
@@ -274,13 +290,16 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends ResourceEntity> Mono<S> save(final @NonNull S entity) {
-            return this.setOps.add(this.table + KEY_SEP + entity.getParentId(), entity.getId())
-                    .then(super.saveDefault(entity));
+            final String id = this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + entity.getParentId();
+            // The ttl set here should be moved to configuration
+            return this.setOps.add(id, entity.getId())
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
+                    .then(this.saveDefault(entity));
         }
 
         @Override
         public Flux<ResourceEntity> findAllByParentId(final String parentId) {
-            return this.setOps.members(this.table + KEY_SEP + parentId)
+            return this.setOps.members(this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + parentId)
                     .flatMap(this::findById);
         }
 
@@ -288,8 +307,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + entity.getParentId()))
-                    .then(super.deleteByIdDefault(key));
+                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + PARENT_KEYSPACE + KEY_SEP + entity.getParentId()))
+                    .then(this.deleteByIdDefault(key));
         }
     }
 
@@ -297,6 +316,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link SerialisedFormatEntity}s to be stored in a reactive repository
      */
     public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
+
+        private static final String FORMAT_KEYSPACE = "format";
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
@@ -316,13 +337,16 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends SerialisedFormatEntity> Mono<S> save(final @NonNull S entity) {
-            return this.setOps.add(this.table + KEY_SEP + entity.getSerialisedFormat(), entity.getId())
-                    .then(super.saveDefault(entity));
+            final String id = this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + entity.getSerialisedFormat();
+            // The ttl set here should be moved to configuration
+            return this.setOps.add(id, entity.getId())
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
+                    .then(this.saveDefault(entity));
         }
 
         @Override
         public Flux<SerialisedFormatEntity> findAllBySerialisedFormat(final String serialisedFormat) {
-            return this.setOps.members(this.table + KEY_SEP + serialisedFormat)
+            return this.setOps.members(this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + serialisedFormat)
                     .flatMap(this::findById);
         }
 
@@ -330,8 +354,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + entity.getSerialisedFormat()))
-                    .then(super.deleteByIdDefault(key));
+                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + FORMAT_KEYSPACE + KEY_SEP + entity.getSerialisedFormat()))
+                    .then(this.deleteByIdDefault(key));
         }
     }
 
@@ -339,6 +363,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link TypeRepository}s to be stored in a reactive repository
      */
     public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
+
+        private static final String TYPE_KEYSPACE = "type";
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
@@ -358,13 +384,16 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends TypeEntity> Mono<S> save(final @NonNull S entity) {
-            return this.setOps.add(this.table + KEY_SEP + entity.getType(), entity.getId())
+            final String id = this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + entity.getType();
+            // The ttl set here should be moved to configuration
+            return this.setOps.add(id, entity.getId())
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
                     .then(super.saveDefault(entity));
         }
 
         @Override
         public Flux<TypeEntity> findAllByType(final String type) {
-            return this.setOps.members(this.table + KEY_SEP + type)
+            return this.setOps.members(this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + type)
                     .flatMap(this::findById);
         }
 
@@ -372,7 +401,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + entity.getType()))
+                    .map(entity -> this.setOps.remove(this.table + KEY_SEP + TYPE_KEYSPACE + KEY_SEP + entity.getType()))
                     .then(super.deleteByIdDefault(key));
         }
     }
