@@ -91,8 +91,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 )
 @Import(KafkaTestConfiguration.class)
 @ActiveProfiles({"akka-test", "testcontainers"})
+// Suppress ternary operator smell
 @SuppressWarnings("java:S1774")
-        //Suppress ternary operator smell
 class KafkaContractTest {
     private static final String KAFKA_URL = "localhost:9092";
     private static final Integer TIMEOUT = 20;
