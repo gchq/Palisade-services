@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
  * The HTTP server will serve forever on the supplied {@code server.host} and {@code server.port}
  * config values, binding all the given {@link RouteSupplier}s using their given
  * {@link akka.http.javadsl.server.Route}s.
+ * <p>
+ * Primarily, we make use of endpoints for clients reading data, and of Spring's Actuators.
  */
 public class AkkaHttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaHttpServer.class);

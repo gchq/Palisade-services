@@ -21,9 +21,12 @@ service:
 image:
   name: data-service
   base: jre
-  tag: SNAPSHOT-8dfadc8
+  tag: SNAPSHOT-3e49fa9
   pullPolicy: IfNotPresent
+  gitHash: 3e49fa9
+  versionNumber: 0.5.0
   codeRelease: 0.5.0-SNAPSHOT
+  revision: SNAPSHOT
 
 resources:
   limits:
