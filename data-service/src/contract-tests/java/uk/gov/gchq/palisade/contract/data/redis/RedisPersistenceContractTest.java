@@ -73,7 +73,7 @@ class RedisPersistenceContractTest {
 
         DataReaderRequest readerRequest = new DataReaderRequest()
                 .user(new User().userId("test-user"))
-                .resource(new FileResource().id("/resource/id")
+                .resource(new FileResource().id("file:/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
                         .connectionDetail(new SimpleConnectionDetail().serviceName("data-service")))
@@ -81,7 +81,7 @@ class RedisPersistenceContractTest {
                 .rules(new Rules<>());
 
         AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
-                .withResource(new FileResource().id("/resource/id")
+                .withResource(new FileResource().id("file:/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
                         .connectionDetail(new SimpleConnectionDetail().serviceName("data-service")))
