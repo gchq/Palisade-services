@@ -16,17 +16,12 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Provides an auditable wrapper to the {@link DataService}. For each of the methods provided in the in the
@@ -61,35 +56,6 @@ public class AuditableDataService {
                         .withDataRequest(dataRequest)
                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
                                 .withAttributes(Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.AUTHORISED_REQUEST))
-                                .withError(e)));
-    }
-
-    /**
-     * Reads the authorised resource and passes this onto the client in the form an {@link OutputStream}. The response
-     * is used in the construction of the audit message for this request.
-     *
-     * @param auditableAuthorisedDataRequest provides the reference to the authorised data request
-     * @param outputStream                   is used to provide the requested data to be forwarded to the client
-     * @return information on the resources that have been provided
-     */
-    public CompletableFuture<AuditableDataResponse> read(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest, final OutputStream outputStream) {
-        DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
-        AuthorisedDataRequest authorisedDataRequest = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
-        AtomicLong recordsProcessed = new AtomicLong(0);
-        AtomicLong recordsReturned = new AtomicLong(0);
-
-        return dataService.read(authorisedDataRequest, outputStream, recordsProcessed, recordsReturned)
-                .thenApply(success -> AuditableDataResponse.Builder.create()
-                        .withToken(dataRequest.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
-                                .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
-                        .withoutAuditErrorMessage())
-                .exceptionally(e -> AuditableDataResponse.Builder.create()
-                        .withToken(dataRequest.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
-                                .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
-                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableAuthorisedDataRequest)
-                                .withAttributes(Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.READ))
                                 .withError(e)));
     }
 }

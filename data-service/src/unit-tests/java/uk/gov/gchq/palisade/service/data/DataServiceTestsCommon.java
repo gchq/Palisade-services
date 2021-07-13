@@ -25,16 +25,10 @@ import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
-import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.reader.ResponseWriter;
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.user.UserId;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -62,9 +56,6 @@ public class DataServiceTestsCommon {
     public static final Rules<Serializable> RULES = new Rules<>()
             .addRule(RULE_MESSAGE, new PassThroughRule<>());
 
-    public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
-    public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
-
     public static final DataRequest DATA_REQUEST = DataRequest.Builder.create()
             .withToken(REQUEST_TOKEN)
             .withLeafResourceId(RESOURCE_ID);
@@ -77,12 +68,6 @@ public class DataServiceTestsCommon {
             RULES
     );
 
-    public static final DataReaderRequest DATA_READER_REQUEST = new DataReaderRequest()
-            .user(USER)
-            .resource(LEAF_RESOURCE)
-            .context(CONTEXT)
-            .rules(RULES);
-
     public static final AuthorisedDataRequest AUTHORISED_DATA_REQUEST = AuthorisedDataRequest.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
@@ -90,27 +75,6 @@ public class DataServiceTestsCommon {
             .withRules(RULES);
 
     public static final String TEST_RESPONSE_MESSAGE = "test response for data request";
-
-    public static final ResponseWriter RESPONSE_WRITER = new ResponseWriter() {
-
-        final String testData = TEST_RESPONSE_MESSAGE;
-
-        @Override
-        public void close() {
-        }
-
-        @Override
-        public ResponseWriter write(final OutputStream outputStream) throws IOException {
-            try (var testInputStream = new ByteArrayInputStream(testData.getBytes())) {
-                testInputStream.transferTo(outputStream);
-            }
-            return this;
-        }
-    };
-
-    public static final DataReaderResponse DATA_READER_RESPONSE = new DataReaderResponse()
-            .message("test message")
-            .writer(RESPONSE_WRITER);
 
     public static class PassThroughRule<T extends Serializable> implements Rule<T> {
         @Override

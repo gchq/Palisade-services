@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
 import uk.gov.gchq.palisade.contract.data.kafka.KafkaTestConfiguration;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -35,7 +36,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
@@ -72,15 +72,14 @@ class RedisPersistenceContractTest {
         // Given
         String token = "token";
 
-        DataReaderRequest readerRequest = new DataReaderRequest()
-                .user(new User().userId("test-user"))
-                .resource(new FileResource().id("/resource/id")
+                User user = new User().userId("test-user");
+                LeafResource resource = new FileResource().id("/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
                         .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                        .parent(new SystemResource().id("/")))
-                .context(new Context().purpose("test-purpose"))
-                .rules(new Rules<>());
+                        .parent(new SystemResource().id("/"));
+                Context context = new Context().purpose("test-purpose");
+                Rules<?> rules = new Rules<>();
 
         AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
                 .serialisedFormat("avro")
@@ -92,16 +91,16 @@ class RedisPersistenceContractTest {
                 .withRules(new Rules<>());
         repository.save(new AuthorisedRequestEntity(
                 token,
-                readerRequest.getUser(),
-                readerRequest.getResource(),
-                readerRequest.getContext(),
-                readerRequest.getRules()
+                user,
+                resource,
+                context,
+                rules
         ));
 
         // When
         DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
-                .withLeafResourceId(readerRequest.getResource().getId());
+                .withLeafResourceId(resource.getId());
         CompletableFuture<AuthorisedDataRequest> futureDataResponse = service.authoriseRequest(dataRequest);
         AuthorisedDataRequest authorisedDataFromResource = futureDataResponse.join();
         // Then

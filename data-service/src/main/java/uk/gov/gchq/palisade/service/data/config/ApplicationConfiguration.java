@@ -29,10 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
-import uk.gov.gchq.palisade.service.data.reader.SimpleDataReader;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
@@ -40,8 +36,12 @@ import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
+import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
+import uk.gov.gchq.palisade.service.data.service.reader.SimpleDataReader;
+import uk.gov.gchq.palisade.service.data.service.writer.ChunkedHttpWriter;
+import uk.gov.gchq.palisade.service.data.service.writer.ResponseWriter;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
@@ -54,32 +54,10 @@ public class ApplicationConfiguration {
 
     private static final int CORE_POOL_SIZE = 6;
 
-    /**
-     * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of serialisers from a yaml file.
-     * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s.
-     * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}.
-     *
-     * @return a {@link StdSerialiserConfiguration} containing a list of {@link StdSerialiserPrepopulationFactory}s
-     */
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdSerialiserConfiguration serialiserConfiguration() {
-        return new StdSerialiserConfiguration();
-    }
-
-    /**
-     * Implementation of a {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file.
-     * A factory for {@link Serialiser} objects, using:
-     * - a {@link Map} of the type and format required for a {@link DataFlavour}
-     * - a {@link Map} of the serialiser class and the domain class needed to create a {@link Serialiser}.
-     *
-     * @return a standard {@link StdSerialiserPrepopulationFactory} capable of building a {@link Serialiser} and {@link DataFlavour} from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
-    public StdSerialiserPrepopulationFactory serialiserPrepopulationFactory() {
-        return new StdSerialiserPrepopulationFactory();
+    @ConfigurationProperties(prefix = "data")
+    SerialiserConfiguration serialiserConfiguration() {
+        return new SerialiserConfiguration();
     }
 
     @Bean
@@ -107,13 +85,11 @@ public class ApplicationConfiguration {
      * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
      *
      * @param persistenceLayer the persistence layer for reading authorised requests
-     * @param dataReader       the data reader to use for reading resource data from storage
      * @return a new {@link SimpleDataService}
      */
     @Bean
-    DataService simpleDataService(final PersistenceLayer persistenceLayer,
-                                  final DataReader dataReader) {
-        return new SimpleDataService(persistenceLayer, dataReader);
+    DataService simpleDataService(final PersistenceLayer persistenceLayer) {
+        return new SimpleDataService(persistenceLayer);
     }
 
     @Bean
@@ -126,6 +102,11 @@ public class ApplicationConfiguration {
         return new AuditMessageService(materializer);
     }
 
+    @Bean
+    ResponseWriter chunkedHttpWriter(final Collection<DataReader> readers, final SerialiserConfiguration serialiserConfiguration,
+                                     final AuditableDataService dataService, final AuditMessageService auditService) {
+        return new ChunkedHttpWriter(readers, serialiserConfiguration.getSerialiserClassMap(), dataService, auditService);
+    }
 
     /**
      * Default JSON to Java seraialiser/deserialiser.

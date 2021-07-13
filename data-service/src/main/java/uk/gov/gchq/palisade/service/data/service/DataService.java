@@ -17,23 +17,11 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
 
-import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * The core API for the data service.
- * The responsibility of the data service is to take the read request from the client,
- * request the trusted details about the request from persistence (what policies to apply, user details, etc).
- * The data service then loops over the list of resources passing the list of rules that need to be applied.
- * The {@link DataReader} will then connect to the resource and apply the rules before streaming the data back to
- * the {@link DataService} which forwards the data back to the client.
- */
 public interface DataService {
 
     /**
@@ -46,15 +34,4 @@ public interface DataService {
      */
     CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
 
-    /**
-     * Read a resource and write each record to the given {@link OutputStream}.
-     *
-     * @param request          the authorised request from persistence to pass to the data-reader
-     * @param out              an {@link OutputStream} to write the stream of resources to (after applying rules)
-     * @param recordsProcessed number of records that have been processed
-     * @param recordsReturned  number of records that have been returned
-     * @return boolean of true for a successful completion
-     * @throws ReadException if there is a failure in the reading of the stream
-     */
-    CompletableFuture<Boolean> read(final AuthorisedDataRequest request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
 }

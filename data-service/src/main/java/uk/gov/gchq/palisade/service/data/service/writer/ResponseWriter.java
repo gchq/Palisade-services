@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.data.service.writer;
+
+import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * Marker interface for {@link RouteSupplier} that are used for writing data from the
+ * {@link DataReader} back to the client.
  */
-public class SerialiserInitialisationException extends RuntimeException {
-    /**
-     * Constructs a new {@link SerialiserInitialisationException} with the specified detail message and cause.
-     *
-     * @param message a {@link String} value detailing the error
-     */
-    public SerialiserInitialisationException(final String message) {
-        super(message);
-    }
+public interface ResponseWriter extends RouteSupplier {
 }

@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.reader;
+package uk.gov.gchq.palisade.service.data.service.reader;
+
+import akka.Done;
+import akka.stream.javadsl.Source;
+import akka.stream.javadsl.StreamConverters;
+import akka.util.ByteString;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.data.exception.ReadException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Paths;
+import java.util.concurrent.CompletionStage;
 
-/**
- * A simple data reader that connects to the data and streams the raw data
- */
-public class SimpleDataReader extends AbstractSerialisedDataReader {
-    @Override
-    protected InputStream readRaw(final LeafResource resource) {
-        try {
-            return new FileInputStream(Paths.get(URI.create(resource.getId())).toFile());
-        } catch (FileNotFoundException e) {
-            throw new ReadException("File not found.", e);
-        }
+public interface DataReader {
+
+    boolean accepts(final LeafResource leafResource);
+
+    InputStream read(final LeafResource leafResource);
+
+    default Source<ByteString, CompletionStage<Done>> readSource(final LeafResource leafResource) {
+        return StreamConverters.fromInputStream(() -> read(leafResource))
+                .mapMaterializedValue(future -> future.thenApply(io -> Done.done()));
     }
 }

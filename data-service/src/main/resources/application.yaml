@@ -53,7 +53,7 @@ data:
   implementation: simple
 
 population:
-  serialiserProvder: std
+  serialisers:
 
 logging:
   level:

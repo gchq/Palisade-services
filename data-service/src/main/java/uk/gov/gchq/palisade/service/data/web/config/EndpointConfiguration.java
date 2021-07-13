@@ -24,10 +24,7 @@ import org.springframework.boot.availability.ApplicationAvailability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
-import uk.gov.gchq.palisade.service.data.web.router.ChunkedHttpWriter;
 import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 import uk.gov.gchq.palisade.service.data.web.router.SpringActuatorRouter;
 import uk.gov.gchq.palisade.service.data.web.router.actuator.ActuatorSupplier;
@@ -60,11 +57,6 @@ public class EndpointConfiguration {
                 .map(InetAddress::getHostAddress)
                 .orElse("0.0.0.0");
         return new AkkaHttpServer(hostname, properties.getPort(), routeSuppliers);
-    }
-
-    @Bean
-    ChunkedHttpWriter chunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
-        return new ChunkedHttpWriter(auditableDataService, auditMessageService);
     }
 
     /**

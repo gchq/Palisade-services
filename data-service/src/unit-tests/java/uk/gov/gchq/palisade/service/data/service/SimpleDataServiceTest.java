@@ -21,18 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.exception.NoCapacityException;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -43,25 +37,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_DATA_REQUEST;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_REQUEST_ENTITY;
-import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_READER_REQUEST;
-import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_READER_RESPONSE;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_REQUEST;
-import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.RECORDS_PROCESSED;
-import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.RECORDS_RETURNED;
-import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.TEST_RESPONSE_MESSAGE;
 
 class SimpleDataServiceTest {
 
 
     //mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
-    final DataReader dataReader = Mockito.mock(DataReader.class);
 
     private SimpleDataService simpleDataService;
 
     @BeforeEach
     void setUp() {
-        simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
+        simpleDataService = new SimpleDataService(persistenceLayer);
     }
 
     /**
@@ -76,11 +64,10 @@ class SimpleDataServiceTest {
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(AUTHORISED_REQUEST_ENTITY)));
 
         // When & Then
-        assertThat(simpleDataService.authoriseRequest(DATA_REQUEST)
-                .join())
+        assertThat(simpleDataService.authoriseRequest(DATA_REQUEST).join())
                 .as("Check authoriseRequest returns a DataReaderRequest")
                 .usingRecursiveComparison()
-                .isEqualTo(DATA_READER_REQUEST);
+                .isEqualTo(AUTHORISED_DATA_REQUEST);
 
         //verifies the service calls the PersistenceLayer getAsync method once
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
@@ -114,33 +101,4 @@ class SimpleDataServiceTest {
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
-    /**
-     * Test for {@link SimpleDataService#read(AuthorisedDataRequest, OutputStream, AtomicLong, AtomicLong)}.
-     * The method will return {@code OutputStream} linked to the input provided by the {@code DataReader} and supply
-     * the requested data.
-     *
-     * @throws NoCapacityException if the reader fails
-     */
-    @Test
-    void testAuthoriseRequestWithARead() throws NoCapacityException {
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        // Given
-        when(dataReader.read(any(), any(), any())).thenReturn(DATA_READER_RESPONSE);
-
-        // When
-        simpleDataService
-                .read(AUTHORISED_DATA_REQUEST, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED)
-                .join();
-
-        //Then
-        String outputString = outputStream.toString();
-        assertThat(outputString)
-                .as("Check that read will provide data in the output stream")
-                .isEqualTo(TEST_RESPONSE_MESSAGE);
-
-        //verifies the service calls the DataReader read method once
-        verify(dataReader, times(1)).read(any(), any(), any());
-
-    }
 }
