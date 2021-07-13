@@ -35,7 +35,6 @@ import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.user.User;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -73,16 +72,16 @@ public class ContractTestData {
     public static final Context CONTEXT = new Context().purpose("testContext");
     public static final String USER_ID = "testUserId";
     public static final User USER = new User().userId(USER_ID);
-    public static final String RESOURCE_ID = "test resource id";
+    public static final String RESOURCE_ID = "file:/test/file.format";
 
-    public static final LeafResource RESOURCE = new FileResource().id("/test/file.format")
+    public static final LeafResource RESOURCE = new FileResource().id(RESOURCE_ID)
             .type("java.lang.String")
             .serialisedFormat("text/plain")
             .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-            .parent(new SystemResource().id("/test"));
+            .parent(new SystemResource().id("file:/test"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
-    public static final Map<String, Object> ATTRIBUTES = Collections.singletonMap("test key", "test value");
+    public static final Map<String, Object> ATTRIBUTES = Map.of("RECORDS_PROCESSED", 1, "RECORDS_RETURNED", 1);
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)

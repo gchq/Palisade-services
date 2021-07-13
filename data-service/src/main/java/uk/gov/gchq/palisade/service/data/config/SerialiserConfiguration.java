@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class SerialiserConfiguration {
-    private Map<String, String> serialisers;
+    private Map<String, String> serialisers = Map.of();
 
     @SuppressWarnings("unchecked")
     private static Class<Serialiser<?>> getSerialiserClass(final String className) {

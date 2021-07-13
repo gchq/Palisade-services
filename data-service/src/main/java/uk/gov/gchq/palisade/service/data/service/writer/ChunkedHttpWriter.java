@@ -43,6 +43,7 @@ import java.util.Map;
  * Route for "/read/chunked"
  */
 public class ChunkedHttpWriter extends AbstractResponseWriter {
+
     public ChunkedHttpWriter(
             final Collection<DataReader> readers,
             final Map<String, Class<Serialiser<?>>> serialisers,
@@ -53,29 +54,31 @@ public class ChunkedHttpWriter extends AbstractResponseWriter {
 
     @Override
     public Route get() {
-        return Directives.path("read", () -> Directives.path("chunked", () -> Directives.withRangeSupport(() ->
-                Directives.entity(Jackson.unmarshaller(DataRequest.class), request ->
-                        Directives.completeWithFuture(dataService.authoriseRequest(request).thenApply(auditableAuthorisedDataRequest -> {
-                            // Decide HTTP Content-Type header and Status-Code
-                            ContentType contentType;
-                            StatusCode statusCode;
-                            if (auditableAuthorisedDataRequest.getAuthorisedDataRequest() != null) {
-                                var leafResource = auditableAuthorisedDataRequest.getAuthorisedDataRequest().getResource();
-                                contentType = LeafResourceContentType.create(leafResource);
-                                statusCode = StatusCodes.OK;
-                            } else {
-                                contentType = ContentTypes.NO_CONTENT_TYPE;
-                                statusCode = StatusCodes.FORBIDDEN;
-                            }
+        return Directives.pathPrefix("read", () -> Directives.pathPrefix("chunked", () -> Directives.pathEndOrSingleSlash(() -> {
+            return Directives.post(() -> Directives.entity(Jackson.unmarshaller(DataRequest.class), request ->
+                    Directives.withRangeSupport(() -> Directives.completeWithFuture(dataService.authoriseRequest(request)
+                            .thenApply(auditableAuthorisedDataRequest -> {
+                                // Decide HTTP Content-Type header and Status-Code
+                                ContentType contentType;
+                                StatusCode statusCode;
+                                if (auditableAuthorisedDataRequest.getAuthorisedDataRequest() != null) {
+                                    var leafResource = auditableAuthorisedDataRequest.getAuthorisedDataRequest().getResource();
+                                    contentType = LeafResourceContentType.create(leafResource);
+                                    statusCode = StatusCodes.OK;
+                                } else {
+                                    contentType = ContentTypes.NO_CONTENT_TYPE;
+                                    statusCode = StatusCodes.FORBIDDEN;
+                                }
 
-                            var responseSource = this.defaultRunnableGraph(auditableAuthorisedDataRequest);
-                            var responseEntity = HttpEntities.create(contentType, responseSource);
-                            // Return HTTP response
-                            return HttpResponse.create()
-                                    .withStatus(statusCode)
-                                    .withEntity(responseEntity);
-                        }))
-                ))));
+                                var responseSource = this.defaultRunnableGraph(auditableAuthorisedDataRequest);
+                                var responseEntity = HttpEntities.create(contentType, responseSource);
+                                // Return HTTP response
+                                return HttpResponse.create()
+                                        .withStatus(statusCode)
+                                        .withEntity(responseEntity);
+                            })))
+            ));
+        })));
     }
 
     @Override

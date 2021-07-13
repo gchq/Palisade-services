@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.user.UserId;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class DataServiceTestsCommon {
 

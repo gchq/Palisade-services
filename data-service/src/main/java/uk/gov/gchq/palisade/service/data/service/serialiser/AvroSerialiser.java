@@ -57,8 +57,8 @@ public class AvroSerialiser<O> implements Serialiser<O> {
         EXECUTOR.setCorePoolSize(PARALLELISM);
     }
 
-    private final transient ReflectDatumWriter<O> datumWriter;
-    private final transient Schema schema;
+    private final ReflectDatumWriter<O> datumWriter;
+    private final Schema schema;
 
     /**
      * Constructor for the {@link AvroSerialiser}

@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 public class SimpleDataReader implements DataReader {
     @Override
     public boolean accepts(final LeafResource leafResource) {
-        return URI.create(leafResource.getId()).getScheme().equals("file");
+        return "file".equals(URI.create(leafResource.getId()).getScheme());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class SimpleDataReader implements DataReader {
         try {
             return new FileInputStream(Paths.get(URI.create(resource.getId())).toFile());
         } catch (FileNotFoundException e) {
-            throw new ReadException("File not found.", e);
+            throw new ReadException("File not found: " + resource.getId(), e);
         }
     }
 }

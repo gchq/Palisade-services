@@ -72,14 +72,14 @@ class RedisPersistenceContractTest {
         // Given
         String token = "token";
 
-                User user = new User().userId("test-user");
-                LeafResource resource = new FileResource().id("/resource/id")
-                        .serialisedFormat("avro")
-                        .type(Employee.class.getTypeName())
-                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                        .parent(new SystemResource().id("/"));
-                Context context = new Context().purpose("test-purpose");
-                Rules<?> rules = new Rules<>();
+        User user = new User().userId("test-user");
+        LeafResource resource = new FileResource().id("/resource/id")
+                .serialisedFormat("avro")
+                .type(Employee.class.getTypeName())
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
+                .parent(new SystemResource().id("/"));
+        Context context = new Context().purpose("test-purpose");
+        Rules<?> rules = new Rules<>();
 
         AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
                 .serialisedFormat("avro")

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
@@ -35,7 +36,7 @@ import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationExcep
 import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage.Builder;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
@@ -50,6 +51,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -74,6 +76,30 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
         this.serialisers = serialisers;
         this.dataService = dataService;
         this.auditService = auditService;
+
+        LOGGER.debug("Initialised {} with readers {} and serialisers {}", this.getClass(), this.readers, this.serialisers);
+    }
+
+    @Generated
+    public Collection<DataReader> getReaders() {
+        return readers;
+    }
+
+    @Generated
+    public void setReaders(final Collection<DataReader> readers) {
+        this.readers = Optional.ofNullable(readers)
+                .orElseThrow(() -> new IllegalArgumentException("readers cannot be null"));
+    }
+
+    @Generated
+    public Map<String, Class<Serialiser<?>>> getSerialisers() {
+        return serialisers;
+    }
+
+    @Generated
+    public void setSerialisers(final Map<String, Class<Serialiser<?>>> serialisers) {
+        this.serialisers = Optional.ofNullable(serialisers)
+                .orElseThrow(() -> new IllegalArgumentException("serialisers cannot be null"));
     }
 
     /**
@@ -160,24 +186,23 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
                         if (done != null) {
                             LOGGER.debug("Auditing success on termination of stream");
                             // Success - audit records processed and returned
-                            auditMessage = Builder.create(auditable)
+                            auditMessage = AuditSuccessMessage.Builder.create(auditable)
                                     .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get());
                         } else if (ex != null) {
-                            LOGGER.debug("Auditing error on termination of stream, ex");
+                            LOGGER.debug("Auditing error on termination of stream '{}'", ex.getMessage());
+                            LOGGER.trace("Exception was", ex);
                             // Error - first establish where the error occurred
-                            Map<String, Object> attributes;
                             if (authorisation.isPresent()) {
                                 // Error occurred while reading/deserialising/applying rules
-                                attributes = Map.of(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.READ);
+                                auditMessage = AuditErrorMessage.Builder.create(auditable.getDataRequest(), auditable.getAuthorisedDataRequest())
+                                        .withAttributes(Map.of(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.READ))
+                                        .withError(ex);
                             } else {
                                 // Error occurred because client is unauthorised to read the requested resource with the given token
-                                attributes = Map.of(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.AUTHORISED_REQUEST);
+                                auditMessage = AuditErrorMessage.Builder.create(auditable.getDataRequest())
+                                        .withAttributes(Map.of(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.AUTHORISED_REQUEST))
+                                        .withError(ex);
                             }
-                            LOGGER.debug("Set audit error attributes to '{}'", attributes);
-                            // Error - now audit exception with established attributes
-                            auditMessage = AuditErrorMessage.Builder.create(auditable)
-                                    .withAttributes(attributes)
-                                    .withError(ex);
                         } else {
                             // Shouldn't be reachable at runtime except by an Akka bug
                             throw new ReadException("Akka stream terminated with neither success nor error, this may be an Akka bug");
@@ -195,5 +220,16 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
 
         LOGGER.debug("Returning default response source");
         return responseSource;
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AbstractResponseWriter.class.getSimpleName() + "[", "]")
+                .add("readers=" + readers)
+                .add("serialisers=" + serialisers)
+                .add("dataService=" + dataService)
+                .add("auditService=" + auditService)
+                .toString();
     }
 }

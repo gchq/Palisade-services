@@ -51,9 +51,12 @@ management:
 
 data:
   implementation: simple
-
-population:
+  # Map of <serialisedFormat : serialiserClassName>
+  # Note that yaml keys need to be wrapped in "[ .. ]" to be treated literally (if containing '.' or '/' etc.)
+  # See https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-Configuration-Binding#map-based-binding
   serialisers:
+    "[avro/binary]": "uk.gov.gchq.palisade.service.data.service.serialiser.AvroSerialiser"
+    "[text/plain]": "uk.gov.gchq.palisade.service.data.service.serialiser.StringLineSerialiser"
 
 logging:
   level:
