@@ -79,7 +79,7 @@ public class ChunkedHttpWriter implements RouteSupplier {
                         // Create a consumer of the REST response's OutputStream, writing resource data to it
                         var leafResource = auditableAuthorisedDataRequest.getAuthorisedDataRequest().getResource();
 
-                        // Maintain existing data-service API for now, create connected InputStream and OutputStream pair
+                        // Maintain existing Data Service API for now, create connected InputStream and OutputStream pair
                         var inputStream = new PipedInputStream();
                         var outputStream = new PipedOutputStream();
                         try {
@@ -92,12 +92,12 @@ public class ChunkedHttpWriter implements RouteSupplier {
                                 .join();
                         auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                                 .withToken(dataRequest.getToken())
-                                //send a message to the audit service of successfully processed request
+                                //send a message to the Audit Service of successfully processed request
                                 .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
 
                         Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
                                 .ifPresent((AuditErrorMessage errorMessage) -> {
-                                    //send a message to the audit service of an error occurred in processing a request
+                                    // Send a message to the Audit Service of an error occurred in processing a request
                                     LOGGER.error("Error occurred processing the read : ", errorMessage.getError());
                                     auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                                             .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
