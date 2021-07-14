@@ -57,6 +57,7 @@
         <akka.version>2.6.10</akka.version>
         <akka.http.version>10.1.11</akka.http.version>
         <alpakka.kafka.version>2.1.0-M1</alpakka.kafka.version>
+        <avro.version>1.8.2</avro.version>
 
         <!-- Test dependency versions -->
         <testcontainers.version>1.15.3</testcontainers.version>
@@ -141,6 +142,13 @@
             <!-- Redis implementation of CrudRepositories -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- AvroSerialiser implementation -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
         </dependency>
 
         <!--
