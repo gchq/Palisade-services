@@ -71,7 +71,7 @@ public class AvroSerialiser<O> implements Serialiser<O> {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Stream<O> deserialise(final InputStream input) {
@@ -88,7 +88,7 @@ public class AvroSerialiser<O> implements Serialiser<O> {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     // Suppress unclosed outputStream (closed in runnable thread finally)
     @SuppressWarnings("java:S2095")

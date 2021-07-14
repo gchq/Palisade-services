@@ -40,7 +40,7 @@ public class StringLineSerialiser implements Serialiser<String> {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public InputStream serialise(final Stream<String> objects) {
@@ -51,7 +51,7 @@ public class StringLineSerialiser implements Serialiser<String> {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public Stream<String> deserialise(final InputStream stream) {
