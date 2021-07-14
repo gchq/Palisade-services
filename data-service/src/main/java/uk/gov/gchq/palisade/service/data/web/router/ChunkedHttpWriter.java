@@ -43,6 +43,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -88,22 +89,24 @@ public class ChunkedHttpWriter implements RouteSupplier {
                             return Directives.complete(StatusCodes.INTERNAL_SERVER_ERROR);
                         }
 
-                        AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream)
-                                .join();
-                        auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                                .withToken(dataRequest.getToken())
-                                //send a message to the Audit Service of successfully processed request
-                                .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
+                        var source = StreamConverters.asOutputStream()
+                                .mapMaterializedValue(os -> auditableDataService.read(auditableAuthorisedDataRequest, outputStream)
+                                        .thenAcceptAsync((AuditableDataResponse auditableDataResponse) -> {
+                                            auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                                    .withToken(dataRequest.getToken())
+                                                    //send a message to the Audit Service of successfully processed request
+                                                    .withAuditMessage(auditableDataResponse.getAuditSuccessMessage()));
 
-                        Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
-                                .ifPresent((AuditErrorMessage errorMessage) -> {
-                                    // Send a message to the Audit Service of an error occurred in processing a request
-                                    LOGGER.error("Error occurred processing the read : ", errorMessage.getError());
-                                    auditMessageService.auditMessage(TokenMessagePair.Builder.create()
-                                            .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
-                                });
+                                            Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
+                                                    .ifPresent((AuditErrorMessage errorMessage) -> {
+                                                        // Send a message to the Audit Service of an error occurred in processing a request
+                                                        LOGGER.error("Error occurred processing the read : ", errorMessage.getError());
+                                                        auditMessageService.auditMessage(TokenMessagePair.Builder.create()
+                                                                .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
+                                                    });
+                                }, Executors.newSingleThreadExecutor()));
 
-                        var entity = HttpEntities.create(LeafResourceContentType.create(leafResource), StreamConverters.fromInputStream(() -> inputStream));
+                        var entity = HttpEntities.create(LeafResourceContentType.create(leafResource), source);
                         return Directives.complete(HttpResponse.create()
                                 .withStatus(StatusCodes.OK)
                                 .addHeaders(getDefaultHeadersForFoundResource(leafResource))
