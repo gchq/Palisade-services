@@ -104,7 +104,8 @@ public class ChunkedHttpWriter implements RouteSupplier {
                                                         auditMessageService.auditMessage(TokenMessagePair.Builder.create()
                                                                 .withToken(dataRequest.getToken()).withAuditMessage(errorMessage));
                                                     });
-                                }, Executors.newSingleThreadExecutor()));
+                                        }, Executors.newSingleThreadExecutor())
+                                );
 
                         var entity = HttpEntities.create(LeafResourceContentType.create(leafResource), source);
                         return Directives.complete(HttpResponse.create()
