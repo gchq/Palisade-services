@@ -50,7 +50,7 @@ In this method, the message types are separated into success and error messages 
 
 | DataRequest     | (response to client)   | AuditSuccessMessage  | AuditErrorMessage |
 |:----------------|:-----------------------|:---------------------|:------------------|
-| *token          | OutputStream           | *token               | *token            | 
+| *token          | InputStream            | *token               | *token            | 
 | leafResourceId  |                        | leafResourceId       | leafResourceId    |  
 |                 |                        | userId               | ***userId         |
 |                 |                        | resourceId           | ***resourceId     |
