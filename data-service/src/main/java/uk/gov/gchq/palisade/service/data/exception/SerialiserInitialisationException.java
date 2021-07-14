@@ -17,7 +17,7 @@
 package uk.gov.gchq.palisade.service.data.exception;
 
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * Exception thrown when a named serialiser cannot be initialised, e.g. because it doesn't accept the domain class.
  */
 public class SerialiserInitialisationException extends RuntimeException {
     /**

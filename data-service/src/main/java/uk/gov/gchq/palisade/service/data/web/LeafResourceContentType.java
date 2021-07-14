@@ -27,6 +27,9 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Arrays;
 
+/**
+ * HTTP {@link ContentType} for a {@link LeafResource}
+ */
 public final class LeafResourceContentType {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeafResourceContentType.class);
 

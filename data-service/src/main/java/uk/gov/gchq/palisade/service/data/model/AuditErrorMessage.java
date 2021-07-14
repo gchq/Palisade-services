@@ -75,7 +75,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class that uses the {@link AuthorisedDataRequest} objects for the
          * construction and will expect the next to builder method to be for the attribute map
          *
-         * @param dataRequest the original request from the client
+         * @param dataRequest           the original request from the client
          * @param authorisedDataRequest details of an authorised request matching the client's from the Attribute-Masking Service
          * @return interface {@link IAttributes} for the next step in the build.
          */

@@ -59,6 +59,8 @@ import java.util.function.Function;
 /**
  * Handles a number of common functions of a ResponseWriter
  */
+// Suppress usage of generic wildcard type, domain class isn't known until execution
+@SuppressWarnings("java:S1452")
 public abstract class AbstractResponseWriter implements ResponseWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResponseWriter.class);
 
@@ -110,6 +112,8 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
      */
     protected abstract Flow<ByteString, ByteString, NotUsed> transformResponse();
 
+    // Suppress warning for untyped lambda expressions, where the type is not known until execution time
+    @SuppressWarnings("java:S2211")
     protected Source<ByteString, CompletionStage<Done>> defaultRunnableGraph(final AuditableAuthorisedDataRequest auditable) {
         AbstractResponseWriter writer = this;
         LOGGER.info("Selected writer '{}' based on route path", writer.getClass());
@@ -180,8 +184,8 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
                 .via(writer.transformResponse())
 
                 // Catch errors and audit
-                .watchTermination((prevMatValue, completion) -> {
-                    completion.whenComplete((done, ex) -> {
+                .watchTermination((CompletionStage<Done> prevMatValue, CompletionStage<Done> completion) -> {
+                    completion.whenComplete((Done done, Throwable ex) -> {
                         AuditMessage auditMessage;
                         if (done != null) {
                             LOGGER.debug("Auditing success on termination of stream");

@@ -26,10 +26,16 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+/**
+ * Configuration map of serialiser names ({@link uk.gov.gchq.palisade.resource.LeafResource#getSerialisedFormat()})
+ * to serialiser classnames ({@link Class#getName()} of a {@link Serialiser}).
+ */
 public class SerialiserConfiguration {
     private Map<String, String> serialisers = Map.of();
 
-    @SuppressWarnings("unchecked")
+    // Suppress warning casting reflection Class<?> to Class<Serialiser>
+    // Suppress usage of generic wildcard type Serialiser<?> as we don't know the domain type until initialisation
+    @SuppressWarnings({"unchecked", "java:S1452"})
     private static Class<Serialiser<?>> getSerialiserClass(final String className) {
         try {
             return (Class<Serialiser<?>>) Class.forName(className);
@@ -43,6 +49,11 @@ public class SerialiserConfiguration {
         return serialisers;
     }
 
+    /**
+     * Convert map values from class names to classes by reflection.
+     *
+     * @return a map from serialiser names to {@link Class} objects.
+     */
     public Map<String, Class<Serialiser<?>>> getSerialiserClassMap() {
         return serialisers.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey(), getSerialiserClass(entry.getValue())))

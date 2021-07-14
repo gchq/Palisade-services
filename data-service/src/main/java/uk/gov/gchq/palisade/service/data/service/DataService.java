@@ -22,6 +22,12 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The only function that the service controls outside of pluggable extensions is the authorisation
+ * of a data-request and gathering of rules that apply to this data access.
+ * These rules have been persisted by the Attribute-Masking Service and must be recalled here by some
+ * means.
+ */
 public interface DataService {
 
     /**

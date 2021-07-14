@@ -16,6 +16,10 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
+/**
+ * Exception thrown when a serialiser name cannot be mapped to a serialiser class, e.g. the class doesn't exist
+ * or a serialiser doesn't exist by that name.
+ */
 public class SerialiserNotFoundException extends RuntimeException {
     /**
      * Constructs a new {@link SerialiserNotFoundException} with the specified detail message.

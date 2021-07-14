@@ -26,7 +26,6 @@ import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -35,7 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -51,11 +53,7 @@ import static java.util.Objects.requireNonNull;
 public class AvroSerialiser<O> implements Serialiser<O> {
     private static final int PARALLELISM = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(AvroSerialiser.class);
-    private static final ThreadPoolTaskExecutor EXECUTOR = new ThreadPoolTaskExecutor();
-
-    static {
-        EXECUTOR.setCorePoolSize(PARALLELISM);
-    }
+    private static final ThreadPoolExecutor EXECUTOR = (ThreadPoolExecutor) Executors.newFixedThreadPool(PARALLELISM);
 
     private final ReflectDatumWriter<O> datumWriter;
     private final Schema schema;
@@ -72,6 +70,9 @@ public class AvroSerialiser<O> implements Serialiser<O> {
         this.datumWriter = new ReflectDatumWriter<>(schema);
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public Stream<O> deserialise(final InputStream input) {
         DataFileStream<O> in;
@@ -86,12 +87,22 @@ public class AvroSerialiser<O> implements Serialiser<O> {
         return StreamSupport.stream(in.spliterator(), false);
     }
 
+    /**
+     * @inheritDoc
+     */
+    // Suppress unclosed outputStream (closed in runnable thread finally)
+    @SuppressWarnings("java:S2095")
     @Override
     public InputStream serialise(final Stream<O> objects) {
         PipedInputStream is = new PipedInputStream();
+        PipedOutputStream os = new PipedOutputStream();
+        try {
+            os.connect(is);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to connect input and output stream pipes", e);
+        }
         Runnable pipeWriter = () -> {
-            try (PipedOutputStream os = new PipedOutputStream(); DataFileWriter<O> dataFileWriter = new DataFileWriter<>(datumWriter)) {
-                os.connect(is);
+            try (DataFileWriter<O> dataFileWriter = new DataFileWriter<>(datumWriter)) {
                 if (nonNull(objects)) {
                     // create a data file writer around the output stream
                     LOGGER.debug("Creating data file writer");
@@ -104,6 +115,12 @@ public class AvroSerialiser<O> implements Serialiser<O> {
                 }
             } catch (IOException e) {
                 throw new ReadException("An error occurred during serialisation", e);
+            } finally {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to close {}", os.getClass(), e);
+                }
             }
         };
         EXECUTOR.execute(pipeWriter);

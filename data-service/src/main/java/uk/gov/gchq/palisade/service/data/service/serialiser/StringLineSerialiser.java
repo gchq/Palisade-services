@@ -22,24 +22,40 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
+/**
+ * Default serialiser for text/plain files, a do-nothing serialiser that maps
+ * a multiline {@link InputStream} into a {@link Stream} of lines.
+ */
 public class StringLineSerialiser implements Serialiser<String> {
+    /**
+     * Dummy constructor, the domain must be {@link String} and no further operations are required
+     *
+     * @param domain the Java stdlib {@link String} {@link Class}
+     */
     public StringLineSerialiser(final Class<String> domain) {
         // Empty constructor for initialisation only
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public InputStream serialise(final Stream<String> objects) {
         var bytes = objects.reduce((l, r) -> l + "\n" + r)
                 .orElse("")
-                .getBytes();
+                .getBytes(Charset.defaultCharset());
         return new ByteArrayInputStream(bytes);
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public Stream<String> deserialise(final InputStream stream) {
-        return new BufferedReader(new InputStreamReader(stream))
+        return new BufferedReader(new InputStreamReader(stream, Charset.defaultCharset()))
                 .lines();
     }
 }
