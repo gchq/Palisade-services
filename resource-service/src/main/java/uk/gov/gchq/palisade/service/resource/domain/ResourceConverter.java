@@ -24,7 +24,6 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.lang.NonNull;
 
-import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
 import java.io.IOException;
@@ -34,14 +33,7 @@ import java.io.IOException;
  */
 public final class ResourceConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceConverter.class);
-    public static final ObjectMapper RESOURCE_MAPPER;
-
-    static {
-        // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
-        // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
-        RESOURCE_MAPPER = new ObjectMapper()
-                .addMixIn(ChildResource.class, AbstractOrphanedChildJsonMixin.class);
-    }
+    public static final ObjectMapper MAPPER = new ObjectMapper();
 
     private ResourceConverter() {
         // Utility class
@@ -55,7 +47,7 @@ public final class ResourceConverter {
         @Override
         public Resource convert(final @NonNull String json) {
             try {
-                return RESOURCE_MAPPER.readValue(json, Resource.class);
+                return MAPPER.readValue(json, Resource.class);
             } catch (IOException e) {
                 LOGGER.error("Conversion error while trying to convert json string to resource.", e);
                 return null;
@@ -71,7 +63,7 @@ public final class ResourceConverter {
         @Override
         public String convert(final @NonNull Resource resource) {
             try {
-                return RESOURCE_MAPPER.writeValueAsString(resource);
+                return MAPPER.writeValueAsString(resource);
             } catch (
                     JsonProcessingException e) {
                 LOGGER.error("Could not convert resource to json string.", e);

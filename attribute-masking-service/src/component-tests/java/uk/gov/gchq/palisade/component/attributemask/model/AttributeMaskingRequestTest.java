@@ -27,7 +27,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.user.User;
@@ -63,8 +62,7 @@ class AttributeMaskingRequestTest {
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
-                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-                .parent(new SystemResource().id("/test"));
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
         Rules<?> rules = new Rules<>();
 
         AttributeMaskingRequest attributeMaskingRequest = AttributeMaskingRequest.Builder.create()

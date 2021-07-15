@@ -19,7 +19,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
@@ -49,8 +48,7 @@ public class ApplicationTestData {
             .id(RESOURCE_ID)
             .type(RESOURCE_TYPE)
             .serialisedFormat(RESOURCE_FORMAT)
-            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-            .parent(new SystemResource().id(RESOURCE_PARENT));
+            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME));
 
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);

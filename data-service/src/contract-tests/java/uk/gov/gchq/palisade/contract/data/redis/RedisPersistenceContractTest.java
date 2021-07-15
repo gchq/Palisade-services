@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.contract.data.config.model.Employee;
 import uk.gov.gchq.palisade.contract.data.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
@@ -74,19 +73,18 @@ class RedisPersistenceContractTest {
 
         DataReaderRequest readerRequest = new DataReaderRequest()
                 .user(new User().userId("test-user"))
-                .resource(new FileResource().id("/resource/id")
+                .resource(new FileResource().id("file:/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
-                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                        .parent(new SystemResource().id("/")))
+                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service")))
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
 
-        AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
-                .serialisedFormat("avro")
-                .type(Employee.class.getTypeName())
-                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                .parent(new SystemResource().id("/")))
+        AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
+                .withResource(new FileResource().id("file:/resource/id")
+                        .serialisedFormat("avro")
+                        .type(Employee.class.getTypeName())
+                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service")))
                 .withUser(new User().userId("test-user"))
                 .withContext(new Context().purpose("test-purpose"))
                 .withRules(new Rules<>());

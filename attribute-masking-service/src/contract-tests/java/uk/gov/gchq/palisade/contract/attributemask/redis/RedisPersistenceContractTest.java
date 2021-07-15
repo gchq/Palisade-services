@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.contract.attributemask.redis;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -50,8 +48,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(initializers = {RedisInitializer.class})
 @ActiveProfiles({"redis", "akkatest", "testcontainers"})
 class RedisPersistenceContractTest {
-    static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
-
     @Autowired
     private AttributeMaskingService service;
     @Autowired

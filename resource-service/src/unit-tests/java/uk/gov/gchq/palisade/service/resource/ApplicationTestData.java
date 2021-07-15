@@ -22,7 +22,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
@@ -48,13 +47,11 @@ public class ApplicationTestData {
     public static final String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
     public static final String RESOURCE_FORMAT = "avro";
     public static final String DATA_SERVICE_NAME = "test-data-service";
-    public static final String RESOURCE_PARENT = "/test";
     public static final LeafResource LEAF_RESOURCE = new FileResource()
             .id(RESOURCE_ID)
             .type(RESOURCE_TYPE)
             .serialisedFormat(RESOURCE_FORMAT)
-            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-            .parent(new SystemResource().id(RESOURCE_PARENT));
+            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME));
 
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
