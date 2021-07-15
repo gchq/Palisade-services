@@ -98,7 +98,7 @@ public class RedisConfiguration {
     ResourceRepositoryAdapter resourceRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         Jackson2JsonRedisSerializer<ResourceEntity> vSerde = new Jackson2JsonRedisSerializer<>(ResourceEntity.class);
-        vSerde.setObjectMapper(ResourceConverter.RESOURCE_MAPPER);
+        vSerde.setObjectMapper(ResourceConverter.MAPPER);
         return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
     }
 

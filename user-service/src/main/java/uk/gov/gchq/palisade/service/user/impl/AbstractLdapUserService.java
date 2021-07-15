@@ -185,7 +185,7 @@ public abstract class AbstractLdapUserService implements UserService {
     }
 
     protected Map<String, Object> addAttribute(final Map<String, Object> attributes, final Attributes userAttrs,
-                                                final String requestAttr) throws NamingException {
+                                               final String requestAttr) throws NamingException {
         final Attribute attribute = userAttrs.get(requestAttr);
         if (null != attribute) {
             NamingEnumeration<?> all = attribute.getAll();
