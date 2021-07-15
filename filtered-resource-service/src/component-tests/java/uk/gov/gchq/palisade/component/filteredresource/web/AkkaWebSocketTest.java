@@ -48,7 +48,6 @@ import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenErrorM
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -93,8 +92,7 @@ class AkkaWebSocketTest {
             .id("/test/file")
             .type("java.util.String")
             .serialisedFormat("text")
-            .connectionDetail(new SimpleConnectionDetail().serviceName("test-data-service"))
-            .parent(new SystemResource().id("/test"));
+            .connectionDetail(new SimpleConnectionDetail().serviceName("test-data-service"));
     final FilteredResourceRequest testRequest = FilteredResourceRequest.Builder.create()
             .withUserId("test-user")
             .withResourceId("/test")
