@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.resource.repository;
 
 import org.reactivestreams.Publisher;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.ReactiveHashOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -30,6 +29,7 @@ import org.springframework.lang.NonNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import uk.gov.gchq.palisade.service.resource.config.RedisProperties;
 import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
@@ -57,18 +57,17 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     private static final String FORMAT_KEYSPACE = "format";
     private static final String TYPE_KEYSPACE = "type";
 
-    @Value("${spring.data.redis.repositories.timeToLive.defaultTtl}")
-    private Long defaultTtl;
-
     protected final String table;
+    protected final Duration ttl;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
     protected final ReactiveValueOperations<String, V> valueOps;
     protected final ReactiveRedisTemplate<String, V> redisTemplate;
 
-    protected AbstractReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table) {
+    protected AbstractReactiveRepositoryRedisAdapter(final ReactiveRedisTemplate<String, V> redisTemplate, final String table, final Duration ttl) {
         this.redisTemplate = redisTemplate;
         this.table = table;
+        this.ttl = ttl;
         RedisSerializationContext<String, V> ctx = redisTemplate.getSerializationContext();
         this.hashOps = redisTemplate.opsForHash();
         this.setOps = redisTemplate.opsForSet(RedisSerializationContext.<String, K>newSerializationContext()
@@ -107,7 +106,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     protected <S extends V> Mono<S> saveDefault(final @NonNull S entity) {
         K id = reflectIdAnnotation(entity);
         return this.valueOps.set(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, entity)
-                .then(this.redisTemplate.expire(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, Duration.ofMinutes(defaultTtl)))
+                .then(this.redisTemplate.expire(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, ttl))
                 .filter(bool -> bool)
                 .map(bool -> entity);
     }
@@ -238,17 +237,15 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link CompletenessEntity}s to be stored in a reactive repository
      */
     public static class CompletenessRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<CompletenessEntity, Integer> implements CompletenessRepository {
-        @Value("${spring.data.redis.repositories.timeToLive.completenessEntity}")
-        private Long completenessTtl;
 
         /**
          * {@link CompletenessRepositoryAdapter} constructor that takes a redis template
          *
-         * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link CompletenessEntity}
-         * @param keyPrefix     a prefix to the table 'namespace'
+         * @param redisTemplate   a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link CompletenessEntity}
+         * @param redisProperties containing properties used to configure redis
          */
-        public CompletenessRepositoryAdapter(final ReactiveRedisTemplate<String, CompletenessEntity> redisTemplate, final String keyPrefix) {
-            super(redisTemplate, keyPrefix + reflectTableAnnotation(CompletenessEntity.class).value());
+        public CompletenessRepositoryAdapter(final ReactiveRedisTemplate<String, CompletenessEntity> redisTemplate, final RedisProperties redisProperties) {
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(CompletenessEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(CompletenessEntity.class).value()));
         }
 
         @Override
@@ -261,7 +258,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         public <S extends CompletenessEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + KEY_SEP + entity.getId();
             return this.valueOps.set(id, entity)
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(completenessTtl)))
+                    .then(this.redisTemplate.expire(id, ttl))
                     .thenReturn(entity);
         }
 
@@ -278,17 +275,15 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
         private static final String SEPARATOR = KEY_SEP + PARENT_KEYSPACE + KEY_SEP;
-        @Value("${spring.data.redis.repositories.timeToLive.resourceEntity}")
-        private Long resourceEntityTtl;
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
          *
-         * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link ResourceEntity}
-         * @param keyPrefix     a prefix to the table 'namespace'
+         * @param redisTemplate   a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link ResourceEntity}
+         * @param redisProperties containing properties used to configure redis
          */
-        public ResourceRepositoryAdapter(final ReactiveRedisTemplate<String, ResourceEntity> redisTemplate, final String keyPrefix) {
-            super(redisTemplate, keyPrefix + reflectTableAnnotation(ResourceEntity.class).value());
+        public ResourceRepositoryAdapter(final ReactiveRedisTemplate<String, ResourceEntity> redisTemplate, final RedisProperties redisProperties) {
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(ResourceEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(ResourceEntity.class).value()));
         }
 
         @Override
@@ -301,7 +296,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         public <S extends ResourceEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + SEPARATOR + entity.getParentId();
             return this.setOps.add(id, entity.getId())
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(resourceEntityTtl)))
+                    .then(this.redisTemplate.expire(id, ttl))
                     .then(this.saveDefault(entity));
         }
 
@@ -325,17 +320,15 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
         private static final String SEPARATOR = KEY_SEP + FORMAT_KEYSPACE + KEY_SEP;
-        @Value("${spring.data.redis.repositories.timeToLive.serialisedFormatEntity}")
-        private Long serialisedFormatEntityTtl;
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
          *
-         * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link SerialisedFormatEntity}
-         * @param keyPrefix     a prefix to the table 'namespace'
+         * @param redisTemplate   a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link SerialisedFormatEntity}
+         * @param redisProperties containing properties used to configure redis
          */
-        public SerialisedFormatRepositoryAdapter(final ReactiveRedisTemplate<String, SerialisedFormatEntity> redisTemplate, final String keyPrefix) {
-            super(redisTemplate, keyPrefix + reflectTableAnnotation(SerialisedFormatEntity.class).value());
+        public SerialisedFormatRepositoryAdapter(final ReactiveRedisTemplate<String, SerialisedFormatEntity> redisTemplate, final RedisProperties redisProperties) {
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(SerialisedFormatEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(SerialisedFormatEntity.class).value()));
         }
 
         @Override
@@ -347,7 +340,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public <S extends SerialisedFormatEntity> Mono<S> save(final @NonNull S entity) {
             return this.setOps.add(this.table + SEPARATOR + entity.getSerialisedFormat(), entity.getId())
-                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), Duration.ofMinutes(serialisedFormatEntityTtl)))
+                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), ttl))
                     .then(this.saveDefault(entity));
         }
 
@@ -371,17 +364,15 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      */
     public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
         private static final String SEPARATOR = KEY_SEP + TYPE_KEYSPACE + KEY_SEP;
-        @Value("${spring.data.redis.repositories.timeToLive.typeEntity}")
-        private Long typeEntityTtl;
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
          *
-         * @param redisTemplate a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link TypeEntity}
-         * @param keyPrefix     a prefix to the table 'namespace'
+         * @param redisTemplate   a {@link ReactiveRedisTemplate} with key of type {@link String} and value of type {@link TypeEntity}
+         * @param redisProperties properties used to configure redis
          */
-        public TypeRepositoryAdapter(final ReactiveRedisTemplate<String, TypeEntity> redisTemplate, final String keyPrefix) {
-            super(redisTemplate, keyPrefix + reflectTableAnnotation(TypeEntity.class).value());
+        public TypeRepositoryAdapter(final ReactiveRedisTemplate<String, TypeEntity> redisTemplate, final RedisProperties redisProperties) {
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(TypeEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(TypeEntity.class).value()));
         }
 
         @Override
@@ -394,7 +385,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         public <S extends TypeEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + SEPARATOR + entity.getType();
             return this.setOps.add(id, entity.getId())
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(typeEntityTtl)))
+                    .then(this.redisTemplate.expire(id, ttl))
                     .then(super.saveDefault(entity));
         }
 
