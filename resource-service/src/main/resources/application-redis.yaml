@@ -31,11 +31,12 @@ spring:
       repositories:
         enabled: true
         # Set the TTL on all the repositories that are used within the Resource service using the effectiveTtl and inFlightTtl values defined above
-        #timeToLive:
-          #CompletenessEntity: ${effectiveTtl}
-          #TypeEntity: ${effectiveTtl} + ${inFlightTtl}
-          #SerialisedFormatEntity: ${effectiveTtl} + ${inFlightTtl}
-          #ResourceEntity: ${effectiveTtl} + 2 * ${inFlightTtl}
+        timeToLive:
+          defaultTtl: 5L
+          completenessEntity: ${ttl.effectiveTtl}
+          typeEntity: ${ttl.effectiveTtl} + ${ttl.inFlightTtl}
+          serialisedFormatEntity: ${ttl.effectiveTtl} + ${ttl.inFlightTtl}
+          resourceEntity: ${ttl.effectiveTtl} + 2 * ${ttl.inFlightTtl}
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
@@ -44,3 +45,7 @@ management:
   health:
     redis:
       enabled: false
+
+ttl:
+  effectiveTtl: 5L
+  inFlightTtl: 3L

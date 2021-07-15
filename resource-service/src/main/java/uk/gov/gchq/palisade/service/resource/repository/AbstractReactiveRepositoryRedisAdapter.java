@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.resource.repository;
 
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.ReactiveHashOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -55,6 +56,10 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
     private static final String PARENT_KEYSPACE = "parent";
     private static final String FORMAT_KEYSPACE = "format";
     private static final String TYPE_KEYSPACE = "type";
+
+    @Value("${spring.data.redis.repositories.timeToLive.defaultTtl}")
+    private Long defaultTtl;
+
     protected final String table;
     protected final ReactiveHashOperations<String, K, V> hashOps;
     protected final ReactiveSetOperations<String, K> setOps;
@@ -101,9 +106,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
     protected <S extends V> Mono<S> saveDefault(final @NonNull S entity) {
         K id = reflectIdAnnotation(entity);
-        // The ttl set here should be moved to configuration
         return this.valueOps.set(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, entity)
-                .then(this.redisTemplate.expire(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, Duration.ofMinutes(5L)))
+                .then(this.redisTemplate.expire(this.table + KEY_SEP + ID_KEYSPACE + KEY_SEP + id, Duration.ofMinutes(defaultTtl)))
                 .filter(bool -> bool)
                 .map(bool -> entity);
     }
@@ -234,6 +238,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link CompletenessEntity}s to be stored in a reactive repository
      */
     public static class CompletenessRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<CompletenessEntity, Integer> implements CompletenessRepository {
+        @Value("${spring.data.redis.repositories.timeToLive.completenessEntity}")
+        private Long completenessTtl;
 
         /**
          * {@link CompletenessRepositoryAdapter} constructor that takes a redis template
@@ -247,23 +253,22 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Mono<CompletenessEntity> findOneByEntityTypeAndEntityId(final EntityType entityType, final String entityId) {
-            return this.valueOps.get(this.table + KEY_SEP + CompletenessEntity.idFor(entityType, entityId).toString());
+            return this.valueOps.get(this.table + KEY_SEP + CompletenessEntity.idFor(entityType, entityId));
         }
 
         @Override
         @NonNull
         public <S extends CompletenessEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + KEY_SEP + entity.getId();
-            // The ttl set here should use the value from the application-redis configuration yaml
             return this.valueOps.set(id, entity)
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(3L)))
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(completenessTtl)))
                     .thenReturn(entity);
         }
 
         @Override
         @NonNull
         public Mono<Void> deleteById(final @NonNull Integer key) {
-            return this.valueOps.delete(this.table + KEY_SEP + key.toString())
+            return this.valueOps.delete(this.table + KEY_SEP + key)
                     .then();
         }
     }
@@ -272,8 +277,9 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link ResourceEntity}s to be stored in a reactive repository
      */
     public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
-
         private static final String SEPARATOR = KEY_SEP + PARENT_KEYSPACE + KEY_SEP;
+        @Value("${spring.data.redis.repositories.timeToLive.resourceEntity}")
+        private Long resourceEntityTtl;
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
@@ -294,9 +300,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public <S extends ResourceEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + SEPARATOR + entity.getParentId();
-            // The ttl set here should use the value from the application-redis configuration yaml
             return this.setOps.add(id, entity.getId())
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(resourceEntityTtl)))
                     .then(this.saveDefault(entity));
         }
 
@@ -319,8 +324,9 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link SerialisedFormatEntity}s to be stored in a reactive repository
      */
     public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
-
         private static final String SEPARATOR = KEY_SEP + FORMAT_KEYSPACE + KEY_SEP;
+        @Value("${spring.data.redis.repositories.timeToLive.serialisedFormatEntity}")
+        private Long serialisedFormatEntityTtl;
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
@@ -340,9 +346,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends SerialisedFormatEntity> Mono<S> save(final @NonNull S entity) {
-            // The ttl set here should use the value from the application-redis configuration yaml
             return this.setOps.add(this.table + SEPARATOR + entity.getSerialisedFormat(), entity.getId())
-                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), Duration.ofMinutes(5L)))
+                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), Duration.ofMinutes(serialisedFormatEntityTtl)))
                     .then(this.saveDefault(entity));
         }
 
@@ -365,8 +370,9 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link TypeRepository}s to be stored in a reactive repository
      */
     public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
-
         private static final String SEPARATOR = KEY_SEP + TYPE_KEYSPACE + KEY_SEP;
+        @Value("${spring.data.redis.repositories.timeToLive.typeEntity}")
+        private Long typeEntityTtl;
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
@@ -387,9 +393,8 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public <S extends TypeEntity> Mono<S> save(final @NonNull S entity) {
             final String id = this.table + SEPARATOR + entity.getType();
-            // The ttl set here should use the value from the application-redis configuration yaml
             return this.setOps.add(id, entity.getId())
-                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(5L)))
+                    .then(this.redisTemplate.expire(id, Duration.ofMinutes(typeEntityTtl)))
                     .then(super.saveDefault(entity));
         }
 
