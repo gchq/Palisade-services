@@ -56,7 +56,7 @@ public class PolicyServiceCachingProxy {
      */
     @Cacheable(value = "resourceRules", key = "#resourceId")
     public Optional<Rules<LeafResource>> getResourceRules(final String resourceId) {
-        LOGGER.debug("Cache miss for resourceId {}", resourceId);
+        LOGGER.debug("Cache miss in 'resourceRules' cache for resourceId {}", resourceId);
         return service.getResourceRules(resourceId);
     }
 
@@ -69,7 +69,7 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "resourceRules", key = "#resourceId")
     public Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules) {
-        LOGGER.debug("Cache add for resourceId {} and rules message {}", resourceId, rules.getMessage());
+        LOGGER.debug("Cache add in 'resourceRules' cache for resourceId {} and rules message {}", resourceId, rules.getMessage());
         LOGGER.debug("ResourceRules {} added to cache", rules);
         return service.setResourceRules(resourceId, rules);
     }
@@ -83,7 +83,7 @@ public class PolicyServiceCachingProxy {
      */
     @Cacheable(value = "recordRules", key = "#resourceId")
     public Optional<Rules<Serializable>> getRecordRules(final String resourceId) {
-        LOGGER.debug("Cache miss for resourceId {}", resourceId);
+        LOGGER.debug("Cache miss in 'recordRules' cache for resourceId {}", resourceId);
         return service.getRecordRules(resourceId);
     }
 
@@ -96,7 +96,7 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "recordRules", key = "#resourceId")
     public Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules) {
-        LOGGER.debug("Cache add for resourceId {} and rules message {}", resourceId, rules.getMessage());
+        LOGGER.debug("Cache add in 'recordRules' cache for resourceId {} and rules message {}", resourceId, rules.getMessage());
         LOGGER.debug("RecordRules {} added to cache", rules);
         return service.setRecordRules(resourceId, rules);
     }

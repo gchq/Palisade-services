@@ -11,32 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-replicaCount: 1
 
-service:
-  port: 80
-  internalPort: 8089
-  type: ClusterIP
+data:
+  implementation: simple
 
-image:
-  name: audit-service
-  base: jre
-  tag: RELEASE-955749b
-  pullPolicy: IfNotPresent
-  gitHash: 955749b
-  versionNumber: 0.5.0
-  codeRelease: 0.5.0-RELEASE
-  revision: RELEASE
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }
+population:
+  serialiserProvider: std
+  serialisers:
+  - flavourFormat: "string"
+    flavourType: "java.lang.String"
+    serialiserClass: "uk.gov.gchq.palisade.component.data.service.TestSerialiser"
