@@ -70,7 +70,6 @@ import uk.gov.gchq.palisade.contract.filteredresource.redis.RedisInitializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
@@ -163,8 +162,7 @@ class KafkaRestWebSocketContractTest {
                         .serialisedFormat("fmt")
                         .type("type")
                         .connectionDetail(new SimpleConnectionDetail()
-                                .serviceName("data-service"))
-                        .parent(new SystemResource().id("file:/file/")));
+                                .serviceName("data-service")));
     }
 
     @NonNull
