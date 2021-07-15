@@ -31,7 +31,7 @@ The second task for the Palisade Service is to initiate the processing of the re
 The service will perform its required task and then forward the message onto the next service with the end goal of producing resources ready to be viewed by the client.
 This sequence of steps is completed with the Filtered-Resource Service prepared to provide the processed request.
 In the subsequent request by the client to the Filtered-Resource Service, the service returns, one-by-one upon request over a websocket, metadata for a single resource (e.g. a file) they are authorised to view in some capacity.
-These resources can then be read from the Data Service. 
+These resources can then be read from the Data Service.
 The following diagram shows at a high level the services and their relative relationships with each other. 
 Communications between the services and their related support servers utilise Kafka streaming. 
 
