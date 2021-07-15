@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
@@ -77,8 +76,7 @@ public class ContractTestData {
     public static final LeafResource RESOURCE = new FileResource().id(RESOURCE_ID)
             .type("java.lang.String")
             .serialisedFormat("text/plain")
-            .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-            .parent(new SystemResource().id("file:/test"));
+            .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
     public static final Map<String, Object> ATTRIBUTES = Map.of("RECORDS_PROCESSED", 1, "RECORDS_RETURNED", 1);

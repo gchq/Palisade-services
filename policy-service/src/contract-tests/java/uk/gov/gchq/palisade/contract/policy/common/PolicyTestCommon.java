@@ -51,21 +51,21 @@ public class PolicyTestCommon {
             .addRule("Resource serialised format is txt", new IsTextResourceRule());
 
     // A directory that only allows JSON types
-    public static final DirectoryResource JSON_DIRECTORY = new DirectoryResource().id("/txt/json").parent(TXT_SYSTEM);
+    public static final DirectoryResource JSON_DIRECTORY = new DirectoryResource().id("/txt/json");
     public static final Rules<LeafResource> JSON_POLICY = new Rules<LeafResource>()
             .addRule("Resource type is json", (PredicateRule<LeafResource>) (resource, user, context) -> resource.getType().equals("json"));
 
     // A text file containing json data - this should be accessible
-    public static final FileResource ACCESSIBLE_JSON_TXT_FILE = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json").parent(JSON_DIRECTORY);
+    public static final FileResource ACCESSIBLE_JSON_TXT_FILE = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json");
 
     // A secret directory that allows only secret authorised users
-    public static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret").parent(TXT_SYSTEM);
+    public static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret");
     public static final Rules<LeafResource> SECRET_POLICY = new Rules<LeafResource>()
             .addRule("Check user has 'Secret' auth", (PredicateRule<LeafResource>) (resource, user, context) -> user.getAuths().contains("Secret"))
             .addRule("Redact all with 'Testing' purpose", (PredicateRule<LeafResource>) (record, user, context) -> !context.getPurpose().equals("Testing"));
 
     // A secret file - accessible only to the secret user
-    public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);
+    public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt");
 
     // A do-nothing policy to apply to leaf resources
     public static final Rules<LeafResource> PASS_THROUGH_POLICY = new Rules<LeafResource>()
