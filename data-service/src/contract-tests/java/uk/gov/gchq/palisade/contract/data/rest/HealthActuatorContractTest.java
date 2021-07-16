@@ -15,16 +15,19 @@
  */
 package uk.gov.gchq.palisade.contract.data.rest;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.data.DataApplication;
+import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -37,14 +40,22 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 @SpringBootTest(
         classes = {DataApplication.class},
-        webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"management.health.kafka.enabled=false"}
+        webEnvironment = WebEnvironment.MOCK,
+        properties = {"management.health.kafka.enabled=false", "server.port=0"}
 )
 @ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
 
-    @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private AkkaHttpServer akkaHttpServer;
+
+    @BeforeEach
+    void setUp() {
+        var localAddress = akkaHttpServer.getServerBinding().join().localAddress();
+        var rootUri = "http://localhost:" + localAddress.getPort();
+        restTemplate = new TestRestTemplate(new RestTemplateBuilder().rootUri(rootUri));
+    }
 
     @Test
     void testContextLoads() {

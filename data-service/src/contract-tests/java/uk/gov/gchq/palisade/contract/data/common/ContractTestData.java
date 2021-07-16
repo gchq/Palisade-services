@@ -76,7 +76,7 @@ public class ContractTestData {
 
     public static final LeafResource RESOURCE = new FileResource().id("/test/file.format")
             .type("java.lang.String")
-            .serialisedFormat("format")
+            .serialisedFormat("text/plain")
             .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
