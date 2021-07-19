@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import avro.shaded.com.google.common.annotations.VisibleForTesting;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import event.logging.Activity;
 import event.logging.Authorisation;
@@ -66,10 +65,8 @@ public class StroomAuditService implements AuditService {
     private static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
     private static final System SYSTEM = new System();
 
-    @VisibleForTesting
-    static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
-    @VisibleForTesting
-    static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
+    public static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
+    public static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
 
     private final DefaultEventLoggingService eventLogger;
 

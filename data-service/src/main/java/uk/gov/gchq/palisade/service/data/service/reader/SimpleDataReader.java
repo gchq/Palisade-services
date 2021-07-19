@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.reader;
+package uk.gov.gchq.palisade.service.data.service.reader;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -28,13 +28,18 @@ import java.nio.file.Paths;
 /**
  * A simple data reader that connects to the data and streams the raw data
  */
-public class SimpleDataReader extends AbstractSerialisedDataReader {
+public class SimpleDataReader implements DataReader {
     @Override
-    protected InputStream readRaw(final LeafResource resource) {
+    public boolean accepts(final LeafResource leafResource) {
+        return "file".equals(URI.create(leafResource.getId()).getScheme());
+    }
+
+    @Override
+    public InputStream read(final LeafResource resource) {
         try {
             return new FileInputStream(Paths.get(URI.create(resource.getId())).toFile());
         } catch (FileNotFoundException e) {
-            throw new ReadException("File not found.", e);
+            throw new ReadException("File not found: " + resource.getId(), e);
         }
     }
 }

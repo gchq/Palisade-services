@@ -43,6 +43,7 @@
     </scm>
 
     <properties>
+        <readers.app.version>0.5.0-${revision}</readers.app.version>
         <examples.app.version>0.5.0-${revision}</examples.app.version>
     </properties>
 

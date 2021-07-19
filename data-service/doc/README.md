@@ -22,3 +22,8 @@ See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image fr
 See [data-service.drawio](./data-service.drawio) for the source for this diagram:
 
 ![Data Service diagram](./data-service.png)
+
+
+See [data-streaming-pathway.drawio](./data-streaming-pathway.drawio) for the source for this diagram:
+
+![Data Streaming Pathway diagram](./data-streaming-pathway.jpg)
