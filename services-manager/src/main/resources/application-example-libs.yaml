@@ -30,13 +30,18 @@ spring:
 # Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
 # example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
 # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
+readers:
+  version: '@readers.app.version@'
+  path: ../Palisade-readers
 example:
   version: '@examples.app.version@'
   path: ../Palisade-examples
   libs: &libraries
     - ${example.path}/example-library/target/example-library-${example.version}-jar-with-dependencies.jar
+    - ${readers.path}/avro-serialiser/target/avro-serialiser-${readers.version}-jar-with-dependencies.jar
   service-profiles: &profiles
     - static
+    - avro
     - example
 
 manager:
