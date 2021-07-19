@@ -103,7 +103,7 @@ Calculate a storage path based on the code release artifact id or the supplied v
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "policy-service.deployment.revision" }}
-{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- $revision := printf "%s-%s" .Values.image.versionNumber .Values.image.revision | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 
@@ -114,6 +114,6 @@ Create the image name
 {{- if contains .Values.image.revision .Values.global.releaseTag -}}
 {{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.versionNumber }}
 {{- else -}}
-{{- printf "%s%s:%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.tag }}
+{{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.gitHash }}
 {{- end -}}
 {{- end -}}
