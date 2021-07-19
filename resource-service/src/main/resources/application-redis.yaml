@@ -26,16 +26,16 @@ spring:
           defaultTtl: 26H
           # The time before you start getting cache misses, the traditional sense of TTL.
           # Default value should be 24h
-          completenessEntity: 24H
+          completeness: 24H
           # We have an "inflight" ttl, which is the maximum time you'd expect the Resource service to process a single request.
           # We add on to the time above this difference such that a cache miss will occur before there is a chance for data corruption from data being expired early
           # Any request that takes longer to read persistence will see weird errors.
           # These errors could be avoided and explicitly managed with akka `.takeDuring(Duration)`.
           # Default value should be 1h more than completenessEntity
-          typeEntity: 25H
-          serialisedFormatEntity: 25H
+          types: 25H
+          serialised_formats: 25H
           # Default value is 2h more than completenessEntity
-          resourceEntity: 26H
+          resources: 26H
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
