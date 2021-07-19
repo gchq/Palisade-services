@@ -28,6 +28,8 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -48,6 +50,8 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     Function1<Throwable, Supervision.Directive> supervisor() {
@@ -72,6 +76,7 @@ public class AkkaRunnableGraph {
                         //Send AuditSuccessMessage to the Audit Service via the success Kafka topic
                         .filter(tokenMessagePair -> tokenMessagePair.getAuditMessage() instanceof AuditSuccessMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
+                            LOGGER.info("Sending a success message {}", tokenMessagePair.getAuditMessage().getResourceId());
                             Integer partition = Token.toPartition(tokenMessagePair.getToken(), successTopic.getPartitions());
                             Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.getToken().getBytes(Charset.defaultCharset()))});
                             return new ProducerRecord<>(successTopic.getName(), partition, (String) null, (AuditSuccessMessage) tokenMessagePair.getAuditMessage(), headers);
@@ -81,6 +86,7 @@ public class AkkaRunnableGraph {
                         //Send AuditErrorMessage to the Audit Service via the error Kafka topic
                         .filter(tokenMessagePair -> tokenMessagePair.getAuditMessage() instanceof AuditErrorMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
+                            LOGGER.info("Sending an error message {}", tokenMessagePair.getAuditMessage().getResourceId());
                             Integer partition = Token.toPartition(tokenMessagePair.getToken(), errorTopic.getPartitions());
                             Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.getToken().getBytes(Charset.defaultCharset()))});
                             return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, (AuditErrorMessage) tokenMessagePair.getAuditMessage(), headers);

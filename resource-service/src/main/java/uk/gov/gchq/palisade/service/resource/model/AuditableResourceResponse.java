@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * This class is a container for {@code ResourceResponse} and {@code AuditErrorMessage} during stream processing.
@@ -134,5 +135,15 @@ public final class AuditableResourceResponse {
              */
             AuditableResourceResponse withResponseAndError(ResourceResponse response, AuditErrorMessage auditErrorMessage);
         }
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditableResourceResponse.class.getSimpleName() + "[", "]")
+                .add("resourceResponse=" + resourceResponse)
+                .add("auditErrorMessage=" + auditErrorMessage)
+                .add(super.toString())
+                .toString();
     }
 }

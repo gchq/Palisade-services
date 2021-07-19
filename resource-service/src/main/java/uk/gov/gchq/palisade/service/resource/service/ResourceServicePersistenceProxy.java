@@ -98,6 +98,15 @@ public class ResourceServicePersistenceProxy {
                         )
                         // If persistence is empty, a "cache miss"
                         .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
+
+                                // Catch any errors that where thrown from the delegateGetResourcesById
+                                .recover(new PFBuilder<Throwable, AuditableResourceResponse>()
+                                        .match(Exception.class, ex -> AuditableResourceResponse.Builder.create()
+                                                .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
+                                                        Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.SERVICE.toString()))
+                                                        .withError(new NoSuchResourceException("Exception thrown while querying service implementation", ex)))).build())
+
+
                                 // Persist newly-discovered resources before they are returned, return errors without persisting
                                 .via(ConditionalGraph.map((AuditableResourceResponse response) -> {
                                     if (response.getAuditErrorMessage() != null) {
@@ -138,12 +147,15 @@ public class ResourceServicePersistenceProxy {
                             .withResourceResponse(ResourceResponse.Builder.create(request)
                                     .withResource(leafResource)))
                     // An error occurred when requesting resource from delegate, create an AuditErrorMessage
-                    .exceptionally(ex -> AuditableResourceResponse.Builder.create()
-                            .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
-                                    Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.REQUEST.toString()))
-                                    .withError(new NoSuchResourceException(ex.getMessage(), ex))));
+                    .exceptionally(ex -> {
+                        LOGGER.error("Exception encountered when calling getNext() on iterator", ex);
+                        return AuditableResourceResponse.Builder.create()
+                                .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
+                                        Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.REQUEST.toString()))
+                                        .withError(new NoSuchResourceException(ex.getMessage(), ex)));
+                    });
         } catch (RuntimeException ex) {
-            LOGGER.error("Exception encountered connecting to the service: {}", ex.getMessage());
+            LOGGER.error("Exception encountered connecting to the service", ex);
             // If the initial request to the service fails, audit as a service error rather than a request error
             return Collections.singleton(AuditableResourceResponse.Builder.create()
                     .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
@@ -154,7 +166,7 @@ public class ResourceServicePersistenceProxy {
     }
 
     /**
-     * Uses a type to get any {@link LeafResource}s associated with the it.
+     * Uses a type to get any {@link LeafResource}s associated with it.
      *
      * @param request the the {@link ResourceRequest} that contains the resourceId used to retrieve resources
      * @param type    the type to be queried
