@@ -67,6 +67,9 @@
         <dockerfile.base.image>openjdk@sha256:775cd07d9c8c44db4a329269b128065dd86549675ea4db70b6201f3081eb2d89</dockerfile.base.image>
         <!-- Prefix image tag with image type being used -->
         <dockerfile.base.tag>jre</dockerfile.base.tag>
+        <!-- Set the version-tag depending on profile (defaults to SNAPSHOT-$githash, but may be RELEASE-$version for releases) -->
+        <!--suppress UnresolvedMavenProperty -->
+        <dockerfile.version.tag>${revision}-${git.commit.id.abbrev}</dockerfile.version.tag>
     </properties>
 
     <dependencies>
@@ -296,7 +299,7 @@
                         <replacement>
                             <token>image.tag</token>
                             <!--suppress UnresolvedMavenProperty -->
-                            <value>${image.tag}</value>
+                            <value>${version}-${git.commit.id.abbrev}</value>
                         </replacement>
                     </replacements>
                 </configuration>
@@ -358,7 +361,7 @@
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
-                    <tag>${dockerfile.base.tag}-${image.tag}</tag>
+                    <tag>${dockerfile.base.tag}-${dockerfile.version.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
                         <BASE_IMG>${dockerfile.base.image}</BASE_IMG>

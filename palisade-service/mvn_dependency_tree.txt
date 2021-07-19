@@ -1,5 +1,5 @@
-uk.gov.gchq.palisade:palisade-service:jar:0.5.0-RELEASE
-+- uk.gov.gchq.palisade:common:jar:0.5.0-RELEASE:compile
+uk.gov.gchq.palisade:palisade-service:jar:0.5.0-SNAPSHOT
++- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
 |  \- org.apache.avro:avro:jar:1.8.2:compile
 |     +- org.codehaus.jackson:jackson-core-asl:jar:1.9.13:compile
 |     +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.13:compile
