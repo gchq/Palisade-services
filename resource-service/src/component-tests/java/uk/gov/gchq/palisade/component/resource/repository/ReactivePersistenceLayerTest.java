@@ -40,8 +40,6 @@ import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataR2dbcTest
@@ -55,12 +53,12 @@ class ReactivePersistenceLayerTest {
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
-    private Materializer materializer;
+    private Materializer materialiser;
 
     private LeafResource resource;
 
     @BeforeEach
-    public void setUp() throws InterruptedException {
+    public void setUp() {
         // Given
         resource = ((FileResource) AbstractResourceBuilder.create("file:/root/test-file-id"))
                 .type("test-type")
@@ -72,10 +70,8 @@ class ReactivePersistenceLayerTest {
                 .via(persistenceLayer.withPersistenceById(resource.getId()))
                 .via(persistenceLayer.withPersistenceByType(resource.getType()))
                 .via(persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat()))
-                .runWith(Sink.ignore(), materializer)
+                .runWith(Sink.ignore(), materialiser)
                 .toCompletableFuture().join();
-
-        TimeUnit.SECONDS.sleep(1);
     }
 
     @Test
@@ -119,7 +115,7 @@ class ReactivePersistenceLayerTest {
         // When getting a resource from the persistence layer by resourceId
         var idResult = persistenceLayer.getResourcesById(resource.getId())
                 .join().orElseThrow()
-                .runWith(Sink.seq(), materializer)
+                .runWith(Sink.seq(), materialiser)
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
         assertThat(idResult)
@@ -129,7 +125,7 @@ class ReactivePersistenceLayerTest {
         // When getting a resource from the persistence layer by type
         var typeResult = persistenceLayer.getResourcesByType(resource.getType())
                 .join().orElseThrow()
-                .toMat(Sink.seq(), Keep.right()).run(materializer)
+                .toMat(Sink.seq(), Keep.right()).run(materialiser)
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
         assertThat(typeResult)
@@ -139,7 +135,7 @@ class ReactivePersistenceLayerTest {
         // When getting a resource from the persistence layer by serialised format
         var formatResult = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
                 .join().orElseThrow()
-                .runWith(Sink.seq(), materializer)
+                .runWith(Sink.seq(), materialiser)
                 .toCompletableFuture().join();
         // Then the returned resource should match the created resource
         assertThat(formatResult)

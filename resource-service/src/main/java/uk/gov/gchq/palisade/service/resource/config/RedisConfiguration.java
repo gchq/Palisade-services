@@ -90,7 +90,7 @@ public class RedisConfiguration {
     CompletenessRepositoryAdapter completenessRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<Integer> kSerde = new Jackson2JsonRedisSerializer<>(Integer.class);
         RedisSerializer<CompletenessEntity> vSerde = new Jackson2JsonRedisSerializer<>(CompletenessEntity.class);
-        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
+        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties);
     }
 
     @Primary
@@ -99,7 +99,7 @@ public class RedisConfiguration {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         Jackson2JsonRedisSerializer<ResourceEntity> vSerde = new Jackson2JsonRedisSerializer<>(ResourceEntity.class);
         vSerde.setObjectMapper(ResourceConverter.MAPPER);
-        return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
+        return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties);
     }
 
     @Primary
@@ -107,7 +107,7 @@ public class RedisConfiguration {
     TypeRepositoryAdapter typeRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         RedisSerializer<TypeEntity> vSerde = new Jackson2JsonRedisSerializer<>(TypeEntity.class);
-        return new TypeRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
+        return new TypeRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties);
     }
 
     @Primary
@@ -115,6 +115,6 @@ public class RedisConfiguration {
     SerialisedFormatRepositoryAdapter serialisedFormatRepositoryAdapter(final RedisProperties properties) {
         RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
         RedisSerializer<SerialisedFormatEntity> vSerde = new Jackson2JsonRedisSerializer<>(SerialisedFormatEntity.class);
-        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties.getKeyPrefix());
+        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde), properties);
     }
 }
