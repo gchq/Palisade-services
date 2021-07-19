@@ -22,12 +22,12 @@ service:
 image:
   name: audit-service
   base: jre
-  tag: RELEASE-955749b
+  tag: SNAPSHOT-e9f2ac3
   pullPolicy: IfNotPresent
-  gitHash: 955749b
+  gitHash: e9f2ac3
   versionNumber: 0.5.0
-  codeRelease: 0.5.0-RELEASE
-  revision: RELEASE
+  codeRelease: 0.5.0-SNAPSHOT
+  revision: SNAPSHOT
 
 resources:
   limits:
