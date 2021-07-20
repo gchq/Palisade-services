@@ -33,13 +33,13 @@ import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
+import uk.gov.gchq.palisade.service.data.service.ReadChunkedDataService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.SimpleAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.service.reader.SimpleDataReader;
-import uk.gov.gchq.palisade.service.data.service.writer.ChunkedHttpWriter;
-import uk.gov.gchq.palisade.service.data.service.writer.ResponseWriter;
 
 import java.util.Collection;
 import java.util.concurrent.Executor;
@@ -81,20 +81,20 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Bean for a {@link SimpleDataService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
+     * Bean for a {@link SimpleAuthorisationService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
      * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
      *
      * @param persistenceLayer the persistence layer for reading authorised requests
-     * @return a new {@link SimpleDataService}
+     * @return a new {@link SimpleAuthorisationService}
      */
     @Bean
-    DataService simpleDataService(final PersistenceLayer persistenceLayer) {
-        return new SimpleDataService(persistenceLayer);
+    AuthorisationService simpleAuthorisationService(final PersistenceLayer persistenceLayer) {
+        return new SimpleAuthorisationService(persistenceLayer);
     }
 
     @Bean
-    AuditableDataService auditableDataService(final DataService dataService) {
-        return new AuditableDataService(dataService);
+    AuditableAthorisationService auditableAuthorisationService(final AuthorisationService authorisationService) {
+        return new AuditableAthorisationService(authorisationService);
     }
 
     @Bean
@@ -103,9 +103,9 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    ResponseWriter chunkedHttpWriter(final Collection<DataReader> readers, final SerialiserConfiguration serialiserConfiguration,
-                                     final AuditableDataService dataService, final AuditMessageService auditService) {
-        return new ChunkedHttpWriter(readers, serialiserConfiguration.getSerialiserClassMap(), dataService, auditService);
+    DataService readChunkedDataService(final Collection<DataReader> readers, final SerialiserConfiguration serialiserConfiguration,
+                                       final AuditableAthorisationService dataService, final AuditMessageService auditService) {
+        return new ReadChunkedDataService(readers, serialiserConfiguration.getSerialiserClassMap(), dataService, auditService);
     }
 
     /**

@@ -37,7 +37,7 @@ import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
-import uk.gov.gchq.palisade.service.data.service.DataService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuthorisationService;
 import uk.gov.gchq.palisade.user.User;
 
 import java.util.concurrent.CompletableFuture;
@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class RedisPersistenceContractTest {
 
     @Autowired
-    private DataService service;
+    private AuthorisationService service;
 
     @Autowired
     private AuthorisedRequestsRepository repository;

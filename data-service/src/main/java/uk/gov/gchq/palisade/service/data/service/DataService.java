@@ -16,28 +16,12 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
-import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataRequest;
-
-import java.util.concurrent.CompletableFuture;
+import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 
 /**
- * The only function that the service controls outside of pluggable extensions is the authorisation
- * of a data-request and gathering of rules that apply to this data access.
- * These rules have been persisted by the Attribute-Masking Service and must be recalled here by some
- * means.
+ * Marker interface for {@link RouteSupplier} that are used for writing data from the
+ * {@link DataReader} back to the client.
  */
-public interface DataService {
-
-    /**
-     * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc).
-     *
-     * @param request the client's request for a leaf resource and their unique request token
-     * @return rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the
-     * data-reader and null if there is no data
-     * @throws ForbiddenException if there is no authorised data for the request
-     */
-    CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
-
+public interface DataService extends RouteSupplier {
 }

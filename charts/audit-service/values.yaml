@@ -22,11 +22,11 @@ service:
 image:
   name: audit-service
   base: jre
-  tag: SNAPSHOT-e9f2ac3
+  tag: SNAPSHOT-cb944d8
   pullPolicy: IfNotPresent
-  gitHash: e9f2ac3
+  gitHash: cb944d8
   versionNumber: 0.5.0
-  codeRelease: 0.5.0-SNAPSHOT
+  codeRelease: 0.5.1-SNAPSHOT
   revision: SNAPSHOT
 
 resources:

@@ -1,5 +1,5 @@
-uk.gov.gchq.palisade:palisade-service:jar:0.5.0-SNAPSHOT
-+- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
+uk.gov.gchq.palisade:palisade-service:jar:0.5.1-SNAPSHOT
++- uk.gov.gchq.palisade:common:jar:0.5.1-SNAPSHOT:compile
 |  \- org.slf4j:slf4j-api:jar:1.7.30:compile
 +- com.typesafe.akka:akka-stream_2.13:jar:2.6.10:compile
 |  +- org.scala-lang:scala-library:jar:2.13.3:compile

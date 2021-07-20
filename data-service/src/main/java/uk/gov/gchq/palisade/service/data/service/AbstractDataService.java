@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.service.writer;
+package uk.gov.gchq.palisade.service.data.service;
 
 import akka.Done;
 import akka.NotUsed;
@@ -41,8 +41,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.RulesUtil;
@@ -61,22 +60,22 @@ import java.util.function.Function;
  */
 // Suppress usage of generic wildcard type, domain class isn't known until execution
 @SuppressWarnings("java:S1452")
-public abstract class AbstractResponseWriter implements ResponseWriter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResponseWriter.class);
+public abstract class AbstractDataService implements DataService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataService.class);
 
     protected Collection<DataReader> readers;
     protected Map<String, Class<Serialiser<?>>> serialisers;
-    protected AuditableDataService dataService;
+    protected AuditableAthorisationService authorisationService;
     protected AuditMessageService auditService;
 
-    protected AbstractResponseWriter(
+    protected AbstractDataService(
             final Collection<DataReader> readers,
             final Map<String, Class<Serialiser<?>>> serialisers,
-            final AuditableDataService dataService,
+            final AuditableAthorisationService authorisationService,
             final AuditMessageService auditService) {
         this.readers = readers;
         this.serialisers = serialisers;
-        this.dataService = dataService;
+        this.authorisationService = authorisationService;
         this.auditService = auditService;
 
         LOGGER.debug("Initialised {} with readers {} and serialisers {}", this.getClass(), this.readers, this.serialisers);
@@ -107,7 +106,7 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
     /**
      * Implement a transformation from reader/serialiser/rule output as a callback for the last point of auditing.
      *
-     * @return a flow from reader/serialiser/rule output bytes to the output of {@link AbstractResponseWriter#defaultRunnableGraph(AuditableAuthorisedDataRequest)}
+     * @return a flow from reader/serialiser/rule output bytes to the output of {@link AbstractDataService#defaultRunnableGraph(AuditableAuthorisedDataRequest)}
      * which allows for injecting 'interesting' behaviour before auditing.
      */
     protected abstract Flow<ByteString, ByteString, NotUsed> transformResponse();
@@ -115,8 +114,8 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
     // Suppress warning for untyped lambda expressions, where the type is not known until execution time
     @SuppressWarnings("java:S2211")
     protected Source<ByteString, CompletionStage<Done>> defaultRunnableGraph(final AuditableAuthorisedDataRequest auditable) {
-        AbstractResponseWriter writer = this;
-        LOGGER.info("Selected writer '{}' based on route path", writer.getClass());
+        AbstractDataService service = this;
+        LOGGER.info("Selected service '{}' based on route path", service.getClass());
 
         final AtomicLong recordsProcessed = new AtomicLong(0);
         final AtomicLong recordsReturned = new AtomicLong(0);
@@ -181,7 +180,7 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
                 .mapMaterializedValue(cs -> cs.thenCompose(Function.identity()))
 
                 // Transform data before writing back to the client
-                .via(writer.transformResponse())
+                .via(service.transformResponse())
 
                 // Catch errors and audit
                 .watchTermination((CompletionStage<Done> prevMatValue, CompletionStage<Done> completion) -> {
@@ -229,10 +228,10 @@ public abstract class AbstractResponseWriter implements ResponseWriter {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AbstractResponseWriter.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AbstractDataService.class.getSimpleName() + "[", "]")
                 .add("readers=" + readers)
                 .add("serialisers=" + serialisers)
-                .add("dataService=" + dataService)
+                .add("dataService=" + authorisationService)
                 .add("auditService=" + auditService)
                 .toString();
     }

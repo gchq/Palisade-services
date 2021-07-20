@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.service.writer;
+package uk.gov.gchq.palisade.service.data.service;
 
 import akka.Done;
 import akka.NotUsed;
@@ -36,8 +36,7 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.web.LeafResourceContentType;
 
@@ -48,23 +47,23 @@ import java.util.concurrent.CompletionStage;
 /**
  * Route for "/read/chunked"
  */
-public class ChunkedHttpWriter extends AbstractResponseWriter {
+public class ReadChunkedDataService extends AbstractDataService {
 
     /**
-     * Construct a new instance of a {@link ChunkedHttpWriter}, delegating construction to the {@link AbstractResponseWriter} superclass.
+     * Construct a new instance of a {@link ReadChunkedDataService}, delegating construction to the {@link AbstractDataService} superclass.
      *
      * @param readers      collection of {@link DataReader}s which may or may not {@link DataReader#accepts(LeafResource)} a requested {@link LeafResource},
      *                     where the first found reader that accepts the resource will be used to {@link DataReader#read(LeafResource)} it
      * @param serialisers  map from serialiser names (decided here using {@link LeafResource#getSerialisedFormat()}) and serialiser classes to use for
      *                     constructing {@link Serialiser}s to (de)serialise bytes into records (so rules can be applied)
-     * @param dataService  instance of {@link AuditableDataService} to decide whether access to a given resource should be granted, and with which rules
+     * @param dataService  instance of {@link AuditableAthorisationService} to decide whether access to a given resource should be granted, and with which rules
      *                     to apply to this data read
      * @param auditService sink to send {@link uk.gov.gchq.palisade.service.data.model.AuditMessage}s to on success or failure of a data read
      */
-    public ChunkedHttpWriter(
+    public ReadChunkedDataService(
             final Collection<DataReader> readers,
             final Map<String, Class<Serialiser<?>>> serialisers,
-            final AuditableDataService dataService,
+            final AuditableAthorisationService dataService,
             final AuditMessageService auditService) {
         super(readers, serialisers, dataService, auditService);
     }
@@ -75,7 +74,7 @@ public class ChunkedHttpWriter extends AbstractResponseWriter {
         return Directives.pathPrefix("read", () -> Directives.pathPrefix("chunked", () -> Directives.pathEndOrSingleSlash(() ->
                 // POST with header Range: <Range> and body DataRequest
                 Directives.post(() -> Directives.withRangeSupport(() -> Directives.entity(Jackson.unmarshaller(DataRequest.class), request ->
-                        Directives.completeWithFuture(dataService.authoriseRequest(request)
+                        Directives.completeWithFuture(authorisationService.authoriseRequest(request)
                                 .thenApply((AuditableAuthorisedDataRequest authorisation) -> {
                                     // Decide HTTP Content-Type header and Status-Code
                                     ContentType contentType;

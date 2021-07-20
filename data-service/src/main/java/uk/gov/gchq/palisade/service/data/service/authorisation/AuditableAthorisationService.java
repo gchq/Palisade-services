@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.service;
+package uk.gov.gchq.palisade.service.data.service.authorisation;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
@@ -24,20 +24,20 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Provides an auditable wrapper to the {@link DataService}. For each of the methods provided in the in the
+ * Provides an auditable wrapper to the {@link AuthorisationService}. For each of the methods provided in the in the
  * {@code DataService}, there is a corresponding method in this class for requesting the information and providing a
  * response wrapped with the data or the exception when an error has occurred.
  */
-public class AuditableDataService {
-    private final DataService dataService;
+public class AuditableAthorisationService {
+    private final AuthorisationService authorisationService;
 
     /**
      * AuditableDataService constructor
      *
-     * @param dataService the current Data Service implementation
+     * @param authorisationService the current Data Service implementation
      */
-    public AuditableDataService(final DataService dataService) {
-        this.dataService = dataService;
+    public AuditableAthorisationService(final AuthorisationService authorisationService) {
+        this.authorisationService = authorisationService;
     }
 
     /**
@@ -48,7 +48,7 @@ public class AuditableDataService {
      * @return reference to the resource information or error message
      */
     public CompletableFuture<AuditableAuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
-        return dataService.authoriseRequest(dataRequest)
+        return authorisationService.authoriseRequest(dataRequest)
                 .thenApply(authorisedDataRequest -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
                         .withAuthorisedData(authorisedDataRequest))

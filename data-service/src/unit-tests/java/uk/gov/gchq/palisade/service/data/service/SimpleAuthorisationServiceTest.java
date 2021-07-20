@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.data.service.authorisation.SimpleAuthorisationService;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -39,21 +40,21 @@ import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISE
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.AUTHORISED_REQUEST_ENTITY;
 import static uk.gov.gchq.palisade.service.data.DataServiceTestsCommon.DATA_REQUEST;
 
-class SimpleDataServiceTest {
+class SimpleAuthorisationServiceTest {
 
 
     //mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
 
-    private SimpleDataService simpleDataService;
+    private SimpleAuthorisationService simpleDataService;
 
     @BeforeEach
     void setUp() {
-        simpleDataService = new SimpleDataService(persistenceLayer);
+        simpleDataService = new SimpleAuthorisationService(persistenceLayer);
     }
 
     /**
-     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is found to be
+     * Test for {@link SimpleAuthorisationService#authoriseRequest(DataRequest)}.  If the request is found to be
      * authorised, the response will be the relevant information needed to proceed with the request. This will be in the
      * form of a {@code DataReaderRequest}.
      */
@@ -74,7 +75,7 @@ class SimpleDataServiceTest {
     }
 
     /**
-     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)} when no data is returned from the persistence
+     * Test for {@link SimpleAuthorisationService#authoriseRequest(DataRequest)} when no data is returned from the persistence
      * storage.  The expected response will be for the method to throw a {@link ForbiddenException}.
      */
     @Test

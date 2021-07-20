@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.service;
+package uk.gov.gchq.palisade.service.data.service.authorisation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +32,8 @@ import java.util.concurrent.CompletableFuture;
  * Simple implementation of a Data Service, which reads using a data-reader and audits the
  * number of records processed and returned.
  */
-public class SimpleDataService implements DataService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
+public class SimpleAuthorisationService implements AuthorisationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuthorisationService.class);
     private final PersistenceLayer persistenceLayer;
 
     /**
@@ -41,7 +41,7 @@ public class SimpleDataService implements DataService {
      *
      * @param persistenceLayer the persistence layer containing the authorised read requests
      */
-    public SimpleDataService(final PersistenceLayer persistenceLayer) {
+    public SimpleAuthorisationService(final PersistenceLayer persistenceLayer) {
         this.persistenceLayer = persistenceLayer;
     }
 
