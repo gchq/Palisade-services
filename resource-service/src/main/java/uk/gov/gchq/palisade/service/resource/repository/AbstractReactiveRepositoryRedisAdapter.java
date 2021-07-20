@@ -45,7 +45,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * A class that implements a {@link ReactiveCrudRepository} for Redis backing store
+ * An abstract RedisAdapter class that implements a {@link ReactiveCrudRepository} for Redis backing store.
+ *
  *
  * @param <V> the value in the backing store
  * @param <K> the key in the backing store
@@ -53,9 +54,6 @@ import java.util.stream.Collectors;
 public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements ReactiveCrudRepository<V, K> {
     public static final String KEY_SEP = "::";
     private static final String ID_KEYSPACE = "id";
-    private static final String PARENT_KEYSPACE = "parent";
-    private static final String FORMAT_KEYSPACE = "format";
-    private static final String TYPE_KEYSPACE = "type";
 
     protected final String table;
     protected final Duration ttl;
@@ -274,7 +272,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link ResourceEntity}s to be stored in a reactive repository
      */
     public static class ResourceRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<ResourceEntity, String> implements ResourceRepository {
-        private static final String SEPARATOR = KEY_SEP + PARENT_KEYSPACE + KEY_SEP;
+        private static final String PARENT_SEPARATOR = KEY_SEP + "parent" + KEY_SEP;
 
         /**
          * {@link ResourceRepositoryAdapter} constructor that takes a redis template
@@ -294,7 +292,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends ResourceEntity> Mono<S> save(final @NonNull S entity) {
-            final String id = this.table + SEPARATOR + entity.getParentId();
+            final String id = this.table + PARENT_SEPARATOR + entity.getParentId();
             return this.setOps.add(id, entity.getId())
                     .then(this.redisTemplate.expire(id, ttl))
                     .then(this.saveDefault(entity));
@@ -302,7 +300,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Flux<ResourceEntity> findAllByParentId(final String parentId) {
-            return this.setOps.members(this.table + SEPARATOR + parentId)
+            return this.setOps.members(this.table + PARENT_SEPARATOR + parentId)
                     .flatMap(this::findById);
         }
 
@@ -310,7 +308,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getParentId()))
+                    .map(entity -> this.setOps.remove(this.table + PARENT_SEPARATOR + entity.getParentId()))
                     .then(this.deleteByIdDefault(key));
         }
     }
@@ -319,7 +317,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link SerialisedFormatEntity}s to be stored in a reactive repository
      */
     public static class SerialisedFormatRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<SerialisedFormatEntity, String> implements SerialisedFormatRepository {
-        private static final String SEPARATOR = KEY_SEP + FORMAT_KEYSPACE + KEY_SEP;
+        private static final String SERIALISED_FORMAT_SEPARATOR = KEY_SEP + "format" + KEY_SEP;
 
         /**
          * {@link SerialisedFormatRepositoryAdapter} constructor that takes a redis template
@@ -339,14 +337,14 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends SerialisedFormatEntity> Mono<S> save(final @NonNull S entity) {
-            return this.setOps.add(this.table + SEPARATOR + entity.getSerialisedFormat(), entity.getId())
-                    .then(this.redisTemplate.expire(this.table + SEPARATOR + entity.getSerialisedFormat(), ttl))
+            return this.setOps.add(this.table + SERIALISED_FORMAT_SEPARATOR + entity.getSerialisedFormat(), entity.getId())
+                    .then(this.redisTemplate.expire(this.table + SERIALISED_FORMAT_SEPARATOR + entity.getSerialisedFormat(), ttl))
                     .then(this.saveDefault(entity));
         }
 
         @Override
         public Flux<SerialisedFormatEntity> findAllBySerialisedFormat(final String serialisedFormat) {
-            return this.setOps.members(this.table + SEPARATOR + serialisedFormat)
+            return this.setOps.members(this.table + SERIALISED_FORMAT_SEPARATOR + serialisedFormat)
                     .flatMap(this::findById);
         }
 
@@ -354,7 +352,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getSerialisedFormat()))
+                    .map(entity -> this.setOps.remove(this.table + SERIALISED_FORMAT_SEPARATOR + entity.getSerialisedFormat()))
                     .then(this.deleteByIdDefault(key));
         }
     }
@@ -363,7 +361,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
      * A class to allow {@link TypeRepository}s to be stored in a reactive repository
      */
     public static class TypeRepositoryAdapter extends AbstractReactiveRepositoryRedisAdapter<TypeEntity, String> implements TypeRepository {
-        private static final String SEPARATOR = KEY_SEP + TYPE_KEYSPACE + KEY_SEP;
+        private static final String TYPE_SEPARATOR = KEY_SEP + "type" + KEY_SEP;
 
         /**
          * {@link TypeRepositoryAdapter} constructor that takes a redis template
@@ -383,7 +381,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @Override
         @NonNull
         public <S extends TypeEntity> Mono<S> save(final @NonNull S entity) {
-            final String id = this.table + SEPARATOR + entity.getType();
+            final String id = this.table + TYPE_SEPARATOR + entity.getType();
             return this.setOps.add(id, entity.getId())
                     .then(this.redisTemplate.expire(id, ttl))
                     .then(super.saveDefault(entity));
@@ -391,7 +389,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
 
         @Override
         public Flux<TypeEntity> findAllByType(final String type) {
-            return this.setOps.members(this.table + SEPARATOR + type)
+            return this.setOps.members(this.table + TYPE_SEPARATOR + type)
                     .flatMap(this::findById);
         }
 
@@ -399,7 +397,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
         @NonNull
         public Mono<Void> deleteById(final @NonNull String key) {
             return this.findById(key)
-                    .map(entity -> this.setOps.remove(this.table + SEPARATOR + entity.getType()))
+                    .map(entity -> this.setOps.remove(this.table + TYPE_SEPARATOR + entity.getType()))
                     .then(super.deleteByIdDefault(key));
         }
     }

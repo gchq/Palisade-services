@@ -64,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitialiser.class})
-@ActiveProfiles({"redis-test", "akka-test", "testcontainers"})
+@ActiveProfiles({"redis", "akka-test", "testcontainers"})
 class RedisPersistenceTest {
 
     @Autowired

@@ -44,11 +44,18 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataRedisTest
+@DataRedisTest(properties = {
+        "spring.data.redis.repositories.key-prefix=test:",
+        "spring.data.redis.repositories.timeToLive.defaultTtl=1s",
+        "spring.data.redis.repositories.timeToLive.completeness=1s",
+        "spring.data.redis.repositories.timeToLive.types=2s",
+        "spring.data.redis.repositories.timeToLive.serialised_formats=2s",
+        "spring.data.redis.repositories.timeToLive.resources=3s"
+})
 @ContextConfiguration(initializers = {RedisInitialiser.class},
         classes = {ApplicationConfiguration.class, RedisConfiguration.class, AkkaSystemConfig.class})
 @EnableAutoConfiguration
-@ActiveProfiles({"redis-test", "testcontainers"})
+@ActiveProfiles({"redis", "testcontainers"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class RedisPersistenceLayerTest {
 
