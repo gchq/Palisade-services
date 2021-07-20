@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.resource.domain.AbstractOrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
@@ -273,68 +272,12 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
             return resourceRepository.streamFindAllByParentId(parentResource.getId())
                     .map(ResourceEntity::getResource)
                     // Recurse over further children
-                    .flatMapConcat(this::collectLeaves)
-                    .mapAsync(PARALLELISM, leafResource -> resolveParentsUpto(leafResource, resource));
+                    .flatMapConcat(this::collectLeaves);
         } else if (resource instanceof LeafResource) {
             // If we have reached a leaf, then done
             return Source.single((LeafResource) resource);
         } else {
             throw new UnknownResourceTypeException(String.format("Resource '%s' is neither Parent nor Leaf", resource.getId()));
-        }
-    }
-
-    /**
-     * Given a resource, get from persistence its grand*parents and set them up appropriately
-     * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
-     * This is effectively undoing the effects of serialisation using the {@link AbstractOrphanedChildJsonMixin}
-     *
-     * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
-     * @param childResource the initial resource to recurse up from
-     * @return the resource with all parents resolved up-to some 'root' resource, usually the first {@link Resource}
-     * that wasn't an instance of {@link ChildResource}
-     */
-    private <T extends Resource> CompletableFuture<T> resolveParents(final T childResource) {
-        return traverseParentsByEntity(
-                childResource,
-                (ParentResource parent, ChildResource child) -> {
-                    child.setParent(parent);
-                    return true;
-                }
-        ).thenApply(ignored -> childResource);
-    }
-
-    /**
-     * Given a resource, get from persistence its grand*parents and set them up appropriately
-     * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
-     * Stop once a given 'root' resource has been reached at either the parent or the child
-     * In practice, this check is only satisfied by the child when childResource == rootResource
-     * Otherwise it will always be satisfied by the parent first before it is satisfied by the child
-     * Subsequently, this is split as one initial check by child and all subsequent checks by parent
-     *
-     * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
-     * @param childResource the initial resource to recurse up from
-     * @param rootResource  the resource at which to stop recursion
-     * @return the resource with all parents resolved up-to the given rootResource
-     */
-    private <T extends Resource> CompletableFuture<T> resolveParentsUpto(final T childResource, final Resource rootResource) {
-        if (!childResource.getId().equals(rootResource.getId())) {
-            return traverseParentsByEntity(
-                    childResource,
-                    (ParentResource parent, ChildResource child) -> {
-                        if (parent.getId().equals(rootResource.getId())) {
-                            if (rootResource instanceof ParentResource) {
-                                child.setParent((ParentResource) rootResource);
-                            }
-                            return false;
-                        } else {
-                            child.setParent(parent);
-                            return true;
-                        }
-                    }
-            ).thenApply(ignored -> childResource);
-        } else {
-            // See traverseParentsByEntity, nice for transparency, even though the reference has been mutated
-            return CompletableFuture.completedFuture(childResource);
         }
     }
 
@@ -490,9 +433,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // Get resource entity from db
         return resourceRepository.streamFindOneByResourceId(resourceId)
                 // Get resource from db entity
-                .map(ResourceEntity::getResource)
-                // Resolve this resource's parents until no more parents found in db
-                .mapAsync(PARALLELISM, this::resolveParents);
+                .map(ResourceEntity::getResource);
     }
 
     // ~~~ Actual method implementations/overrides for PersistenceLayer interface ~~~ //
@@ -510,10 +451,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
                                 // Get resource from db entity
                                 .map(ResourceEntity::getResource)
-                                // Optimisation - resolve this resource's parents as itself is a parent of each leaf
-                                // This means leaves have fewer parents to resolve AND may help with memory usage
-                                // Each resource pulled from the database is unique, even for the same entity
-                                .mapAsync(PARALLELISM, this::resolveParents)
                                 // Get all leaves of this resource with parents resolved up to this resource
                                 // See above, all parents are now resolved
                                 .flatMapConcat(this::collectLeaves));
