@@ -121,16 +121,16 @@ class RedisPersistenceTest {
         tempClientAvroFile = Files.createFile(tempDir.resolve("client.avro")).toFile();
 
         // Create the test resources from the temp files
-        testDirectory = (DirectoryResource) AbstractResourceBuilder.create("file:" + tempDir + "/");
-        employeeAvroFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempEmployeeAvroFile.getPath()))
+        testDirectory = (DirectoryResource) AbstractResourceBuilder.create(tempDir.toUri());
+        employeeAvroFile = ((FileResource) AbstractResourceBuilder.create(tempEmployeeAvroFile.toURI()))
                 .type(EMPLOYEE_TYPE)
                 .serialisedFormat(AVRO_FORMAT)
                 .connectionDetail(DETAIL);
-        employeeJsonFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempEmployeeJsonFile.getPath()))
+        employeeJsonFile = ((FileResource) AbstractResourceBuilder.create(tempEmployeeJsonFile.toURI()))
                 .type(EMPLOYEE_TYPE)
                 .serialisedFormat(JSON_FORMAT)
                 .connectionDetail(DETAIL);
-        clientAvroFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempClientAvroFile.getPath()))
+        clientAvroFile = ((FileResource) AbstractResourceBuilder.create(tempClientAvroFile.toURI()))
                 .type(CLIENT_TYPE)
                 .serialisedFormat(AVRO_FORMAT)
                 .connectionDetail(DETAIL);

@@ -24,8 +24,8 @@ image:
   tag: SNAPSHOT-3e49fa9
   pullPolicy: IfNotPresent
   gitHash: 3e49fa9
-  versionNumber: 0.5.0
-  codeRelease: 0.5.0-SNAPSHOT
+  versionNumber: 0.5.1
+  codeRelease: 0.5.1-SNAPSHOT
   revision: SNAPSHOT
 
 resources:
