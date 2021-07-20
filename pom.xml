@@ -142,7 +142,7 @@
                 <common.revision>RELEASE</common.revision>
                 <maven.test.skip>true</maven.test.skip>
                 <dockerfile.push.skip>true</dockerfile.push.skip>
-                <image.tag>${revision}-${version.number}</image.tag>
+                <dockerfile.version.tag>${revision}-${version.number}</dockerfile.version.tag>
             </properties>
             <build>
                 <plugins>
