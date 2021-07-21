@@ -71,7 +71,7 @@ public class AkkaHttpServer {
 
     /**
      * Start the server using the provided actor system and start to serve requests forever,
-     * or until {@link AkkaHttpServer#terminate()}d.
+     * or until the server's @link AkkaHttpServer#terminate()} method is called.
      *
      * @param system the akka actor system (effectively providing the thread-pool to run this server on)
      */

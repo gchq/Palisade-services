@@ -62,6 +62,14 @@ public class EndpointConfiguration {
         return new AkkaHttpServer(hostname, properties.getPort(), routeSuppliers);
     }
 
+    /**
+     * Route for "/read/chunked" Data Service endpoint, used by a client to read data as an HTTP stream.
+     *
+     * @param auditableDataService the {@link AuditableDataService} used for reading the data
+     * @param auditMessageService  the {@link AuditMessageService} used for audinting the result of a data request,
+     *                             this might be success with records processed and returned, or error with the cause
+     * @return
+     */
     @Bean
     ChunkedHttpWriter chunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
         return new ChunkedHttpWriter(auditableDataService, auditMessageService);

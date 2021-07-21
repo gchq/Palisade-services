@@ -47,7 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * Route for "/read/chunked
+ * Route for "/read/chunked"
  */
 public class ChunkedHttpWriter implements RouteSupplier {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkedHttpWriter.class);
