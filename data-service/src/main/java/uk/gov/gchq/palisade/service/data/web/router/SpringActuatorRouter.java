@@ -48,7 +48,7 @@ public class SpringActuatorRouter implements RouteSupplier {
     }
 
     /**
-     * Serve all ActuatorSuppliers under the /actuator endpoint
+     * Collect all ActuatorSuppliers under the /actuator endpoint into a single {@link Route}
      *
      * @return an Akka {@link Route} for all Spring Actuator imitators
      */

@@ -150,8 +150,10 @@ class KafkaContractTest {
         HttpEntity<DataRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity(READ_CHUNKED, entity, Void.class);
 
-        // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        // Then - the REST request was accepted, and returned a FORBIDDEN
+        assertThat(response.getStatusCode())
+                .as("Check the response was FORBIDDEN as the client has no authorisation to read the data")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = errorProbe.request(1);
 
@@ -212,6 +214,7 @@ class KafkaContractTest {
 
         // Then - the REST request was accepted
         assertThat(response.getStatusCode())
+                .as("Check the response was OK as the client is authorised to read the data")
                 .isEqualTo(HttpStatus.OK);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
