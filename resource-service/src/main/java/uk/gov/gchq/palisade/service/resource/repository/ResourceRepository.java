@@ -51,6 +51,16 @@ public interface ResourceRepository extends ReactiveCrudRepository<ResourceEntit
     }
 
     /**
+     * Delete a {@link ResourceEntity} given a resource id
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link CompletableFuture} of a {@link Void} once deleted
+     */
+    default CompletableFuture<Void> futureDeleteByResourceId(String resourceId) {
+        return this.deleteById(resourceId).toFuture();
+    }
+
+    /**
      * Checks if there is a {@link ResourceEntity} for a resource id
      *
      * @param resourceId the id of the Resource
