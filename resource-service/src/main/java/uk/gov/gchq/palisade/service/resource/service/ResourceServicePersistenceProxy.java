@@ -147,7 +147,7 @@ public class ResourceServicePersistenceProxy {
                             .withResourceResponse(ResourceResponse.Builder.create(request)
                                     .withResource(leafResource)))
                     // An error occurred when requesting resource from delegate, create an AuditErrorMessage
-                    .exceptionally(ex -> {
+                    .exceptionally((Throwable ex) -> {
                         LOGGER.error("Exception encountered when calling getNext() on iterator", ex);
                         return AuditableResourceResponse.Builder.create()
                                 .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
