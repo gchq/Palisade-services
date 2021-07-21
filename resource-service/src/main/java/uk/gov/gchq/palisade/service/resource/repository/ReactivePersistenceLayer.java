@@ -290,21 +290,23 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveIncompleteResource(final Resource resource) {
-        // Since this is a 'low-quality' set of information, we never want to overwrite a 'high-quality' (complete) entity
-        // There is no benefit to overwrite a 'low-quality' (incomplete) entity as it should be equivalent
-        // Therefore, if this resource is already persisted, skip
+
         return isResourceIdPersisted(resource.getId())
                 .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
-                        // Create an entity
-                        ResourceEntity entity = new ResourceEntity(resource);
-                        // Save to db
-                        return resourceRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
-                        // Don't save to completeness db
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing resource '{}'", resource);
+                        return resourceRepository.futureDeleteByResourceId(resource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    ResourceEntity entity = new ResourceEntity(resource);
+                    // Save to db
+                    return resourceRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
+
                 });
     }
 
@@ -388,15 +390,22 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveType(final String type, final LeafResource leafResource) {
+
         return typeRepository.futureExistsByResourceId(leafResource.getId())
-                .thenCompose((Boolean alreadySaved) -> {
-                    if (alreadySaved.equals(Boolean.FALSE)) {
-                        TypeEntity entity = new TypeEntity(type, leafResource.getId());
-                        return typeRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType()));
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing type '{}' resource  '{}'", type, leafResource);
+                        return typeRepository.futureDeleteByResourceId(leafResource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    TypeEntity entity = new TypeEntity(type, leafResource.getId());
+                    return typeRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with type '{}'",
+                                    entity.getResourceId(), entity.getType()));
                 });
     }
 
@@ -410,16 +419,22 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
-        return serialisedFormatRepository.futureExistsFindOneByResourceId(leafResource.getId())
-                .thenCompose((Boolean alreadySaved) -> {
-                    if (alreadySaved.equals(Boolean.FALSE)) {
-                        SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
-                        return serialisedFormatRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with serialisedFormat '{}'",
-                                        entity.getResourceId(), entity.getSerialisedFormat()));
+
+        return serialisedFormatRepository.futureExistsByResourceId(leafResource.getId())
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing seralisedFormat '{}' resource '{}'", serialisedFormat, leafResource);
+                        return serialisedFormatRepository.futureDeleteByResourceId(leafResource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
+                    return serialisedFormatRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for serialisedFormat entity '{}' with serialisedFormat '{}'",
+                                    entity.getResourceId(), entity.getSerialisedFormat()));
                 });
     }
 
