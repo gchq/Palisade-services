@@ -53,7 +53,7 @@ The token is also added to a `PalisadeClientResponse` object, which is sent back
 
 ## REST Interface
 
-Palisade Service exposes two REST endpoints:
+Palisade Service exposes one REST endpoint:
 
 * `POST palisade/registerDataRequest`
     - accepts an `x-request-token` `String` header, any number of extra headers, and an `PalisadeClientRequest` body

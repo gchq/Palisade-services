@@ -40,7 +40,7 @@ See topic-offset-service/doc/topic-offset-service.drawio for the source of this 
 (fields marked with * are acquired from headers metadata)
 
 The Topic-Offset Service monitors and watches the `masked-resource` Kafka topic and reports the offsets that satisfy some prerequisites. 
-This service accepts a `TopicOffsetRequest`, which contains a token, it is then used to subscribe to the kafka topic and check for a Start of Stream message, declared in the `StreamMarker` class. 
+This service accepts a `TopicOffsetRequest`, which contains a token value, the service will then look at the value of the `x-request-token` header to check if it is a `START` message. 
 When a Start of Stream message is observed, the commitOffset is retrieved, and sent onward to the [Filtered-Resource Service](../filtered-resource-service) to point the Filtered-Resource Service to the commitOffset on the Kafka topic.
 
 ## REST Interface
@@ -50,10 +50,12 @@ The application exposes two REST endpoints used for debugging or mocking the kaf
   - accepts an `x-request-token` `String` header, any number of extra headers, and a single `TopicOffsetRequest` in the body
   - returns a `202 ACCEPTED` after writing the headers and `TopicOffsetRequest` to kafka
 * `POST api/offset/multi`
-  - accepts an `x-request-token` `String` header, any number of extra headers, and a list of `TopicOffsetRequest`s within the body
+  - accepts an `x-request-token` `String` header, any number of extra headers, and a list of `TopicOffsetRequest` objects within the body
   - returns a `202 ACCEPTED` after writing the headers and `TopicOffsetRequest` to kafka
 
 ## Example JSON Request
+The following example request forms the body of the request however, the Topic-Offset Service looks for a specific header associated with each request message.
+The request body can be empty as it is treated as an Optional within the RunnableGraph
 ```
 curl -X POST topic-offset-service/api/offset -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
 '{
@@ -82,6 +84,7 @@ curl -X POST topic-offset-service/api/offset -H "x-request-token: test-request-t
 
 
 ## Example JSON Kafka Topic ('masked-resource-offset') Output
+The following response is only outputted to the topic if the service has received a `START` message
 ```
 '{
    "commitOffset": 101
