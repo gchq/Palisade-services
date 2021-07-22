@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  *         <td>serialised_formats</td><td>|</td><td>Table Name :: format :: Serialised Format Value</td><td>|</td><td>Set of all resources associated with this format</td>
  *     </tr>
  * </table>
- * 
+ *
  * @param <V> the value in the backing store
  * @param <K> the key in the backing store
  */

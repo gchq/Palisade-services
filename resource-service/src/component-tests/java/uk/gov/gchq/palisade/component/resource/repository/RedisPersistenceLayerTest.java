@@ -46,11 +46,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataRedisTest(properties = {
         "spring.data.redis.repositories.key-prefix=test:",
-        "spring.data.redis.repositories.timeToLive.defaultTtl=1s",
-        "spring.data.redis.repositories.timeToLive.completeness=1s",
-        "spring.data.redis.repositories.timeToLive.types=2s",
-        "spring.data.redis.repositories.timeToLive.serialised_formats=2s",
-        "spring.data.redis.repositories.timeToLive.resources=3s"
+        "spring.data.redis.repositories.timeToLive.defaultTtl=2s",
+        "spring.data.redis.repositories.timeToLive.completeness=2s",
+        "spring.data.redis.repositories.timeToLive.types=4s",
+        "spring.data.redis.repositories.timeToLive.serialised_formats=4s",
+        "spring.data.redis.repositories.timeToLive.resources=5s"
 })
 @ContextConfiguration(initializers = {RedisInitialiser.class},
         classes = {ApplicationConfiguration.class, RedisConfiguration.class, AkkaSystemConfig.class})
