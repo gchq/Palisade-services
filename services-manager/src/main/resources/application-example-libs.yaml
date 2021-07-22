@@ -37,8 +37,10 @@ example:
   version: '@examples.app.version@'
   path: ../Palisade-examples
   libs: &libraries
-    - ${example.path}/example-library/target/example-library-${example.version}-jar-with-dependencies.jar
     - ${readers.path}/avro-serialiser/target/avro-serialiser-${readers.version}-jar-with-dependencies.jar
+    - ${example.path}/example-library/target/example-library-${example.version}-jar-with-dependencies.jar
+    - ${example.path}/example-user-library/target/example-user-library-${example.version}-jar-with-dependencies.jar
+    - ${example.path}/example-rule-library/target/example-rule-library-${example.version}-jar-with-dependencies.jar
   service-profiles: &profiles
     - static
     - avro
