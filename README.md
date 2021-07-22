@@ -17,6 +17,8 @@ limitations under the License.
 # <img src="logos/logo.svg" width="180">
 
 ## A Tool for Complex and Scalable Data Access Policy Enforcement
+Windows is not an explicitly supported environment, although where possible Palisade has been made compatible.  
+For Windows developer environments, we recommend setting up [WSL](https://docs.microsoft.com/en-us/windows/wsl/).
 
 ## Overview
 
@@ -78,10 +80,9 @@ This is achieved via profile activation (**pi**, "push image"), eg:
 mvn clean install -pl <module name> -P pi
 ```
 
-
 ### Considerations for running under Windows
 
-In order to mount local directories to the data service, ***Windows users*** may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private via PowerShell:
+In order to mount local directories to the Data Service, ***Windows users*** may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private via PowerShell:
 ```
 Set-NetConnectionProfile -InterfaceAlias "vEthernet (DockerNAT)" -NetworkCategory Private
 ```
@@ -95,7 +96,6 @@ root = /
 options = "metadata"
 ```
 Changes will require a reboot to take effect.
-
 
 ### Helm Install
 
@@ -220,3 +220,11 @@ Use the `-h` flag to see usage instructions.
 ## Palisade Flow Diagram
 ![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
 
+
+## FAQ
+Q: What is the version of Java is supported?  
+A: The existing version of the application is built with Java 11. It should work with later versions of Java, but this has not been tested.
+
+Q: What build environments are supported?  
+A: We currently support macOS and Linux environments. Windows can be configured  _although there are some caveats for Windows users wishing to use Hadoop components.
+As such, WSL is preferred._
