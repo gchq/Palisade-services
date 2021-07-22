@@ -220,3 +220,11 @@ Use the `-h` flag to see usage instructions.
 ## Palisade Flow Diagram
 ![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
 
+
+## FAQ
+Q: What is the version of Java is supported?  
+A: The existing version of the application is built with Java 11. It should work with later versions of Java, but this has not been tested.
+
+Q: What build environments are supported?  
+A: We currently support macOS and Linux environments. Windows can be configured  _although there are some caveats for Windows users wishing to use Hadoop components.
+As such, WSL is preferred._
