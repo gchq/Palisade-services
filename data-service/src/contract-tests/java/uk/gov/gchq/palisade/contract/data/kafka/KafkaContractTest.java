@@ -27,6 +27,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -184,7 +185,7 @@ class KafkaContractTest {
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
         when(serviceMock.read(any(), any()))
-                .then(invocation -> {
+                .then((InvocationOnMock invocation) -> {
                     var os = invocation.getArgument(1, OutputStream.class);
                     os.close();
                     return CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE);

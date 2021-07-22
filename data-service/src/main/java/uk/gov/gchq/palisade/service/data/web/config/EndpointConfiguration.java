@@ -68,7 +68,7 @@ public class EndpointConfiguration {
      * @param auditableDataService the {@link AuditableDataService} used for reading the data
      * @param auditMessageService  the {@link AuditMessageService} used for audinting the result of a data request,
      *                             this might be success with records processed and returned, or error with the cause
-     * @return
+     * @return a {@link RouteSupplier} to process POST requests to the "/read/chunked" endpoint
      */
     @Bean
     ChunkedHttpWriter chunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
