@@ -46,11 +46,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataRedisTest(properties = {
         "spring.data.redis.repositories.key-prefix=test:",
-        "spring.data.redis.repositories.timeToLive.defaultTtl=2s",
-        "spring.data.redis.repositories.timeToLive.completeness=2s",
-        "spring.data.redis.repositories.timeToLive.types=4s",
-        "spring.data.redis.repositories.timeToLive.serialised_formats=4s",
-        "spring.data.redis.repositories.timeToLive.resources=5s"
+        "spring.data.redis.repositories.timeToLive.defaultTtl=5s",
+        "spring.data.redis.repositories.timeToLive.completeness=5s",
+        "spring.data.redis.repositories.timeToLive.types=10s",
+        "spring.data.redis.repositories.timeToLive.serialised_formats=10s",
+        "spring.data.redis.repositories.timeToLive.resources=15s"
 })
 @ContextConfiguration(initializers = {RedisInitialiser.class},
         classes = {ApplicationConfiguration.class, RedisConfiguration.class, AkkaSystemConfig.class})
@@ -110,13 +110,13 @@ class RedisPersistenceLayerTest {
                 .isEqualTo(resource);
 
         // Then sleep to imitate a persistence timeout
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(5);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesById(resource.getId())
                 .join();
 
-        // Then the returned resource should match the created resource
+        // Then no resources are returned
         assertThat(resourceOptional)
                 .as("Check that the list is empty as the resource has expired from the persistence")
                 .isEmpty();
@@ -142,13 +142,13 @@ class RedisPersistenceLayerTest {
 
         // Then sleep to imitate a persistence timeout
 
-        TimeUnit.SECONDS.sleep(2);
+        TimeUnit.SECONDS.sleep(10);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesByType(resource.getType())
                 .join();
 
-        // Then the returned resource should match the created resource
+        // Then no resources are returned
         assertThat(resourceOptional)
                 .as("Check that the list is empty as the resource has expired from the persistence")
                 .isEmpty();
@@ -175,13 +175,13 @@ class RedisPersistenceLayerTest {
 
         // Then sleep to imitate a persistence timeout
 
-        TimeUnit.SECONDS.sleep(2);
+        TimeUnit.SECONDS.sleep(10);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
                 .join();
 
-        // Then the returned resource should match the created resource
+        // Then no resources are returned
         assertThat(resourceOptional)
                 .as("Check that the list is empty as the resource has expired from the persistence")
                 .isEmpty();
@@ -196,7 +196,7 @@ class RedisPersistenceLayerTest {
 
         // Then Sleep for 2 seconds to imitate a slow request
         // The persistence evict for completeness happens here, but not for resources
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(5);
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
@@ -217,7 +217,7 @@ class RedisPersistenceLayerTest {
 
         // Then Sleep for 2 seconds to imitate a slow request
         // The persistence evict for completeness happens here and also for resources
-        TimeUnit.SECONDS.sleep(3);
+        TimeUnit.SECONDS.sleep(15);
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
