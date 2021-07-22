@@ -51,6 +51,16 @@ public interface TypeRepository extends ReactiveCrudRepository<TypeEntity, Strin
     }
 
     /**
+     * Delete a {@link TypeEntity} given a resource id
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link CompletableFuture} of a {@link Void} once deleted
+     */
+    default CompletableFuture<Void> futureDeleteByResourceId(String resourceId) {
+        return this.deleteById(resourceId).toFuture();
+    }
+
+    /**
      * A {@link Flux} of resources by type
      *
      * @param type the type of the Resource to retrieve

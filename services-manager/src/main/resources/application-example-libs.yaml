@@ -35,6 +35,9 @@ example:
   path: ../Palisade-examples
   libs: &libraries
     - ${example.path}/example-library/target/example-library-${example.version}-jar-with-dependencies.jar
+    - ${example.path}/example-user-library/target/example-user-library-${example.version}-jar-with-dependencies.jar
+    - ${example.path}/example-rule-library/target/example-rule-library-${example.version}-jar-with-dependencies.jar
+
   service-profiles: &profiles
     - static
     - example

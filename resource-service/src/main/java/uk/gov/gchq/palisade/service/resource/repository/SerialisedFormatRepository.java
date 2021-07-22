@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
-import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -42,13 +41,23 @@ public interface SerialisedFormatRepository extends ReactiveCrudRepository<Seria
     Mono<SerialisedFormatEntity> findOneByResourceId(String resourceId);
 
     /**
-     * Checks if there is a {@link TypeEntity} for a resource id
+     * Checks if there is a {@link SerialisedFormatEntity} for a resource id
      *
      * @param resourceId the id of the resource to be retrieved
      * @return a {@link CompletableFuture} of a {@link Boolean} if a SerialisedFormatEntity is returned
      */
-    default CompletableFuture<Boolean> futureExistsFindOneByResourceId(String resourceId) {
+    default CompletableFuture<Boolean> futureExistsByResourceId(String resourceId) {
         return this.findOneByResourceId(resourceId).hasElement().toFuture();
+    }
+
+    /**
+     * Delete a {@link SerialisedFormatEntity} given a resource id
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link CompletableFuture} of a {@link Void} once deleted
+     */
+    default CompletableFuture<Void> futureDeleteByResourceId(String resourceId) {
+        return this.deleteById(resourceId).toFuture();
     }
 
     /**
