@@ -57,12 +57,13 @@ class KafkaHealthIndicatorTest {
         // Then the service should be healthy (all topics in config were found in kafka)
         assertThat(health)
                 .extracting(Health::getStatus)
+                .as("The mock should produce no topics, thus all topics are available, thus service is healthy")
                 .isEqualTo(Status.UP);
     }
 
     @Test
     void testHealthWithConfigTopics() {
-        // Given there are no topics in config and none in kafka
+        // Given there is one topic in config and none in kafka
         var describeTopicsResult = Mockito.mock(DescribeTopicsResult.class);
         var configTopic = new ProducerTopicConfiguration.Topic();
         configTopic.setName("testtopic");
@@ -77,6 +78,7 @@ class KafkaHealthIndicatorTest {
         // Then the service should be unhealthy (some topics from config were not found in kafka)
         assertThat(health)
                 .extracting(Health::getStatus)
+                .as("The mock produces a topic that cannot be found in kafka, thus kafka is not ready, thus the service is unhealthy")
                 .isEqualTo(Status.DOWN);
     }
 
@@ -98,6 +100,7 @@ class KafkaHealthIndicatorTest {
         // Then the service should be healthy (all topics in config were found in kafka)
         assertThat(health)
                 .extracting(Health::getStatus)
+                .as("The mock produces a number of topics, all of which can be found in kafka, thus the service is healthy")
                 .isEqualTo(Status.UP);
     }
 }

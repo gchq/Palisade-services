@@ -101,6 +101,7 @@ class ReadChunkedDataServiceTest {
     @Test
     void testContextLoads() {
         assertThat(service)
+                .as("Spring beans should be autowired")
                 .isNotNull();
     }
 
@@ -120,12 +121,14 @@ class ReadChunkedDataServiceTest {
                 .runWith(Sink.head(), testMaterialiser)
                 .toCompletableFuture().join();
         assertThat(httpResponse.status())
+                .as("The request was not authorised so the response should reflect this")
                 .isEqualTo(StatusCodes.FORBIDDEN);
         var futureResponse = httpResponse.entity()
                 .getDataBytes()
                 .runWith(Sink.seq(), testMaterialiser)
                 .toCompletableFuture();
         assertThatThrownBy(futureResponse::join)
+                .as("The request was not authorised so the response should reflect this")
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(ForbiddenException.class);
     }
@@ -150,12 +153,14 @@ class ReadChunkedDataServiceTest {
                 .runWith(Sink.head(), testMaterialiser)
                 .toCompletableFuture().join();
         assertThat(httpResponse.status())
+                .as("The request was authorised so the response should reflect this")
                 .isEqualTo(StatusCodes.OK);
         var futureResponse = httpResponse.entity()
                 .getDataBytes()
                 .runWith(Sink.seq(), testMaterialiser)
                 .toCompletableFuture();
         assertThatThrownBy(futureResponse::join)
+                .as("The reader required for this request does not exist")
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(ReaderNotFoundException.class);
     }
@@ -182,12 +187,14 @@ class ReadChunkedDataServiceTest {
                 .runWith(Sink.head(), testMaterialiser)
                 .toCompletableFuture().join();
         assertThat(httpResponse.status())
+                .as("The request was authorised so the response should reflect this")
                 .isEqualTo(StatusCodes.OK);
         var futureResponse = httpResponse.entity()
                 .getDataBytes()
                 .runWith(Sink.seq(), testMaterialiser)
                 .toCompletableFuture();
         assertThatThrownBy(futureResponse::join)
+                .as("The serialiser for this request does not exist")
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(SerialiserNotFoundException.class);
     }
@@ -216,12 +223,14 @@ class ReadChunkedDataServiceTest {
                 .runWith(Sink.head(), testMaterialiser)
                 .toCompletableFuture().join();
         assertThat(httpResponse.status())
+                .as("The request was authorised so the response should reflect this")
                 .isEqualTo(StatusCodes.OK);
         var futureResponse = httpResponse.entity()
                 .getDataBytes()
                 .runWith(Sink.seq(), testMaterialiser)
                 .toCompletableFuture();
         assertThatThrownBy(futureResponse::join)
+                .as("The data file for this request does not exist (this should never happen in a correct deployment, but it shouldn't bring the server down if it does happen)")
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(NullPointerException.class);
     }
@@ -252,6 +261,7 @@ class ReadChunkedDataServiceTest {
                 .runWith(Sink.head(), testMaterialiser)
                 .toCompletableFuture().join();
         assertThat(httpResponse.status())
+                .as("The request was authorised so the response should reflect this")
                 .isEqualTo(StatusCodes.OK);
         var response = httpResponse.entity()
                 .getDataBytes()
@@ -262,6 +272,7 @@ class ReadChunkedDataServiceTest {
                 .collect(Collectors.toList());
 
         assertThat(response)
+                .as("All components are available such that this request may be read")
                 .containsExactly(TEST_RECORD);
     }
 
