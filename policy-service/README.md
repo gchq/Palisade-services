@@ -27,9 +27,11 @@ The "set of rules" are split into 2 groups:
 
 #### Resource Level Rules
 These rules define whether a `User` is allowed to access a resource.
+If no resource level rules are set on a resource then access will not be granted to any users
 
 #### Record Level Rules
 These rules define whether a `User` is allowed to see specific values contained within a resource.
+The values will either be masked if the whole value is not required, or fully redacted if the user should not see the value
 
 ## High Level Architecture
 
