@@ -80,7 +80,6 @@ This is achieved via profile activation (**pi**, "push image"), eg:
 mvn clean install -pl <module name> -P pi
 ```
 
-
 ### Considerations for running under Windows
 
 In order to mount local directories to the Data Service, ***Windows users*** may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private via PowerShell:
