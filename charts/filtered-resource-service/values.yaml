@@ -22,10 +22,10 @@ service:
 image:
   name: filtered-resource-service
   base: jre
-  tag: SNAPSHOT-22eb470
+  tag: SNAPSHOT-cb944d8
   pullPolicy: IfNotPresent
-  gitHash: 22eb470
-  versionNumber: 0.5.1
+  gitHash: cb944d8
+  versionNumber: 0.5.0
   codeRelease: 0.5.1-SNAPSHOT
   revision: SNAPSHOT
 
