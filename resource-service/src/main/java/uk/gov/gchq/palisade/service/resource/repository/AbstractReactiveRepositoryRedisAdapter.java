@@ -47,8 +47,9 @@ import java.util.stream.Collectors;
 /**
  * An abstract RedisAdapter class that implements a {@link ReactiveCrudRepository} for Redis backing store.
  * The tables within the Redis backing store will have a unique key which is created using different elements, each element is separated by a double colon `::`.
- * <p></p>
+ *
  * <table>
+ *     <caption>Redis tables for the Resource Service</caption>
  *     <tr>
  *         <th>Table Name</th><th>|</th><th>Key</th><th>|</th><th>Value</th>
  *     </tr>
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
  *         <td>serialised_formats</td><td>|</td><td>Table Name :: format :: Serialised Format Value</td><td>|</td><td>Set of all resources associated with this format</td>
  *     </tr>
  * </table>
- * <p></p>
+ * 
  * @param <V> the value in the backing store
  * @param <K> the key in the backing store
  */
