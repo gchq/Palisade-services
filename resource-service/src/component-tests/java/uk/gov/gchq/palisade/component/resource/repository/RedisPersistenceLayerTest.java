@@ -36,21 +36,22 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.RedisConfiguration;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.CompletenessRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.ResourceRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.SerialisedFormatRepositoryAdapter;
+import uk.gov.gchq.palisade.service.resource.repository.AbstractReactiveRepositoryRedisAdapter.TypeRepositoryAdapter;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.AbstractResourceBuilder;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataRedisTest(properties = {
-        "spring.data.redis.repositories.key-prefix=test:",
-        "spring.data.redis.repositories.timeToLive.defaultTtl=1s",
-        "spring.data.redis.repositories.timeToLive.completeness=1s",
-        "spring.data.redis.repositories.timeToLive.types=2s",
-        "spring.data.redis.repositories.timeToLive.serialised_formats=2s",
-        "spring.data.redis.repositories.timeToLive.resources=3s"
+        "spring.data.redis.repositories.key-prefix=test:"
 })
 @ContextConfiguration(initializers = {RedisInitialiser.class},
         classes = {ApplicationConfiguration.class, RedisConfiguration.class, AkkaSystemConfig.class})
@@ -58,27 +59,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({"redis", "testcontainers"})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class RedisPersistenceLayerTest {
+    private static final Duration TTL_EXPIRY_DURATION = Duration.ofSeconds(2);
 
     @Autowired
     private ReactivePersistenceLayer persistenceLayer;
     @Autowired
     private Materializer materialiser;
 
+    @Autowired
+    private CompletenessRepositoryAdapter completenessRepository;
+    @Autowired
+    private TypeRepositoryAdapter typeRepository;
+    @Autowired
+    private SerialisedFormatRepositoryAdapter serialisedFormatRepository;
+    @Autowired
+    private ResourceRepositoryAdapter resourceRepository;
+
     private LeafResource resource;
 
     @BeforeEach
     public void setUp() {
-        // After creating a resource
         resource = ((FileResource) AbstractResourceBuilder.create("file:/root/test-file-id"))
                 .type("test-type")
                 .serialisedFormat("test-format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
+    }
+
+    void saveResourceOverridingResourceTtl(final LeafResource leafResource, final Duration resourceTtl) {
+        try {
+            var ttlField = AbstractReactiveRepositoryRedisAdapter.class.getDeclaredField("ttl");
+            ttlField.setAccessible(true);
+            ttlField.set(completenessRepository, TTL_EXPIRY_DURATION);
+            ttlField.set(typeRepository, TTL_EXPIRY_DURATION);
+            ttlField.set(serialisedFormatRepository, TTL_EXPIRY_DURATION);
+            ttlField.set(resourceRepository, resourceTtl);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        Source.single(resource)
-                .via(persistenceLayer.withPersistenceById(resource.getId()))
-                .via(persistenceLayer.withPersistenceByType(resource.getType()))
-                .via(persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat()))
+        Source.single(leafResource)
+                .via(persistenceLayer.withPersistenceById(leafResource.getId()))
+                .via(persistenceLayer.withPersistenceByType(leafResource.getType()))
+                .via(persistenceLayer.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat()))
                 .runWith(Sink.ignore(), materialiser)
                 .toCompletableFuture().join();
     }
@@ -94,6 +117,7 @@ class RedisPersistenceLayerTest {
     @Test
     void testPersistenceTtlForResourceId() throws InterruptedException {
         // Given the resource has been added to the persistence
+        saveResourceOverridingResourceTtl(resource, TTL_EXPIRY_DURATION);
 
         // When getting a resource from the persistence layer by resourceId
         var idResult = persistenceLayer.getResourcesById(resource.getId())
@@ -110,7 +134,7 @@ class RedisPersistenceLayerTest {
                 .isEqualTo(resource);
 
         // Then sleep to imitate a persistence timeout
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(TTL_EXPIRY_DURATION.toSeconds());
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesById(resource.getId())
@@ -125,6 +149,7 @@ class RedisPersistenceLayerTest {
     @Test
     void testPersistenceTtlForResourceType() throws InterruptedException {
         // Given the resource has been added to the persistence
+        saveResourceOverridingResourceTtl(resource, TTL_EXPIRY_DURATION);
 
         // When getting a resource from the persistence layer by resource type
         var idResult = persistenceLayer.getResourcesByType(resource.getType())
@@ -141,8 +166,7 @@ class RedisPersistenceLayerTest {
                 .isEqualTo(resource);
 
         // Then sleep to imitate a persistence timeout
-
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(TTL_EXPIRY_DURATION.toSeconds());
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesByType(resource.getType())
@@ -157,6 +181,7 @@ class RedisPersistenceLayerTest {
     @Test
     void testPersistenceTtlForResourceFormat() throws InterruptedException {
         // Given the resource has been added to the persistence
+        saveResourceOverridingResourceTtl(resource, TTL_EXPIRY_DURATION);
 
         // When getting a resource from the persistence layer by serialisedFormat
         var idResult = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
@@ -174,8 +199,7 @@ class RedisPersistenceLayerTest {
                 .isEqualTo(resource);
 
         // Then sleep to imitate a persistence timeout
-
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(TTL_EXPIRY_DURATION.toSeconds());
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
@@ -189,6 +213,10 @@ class RedisPersistenceLayerTest {
 
     @Test
     void testPersistenceTtlForInFlightResources() throws InterruptedException {
+        // Given the resource has been added to the persistence
+        // Note the longer resource TTL
+        saveResourceOverridingResourceTtl(resource, TTL_EXPIRY_DURATION.multipliedBy(2));
+
         // When getting a resource from the persistence layer by resourceId, imitating a slow request
         var inFlight = persistenceLayer.getResourcesById(resource.getId())
                 .join()
@@ -196,7 +224,7 @@ class RedisPersistenceLayerTest {
 
         // Then Sleep for 2 seconds to imitate a slow request
         // The persistence evict for completeness happens here, but not for resources
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(TTL_EXPIRY_DURATION.toSeconds());
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
@@ -211,13 +239,16 @@ class RedisPersistenceLayerTest {
 
     @Test
     void testPersistenceTtlForExpiredInFlightResources() throws InterruptedException {
+        // Given the resource has been added to the persistence
+        saveResourceOverridingResourceTtl(resource, TTL_EXPIRY_DURATION);
+
         // When getting a resource from the persistence layer by resourceId, imitating a slow request
         var inFlight = persistenceLayer.getResourcesById(resource.getId())
                 .join().orElseThrow();
 
         // Then Sleep for 3 seconds to imitate a slow request
         // The persistence evict for completeness happens here and also for resources
-        TimeUnit.SECONDS.sleep(3);
+        TimeUnit.SECONDS.sleep(TTL_EXPIRY_DURATION.toSeconds());
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
