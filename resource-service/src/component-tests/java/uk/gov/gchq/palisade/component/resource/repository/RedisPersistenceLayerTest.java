@@ -46,11 +46,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataRedisTest(properties = {
         "spring.data.redis.repositories.key-prefix=test:",
-        "spring.data.redis.repositories.timeToLive.defaultTtl=5s",
-        "spring.data.redis.repositories.timeToLive.completeness=5s",
-        "spring.data.redis.repositories.timeToLive.types=10s",
-        "spring.data.redis.repositories.timeToLive.serialised_formats=10s",
-        "spring.data.redis.repositories.timeToLive.resources=15s"
+        "spring.data.redis.repositories.timeToLive.defaultTtl=1s",
+        "spring.data.redis.repositories.timeToLive.completeness=1s",
+        "spring.data.redis.repositories.timeToLive.types=2s",
+        "spring.data.redis.repositories.timeToLive.serialised_formats=2s",
+        "spring.data.redis.repositories.timeToLive.resources=3s"
 })
 @ContextConfiguration(initializers = {RedisInitialiser.class},
         classes = {ApplicationConfiguration.class, RedisConfiguration.class, AkkaSystemConfig.class})
@@ -110,7 +110,7 @@ class RedisPersistenceLayerTest {
                 .isEqualTo(resource);
 
         // Then sleep to imitate a persistence timeout
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(1);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesById(resource.getId())
@@ -142,7 +142,7 @@ class RedisPersistenceLayerTest {
 
         // Then sleep to imitate a persistence timeout
 
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(1);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesByType(resource.getType())
@@ -175,7 +175,7 @@ class RedisPersistenceLayerTest {
 
         // Then sleep to imitate a persistence timeout
 
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(1);
 
         // When getting a resource from the persistence layer by resourceId
         var resourceOptional = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat())
@@ -196,7 +196,7 @@ class RedisPersistenceLayerTest {
 
         // Then Sleep for 2 seconds to imitate a slow request
         // The persistence evict for completeness happens here, but not for resources
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(1);
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
@@ -215,9 +215,9 @@ class RedisPersistenceLayerTest {
         var inFlight = persistenceLayer.getResourcesById(resource.getId())
                 .join().orElseThrow();
 
-        // Then Sleep for 2 seconds to imitate a slow request
+        // Then Sleep for 3 seconds to imitate a slow request
         // The persistence evict for completeness happens here and also for resources
-        TimeUnit.SECONDS.sleep(15);
+        TimeUnit.SECONDS.sleep(3);
 
         // Now complete the retrieval of the request
         var idResult = inFlight.runWith(Sink.seq(), materialiser)
