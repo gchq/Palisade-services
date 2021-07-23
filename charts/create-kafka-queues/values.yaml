@@ -52,11 +52,9 @@ waitForServices:
 image:
   name: create-kafka-queues
   base: jre
-  tag: SNAPSHOT-e0cb6cd
   pullPolicy: IfNotPresent
   gitHash: e0cb6cd
   versionNumber: 0.5.0
-  codeRelease: 0.5.0-SNAPSHOT
   revision: SNAPSHOT
 
 resources:
