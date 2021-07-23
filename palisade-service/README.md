@@ -54,7 +54,7 @@ The service will then create an empty message to mark the start of the request.
 This is done by adding the value `START` to a custom header for the request named `x-stream-marker`, this empty message is then sent to the `user` topic.
 The service then sends the `PalisadeSystemResponse` onwards via the `user` kafka topic to the User service for further processing. 
 The service will then create another empty message to mark the end of the request.
-This is done in the same way as the start message but the header value is `END`.
+This is done in the same way as the start message, but the header value is `END`.
 The token is also added to a `PalisadeClientResponse` object, which is sent back to the client, so that they can get the processed request from the Filtered Resource Service.
 
 ## REST Interface
