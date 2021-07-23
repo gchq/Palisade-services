@@ -31,7 +31,7 @@ If no resource level rules are set on a resource then access will not be granted
 
 #### Record Level Rules
 These rules define whether a `User` is allowed to see specific values contained within a resource.
-The values will either be masked if the whole value is not required, or fully redacted if the user should not see the value
+The value(s) will either be masked if the whole value is not required, or fully redacted if the user should not see the value
 
 ## High Level Architecture
 
