@@ -79,7 +79,8 @@ public class ContractTestData {
             .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
-    public static final Map<String, Object> ATTRIBUTES = Map.of("RECORDS_PROCESSED", 1, "RECORDS_RETURNED", 1);
+    // Records processed and returned should be -1 as there are no rules to apply
+    public static final Map<String, Object> ATTRIBUTES = Map.of("RECORDS_PROCESSED", -1, "RECORDS_RETURNED", -1);
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
