@@ -23,8 +23,8 @@ image:
   name: resource-service
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: 36d23ec
-  versionNumber: 0.5.0
+  gitHash: 0be003a
+  versionNumber: 0.5.1
   revision: SNAPSHOT
 
 resources:
