@@ -36,7 +36,7 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.web.LeafResourceContentType;
 
@@ -56,14 +56,14 @@ public class ReadChunkedDataService extends AbstractDataService {
      *                     where the first found reader that accepts the resource will be used to {@link DataReader#read(LeafResource)} it
      * @param serialisers  map from serialiser names (decided here using {@link LeafResource#getSerialisedFormat()}) and serialiser classes to use for
      *                     constructing {@link Serialiser}s to (de)serialise bytes into records (so rules can be applied)
-     * @param dataService  instance of {@link AuditableAthorisationService} to decide whether access to a given resource should be granted, and with which rules
+     * @param dataService  instance of {@link AuditableAuthorisationService} to decide whether access to a given resource should be granted, and with which rules
      *                     to apply to this data read
      * @param auditService sink to send {@link uk.gov.gchq.palisade.service.data.model.AuditMessage}s to on success or failure of a data read
      */
     public ReadChunkedDataService(
             final Collection<DataReader> readers,
             final Map<String, Class<Serialiser<?>>> serialisers,
-            final AuditableAthorisationService dataService,
+            final AuditableAuthorisationService dataService,
             final AuditMessageService auditService) {
         super(readers, serialisers, dataService, auditService);
     }

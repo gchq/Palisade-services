@@ -57,7 +57,7 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 import uk.gov.gchq.palisade.service.data.model.Token;
 import uk.gov.gchq.palisade.service.data.service.ReadChunkedDataService;
-import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.SimpleDataReader;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
@@ -97,7 +97,7 @@ class KafkaContractTest {
 
     private TestRestTemplate restTemplate;
     @MockBean
-    private AuditableAthorisationService serviceMock;
+    private AuditableAuthorisationService serviceMock;
     @SpyBean
     private SimpleDataReader readerSpy;
     @Autowired

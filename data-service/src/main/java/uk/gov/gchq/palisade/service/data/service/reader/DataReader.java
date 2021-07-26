@@ -28,7 +28,7 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Part of the core set of interfaces for the Data Service.
- * The {@link DataReader} is responsible for reading the raw bytes of a {@link LeafResource} from the appropriate data-source.
+ * The DataReader is responsible for reading the raw bytes of a {@link LeafResource} from the appropriate data-source.
  * This may be a local file, a remote stream or any other mapping of resources to bytes.
  */
 public interface DataReader {

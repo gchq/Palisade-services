@@ -41,7 +41,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.user.User;
 import uk.gov.gchq.palisade.util.RulesUtil;
@@ -65,13 +65,13 @@ public abstract class AbstractDataService implements DataService {
 
     protected Collection<DataReader> readers;
     protected Map<String, Class<Serialiser<?>>> serialisers;
-    protected AuditableAthorisationService authorisationService;
+    protected AuditableAuthorisationService authorisationService;
     protected AuditMessageService auditService;
 
     protected AbstractDataService(
             final Collection<DataReader> readers,
             final Map<String, Class<Serialiser<?>>> serialisers,
-            final AuditableAthorisationService authorisationService,
+            final AuditableAuthorisationService authorisationService,
             final AuditMessageService auditService) {
         this.readers = readers;
         this.serialisers = serialisers;
@@ -133,10 +133,13 @@ public abstract class AbstractDataService implements DataService {
                     User user = authorised.getUser();
                     LeafResource leafResource = authorised.getResource();
                     Context context = authorised.getContext();
-                    @SuppressWarnings("unchecked") Rules<Serializable> rules = (Rules<Serializable>) authorised.getRules();
+                    // Suppress cast Rules<?> to Rules<Serializable>
+                    @SuppressWarnings("unchecked")
+                    Rules<Serializable> rules = (Rules<Serializable>) authorised.getRules();
                     LOGGER.debug("User '{}' requested resource '{}' with context '{}' and got record-level rules '{}'", user, leafResource, context, rules);
 
-                    DataReader reader = readers.stream().filter(r -> r.accepts(leafResource)).findAny()
+                    DataReader reader = readers.stream()
+                            .filter(r -> r.accepts(leafResource)).findAny()
                             .orElseThrow(() -> new ReaderNotFoundException("Could not find a reader that accepts " + leafResource.getId()));
                     LOGGER.info("Selected reader '{}' based on resource URI '{}'", reader.getClass(), leafResource.getId());
 
@@ -155,7 +158,7 @@ public abstract class AbstractDataService implements DataService {
                             .via(serialiser.deserialiseFlow())
 
                             // Apply rules, collecting audit data for total records processed (unredacted)
-                            .map(record -> {
+                            .map((Serializable record) -> {
                                 recordsProcessed.incrementAndGet();
                                 return Optional.ofNullable(RulesUtil.applyRulesToItem(record, user, context, rules));
                             })
@@ -165,7 +168,7 @@ public abstract class AbstractDataService implements DataService {
                             .filter(Optional::isPresent)
 
                             // Unwrap optional, collecting audit data for total records returned (after redactions)
-                            .map(record -> {
+                            .map((Optional<Serializable> record) -> {
                                 recordsReturned.incrementAndGet();
                                 // Appease any linters and codestyle checkers, although this should never fail as empties have been filtered
                                 assert record.isPresent();
@@ -184,6 +187,7 @@ public abstract class AbstractDataService implements DataService {
 
                 // Catch errors and audit
                 .watchTermination((CompletionStage<Done> prevMatValue, CompletionStage<Done> completion) -> {
+                    // Either (done == something, ex == null) or (done == null, ex == something)
                     completion.whenComplete((Done done, Throwable ex) -> {
                         AuditMessage auditMessage;
                         if (done != null) {

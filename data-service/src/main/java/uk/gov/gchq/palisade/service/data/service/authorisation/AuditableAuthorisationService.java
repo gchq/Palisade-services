@@ -25,10 +25,10 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Provides an auditable wrapper to the {@link AuthorisationService}. For each of the methods provided in the in the
- * {@code DataService}, there is a corresponding method in this class for requesting the information and providing a
+ * {@link AuthorisationService}, there is a corresponding method in this class for requesting the information and providing a
  * response wrapped with the data or the exception when an error has occurred.
  */
-public class AuditableAthorisationService {
+public class AuditableAuthorisationService {
     private final AuthorisationService authorisationService;
 
     /**
@@ -36,7 +36,7 @@ public class AuditableAthorisationService {
      *
      * @param authorisationService the current Data Service implementation
      */
-    public AuditableAthorisationService(final AuthorisationService authorisationService) {
+    public AuditableAuthorisationService(final AuthorisationService authorisationService) {
         this.authorisationService = authorisationService;
     }
 

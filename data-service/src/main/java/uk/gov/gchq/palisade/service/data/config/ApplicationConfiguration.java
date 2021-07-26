@@ -35,7 +35,7 @@ import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.ReadChunkedDataService;
-import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAthorisationService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.authorisation.AuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.authorisation.SimpleAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
@@ -93,8 +93,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    AuditableAthorisationService auditableAuthorisationService(final AuthorisationService authorisationService) {
-        return new AuditableAthorisationService(authorisationService);
+    AuditableAuthorisationService auditableAuthorisationService(final AuthorisationService authorisationService) {
+        return new AuditableAuthorisationService(authorisationService);
     }
 
     @Bean
@@ -104,7 +104,7 @@ public class ApplicationConfiguration {
 
     @Bean
     DataService readChunkedDataService(final Collection<DataReader> readers, final SerialiserConfiguration serialiserConfiguration,
-                                       final AuditableAthorisationService dataService, final AuditMessageService auditService) {
+                                       final AuditableAuthorisationService dataService, final AuditMessageService auditService) {
         return new ReadChunkedDataService(readers, serialiserConfiguration.getSerialiserClassMap(), dataService, auditService);
     }
 
