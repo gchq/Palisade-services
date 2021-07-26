@@ -73,7 +73,7 @@ This means being generic over all of the following:
 * Record Types - different record objects to which rules apply such as `Employee`
 * Writers - different clients can transform how Palisade is used, but this may require different protocols with the Data Service such as `/read/chunked`
 
-![Data Streaming Pathway diagram](doc/data-streaming-pathway.jpg)
+![Data Streaming Pathway diagram](doc/data-streaming-pathway.png)
 
 As such, for a given request, the API aims to be as flexible as possible depending on what is required in a given deployment.
 The [AbstractResponseWriter](src/main/java/uk/gov/gchq/palisade/service/data/service/writer/AbstractResponseWriter.java) provides a default flow of data that is likely followed by all implementations.

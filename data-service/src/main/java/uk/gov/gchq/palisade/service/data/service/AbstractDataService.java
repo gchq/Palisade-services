@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
 import uk.gov.gchq.palisade.service.data.service.reader.DataReader;
 import uk.gov.gchq.palisade.user.User;
-import uk.gov.gchq.palisade.util.RulesUtil;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -62,6 +61,9 @@ import java.util.function.Function;
 @SuppressWarnings("java:S1452")
 public abstract class AbstractDataService implements DataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataService.class);
+    // Optimisation to return raw data if rules applied to the resource would have no effect on the records
+    // Disables auditing records processed and returned
+    private static final boolean SHOULD_SKIP_SERDES_IF_NO_APPLICABLE_RULES = true;
 
     protected Collection<DataReader> readers;
     protected Map<String, Class<Serialiser<?>>> serialisers;
@@ -151,32 +153,42 @@ public abstract class AbstractDataService implements DataService {
                             .orElseThrow(() -> new SerialiserInitialisationException("Failed to construct a serialiser using domain class " + leafResource.getType()));
                     LOGGER.info("Built serialiser instance '{}' (with domain class) based on resource type '{}'", serialiser, leafResource.getType());
 
-                    // Read raw data
-                    return reader.readSource(leafResource)
+                    var readerBytes = reader.readSource(leafResource);
 
-                            // Deserialise bytes into objects
-                            .via(serialiser.deserialiseFlow())
+                    boolean rulesAreApplicable = isAnyRuleApplicable(user, context, rules);
 
-                            // Apply rules, collecting audit data for total records processed (unredacted)
-                            .map((Serializable record) -> {
-                                recordsProcessed.incrementAndGet();
-                                return Optional.ofNullable(RulesUtil.applyRulesToItem(record, user, context, rules));
-                            })
+                    if (SHOULD_SKIP_SERDES_IF_NO_APPLICABLE_RULES && !rulesAreApplicable) {
 
-                            // Nulls are wrapped in optionals as the reactive-streams spec doesn't allow null elements
-                            // Filter out 'nulls' - i.e. total redaction of a record
-                            .filter(Optional::isPresent)
+                        // Cannot count records if skipping deserialisation
+                        recordsProcessed.set(-1L);
+                        recordsReturned.set(-1L);
+                        // Read and return raw data as there were no rules to apply
+                        return readerBytes;
 
-                            // Unwrap optional, collecting audit data for total records returned (after redactions)
-                            .map((Optional<Serializable> record) -> {
-                                recordsReturned.incrementAndGet();
-                                // Appease any linters and codestyle checkers, although this should never fail as empties have been filtered
-                                assert record.isPresent();
-                                return record.get();
-                            })
+                    } else {
 
-                            // Serialise objects back to bytes
-                            .via(serialiser.serialiseFlow());
+                        return readerBytes
+                                // Deserialise bytes into objects
+                                .via(serialiser.deserialiseFlow())
+
+                                // Apply rules, collecting audit data for total records processed (unredacted)
+                                .map((Serializable record) -> {
+                                    recordsProcessed.incrementAndGet();
+                                    return record;
+                                })
+
+                                // Apply roles in a flow, taking advantage of multiple threads and backpressuring mechanisms
+                                .via(applyRulesInFlow(user, context, rules))
+
+                                // Unwrap optional, collecting audit data for total records returned (after redactions)
+                                .map((Serializable record) -> {
+                                    recordsReturned.incrementAndGet();
+                                    return record;
+                                })
+
+                                // Serialise objects back to bytes
+                                .via(serialiser.serialiseFlow());
+                    }
                 })
 
                 // Flatten nested CompletionStage<CompletionStage<T>> to CompletionStage<T>
@@ -227,6 +239,49 @@ public abstract class AbstractDataService implements DataService {
 
         LOGGER.debug("Returning default response source");
         return responseSource;
+    }
+
+    /**
+     * Convert a collection of {@link uk.gov.gchq.palisade.rule.Rule} objects into a single {@link Flow}
+     * This applies the rules as separate flow stages, making rule application backpressure-aware and
+     * short-circuiting rule application as soon as a record is totally redacted to 'null'.
+     *
+     * @param user the user reading the resource
+     * @param context the context for the resource read request
+     * @param rules the rules decided to be applied to each record of this resource
+     * @param <T> the type of the records in the resource
+     * @return a backpressure-aware {@link Flow}, applying each rule as a separate stream processor stage
+     */
+    private static <T extends Serializable> Flow<T, T, NotUsed> applyRulesInFlow(final User user, final Context context, final Rules<T> rules) {
+        Flow<Optional<T>, Optional<T>, NotUsed> boxedRuleFlow = rules.getRules()
+                .values()
+                .stream()
+                .reduce(Flow.create(),
+                        // Nulls are wrapped in optionals and short-circuit rule application
+                        (flow, rule) -> flow.map(optRecord -> optRecord.flatMap(record -> Optional.ofNullable(rule
+                                .apply(record, user, context)))),
+                        // If two partial Flows are generated, then join one after the other
+                        Flow::via);
+
+        return Flow.<T>create()
+                // Records are boxed/unboxed in Optionals, as reactive-streams spec doesn't allow null elements
+                .map(Optional::of)
+                // Apply rules, mapping total redactions, or 'nulls', to Optional.empty()
+                .via(boxedRuleFlow)
+                // Filter out empty Optionals, or 'nulls' - i.e. total redaction of a record
+                .filter(Optional::isPresent)
+                // Unbox non-null record
+                .map(Optional::get);
+    }
+
+    private static boolean isAnyRuleApplicable(final User user, final Context context, final Rules<?> rules) {
+        return rules.getRules()
+                .values()
+                .stream()
+                .map(rule -> rule.isApplicable(user, context))
+                .filter(applicable -> applicable)
+                .findAny()
+                .orElse(false);
     }
 
     @Override

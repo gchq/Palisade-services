@@ -26,4 +26,4 @@ See [data-service.drawio](./data-service.drawio) for the source for this diagram
 
 See [data-streaming-pathway.drawio](./data-streaming-pathway.drawio) for the source for this diagram:
 
-![Data Streaming Pathway diagram](./data-streaming-pathway.jpg)
+![Data Streaming Pathway diagram](./data-streaming-pathway.png)
