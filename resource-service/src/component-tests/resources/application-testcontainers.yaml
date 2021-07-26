@@ -11,32 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-replicaCount: 1
 
-service:
-  port: 80
-  internalPort: 8089
-  type: ClusterIP
-
-image:
-  name: audit-service
-  base: jre
-  tag: SNAPSHOT-cb944d8
-  pullPolicy: IfNotPresent
-  gitHash: cb944d8
-  versionNumber: 0.5.0
-  codeRelease: 0.5.1-SNAPSHOT
-  revision: SNAPSHOT
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }
+# Substitute maven properties for testcontainers image names
+testcontainers:
+  redis.image: "@testcontainers.redis.image@"
+  redis.default.image: "redis:6-alpine"
