@@ -22,11 +22,9 @@ service:
 image:
   name: resource-service
   base: jre
-  tag: SNAPSHOT-cb944d8
   pullPolicy: IfNotPresent
-  gitHash: cb944d8
+  gitHash: 36d23ec
   versionNumber: 0.5.0
-  codeRelease: 0.5.1-SNAPSHOT
   revision: SNAPSHOT
 
 resources:
