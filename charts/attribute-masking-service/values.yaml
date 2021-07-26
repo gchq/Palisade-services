@@ -23,7 +23,7 @@ image:
   name: attribute-masking-service
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: 0be003a
+  gitHash: 7c2f2e1
   versionNumber: 0.5.1
   revision: SNAPSHOT
 
