@@ -20,8 +20,8 @@ limitations under the License.
 Windows is not an explicitly supported environment, although where possible Palisade has been made compatible.  
 For Windows developer environments, we recommend setting up [WSL](https://docs.microsoft.com/en-us/windows/wsl/).
 
-### Note
-This is not the start point for understanding Palisade.
+### Getting Started
+This is not the starting point for understanding Palisade.
 This should be done from within the main [Palisade repo](https://github.com/gchq/Palisade)
 
 ## Overview

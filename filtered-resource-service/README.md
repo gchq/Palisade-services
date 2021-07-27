@@ -62,15 +62,21 @@ See filtered-resource-service/doc/filtered-resource-service.drawio for the sourc
 The main route of web requests - and subsequent websocket messages - through the service is shown in the above diagram. 
 The green boxes are client web requests, red boxes are kafka topics, and red storage is redis persistence.
 
-### Token-Offset System
+### Token-Offset Actor System
 
 The top-right box is the token-offset-system and its associated worker actors. 
 This performs the task of persisting and retrieving offsets for tokens. 
 We use an Akka Actor System to process both requests from the client and messages from kafka. 
-In the former case, the offset is either looked-up from redis or told to the actor from kafka. 
-In the latter case, the offset is persisted to redis and then told to all running actors for that given token.
+The first diagram below shows what happens when a client connects to the service before the request has been processed by Palisade.
+The second diagram below shows what happens when a client connects to the service after the request has been processed by Palisade.
 
-### Token-Error System
+#### Early Client Connection
+![Filtered-Resource Service Early Client Connection Diagram](doc/Filtered-Resource-Offset-Early-Client.png)
+
+#### Late Client Connection
+![Filtered-Resource Service Late Client Connection Diagram](doc/Filtered-Resource-Offset-Late-Client.png)
+
+### Token-Error Actor System
 
 The bottom-right box is the token-error-system and its associated worker actors. 
 This performs the task of persisting and retrieving errors for tokens. 
@@ -78,10 +84,12 @@ We use an Akka Actor System to process requests from the client.
 For a given token, all errors matching the token are looked-up from redis. 
 This list of errors are then deleted from redis and emitted by the actor. 
 
-### Websocket Event Service
+![Filtered-Resource Service Error Actor System Diagram](doc/Filtered-Resource-Errors-Actor-System.png)
 
-The left-half is the websocket-event-service. 
-An instance of this service is created for each open client websocket connection. 
+### WebSocket Event Service
+
+The left-half is the WebSocket-event-service. 
+An instance of this service is created for each open client WebSocket connection. 
 The client and server communicate using the following protocol:
 
 | Client Request | Server Response                | Notes
