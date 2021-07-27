@@ -54,9 +54,10 @@ The application receives 3 messages for each token.
 A `START` message, a message containing a `ResourceRequest` and an `END` message.
 In order to determine which message is the `START` and which message is the `END` these values are written into the `x-stream-marker` header for each of the received message.
 The `START` gets consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic.
-
-The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. This then gets written to the `resource` Kafka topic. Once all the`ResourceResponse` objects have been written to the topic, the 
-`END` message gets written to the `resource` topic to mark the end of the resources for this request. If any errors are thrown within the service, the original request, along with the thrown exception are captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
+The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. 
+This then gets written to the `resource` Kafka topic. 
+Once all the`ResourceResponse` objects have been written to the topic, the `END` message gets written to the `resource` topic to mark the end of the resources for this request. 
+If any errors are thrown within the service, the original request, along with the thrown exception are captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
 
 ## REST Interface
 
