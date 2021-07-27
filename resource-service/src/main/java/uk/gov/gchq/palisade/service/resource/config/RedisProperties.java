@@ -58,6 +58,13 @@ public class RedisProperties {
         this.keyPrefix = keyPrefix;
     }
 
+    /**
+     * Get the time to live for a given table name, or default if not found.
+     * This should be preferred over {@link RedisProperties#getTimeToLive()}.
+     *
+     * @param tableName the name of a table in the configuration to get a time-to-live value for
+     * @return that table's time-to-live duration, or the default (1 day) if no such configuration key was found
+     */
     @Generated
     public Duration getTimeToLive(final String tableName) {
         return this.timeToLive.getOrDefault(tableName, DEFAULT_TTL);
