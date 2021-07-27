@@ -59,7 +59,7 @@ public class RedisProperties {
     }
 
     @Generated
-    public Duration timeToLiveFor(final String tableName) {
+    public Duration getTimeToLive(final String tableName) {
         return this.timeToLive.getOrDefault(tableName, DEFAULT_TTL);
     }
 }
