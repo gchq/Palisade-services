@@ -47,8 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(
         classes = DataApplication.class,
-        webEnvironment = WebEnvironment.DEFINED_PORT,
-        properties = {"spring.cache.redis.timeToLive=1s", "akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"})
+        webEnvironment = WebEnvironment.MOCK,
+        properties = {"spring.cache.redis.timeToLive=1s", "akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:", "server.port=0"})
 @Import({KafkaTestConfiguration.class})
 @ActiveProfiles({"redis", "testcontainers"})
 @EnableRedisRepositories

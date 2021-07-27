@@ -16,6 +16,7 @@ spring:
   profiles:
     include:
     - akka
+    - akka-http
     - default-config
 ---
 
@@ -32,6 +33,7 @@ spring:
 
 server:
   port: 8082
+  address: "0.0.0.0"
 
 management:
   endpoints:
@@ -53,11 +55,7 @@ data:
 population:
   serialiserProvder: std
 
-async:
-  webMvcTimeout: 300000
-  corePoolSize: 6
-
 logging:
   level:
-    org.apache.kafka: WARN
+    org.apache.kafka: ERROR
 

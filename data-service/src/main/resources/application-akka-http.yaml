@@ -1,0 +1,307 @@
+# Copyright 2018-2021 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Sourced from https://github.com/akka/akka-http/blob/v10.2.4/akka-http-core/src/main/resources/reference.conf
+
+akka.http:
+  server:
+    # The time after which an idle connection will be automatically closed.
+    # Set to `infinite` to completely disable idle connection timeouts.
+    idle-timeout: "60s"
+
+    # Defines the default time period within which the application has to
+    # produce an HttpResponse for any given HttpRequest it received.
+    # The timeout begins to run when the *end* of the request has been
+    # received, so even potentially long uploads can have a short timeout.
+    # Set to `infinite` to completely disable request timeout checking.
+    #
+    # Make sure this timeout is smaller than the idle-timeout, otherwise,
+    # the idle-timeout will kick in first and reset the TCP connection
+    # without a response.
+    #
+    # If this setting is not `infinite` the HTTP server layer attaches a
+    # `Timeout-Access` header to the request, which enables programmatic
+    # customization of the timeout period and timeout response for each
+    # request individually.
+    request-timeout: "20s"
+
+    # The time period within which the TCP binding process must be completed.
+    bind-timeout: "1s"
+
+    # Default port to bind HTTP server to when no port was explicitly given.
+    default-http-port: 80
+
+    # Default port to bind HTTPS server to when no port was explicitly given.
+    default-https-port: 443
+
+    # The time period the HTTP server implementation will keep a connection open after
+    # all data has been delivered to the network layer. This setting is similar to the SO_LINGER socket option
+    # but does not only include the OS-level socket but also covers the Akka IO / Akka Streams network stack.
+    # The setting is an extra precaution that prevents clients from keeping open a connection that is
+    # already considered completed from the server side.
+    #
+    # If the network level buffers (including the Akka Stream / Akka IO networking stack buffers)
+    # contains more data than can be transferred to the client in the given time when the server-side considers
+    # to be finished with this connection, the client may encounter a connection reset.
+    #
+    # Set to 'infinite' to disable automatic connection closure (which will risk to leak connections).
+    linger-timeout: "1min"
+
+    # The maximum number of concurrently accepted connections when binding a server using
+    # `Http().newServerAt().bindXYZ()` methods.
+    #
+    # This setting doesn't apply to the `Http().bind` method which will still
+    # deliver an unlimited backpressured stream of incoming connections.
+    #
+    # Note, that this setting limits the number of the connections on a best-effort basis.
+    # It does *not* strictly guarantee that the number of established TCP connections will never
+    # exceed the limit (but it will be approximately correct) because connection termination happens
+    # asynchronously. It also does *not* guarantee that the number of concurrently active handler
+    # flow materializations will never exceed the limit for the reason that it is impossible to reliably
+    # detect when a materialization has ended.
+    max-connections: 1024
+
+    # The maximum number of requests that are accepted (and dispatched to
+    # the application) on one single connection before the first request
+    # has to be completed.
+    # Incoming requests that would cause the pipelining limit to be exceeded
+    # are not read from the connections socket so as to build up "back-pressure"
+    # to the client via TCP flow control.
+    # A setting of 1 disables HTTP pipelining, since only one request per
+    # connection can be "open" (i.e. being processed by the application) at any
+    # time. Set to higher values to enable HTTP pipelining.
+    # This value must be > 0 and <= 1024.
+    pipelining-limit: 1
+
+    # Enables/disables the addition of a `Remote-Address` header
+    # holding the clients (remote) IP address.
+    # Deprecated since 10.2.0: please use `remote-address-attribute` instead.
+    remote-address-header: "off"
+
+    # Enables/disables the addition of a remote-address attribute in HttpRequest
+    # holding the clients (remote) IP address. This is preferred over `remote-address-header`
+    # because it cannot be confused with a real header.
+    remote-address-attribute: "off"
+
+    # Enables/disables the addition of a `Raw-Request-URI` header holding the
+    # original raw request URI as the client has sent it.
+    raw-request-uri-header: "off"
+
+    # Enables/disables automatic handling of HEAD requests.
+    # If this setting is enabled the server dispatches HEAD requests as GET
+    # requests to the application and automatically strips off all message
+    # bodies from outgoing responses.
+    # Note that, even when this setting is off the server will never send
+    # out message bodies on responses to HEAD requests.
+    transparent-head-requests: "off"
+
+    # Enables/disables the returning of more detailed error messages to
+    # the client in the error response.
+    # Should be disabled for browser-facing APIs due to the risk of XSS attacks
+    # and (probably) enabled for internal or non-browser APIs.
+    # Note that akka-http will always produce log messages containing the full
+    # error details.
+    verbose-error-messages: "off"
+
+    # The initial size of the buffer to render the response headers in.
+    # Can be used for fine-tuning response rendering performance but probably
+    # doesn't have to be fiddled with in most applications.
+    response-header-size-hint: 512
+
+    # The requested maximum length of the queue of incoming connections.
+    # If the server is busy and the backlog is full the OS will start dropping
+    # SYN-packets and connection attempts may fail. Note, that the backlog
+    # size is usually only a maximum size hint for the OS and the OS can
+    # restrict the number further based on global limits.
+    backlog: 100
+
+    # If this setting is empty the server only accepts requests that carry a
+    # non-empty `Host` header. Otherwise it responds with `400 Bad Request`.
+    # Set to a non-empty value to be used in lieu of a missing or empty `Host`
+    # header to make the server accept such requests.
+    # Note that the server will never accept HTTP/1.1 request without a `Host`
+    # header, i.e. this setting only affects HTTP/1.1 requests with an empty
+    # `Host` header as well as HTTP/1.0 requests.
+    # Examples: `www.spray.io` or `example.com:8080`
+    default-host-header: ""
+
+    # Socket options to set for the listening socket. If a setting is left
+    # undefined, it will use whatever the default on the system is.
+    socket-options:
+      so-receive-buffer-size: undefined
+      so-send-buffer-size: undefined
+      so-reuse-address: undefined
+      so-traffic-class: undefined
+      tcp-keep-alive: undefined
+      tcp-oob-inline: undefined
+      tcp-no-delay: undefined
+
+
+    # When graceful termination is enabled and used invoked with a deadline,
+    # after the deadline passes pending requests will be replied to with a "terminating" http response,
+    # instead of delivering those requests to the user-handler.
+    # This response is configurable here using configuration, or via code in case more a sophisticated (e.g. with response entity)
+    # response is needed.
+    #
+    termination-deadline-exceeded-response:
+      # Status code of the "terminating" response to be automatically sent to pending requests once the termination deadline is exceeded.
+      status: 503 # ServiceUnavailable
+
+
+    # Modify to tweak parsing settings on the server-side only.
+    parsing:
+      # no overrides by default, see `akka.http.parsing` for default values
+
+      # Server-specific parsing settings:
+
+      # Default maximum content length which should not be exceeded by incoming request entities.
+      # Can be changed at runtime (to a higher or lower value) via the `HttpEntity::withSizeLimit` method.
+      # Note that it is not necessarily a problem to set this to a high value as all stream operations
+      # are always properly backpressured.
+      # Nevertheless you might want to apply some limit in order to prevent a single client from consuming
+      # an excessive amount of server resources.
+      #
+      # Set to `infinite` to completely disable entity length checks. (Even then you can still apply one
+      # programmatically via `withSizeLimit`.)
+      max-content-length: 8m
+
+      # When a request is so malformed we cannot create a RequestContext out of it,
+      # the regular exception handling does not apply, and a default error handling
+      # is applied that only has access to the parse error and not the actual request.
+      # To customize this error response, set error-handler to the FQCN of an
+      # implementation of akka.http.ParsingErrorHandler
+      error-handler: "akka.http.DefaultParsingErrorHandler$"
+
+
+    # Enables/disables the logging of unencrypted HTTP traffic to and from the HTTP
+    # server for debugging reasons.
+    #
+    # Note: Use with care. Logging of unencrypted data traffic may expose secret data.
+    #
+    # Incoming and outgoing traffic will be logged in hexdump format. To enable logging,
+    # specify the number of bytes to log per chunk of data (the actual chunking depends
+    # on implementation details and networking conditions and should be treated as
+    # arbitrary).
+    #
+    # For logging on the client side, see akka.http.client.log-unencrypted-network-bytes.
+    #
+    # `off` : no log messages are produced
+    # Int   : determines how many bytes should be logged per data chunk
+    log-unencrypted-network-bytes: "off"
+
+    # Cancellation in the HTTP streams is delayed by this duration to prevent race conditions between cancellation
+    # and stream completion / failure. In most cases, the value chosen here should make no difference because
+    # HTTP streams are loops where completion and failures should propagate immediately and make the handling of
+    # cancellations redundant.
+    #
+    # In most cases, there should be no reason to change this setting.
+    #
+    # Set to 0 to disable the delay.
+    stream-cancellation-delay: "100millis"
+
+    http2:
+      # The maximum number of request per connection concurrently dispatched to the request handler.
+      # This limit is enforced as soon as the connection between the peers is established. Enforcing
+      # the limit even before the SETTINGS/SETTINGS_ACK exchange has completed, means
+      # that we will refuse extra streams/requests that were sent by the client right after
+      # the connection was established but before it received our SETTINGS.
+      max-concurrent-streams: 256
+
+      # The maximum number of bytes to receive from a request entity in a single chunk.
+      #
+      # The reasoning to limit that amount (instead of delivering all buffered data for a stream) is that
+      # the amount of data in the internal buffers will drive backpressure and flow control on the HTTP/2 level. Bigger
+      # chunks would mean that the user-level entity reader will have to buffer all that data if it cannot read it in one
+      # go. The implementation would not be able to backpressure further data in that case because it does not know about
+      # this user-level buffer.
+      request-entity-chunk-size: 65536
+
+      # The number of request data bytes the HTTP/2 implementation is allowed to buffer internally per connection. Free
+      # space in this buffer is communicated to the peer using HTTP/2 flow-control messages to backpressure data if it
+      # isn't read fast enough.
+      #
+      # When there is no backpressure, this amount will limit the amount of in-flight data. It might need to be increased
+      # for high bandwidth-delay-product connections.
+      #
+      # There is a relation between the `incoming-connection-level-buffer-size` and the `incoming-stream-level-buffer-size`:
+      # If incoming-connection-level-buffer-size < incoming-stream-level-buffer-size * number_of_streams, then
+      # head-of-line blocking is possible between different streams on the same connection.
+      incoming-connection-level-buffer-size: "10MB"
+
+      # The number of request data bytes the HTTP/2 implementation is allowed to buffer internally per stream. Free space
+      # in this buffer is communicated to the peer using HTTP/2 flow-control messages to backpressure data if it isn't
+      # read fast enough.
+      #
+      # When there is no backpressure, this amount will limit the amount of in-flight data per stream. It might need to
+      # be increased for high bandwidth-delay-product connections.
+      incoming-stream-level-buffer-size: "512kB"
+
+      # The maximum number of outgoing control frames to buffer when the peer does not read from its TCP connection before
+      # backpressuring incoming frames.
+      #
+      # On a healthy HTTP/2 connection this setting should have little effect because control frames are given priority over
+      # data frames and should not be buffered for a long time.
+      #
+      # The limit is necessary to prevent a malicious peer to solicit buffering of outgoing control frames (e.g. by sending PINGs)
+      # without ever reading frames ultimately leading to an out of memory situation. With the limit in place, the implementation
+      # stops reading incoming frames when the number of outgoing control frames has reached the given amount. This way an attacker
+      # isn't able to communicate any further without first freeing space in the TCP window, draining the buffered control frames.
+      #
+      # See CVE-2019-9512 for an example of such an attack.
+      #
+      # Note that only control frames are affected because data frames, in contrast, are covered by the HTTP/2 flow control.
+      outgoing-control-frame-buffer-size: 1024
+
+      # Enable verbose debug logging for all ingoing and outgoing frames
+      log-frames: false
+
+      # When there is no data transmitted in either direction, but there are active streams, send a HTTP/2 ping frame with this initial
+      # delay and subsequent interval to make sure the connection is kept alive, 0s disables sending ping frames.
+      ping-interval: 0s
+
+      # Fail the connection if a sent ping is not acknowledged within this timeout.
+      # When zero the ping-interval is used, if set the value must be evenly divisible by less than or equal to the ping-interval.
+      ping-timeout: "0s"
+
+
+  host-connection-pool:
+    # The maximum number of parallel connections that a connection pool to a
+    # single host endpoint is allowed to establish. Must be greater than zero.
+    max-connections: 4
+
+    # The minimum number of parallel connections that a pool should keep alive ("hot").
+    # If the number of connections is falling below the given threshold, new ones are being spawned.
+    # You can use this setting to build a hot pool of "always on" connections.
+    # Default is 0, meaning there might be no active connection at given moment.
+    # Keep in mind that `min-connections` should be smaller than `max-connections` or equal
+    min-connections: 0
+
+    # The maximum number of times failed requests are attempted again,
+    # (if the request can be safely retried) before giving up and returning an error.
+    # Set to zero to completely disable request retries.
+    max-retries: 5
+
+    # The maximum number of open requests accepted into the pool across all
+    # materializations of any of its client flows.
+    # Protects against (accidentally) overloading a single pool with too many client flow materializations.
+    # Note that with N concurrent materializations the max number of open request in the pool
+    # will never exceed N * max-connections * pipelining-limit.
+    # Must be a power of 2 and > 0!
+    max-open-requests: 32
+
+    # The maximum duration for a connection to be kept alive
+    # This amount gets modified by a 10 percent fuzzyness to avoid the simultanous reconnections
+    # defaults to 'infinite'
+    # Note that this is only implemented in the new host connection pool
+    max-connection-lifetime: "infinite"
