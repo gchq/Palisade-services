@@ -17,16 +17,15 @@
 package uk.gov.gchq.palisade.service.data.exception;
 
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * Exception thrown when a named serialiser cannot be initialised, e.g. because it doesn't accept the domain class.
  */
 public class SerialiserInitialisationException extends RuntimeException {
     /**
      * Constructs a new {@link SerialiserInitialisationException} with the specified detail message and cause.
      *
      * @param message a {@link String} value detailing the error
-     * @param cause   a {@link Throwable} that caused the iss
      */
-    public SerialiserInitialisationException(final String message, final Throwable cause) {
-        super(message, cause);
+    public SerialiserInitialisationException(final String message) {
+        super(message);
     }
 }

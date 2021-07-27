@@ -27,11 +27,11 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Import;
@@ -51,14 +51,19 @@ import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 import uk.gov.gchq.palisade.service.data.model.Token;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.service.ReadChunkedDataService;
+import uk.gov.gchq.palisade.service.data.service.authorisation.AuditableAuthorisationService;
+import uk.gov.gchq.palisade.service.data.service.reader.SimpleDataReader;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
 
-import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -71,10 +76,10 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
-import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_RESPONSE;
 
 /**
  * An external requirement of the service is to audit the client's requests.
@@ -92,7 +97,11 @@ class KafkaContractTest {
 
     private TestRestTemplate restTemplate;
     @MockBean
-    private AuditableDataService serviceMock;
+    private AuditableAuthorisationService serviceMock;
+    @SpyBean
+    private SimpleDataReader readerSpy;
+    @Autowired
+    private ReadChunkedDataService writer;
     @Autowired
     private KafkaContainer kafkaContainer;
     @Autowired
@@ -158,15 +167,14 @@ class KafkaContractTest {
                 .allSatisfy(result -> {
                     assertThat(result.value())
                             .as("Recursively check the result against the AuditErrorMessage, ignoring the error")
-                            .usingRecursiveComparison()
-                            .ignoringFieldsOfTypes(Throwable.class)
-                            .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
+                            .extracting(AuditMessage::getAttributes)
+                            .isEqualTo(Map.of(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.AUTHORISED_REQUEST.toString()));
 
                     assertThat(result.value())
                             .as("Check the Error Message in the AuditErrorMessage object")
                             .extracting(AuditErrorMessage::getError)
                             .extracting(Throwable::getMessage)
-                            .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE.getError().getMessage());
+                            .isEqualTo("Authorisation denied for request " + ContractTestData.REQUEST_OBJ.toString());
 
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .as("Check the bytes of the request token")
@@ -181,15 +189,13 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testRestEndpointSuccess() {
+        writer.setReaders(Collections.singleton(readerSpy));
+
         when(serviceMock.authoriseRequest(any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
-        when(serviceMock.read(any(), any()))
-                .then((InvocationOnMock invocation) -> {
-                    var os = invocation.getArgument(1, OutputStream.class);
-                    os.close();
-                    return CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE);
-                });
+        doReturn(new ByteArrayInputStream("some data".getBytes(Charset.defaultCharset())))
+                .when(readerSpy).read(any());
 
         // Given - we are already listening to the service success output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
@@ -224,6 +230,7 @@ class KafkaContractTest {
                     assertThat(result.value())
                             .as("Recursivley check the result against the AuditSuccessMessage")
                             .usingRecursiveComparison()
+                            .ignoringFields("timestamp")
                             .isEqualTo(ContractTestData.AUDIT_SUCCESS_MESSAGE);
 
                     assertThat(result.headers().lastHeader(Token.HEADER).value())

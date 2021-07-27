@@ -43,7 +43,7 @@
     <properties>
         <!-- Project properties -->
         <java.version>11</java.version>
-        <version.number>0.5.0</version.number>
+        <version.number>0.5.1</version.number>
         <revision>SNAPSHOT</revision>
         <common.revision>SNAPSHOT</common.revision>
         <maven.compiler.source>${java.version}</maven.compiler.source>

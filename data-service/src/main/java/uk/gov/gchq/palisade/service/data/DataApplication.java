@@ -30,12 +30,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
-import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.reader.DataFlavour;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
@@ -44,7 +39,6 @@ import javax.annotation.PreDestroy;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -58,8 +52,6 @@ public class DataApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataApplication.class);
 
     private final AuditMessageService auditMessageService;
-    private final DataReader dataReader;
-    private final StdSerialiserConfiguration serialiserConfiguration;
 
     private final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner;
     private final Set<ActorSystem> actorSystems;
@@ -72,27 +64,21 @@ public class DataApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param auditMessageService     instance of the auditMessageService to connect with the sink from the runner
-     * @param dataReader              reader to 'prepopulate' with serialisers
-     * @param serialiserConfiguration serialisers to add to the reader
-     * @param runner                  collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param actorSystems            collection of all Akka {@link ActorSystem}s discovered for the application
-     * @param server                  the http server to start (in replacement of spring-boot-starter-web)
-     * @param system                  the default akka actor system
-     * @param executor                an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param auditMessageService instance of the auditMessageService to connect with the sink from the runner
+     * @param runner              collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param actorSystems        collection of all Akka {@link ActorSystem}s discovered for the application
+     * @param server              the http server to start (in replacement of spring-boot-starter-web)
+     * @param system              the default akka actor system
+     * @param executor            an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public DataApplication(
             final AuditMessageService auditMessageService,
-            final DataReader dataReader,
-            final StdSerialiserConfiguration serialiserConfiguration,
             final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner,
             final Collection<ActorSystem> actorSystems,
             final AkkaHttpServer server,
             final ActorSystem system,
             final @Qualifier("applicationTaskExecutor") Executor executor) {
         this.auditMessageService = auditMessageService;
-        this.dataReader = dataReader;
-        this.serialiserConfiguration = serialiserConfiguration;
 
         this.runner = runner;
         this.actorSystems = new HashSet<>(actorSystems);
@@ -127,16 +113,6 @@ public class DataApplication {
         runnerThreads.add(CompletableFuture.supplyAsync(() -> runner.run(materialiser), executor));
         auditMessageService.registerRequestSink(runner.run(materialiser));
         LOGGER.info("Started {} runner threads", runnerThreads.size());
-
-        // Add serialiser to the Data Service
-        LOGGER.info("Pre-populating using serialiser config: {}", serialiserConfiguration);
-        serialiserConfiguration.getSerialisers().stream()
-                .map(StdSerialiserPrepopulationFactory::build)
-                .forEach((Entry<DataFlavour, Serialiser<Object>> entry) -> {
-                    dataReader.addSerialiser(entry.getKey(), entry.getValue());
-                    LOGGER.info("Added serialiser to data-reader for flavour {}", entry.getKey());
-                    LOGGER.debug("Added {} -> {}", entry.getKey(), entry.getValue());
-                });
 
         server.serveForever(system);
 

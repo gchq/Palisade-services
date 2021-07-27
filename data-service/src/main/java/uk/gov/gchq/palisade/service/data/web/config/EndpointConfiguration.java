@@ -24,10 +24,7 @@ import org.springframework.boot.availability.ApplicationAvailability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.web.AkkaHttpServer;
-import uk.gov.gchq.palisade.service.data.web.router.ChunkedHttpWriter;
 import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
 import uk.gov.gchq.palisade.service.data.web.router.SpringActuatorRouter;
 import uk.gov.gchq.palisade.service.data.web.router.actuator.ActuatorSupplier;
@@ -60,19 +57,6 @@ public class EndpointConfiguration {
                 .map(InetAddress::getHostAddress)
                 .orElse("0.0.0.0");
         return new AkkaHttpServer(hostname, properties.getPort(), routeSuppliers);
-    }
-
-    /**
-     * Route for "/read/chunked" Data Service endpoint, used by a client to read data as an HTTP stream.
-     *
-     * @param auditableDataService the {@link AuditableDataService} used for reading the data
-     * @param auditMessageService  the {@link AuditMessageService} used for audinting the result of a data request,
-     *                             this might be success with records processed and returned, or error with the cause
-     * @return a {@link RouteSupplier} to process POST requests to the "/read/chunked" endpoint
-     */
-    @Bean
-    ChunkedHttpWriter chunkedHttpWriter(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
-        return new ChunkedHttpWriter(auditableDataService, auditMessageService);
     }
 
     /**

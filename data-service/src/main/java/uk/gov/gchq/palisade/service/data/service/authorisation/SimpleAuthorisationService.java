@@ -14,48 +14,35 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.service;
+package uk.gov.gchq.palisade.service.data.service.authorisation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequest;
-import uk.gov.gchq.palisade.service.data.model.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Simple implementation of a Data Service, which reads using a data-reader and audits the
  * number of records processed and returned.
  */
-public class SimpleDataService implements DataService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
+public class SimpleAuthorisationService implements AuthorisationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuthorisationService.class);
     private final PersistenceLayer persistenceLayer;
-    private final DataReader dataReader;
 
     /**
      * Autowired constructor for Spring.
      *
      * @param persistenceLayer the persistence layer containing the authorised read requests
-     * @param dataReader       an instance of a data-reader (eg a {@code new HadoopDataReader()})
      */
-    public SimpleDataService(
-            final PersistenceLayer persistenceLayer,
-            final DataReader dataReader
-    ) {
+    public SimpleAuthorisationService(final PersistenceLayer persistenceLayer) {
         this.persistenceLayer = persistenceLayer;
-        this.dataReader = dataReader;
     }
 
     /**
@@ -79,38 +66,4 @@ public class SimpleDataService implements DataService {
         );
     }
 
-    /**
-     * Includes the resources into the OutputStream that is to be provided to the client
-     *
-     * @param authorisedDataRequest the information for the resources in the context of the request
-     * @param out                   an {@link OutputStream} to write the stream of resources to (after applying rules)
-     * @param recordsProcessed      number of records that have been processed
-     * @param recordsReturned       number of records that have been returned
-     * @return true if indicating that the process has been successful
-     * @throws ReadException if there is a failure during reading of the stream
-     */
-    public CompletableFuture<Boolean> read(final AuthorisedDataRequest authorisedDataRequest, final OutputStream out,
-                                           final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
-
-        return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("Reading from reader with request {}", authorisedDataRequest);
-            DataReaderRequest readerRequest = new DataReaderRequest()
-                    .context(authorisedDataRequest.getContext())
-                    .user(authorisedDataRequest.getUser())
-                    .resource(authorisedDataRequest.getResource())
-                    .rules(authorisedDataRequest.getRules());
-
-            try {
-                DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
-                LOGGER.debug("Writing reader response {} to output stream", readerResponse);
-                readerResponse.getWriter().write(out);
-                out.close();
-            } catch (IOException ex) {
-                throw new ReadException("Failed to write data out to the output stream.", ex);
-            }
-
-            LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
-            return true;
-        });
-    }
 }
