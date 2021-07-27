@@ -114,7 +114,7 @@ public abstract class AbstractDataService implements DataService {
      * @return a flow from reader/serialiser/rule output bytes to the output of {@link AbstractDataService#defaultSourceWithAuditing(AuditableAuthorisedDataRequest)}
      * which allows for injecting 'interesting' behaviour before auditing.
      */
-    protected abstract Flow<ByteString, ByteString, CompletionStage<Pair<AtomicLong, AtomicLong>>> transformResponse();
+    protected abstract Flow<ByteString, ByteString, NotUsed> transformResponse();
 
     /**
      * Create a Source of bytes that will audit errors that occurred in the {@link AbstractDataService#defaultSourceWithComponentsFromRequest}
