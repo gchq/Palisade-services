@@ -91,7 +91,7 @@ public class ReadChunkedDataService extends AbstractDataService {
                                     }
 
                                     // Use AbstractResponseWriter super method
-                                    Source<ByteString, CompletionStage<Done>> responseSource = super.defaultRunnableGraph(authorisation);
+                                    Source<ByteString, CompletionStage<Done>> responseSource = super.defaultSourceWithAuditing(authorisation);
                                     // Create streamed (chunked) HTTP response entity
                                     Chunked responseEntity = HttpEntities.create(contentType, responseSource);
                                     // Return HTTP response
