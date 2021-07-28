@@ -39,8 +39,8 @@ See topic-offset-service/doc/topic-offset-service.drawio for the source of this 
   
 (fields marked with * are acquired from headers metadata)
 
-The Topic-Offset Service monitors and watches the `masked-resource` Kafka topic and reports the offsets that satisfy some prerequisites. 
-This service accepts a `TopicOffsetRequest`, which contains a token value, the service will then look at the value of the `x-request-token` header to check if it is a `START` message. 
+The Topic-Offset Service monitors and watches the `masked-resource` Kafka topic and reports the offsets that satisfy some prerequisites.
+This service retrieves the values of the `x-request-token` and `x-stream-marker` headers to decide if the `START` has been found for this token.  
 When a Start of Stream message is observed, the commitOffset is retrieved, and sent onward to the [Filtered-Resource Service](../filtered-resource-service) to point the Filtered-Resource Service to the commitOffset on the Kafka topic.
 
 ## REST Interface

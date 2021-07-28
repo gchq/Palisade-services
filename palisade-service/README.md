@@ -23,7 +23,7 @@ limitations under the License.
 The Palisade Service is the entry point into the rest of the Palisade Services.
 It accepts a request from the client, containing the userId of the user requesting access, the resource the user wants access to, and the context as to why they require access. 
 The Palisade Service then creates a token, currently via the UUIDPalisadeService, but this can be extended in the future for specific token requirements. 
-The token is attached to the message in the form of a `PalisadeSystemResponse` to be sent to the User Service on the `user` kafka topic. 
+The token is attached to the message in the form of a `PalisadeSystemResponse` to be sent to the User Service on the `user` Kafka topic. 
 It is also sent back to the client directly as part of a `PalisadeClientResponse` so that the client can connect to the Filtered Resource Service to retrieve the processed request.
 As the request progresses through the other Palisade services, it is refined and enriched, the Palisade Service is the entry point for client requests.
 The service also creates a start and end marker message for each request that will help the other services to determine where each request starts and ends.
@@ -35,7 +35,7 @@ See palisade-service/doc/palisade-service.drawio for the source of this diagram
 ![Palisade Service diagram](doc/palisade-service.png)
 
 The routing of requests is shown in the diagram above. 
-The green box indicate the client request, the red box indicates if an error has occurred, and the purple are kafka topics.
+The green box indicate the client request, the red box indicates if an error has occurred, and the purple boxes are Kafka topics.
 
 ## Message Model and Database Domain
 
@@ -54,9 +54,9 @@ The service accepts a `PalisadeClientRequest`, containing the userId, resourceId
 It then generates a token, using the `UUIDPalisadeService`, which along-side the original request information, is packaged in a `PalisadeSystemResponse`.
 The service will then create an empty message to mark the start of the request.
 This is done by adding the value `START` to a custom header for the request named `x-stream-marker`, this empty message is then sent to the `user` topic.
-The service then sends the `PalisadeSystemResponse` onwards via the `user` kafka topic to the User service for further processing. 
+The service then sends the `PalisadeSystemResponse` onwards via the `user` Kafka topic to the User Service for further processing. 
 The service will then create another empty message to mark the end of the request.
-This is done in the same way as the start message, but the header value is `END`.
+This is done in the same way as the start message, a custom header with a key of `x-stream-token`, but the header value is `END`.
 The token is also added to a `PalisadeClientResponse` object, which is sent back to the client, so that they can get the processed request from the Filtered Resource Service.
 
 ## REST Interface
@@ -65,7 +65,7 @@ Palisade Service exposes one REST endpoint:
 
 * `POST palisade/registerDataRequest`
     - accepts an `x-request-token` `String` header, any number of extra headers, and an `PalisadeClientRequest` body
-    - returns a `202 ACCEPTED` and a `PalisadeClientResponse` containing a token, after writing the headers and body to the `user` kafka topic
+    - returns a `202 ACCEPTED` and a `PalisadeClientResponse` containing a token, after writing the headers and body to the `user` Kafka topic
 
 ## Kafka Interface
 

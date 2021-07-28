@@ -50,9 +50,12 @@ The service accepts a `ResourceRequest` from the User Service, finds all the res
 
 ## Kafka Interface
 
-The application receives 3 messages for each token.
-A `START` message, a message containing a `ResourceRequest` and an `END` message.
-In order to determine which message is the `START` and which message is the `END` these values are written into the `x-stream-marker` header for each of the received message.
+The application receives 3 messages for each token: 
+1. A `START` message,
+2. A message containing a `ResourceRequest`, 
+3. An `END` message.
+
+In order to determine which message is the `START` and which message is the `END` these values are written into the `x-stream-marker` header by the Palisade Service.
 The `START` gets consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic.
 The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. 
 This then gets written to the `resource` Kafka topic. 

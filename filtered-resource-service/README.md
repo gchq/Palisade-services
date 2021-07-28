@@ -24,7 +24,7 @@ limitations under the License.
 
 The Filtered-Resource Service sits at the end of the stream pipeline and has the task of returning information about resources (and their connection details) back to the client. 
 Given a token `$[token]` from the Palisade Service, it is accessed by a WebSocket request to `ws://filtered-resource-service/resource/${token}`. 
-The service will return each resource discovered by the Palisade system one-by-one to the client as requested, auditing that the client is now aware of the resource and effectively authorised to access that resource. 
+The service will return each resource discovered by the Palisade system one-by-one to the client as requested, auditing that the client is now aware of the resource and has been authorised to access that resource. 
 
 The expectation is that these resources would either be filtered out by the client as not relevant, or requested to download from the Data Service.
 
@@ -33,23 +33,23 @@ The expectation is that these resources would either be filtered out by the clie
 ![Filtered-Resource Service Mid-Level Diagram](doc/Filtered-Resource-Service-ML.png)
 
 The above diagram shows the decision-making architecture of the Attribute-Masking Service (left), Topic-Offset Service (middle) and Filtered-Resource Service (right). 
-The service connects to three kafka topics as inputs:
+The service connects to three Kafka topics as inputs:
 
 * "masked-resource" from the Attribute-Masking Service, containing Leaf Resources for the client's request, stripped of sensitive attributes
 * "masked-resource-offset" from the Topic-Offset Service, containing at most one message per token, pointing to the START marker on the "masked-resource" topic for that token
 * "error" from all services that may produce errors, containing the error produced
 
-An additional kafka topic is used for auditing the client's access to each returned resource - this is the "success" topic, which will be read later by the Audit Service.
+An additional Kafka topic is used for auditing the client's access to each returned resource - this is the "success" topic, which will be read later by the Audit Service.
 
 For a given token, the offset (on the "masked-resource" topic) for this token is received from the "masked-resource-offset" and used to create a consumer starting from this point. 
-This flow of messages is then filtered by their token (the `X-Request-Token` header on kafka) to match the token supplied by the client. 
-Then, as each resource is requested over the websocket, the successful return of each resource to the client is audited to the Audit Service's "success" topic.
+This flow of messages is then filtered by their token (the `X-Request-Token` header on Kafka) to match the token supplied by the client. 
+Then, as each resource is requested over the WebSocket, the successful return of each resource to the client is audited to the Audit Service's "success" topic.
 
 As can be seen in the (above) diagram, the service's functions generally fall into one of four responsibilities: 
 
 * Handling incoming web requests, REST or WS (top-centre of diagram, akka-web-server) 
 * Persisting and retrieving offsets for tokens (top-left of diagram, blue, token-offset-system) 
-* Processing websocket requests and returning resources (bottom of diagram, websocket-event-service) 
+* Processing WebSocket requests and returning resources (bottom of diagram, WebSocket-event-service) 
 * Alerting the client to errors that occurred during processing (right of diagram, yellow, token-error-system)
 
 ## Breakdown of Service Components
@@ -59,14 +59,14 @@ See filtered-resource-service/doc/filtered-resource-service.drawio for the sourc
 --->
 ![Filtered-Resource Service Low-Level Diagram](doc/Filtered-Resource-Service-LL.png)
 
-The main route of web requests - and subsequent websocket messages - through the service is shown in the above diagram. 
-The green boxes are client web requests, red boxes are kafka topics, and red storage is redis persistence.
+The main route of web requests - and subsequent WebSocket messages - through the service is shown in the above diagram. 
+The green boxes are client web requests, red boxes are Kafka topics, and red storage is Redis persistence.
 
 ### Token-Offset Actor System
 
 The top-right box is the token-offset-system and its associated worker actors. 
 This performs the task of persisting and retrieving offsets for tokens. 
-We use an Akka Actor System to process both requests from the client and messages from kafka. 
+We use an Akka Actor System to process both requests from the client and messages from Kafka. 
 The first diagram below shows what happens when a client connects to the service before the request has been processed by Palisade.
 The second diagram below shows what happens when a client connects to the service after the request has been processed by Palisade.
 
@@ -74,27 +74,27 @@ The second diagram below shows what happens when a client connects to the servic
 ![Filtered-Resource Service Early Client Connection Diagram](doc/Filtered-Resource-Offset-Early-Client.png)
 
 If the client connects to the service before the request has been processed by Palisade an Akka Actor Worker is spawned, which deals with the incoming offset value.
-The worker will check Redis to check if there are any values present for the token, this will return an empty value.
+The worker will check Redis to check if there are any values present for the token, this will return an empty value (since the client connected early as described).
 The service will then read messages from the `masked-resource-offset` Kafka topic until it finds one for the given token.
-The service will tell the Akka Actor Worker the offset value which is then used by the service to read the resources from the `masked-resource` Kafka topic.
+The service will tell the Akka Actor Worker the offset value which is then used by the service to read the resources from the `masked-resource` Kafka topic, starting from the given offset.
 
 #### Late Client Connection
 ![Filtered-Resource Service Late Client Connection Diagram](doc/Filtered-Resource-Offset-Late-Client.png)
 
 If the client connects to the service after Palisade has finished processing the request, the information from the `masked-resource-offset` Kafka topic is stored in Redis.
-The `GET` from the client triggers the service to spawn an Akka Actor Worker.
-The worker will then check Redis for any values that match the incoming token value.
-This offset is then used by the worker which then reads the messages from the `masked-resource` Kafka topic from that offset value.
+An Akka Actor Worker is spawned by the service.
+The worker will then check Redis for any values that match the incoming token value (where it will find the offset since the client connected late as described).
+This offset is then used by the worker which then reads messages from the `masked-resource` Kafka topic, starting from the given offset.
 
 ### Token-Error Actor System
+
+![Filtered-Resource Service Error Actor System Diagram](doc/Filtered-Resource-Errors-Actor-System.png)
 
 The bottom-right box is the token-error-system and its associated worker actors. 
 This performs the task of persisting and retrieving errors for tokens. 
 We use an Akka Actor System to process requests from the client. 
-For a given token, all errors matching the token are looked-up from redis. 
-This list of errors are then deleted from redis and emitted by the actor. 
-
-![Filtered-Resource Service Error Actor System Diagram](doc/Filtered-Resource-Errors-Actor-System.png)
+For a given token, all errors matching the token are looked-up from Redis. 
+The returned list of errors are then deleted from Redis and emitted by the actor. 
 
 ### WebSocket Event Service
 
@@ -108,7 +108,7 @@ The client and server communicate using the following protocol:
 | CTS            | RESOURCE, ERROR, COMPLETE      | A client's clear-to-send message is met with either a RESOURCE from the server (id, type, format, connection-detail) or an ERROR (message-details). Once all RESOURCEs and ERRORs are exhausted, then a COMPLETE message is returned.
 
 In particular, the Filtered-Resource Service checks for errors *twice* - once before any resources and once after.
-This means 'early' errors that came in *before* the client connected (eg. from the User Service) are delivered to the client sooner, and they may choose to re-register a request.
+This means 'early' errors that came in *before* the client connected (e.g. from the User Service) are delivered to the client sooner, and they may choose to re-register a request.
 'Late' errors, those which arrived *after* the client connected are then delivered only after all resources have been delivered, alerting the client that their result set may be incomplete, allowing them to choose whether to re-register their request or continue.
 This minimises the number of queries to the error persistence store per client, while also providing prompt notification of errors.
 
@@ -122,13 +122,13 @@ It exposes the following HTTP REST endpoints:
 |:---------------|:-------------------------------|:----------------
 | GET            | `/actuator/health/$component`  | Provides an indicator for application health for a given component (can be empty), backed by Spring's health mechanism
 | GET, POST      | `/actuator/loggers/$package`   | Get or set logging level for a given package (can be empty), backed by Spring's logging mechanism
-| POST           | `/api/{resource,offset,error}` | Write a payload to an (upstream) kafka queue such that it will then be processed by the service
+| POST           | `/api/{resource,offset,error}` | Write a payload to an (upstream) Kafka queue such that it will then be processed by the service
 
-It also exposes the following Websocket endpoint:
+It also exposes the following WebSocket endpoint:
 
 | Request Type   | Endpoint                       | Notes
 |:---------------|:-------------------------------|:----------------
-| WS_UPGRADE     | `/resource/$token`             | Connect to the service and carry out the websocket protocol described above. There will be no indication from the server as to whether the provided token is valid until a RESOURCE, ERROR or COMPLETE message is received.
+| WS_UPGRADE     | `/resource/$token`             | Connect to the service and carry out the WebSocket protocol described above. There will be no indication from the server as to whether the provided token is valid until a RESOURCE, ERROR or COMPLETE message is received.
 
 
 ## Example Data Payloads
@@ -150,7 +150,7 @@ The Filtered Resource Service will send audit messages, specifically an `AuditEr
    If resources are processed by the Filtered-Resource Service before a start marker is observed, it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of order. 
    In this case, an Audit Error Message is created, containing a `NoStartMarkerObserved` exception, which is then sent to the Audit Service, and finally, the processing of the request is stopped. 
 2. No Resources were contained in the request. 
-   If a start marker is observed, but no resources are contained in the request, the request could be invalid, for resources that aren't known to Paliasde, or for resources that have been redacted. 
+   If a start marker is observed, but no resources are contained in the request, the request could be invalid, for resources that aren't known to Palisade, or for resources that have been redacted. 
    In this case, an Audit Error Message is created, containing a `NoResourcesObserved` exception, and is then sent to the Audit Service. 
 
 ## Message Model
