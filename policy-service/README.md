@@ -22,16 +22,21 @@ limitations under the License.
 
 The responsibility of the Policy Service is to provide the "set of rules" (filters or transformations) that need to be applied to each resource that has been requested, based the User and Context.
 The "set of rules" are split into 2 groups:
-1. Resource Level Rules
+1. Resource Level Rules (If no resource level rules are set on a resource then access will not be granted to any users)
 1. Record Level Rules
+
+#### Note
+A resource will need to have at least 1 resource level and 1 record level rule associated with it, this can be as simple as a pass through rule that does nothing.
+If either of these are not associated with the resource then the system will assume that nobody has access to it.
 
 #### Resource Level Rules
 These rules define whether a `User` is allowed to access a resource.
-If no resource level rules are set on a resource then access will not be granted to any users
+Therefore, the rules can only be based on the metadata about that resource coming from thee resource service, the attributes about the user coming from the user service and the query context that is passed in from the user making the query and enriched 
+by the palisade service.
 
 #### Record Level Rules
-These rules define whether a `User` is allowed to see specific values contained within a resource.
-The value(s) will either be masked if the whole value is not required, or fully redacted if the user should not see the value
+These rules define what content of a resource a `User` is allowed to see.
+The record level rules allow interrogation of any fields in the record to make the decisions as to what redactions or transformations need to happen to the fields to make them suitable for the user to see.
 
 ## High Level Architecture
 

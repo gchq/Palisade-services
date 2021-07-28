@@ -33,7 +33,9 @@ The service also creates a start and end marker message for each request that wi
 See palisade-service/doc/palisade-service.drawio for the source of this diagram
 --->
 ![Palisade Service diagram](doc/palisade-service.png)
-The routing of requests is shown in the diagram above. The yellow boxes indicate the client, and the purple are kafka topics.
+
+The routing of requests is shown in the diagram above. 
+The green box indicate the client request, the red box indicates if an error has occurred, and the purple are kafka topics.
 
 ## Message Model and Database Domain
 

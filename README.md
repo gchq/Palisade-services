@@ -50,13 +50,13 @@ See doc/services.drawio for the source of this diagram
 ![Service Sequence diagram](doc/services.png)
 
 1. [Palisade Service](palisade-service/README.md) receives a clients request, returns a unique token and initiates the processing of resources.
-1. [User Service](user-service/README.md) connects to User Service providers to ensure the user exists.  
-1. [Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
+1. [User Service](user-service/README.md) connects to User Service providers to acquire the requested user details.  
+1. [Resource Service](resource-service/README.md) connects to Resource Service providers to get the metadata for the requested resource(s).
 1. [Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
 1. [Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
 1. [Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
 1. [Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.
-1. [Data Service](data-service/README.md) retrieves resources from the relevant backing stores.
+1. [Data Service](data-service/README.md) retrieves resources from the relevant implementations.
 1. [Audit Service](audit-service/README.md) operates in the background providing an audit log for each request. 
 
 For an overview of all Palisade components, see the root [Palisade README](https://github.com/gchq/Palisade#readme). 

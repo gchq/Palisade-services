@@ -73,8 +73,17 @@ The second diagram below shows what happens when a client connects to the servic
 #### Early Client Connection
 ![Filtered-Resource Service Early Client Connection Diagram](doc/Filtered-Resource-Offset-Early-Client.png)
 
+If the client connects to the service before the request has been processed by Palisade an Akka Actor Worker is spawned, which deals with the incoming offset value.
+The service will then read a message from the `masked-resource-offset` Kafka topic.
+The service will tell the Akka Actor Worker the offset value which is then used by the service to read the resources from the `masked-resource` Kafka topic.
+
 #### Late Client Connection
 ![Filtered-Resource Service Late Client Connection Diagram](doc/Filtered-Resource-Offset-Late-Client.png)
+
+If the client connects to the service after Palisade has finished processing the request the information from the `masked-resource-offse` Kafka topic is stored in Redis.
+The `GET` from the client triggers the service to spawn an Akka Actor Worker.
+The worker will then check Redis for any values that match the incoming token value.
+This is then set on the worker which then reads values from the `masked-resource` Kafka topic from the offset value.
 
 ### Token-Error Actor System
 

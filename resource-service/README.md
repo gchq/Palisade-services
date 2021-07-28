@@ -21,7 +21,7 @@ limitations under the License.
 # Resource Service
 
 The Resource Service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed (this could be an actual file, or a directory that could contain many files and/or sub-directories).
-The service will then query the backing store to see if the requested resourceId has been stored.
+The service will then query the cache to see if the requested resourceId has been stored.
 If this is not the case then the request will be passed onto the local implementation of the Resource Service.
 All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy Service.
 
@@ -140,9 +140,11 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 }
 ```
 
-## Uploading resources to the backing store on service start-up
+## Uploading resources to the cache on service start-up
 
-It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this [test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the backing store when the service starts up.
+It may be that some example resources may need to be added to the cache before, for example, a test run of the Palisade system gets performed. 
+This is solved by using Spring to upload resource(s) to the service from a yaml file. 
+An example of this can be seen in this [test-resource.yaml](src/contract-tests/resources/application-test-resource.yaml) file which adds the resource information to the cache when the service starts up.
 
 ## Database Entities and Structuring
 
