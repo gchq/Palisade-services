@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.data.web.router.actuator;
+
+import akka.http.javadsl.server.Route;
+
+import uk.gov.gchq.palisade.service.data.web.router.RouteSupplier;
+
+import java.util.function.Supplier;
 
 /**
- * Exception thrown when a named serialiser cannot be initialised, e.g. because it doesn't accept the domain class.
+ * Interface for supplying akka routes.
+ * Functionally equivalent to {@link RouteSupplier}
+ * but allows Spring to differentiate between routes under localhost/... and actuators under localhost/actuator/...
  */
-public class SerialiserInitialisationException extends RuntimeException {
-    /**
-     * Constructs a new {@link SerialiserInitialisationException} with the specified detail message and cause.
-     *
-     * @param message a {@link String} value detailing the error
-     */
-    public SerialiserInitialisationException(final String message) {
-        super(message);
-    }
+public interface ActuatorSupplier extends Supplier<Route> {
+    // Marker interface for Spring autowiring
 }
