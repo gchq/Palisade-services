@@ -199,7 +199,7 @@ public abstract class AbstractDataService implements DataService {
      * return true for {@link AbstractDataService#isAnyRuleApplicable}, i.e. none of them returned true for {@link uk.gov.gchq.palisade.rule.Rule#isApplicable}.
      *
      * @param auditable the auditable (possibly authorised) request from the client.
-     * @return the {@link Source} of bytes after applying the [read -> deserialise -> apply rules -> serialise] steps to each record
+     * @return the {@link Source} of bytes after applying the [read - deserialise - apply rules - serialise] steps to each record
      */
     protected Source<ByteString, CompletionStage<Pair<AtomicLong, AtomicLong>>> defaultSourceWithComponentsFromRequest(final AuditableAuthorisedDataRequest auditable) {
         Optional<AuthorisedDataRequest> authorisation = Optional.ofNullable(auditable.getAuthorisedDataRequest());
