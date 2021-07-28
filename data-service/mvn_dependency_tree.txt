@@ -3,12 +3,7 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
 |  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
 |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
-|  \- org.apache.avro:avro:jar:1.8.2:compile
-|     +- org.codehaus.jackson:jackson-core-asl:jar:1.9.13:compile
-|     +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.13:compile
-|     +- com.thoughtworks.paranamer:paranamer:jar:2.7:compile
-|     +- org.xerial.snappy:snappy-java:jar:1.1.1.3:compile
-|     \- org.tukaani:xz:jar:1.5:compile
+|  \- org.slf4j:slf4j-api:jar:1.7.30:compile
 +- com.typesafe.akka:akka-stream_2.13:jar:2.6.10:compile
 |  +- org.scala-lang:scala-library:jar:2.13.3:compile
 |  +- com.typesafe.akka:akka-actor_2.13:jar:2.6.10:compile
@@ -21,10 +16,14 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 +- com.typesafe.akka:akka-stream-kafka_2.13:jar:2.1.0-M1:compile
 |  +- org.apache.kafka:kafka-clients:jar:2.5.0:compile
 |  |  +- com.github.luben:zstd-jni:jar:1.4.4-7:compile
-|  |  \- org.lz4:lz4-java:jar:1.7.1:compile
+|  |  +- org.lz4:lz4-java:jar:1.7.1:compile
+|  |  \- org.xerial.snappy:snappy-java:jar:1.1.7.3:compile
 |  \- org.scala-lang.modules:scala-collection-compat_2.13:jar:2.2.0:compile
 +- com.typesafe.akka:akka-slf4j_2.13:jar:2.6.10:compile
-|  \- org.slf4j:slf4j-api:jar:1.7.30:compile
++- com.typesafe.akka:akka-http_2.13:jar:10.1.11:compile
+|  \- com.typesafe.akka:akka-http-core_2.13:jar:10.1.11:compile
+|     \- com.typesafe.akka:akka-parsing_2.13:jar:10.1.11:compile
++- com.typesafe.akka:akka-http-jackson_2.13:jar:10.1.11:compile
 +- com.typesafe.akka:akka-discovery_2.13:jar:2.6.10:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
@@ -40,26 +39,13 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 |  |  \- org.yaml:snakeyaml:jar:1.26:compile
 |  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-actuator:jar:2.3.1.RELEASE:compile
-|  |  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
+|  |  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:runtime
 |  \- io.micrometer:micrometer-core:jar:1.5.1:compile
 |     +- org.hdrhistogram:HdrHistogram:jar:2.1.12:compile
 |     \- org.latencyutils:LatencyUtils:jar:2.0.3:runtime
-+- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile
-|  +- org.springframework.boot:spring-boot-starter-json:jar:2.3.1.RELEASE:compile
-|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
-|  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.11.0:compile
-|  +- org.springframework.boot:spring-boot-starter-tomcat:jar:2.3.1.RELEASE:compile
-|  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:9.0.36:compile
-|  |  +- org.glassfish:jakarta.el:jar:3.0.3:compile
-|  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:9.0.36:compile
-|  +- org.springframework:spring-web:jar:5.2.7.RELEASE:compile
-|  |  \- org.springframework:spring-beans:jar:5.2.7.RELEASE:compile
-|  \- org.springframework:spring-webmvc:jar:5.2.7.RELEASE:compile
-|     +- org.springframework:spring-aop:jar:5.2.7.RELEASE:compile
-|     +- org.springframework:spring-context:jar:5.2.7.RELEASE:compile
-|     \- org.springframework:spring-expression:jar:5.2.7.RELEASE:compile
 +- org.springframework.boot:spring-boot-starter-data-jpa:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter-aop:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework:spring-aop:jar:5.2.7.RELEASE:compile
 |  |  \- org.aspectj:aspectjweaver:jar:1.9.5:compile
 |  +- org.springframework.boot:spring-boot-starter-jdbc:jar:2.3.1.RELEASE:compile
 |  |  +- com.zaxxer:HikariCP:jar:3.4.5:compile
@@ -82,7 +68,9 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 |  +- org.springframework.data:spring-data-jpa:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.data:spring-data-commons:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework:spring-orm:jar:5.2.7.RELEASE:compile
-|  |  \- org.springframework:spring-tx:jar:5.2.7.RELEASE:compile
+|  |  +- org.springframework:spring-context:jar:5.2.7.RELEASE:compile
+|  |  +- org.springframework:spring-tx:jar:5.2.7.RELEASE:compile
+|  |  \- org.springframework:spring-beans:jar:5.2.7.RELEASE:compile
 |  \- org.springframework:spring-aspects:jar:5.2.7.RELEASE:compile
 +- com.h2database:h2:jar:1.4.200:compile
 +- org.springframework.boot:spring-boot-starter-data-redis:jar:2.3.1.RELEASE:compile
@@ -128,6 +116,17 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 |  |  \- org.springframework:spring-jcl:jar:5.2.7.RELEASE:compile
 |  +- org.springframework:spring-test:jar:5.2.7.RELEASE:test
 |  \- org.xmlunit:xmlunit-core:jar:2.7.0:test
++- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:test
+|  +- org.springframework.boot:spring-boot-starter-json:jar:2.3.1.RELEASE:test
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:test
+|  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.11.0:test
+|  +- org.springframework.boot:spring-boot-starter-tomcat:jar:2.3.1.RELEASE:test
+|  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:9.0.36:test
+|  |  +- org.glassfish:jakarta.el:jar:3.0.3:test
+|  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:9.0.36:test
+|  +- org.springframework:spring-web:jar:5.2.7.RELEASE:test
+|  \- org.springframework:spring-webmvc:jar:5.2.7.RELEASE:test
+|     \- org.springframework:spring-expression:jar:5.2.7.RELEASE:compile
 +- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.10:test
 |  \- com.typesafe.akka:akka-testkit_2.13:jar:2.6.10:test
 +- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.1.0-M1:test
@@ -135,7 +134,7 @@ uk.gov.gchq.palisade:data-service:jar:0.5.1-SNAPSHOT
 \- org.testcontainers:testcontainers:jar:1.15.3:test
    +- junit:junit:jar:4.13:test
    |  \- org.hamcrest:hamcrest-core:jar:2.2:test
-   +- org.apache.commons:commons-compress:jar:1.20:compile
+   +- org.apache.commons:commons-compress:jar:1.20:test
    +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
    +- org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test
    |  \- net.java.dev.jna:jna:jar:5.2.0:test

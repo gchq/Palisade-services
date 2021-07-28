@@ -262,7 +262,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
          * @param redisProperties containing properties used to configure redis
          */
         public CompletenessRepositoryAdapter(final ReactiveRedisTemplate<String, CompletenessEntity> redisTemplate, final RedisProperties redisProperties) {
-            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(CompletenessEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(CompletenessEntity.class).value()));
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(CompletenessEntity.class).value(), redisProperties.getTimeToLive(reflectTableAnnotation(CompletenessEntity.class).value()));
         }
 
         @Override
@@ -300,7 +300,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
          * @param redisProperties containing properties used to configure redis
          */
         public ResourceRepositoryAdapter(final ReactiveRedisTemplate<String, ResourceEntity> redisTemplate, final RedisProperties redisProperties) {
-            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(ResourceEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(ResourceEntity.class).value()));
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(ResourceEntity.class).value(), redisProperties.getTimeToLive(reflectTableAnnotation(ResourceEntity.class).value()));
         }
 
         @Override
@@ -345,7 +345,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
          * @param redisProperties containing properties used to configure redis
          */
         public SerialisedFormatRepositoryAdapter(final ReactiveRedisTemplate<String, SerialisedFormatEntity> redisTemplate, final RedisProperties redisProperties) {
-            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(SerialisedFormatEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(SerialisedFormatEntity.class).value()));
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(SerialisedFormatEntity.class).value(), redisProperties.getTimeToLive(reflectTableAnnotation(SerialisedFormatEntity.class).value()));
         }
 
         @Override
@@ -389,7 +389,7 @@ public abstract class AbstractReactiveRepositoryRedisAdapter<V, K> implements Re
          * @param redisProperties properties used to configure redis
          */
         public TypeRepositoryAdapter(final ReactiveRedisTemplate<String, TypeEntity> redisTemplate, final RedisProperties redisProperties) {
-            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(TypeEntity.class).value(), redisProperties.timeToLiveFor(reflectTableAnnotation(TypeEntity.class).value()));
+            super(redisTemplate, redisProperties.getKeyPrefix() + reflectTableAnnotation(TypeEntity.class).value(), redisProperties.getTimeToLive(reflectTableAnnotation(TypeEntity.class).value()));
         }
 
         @Override

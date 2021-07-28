@@ -17,16 +17,15 @@
 package uk.gov.gchq.palisade.service.data.exception;
 
 /**
- * A {@link RuntimeException} that is thrown when incorrect values are used for the service Prepopulation.
+ * A {@link RuntimeException} that is thrown when incorrect values are used for the service reader selection.
  */
-public class SerialiserConstructorNotFoundException extends RuntimeException {
+public class ReaderNotFoundException extends RuntimeException {
     /**
-     * Constructs a new {@link SerialiserConstructorNotFoundException} with the specified detail message and cause.
+     * Constructs a new {@link ReaderNotFoundException} with the specified detail message and cause.
      *
      * @param message a {@link String} value detailing the error
-     * @param cause   a {@link Throwable} that caused the error
      */
-    public SerialiserConstructorNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
+    public ReaderNotFoundException(final String message) {
+        super(message);
     }
 }

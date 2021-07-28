@@ -61,7 +61,7 @@ public class SpringHealthRouter implements ActuatorSupplier {
     private final ApplicationAvailability applicationAvailability;
 
     /**
-     * Default constructor passing some internal Spring objects used to expose health and availability status similarly
+     * Default constructor passing some internal Spring objects used to expose health and availability status similar
      * to Spring's /actuator/health
      *
      * @param springHealthEndpoint    backs the /health and /health/{component} endpoints
