@@ -25,7 +25,6 @@ The "set of rules" are split into 2 groups:
 1. Resource Level Rules (If no resource level rules are set on a resource then access will not be granted to any users)
 1. Record Level Rules
 
-#### Note
 A resource will need to have at least 1 resource level and 1 record level rule associated with it, this can be as simple as a pass through rule that does nothing.
 If either of these are not associated with the resource then the system will assume that nobody has access to it.
 
