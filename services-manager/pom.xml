@@ -43,7 +43,7 @@
     </scm>
 
     <properties>
-        <readers.app.version>-${version.number}-${revision}</readers.app.version>
+        <readers.app.version>${version.number}-${revision}</readers.app.version>
         <examples.app.version>${version.number}-${revision}</examples.app.version>
     </properties>
 
@@ -142,7 +142,7 @@
                                 <replacement>
                                     <token>image.tag</token>
                                     <!--suppress UnresolvedMavenProperty -->
-                                    <value>${image.tag}</value>
+                                    <value>${version}-${git.commit.id.abbrev}</value>
                                 </replacement>
                             </replacements>
                         </configuration>
@@ -158,7 +158,6 @@
                             <replacements>
                                 <replacement>
                                     <token>executable.jar</token>
-                                    <!--suppress UnresolvedMavenProperty -->
                                     <value>${project.artifactId}-${project.parent.version}-exec.jar</value>
                                 </replacement>
                             </replacements>

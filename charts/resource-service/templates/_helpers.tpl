@@ -72,7 +72,7 @@ Determine ingress root url
 {{- end -}}
 
 {{/*
-Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the code release artifact values and jars path
 */}}
 {{- define "resource-service.deployment.path" }}
 {{- printf "%s/%s" (include "resource-service.classpathJars.mount" .) (include "resource-service.deployment.revision" .) }}
@@ -86,34 +86,35 @@ Calculate the service config location
 {{- end }}
 
 {{/*
-Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+Calculate a pv name based on the jars name
 */}}
 {{- define "resource-service.classpathJars.name" }}
 {{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
-Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the jars mount path
 */}}
 {{- define "resource-service.classpathJars.mount" }}
 {{- printf "%s/%s/classpath" .Values.global.persistence.classpathJars.mountPath .Chart.Name }}
 {{- end }}
 
 {{/*
-Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage name based on the code release artifact values
 */}}
 {{- define "resource-service.deployment.revision" }}
-{{- $revision := index .Values "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- $revision := printf "%s-%s" .Values.image.versionNumber .Values.image.revision | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 
 {{/*
-Create the image name
+Calculate the image name based on the image revision
+If this is a release, then $revision-$version (e.g. RELEASE-0.5.0), otherwise $revision-$gitHash (e.g. SNAPSHOT-abcdef0)
 */}}
 {{- define "resource-service.image.name" }}
 {{- if contains .Values.image.revision .Values.global.releaseTag -}}
 {{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.versionNumber }}
 {{- else -}}
-{{- printf "%s%s:%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.tag }}
+{{- printf "%s%s:%s-%s-%s" .Values.global.repository .Values.image.name .Values.image.base  .Values.image.revision .Values.image.gitHash }}
 {{- end -}}
 {{- end -}}
