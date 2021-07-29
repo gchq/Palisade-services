@@ -61,7 +61,8 @@ public class ResourceServiceConfigProperties {
 
     @Generated
     public void setDefaultFormats(final Map<String, String> defaultFormats) {
-        this.defaultFormats = defaultFormats;
+        this.defaultFormats = Optional.ofNullable(defaultFormats)
+                .orElseThrow(() -> new IllegalArgumentException("defaultFormats cannot be null"));
     }
 
     @Override
