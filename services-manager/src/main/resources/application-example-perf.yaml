@@ -16,7 +16,7 @@
 spring:
   profiles:
     include:
-      - warn
+      - debug
       - example-runner
       - example-perf-config
 # use `warn` profile to set all palisade services log levels to warn only to avoid bottle-necking if any service is writing too much
