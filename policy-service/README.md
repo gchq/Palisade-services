@@ -21,6 +21,10 @@ limitations under the License.
 # Policy Service
 
 The responsibility of the Policy Service is to provide the "set of rules" (filters or transformations) that need to be applied to each resource that has been requested, based on the User, Resource and Context.
+
+Since resources are hierarchically-organised objects, so too is the complete set of rules on a resource.
+For a given resource, the Policy Service will additionally collect rules of each parent resource (and grand-parent etc.), merging all of these together to form the final rule-set.
+
 The "set of rules" are split into two groups:
 1. Resource Level Rules (If no resource level rules are set on a resource then access will be denied to all users)
 1. Record Level Rules (If no record level rules are set on a resource then access will be denied to all users)
