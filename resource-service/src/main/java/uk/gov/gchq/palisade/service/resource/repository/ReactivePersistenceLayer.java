@@ -37,7 +37,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
