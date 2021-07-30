@@ -34,8 +34,7 @@ If either of these are not associated with the resource then the system will ass
 
 #### Resource Level Rules
 These rules define whether a `User` is allowed to access a `Resource` in a given `Context` (e.g. what is their purpose for this data request).
-Therefore, the rules can only be based on the metadata about that resource coming from the Resource Service, the attributes about the user coming from the User Service, and the query context that is passed in from the user making the query and enriched by the Palisade Service.
-by the palisade service.
+Therefore, the rules can only be based on the metadata about that resource coming from the Resource Service, the attributes about the user coming from the User Service, and the query context that is passed in from the user making the query and enriched by the Palisade Service. 
 
 #### Record Level Rules
 These rules define what records of a `Resource` a `User` is allowed to see for the given `Context`.
