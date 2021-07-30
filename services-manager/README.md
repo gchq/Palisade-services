@@ -25,10 +25,6 @@ The source for this file can be found at `services-manager/src/resources/doc/REA
 
 # Palisade Services Manager
 
-## Documentation
-
-The documentation for the latest release can be found [here](https://gchq.github.io/Palisade).
-
 ## Getting started
 
 The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs.

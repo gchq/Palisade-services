@@ -20,8 +20,25 @@ limitations under the License.
 
 # Policy Service
 
-The responsibility of the Policy Service is to provide the set of rules (filters or transformations) that need to be
-applied to each resource that has been requested, based the User and Context.
+The responsibility of the Policy Service is to provide the "set of rules" (filters or transformations) that need to be applied to each resource that has been requested, based on the User, Resource and Context.
+
+Since resources are hierarchically-organised objects, so too is the complete set of rules on a resource.
+For a given resource, the Policy Service will additionally collect rules of each parent resource (and grand-parent etc.), merging all of these together to form the final rule-set.
+
+The "set of rules" are split into two groups:
+1. Resource Level Rules (If no resource level rules are set on a resource then access will be denied to all users)
+1. Record Level Rules (If no record level rules are set on a resource then access will be denied to all users)
+
+A resource will need to have at least 1 resource level and 1 record level rule associated with it, this can be as simple as a pass through rule that does nothing.
+If either of these are not associated with the resource then the system will assume that nobody has access to it.
+
+#### Resource Level Rules
+These rules define whether a `User` is allowed to access a `Resource` in a given `Context` (e.g. what is their purpose for this data request).
+Therefore, the rules can only be based on the metadata about that resource coming from the Resource Service, the attributes about the user coming from the User Service, and the query context that is passed in from the user making the query and enriched by the Palisade Service. 
+
+#### Record Level Rules
+These rules define what records of a `Resource` a `User` is allowed to see for the given `Context`.
+The record level rules allow interrogation of any fields in the record to make the decisions as to what redactions or transformations need to happen to the fields to make them suitable for the user to see.
 
 ## High Level Architecture
 
