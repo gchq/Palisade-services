@@ -53,7 +53,7 @@ image:
   name: create-kafka-queues
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: c10e817
+  gitHash: "077b247"
   versionNumber: 0.5.1
   revision: SNAPSHOT
 
