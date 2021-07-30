@@ -35,7 +35,7 @@ See palisade-service/doc/palisade-service.drawio for the source of this diagram
 ![Palisade Service diagram](doc/palisade-service.png)
 
 The routing of requests is shown in the diagram above. 
-The green box indicate the client request, the red box indicates if an error has occurred, and the purple boxes are Kafka topics.
+The green box indicate the client request, the red box indicates the creation of an error, the purple boxes are Kafka topics, and the blue icons are for the persistence/cache.
 
 ## Message Model and Database Domain
 
