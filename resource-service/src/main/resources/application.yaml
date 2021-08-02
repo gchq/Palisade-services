@@ -59,6 +59,9 @@ resource:
   implementation: simple
   # If a type for the resource cannot be deduced, use this as the default
   defaultType: java.lang.String
+  defaultFormats:
+    txt: "text/plain"
+    json: "application/json"
 
 web:
   client:

@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -31,6 +32,7 @@ import java.util.StringJoiner;
 public class ResourceServiceConfigProperties {
     private String implementation;
     private String defaultType;
+    private Map<String, String> defaultFormats;
 
     @Generated
     public String getImplementation() {
@@ -52,6 +54,17 @@ public class ResourceServiceConfigProperties {
         this.defaultType = Optional.ofNullable(defaultType).orElse(String.class.getName());
     }
 
+    @Generated
+    public Map<String, String> getDefaultFormats() {
+        return defaultFormats;
+    }
+
+    @Generated
+    public void setDefaultFormats(final Map<String, String> defaultFormats) {
+        this.defaultFormats = Optional.ofNullable(defaultFormats)
+                .orElseThrow(() -> new IllegalArgumentException("defaultFormats cannot be null"));
+    }
+
     @Override
     @Generated
     public boolean equals(final Object o) {
@@ -63,13 +76,14 @@ public class ResourceServiceConfigProperties {
         }
         final ResourceServiceConfigProperties that = (ResourceServiceConfigProperties) o;
         return Objects.equals(implementation, that.implementation) &&
-                Objects.equals(defaultType, that.defaultType);
+                Objects.equals(defaultType, that.defaultType) &&
+                Objects.equals(defaultFormats, that.defaultFormats);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(implementation, defaultType);
+        return Objects.hash(implementation, defaultType, defaultFormats);
     }
 
     @Override
@@ -78,6 +92,7 @@ public class ResourceServiceConfigProperties {
         return new StringJoiner(", ", ResourceServiceConfigProperties.class.getSimpleName() + "[", "]")
                 .add("implementation='" + implementation + "'")
                 .add("defaultType='" + defaultType + "'")
+                .add("defaultFormats='" + defaultFormats + "'")
                 .add(super.toString())
                 .toString();
     }

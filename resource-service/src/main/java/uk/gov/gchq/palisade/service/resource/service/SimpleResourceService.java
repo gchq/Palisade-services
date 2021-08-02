@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -43,19 +44,22 @@ public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
     private final String dataServiceName;
     private final String resourceType;
+    private final Map<String, String> formatConversion;
 
     /**
      * Instantiates a new Simple resource service.
      *
-     * @param dataServiceName the data service name used in the connection detail to contain the location,
-     *                        either URL or hostname for the data service associated with this resource
-     * @param resourceType    the type of resource returned by the service, a string representation of a
-     *                        java class - the class itself does not need to be available to the service,
-     *                        as it is only passed around as a String
+     * @param dataServiceName  the data service name used in the connection detail to contain the location,
+     *                         either URL or hostname for the data service associated with this resource
+     * @param resourceType     the type of resource returned by the service, a string representation of a
+     *                         java class - the class itself does not need to be available to the service,
+     *                         as it is only passed around as a String
+     * @param formatConversion Map of a file extension to a resource serialised format
      */
-    public SimpleResourceService(final String dataServiceName, final String resourceType) {
+    public SimpleResourceService(final String dataServiceName, final String resourceType, final Map<String, String> formatConversion) {
         this.dataServiceName = dataServiceName;
         this.resourceType = resourceType;
+        this.formatConversion = formatConversion;
     }
 
     @SuppressWarnings("java:S2095") // resource is closed
@@ -86,7 +90,7 @@ public class SimpleResourceService implements ResourceService {
         }
 
         return ((LeafResource) AbstractResourceBuilder.create(file.toURI()))
-                .serialisedFormat(extension)
+                .serialisedFormat(this.formatConversion.getOrDefault(extension, "application/octet-stream"))
                 .type(this.resourceType)
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
     }

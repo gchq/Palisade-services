@@ -32,6 +32,7 @@ example:
   perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
   service-profiles: &profiles
     - static
+    - avro
     - example-perf
 
 manager:
@@ -43,7 +44,7 @@ manager:
 
   tasks:
     performance-create-task:
-    - create-perf-data
+      - create-perf-data
     performance-test-task:
       - performance-test
 
