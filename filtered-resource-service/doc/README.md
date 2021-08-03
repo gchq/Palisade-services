@@ -33,3 +33,16 @@ See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image fr
 
 ### [Filtered-Resource-Service-LL.drawio](./Filtered-Resource-Service-LL.drawio)
 ![filtered-resource-service.drawio](./Filtered-Resource-Service-LL.png)
+
+---
+
+### [Topic-Offset-Actor-System.drawio](./Filtered-Resource-Offset-Actor-System.drawio)
+#### Early Client Connection
+![filtered-resource-service.drawio](./Filtered-Resource-Offset-Early-Client.png)
+#### Late Client Connection
+![filtered-resource-service.drawio](./Filtered-Resource-Offset-Late-Client.png)
+
+---
+
+### [Topic-Errors-Actor-System.drawio](./Filtered-Resource-Errors-Actor-System.drawio)
+![filtered-resource-service.drawio](./Filtered-Resource-Errors-Actor-System.png)

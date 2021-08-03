@@ -37,7 +37,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -194,41 +193,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     }
 
     /**
-     * Iterate over each parent-child pair, with the parent resolved by querying persistence
-     * Apply the callback predicate to each parent-child pair
-     * Stop if the predicate is not satisfied or if no further parents exist
-     *
-     * @param <T>          the type of this initial resource, e.g. {@link LeafResource}
-     * @param resource     the initial resource to begin operating and recursing up from
-     * @param callbackPred callback function to apply to each parent-child pair, return false to stop recursion
-     * @return the resource passed as the first argument, useful for Stream.map operations
-     */
-    private <T extends Resource> CompletableFuture<Void> traverseParentsByEntity(final T resource, final BiPredicate<ParentResource, ChildResource> callbackPred) {
-        if (resource instanceof ChildResource) {
-            LOGGER.debug("Traversing child '{}' until predicate is not satisfied", resource.getId());
-            // Treat resource as a ChildResource
-            ChildResource childResource = (ChildResource) resource;
-            LOGGER.debug("Getting ResourceEntity for childResource '{}'", childResource.getId());
-            return resourceRepository.findOneByResourceId(childResource.getId()).toFuture()
-                    .thenCompose((ResourceEntity childEntity) -> {
-                        LOGGER.debug("Getting ResourceEntity for parentResource '{}'", childEntity.getParentId());
-                        return resourceRepository.findOneByResourceId(childEntity.getParentId()).toFuture();
-                    })
-                    .thenCompose((ResourceEntity parentEntity) -> {
-                        ParentResource parentResource = (ParentResource) parentEntity.getResource();
-                        if (callbackPred.test(parentResource, childResource)) {
-                            LOGGER.debug("Pair '{}' and '{}' satisfied predicate, recursing", parentResource.getId(), childResource.getId());
-                            return traverseParentsByEntity(parentResource, callbackPred);
-                        } else {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                    });
-        } else {
-            return CompletableFuture.completedFuture(null);
-        }
-    }
-
-    /**
      * Iterate over each parent-child pair, with the parent resolved by getting from the child resource
      * Apply the callback function to each parent-child pair
      * Stop if the predicate is not satisfied or if no further parents exist
@@ -269,14 +233,17 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
             // Treat resource as a ParentResource
             ParentResource parentResource = (ParentResource) resource;
             // Get the children
+            LOGGER.debug("Get leaves for {}", resource.getId());
             return resourceRepository.streamFindAllByParentId(parentResource.getId())
                     .map(ResourceEntity::getResource)
                     // Recurse over further children
                     .flatMapConcat(this::collectLeaves);
         } else if (resource instanceof LeafResource) {
             // If we have reached a leaf, then done
+            LOGGER.debug("Got leaf {}", resource.getId());
             return Source.single((LeafResource) resource);
         } else {
+            LOGGER.warn("Got resource that was neither Parent nor Leaf: {}", resource.getClass());
             throw new UnknownResourceTypeException(String.format("Resource '%s' is neither Parent nor Leaf", resource.getId()));
         }
     }
@@ -290,7 +257,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveIncompleteResource(final Resource resource) {
-
         return isResourceIdPersisted(resource.getId())
                 .thenCompose((Boolean result) -> {
                     if (result.equals(Boolean.TRUE)) {
@@ -330,9 +296,9 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         return completenessRepository.futureSave(EntityType.RESOURCE, resource.getId())
                                 .thenRun(() -> LOGGER.debug("Persistence save for complete entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId()));
                     } else {
-                        return saveIncompleteResource(resource);
+                        return CompletableFuture.completedFuture(null);
                     }
-                });
+                }).thenCompose(ignored -> saveIncompleteResource(resource));
     }
 
     /**
@@ -355,11 +321,10 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // If an incomplete resource is found, overwrite it as it is now complete
         // This is a 'high-quality' set of information (as it is complete) that the persistence layer will report as 'truth'
         return traverseParentsByResource(leafResource,
-                (ParentResource parent, ChildResource child) -> {
-                    saveCompleteResource(child);
-                    return recurseToRootId(parentResourceId, parentReference).apply(parent, child);
-                }
-        ).thenApply(ignored -> Optional.ofNullable(parentReference.get()));
+                (ParentResource parent, ChildResource child) ->
+                        saveCompleteResource(child).thenCompose(ignored ->
+                                recurseToRootId(parentResourceId, parentReference).apply(parent, child)))
+                .thenApply(ignored -> Optional.ofNullable(parentReference.get()));
     }
 
     /**
@@ -390,7 +355,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveType(final String type, final LeafResource leafResource) {
-
         return typeRepository.futureExistsByResourceId(leafResource.getId())
                 .thenCompose((Boolean result) -> {
                     if (result.equals(Boolean.TRUE)) {
@@ -419,7 +383,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
-
         return serialisedFormatRepository.futureExistsByResourceId(leafResource.getId())
                 .thenCompose((Boolean result) -> {
                     if (result.equals(Boolean.TRUE)) {

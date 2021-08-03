@@ -22,7 +22,7 @@ image:
   name: @artifactId@
   base: @dockerfile.base.tag@
   pullPolicy: IfNotPresent
-  gitHash: @git.commit.id.abbrev@
+  gitHash: "@git.commit.id.abbrev@"
   versionNumber: @version.number@
   revision: @revision@
 

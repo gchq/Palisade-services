@@ -161,7 +161,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple", matchIfMissing = true)
     public ResourceService simpleResourceService() {
-        return new SimpleResourceService(dataServiceName, resourceServiceConfigProperties.getDefaultType());
+        return new SimpleResourceService(dataServiceName, resourceServiceConfigProperties.getDefaultType(), resourceServiceConfigProperties.getDefaultFormats());
     }
 
 

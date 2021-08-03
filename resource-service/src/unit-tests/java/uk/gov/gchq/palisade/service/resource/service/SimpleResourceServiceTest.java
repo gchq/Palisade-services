@@ -27,12 +27,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SimpleResourceServiceTest {
-    private final SimpleResourceService service = new SimpleResourceService("data-service", "java.lang.String");
+    private final SimpleResourceService service = new SimpleResourceService("data-service", "java.lang.String", Map.of("java", "java", "avro", "avro"));
 
     @Test
     void testJavaFilesInUnitTest() throws IOException {

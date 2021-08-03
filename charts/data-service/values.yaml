@@ -22,7 +22,7 @@ image:
   name: data-service
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: 7c2f2e1
+  gitHash: "077b247"
   versionNumber: 0.5.1
   revision: SNAPSHOT
 
