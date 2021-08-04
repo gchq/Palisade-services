@@ -22,9 +22,9 @@ image:
   name: palisade-service
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: "077b247"
+  gitHash: "dcfe1cb"
   versionNumber: 0.5.1
-  revision: SNAPSHOT
+  revision: RELEASE
 
 resources:
   limits:
