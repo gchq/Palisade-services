@@ -24,7 +24,7 @@ image:
   base: jre
   pullPolicy: IfNotPresent
   gitHash: "dcfe1cb"
-  versionNumber: 0.5.1
+  versionNumber: 0.5.2
   revision: RELEASE
 
 resources:

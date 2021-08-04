@@ -22,7 +22,7 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.5.1-${revision}</version>
+        <version>0.5.2-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -76,7 +76,7 @@
             <!-- Common types (User, Resource, Context) -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.5.1-${common.revision}</version>
+            <version>0.5.2-${common.revision}</version>
         </dependency>
 
         <!--
