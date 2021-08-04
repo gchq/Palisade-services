@@ -27,7 +27,7 @@ List of third-party dependencies grouped by their license type
 * spring-boot-starter-web ([org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * event-logging ([uk.gov.gchq.eventlogging:event-logging:4.0.8_schema-v3.2.4](https://github.com/gchq/event-logging))
-* GCHQ Palisade Common Library ([uk.gov.gchq.palisade:common:0.5.1-SNAPSHOT](https://github.com/gchq/Palisade-common))
+* GCHQ Palisade Common Library ([uk.gov.gchq.palisade:common:0.5.1-RELEASE](https://github.com/gchq/Palisade-common))
 
 ### [Common Development and Distribution License (CDDL) 1.1](./licenses/cddl_gpl_1.1.html):
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.0-b170127.1453](http://jaxb.java.net/jaxb-runtime-parent/jaxb-runtime))

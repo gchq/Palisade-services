@@ -16,4 +16,4 @@ apiVersion: v2
 appVersion: "1.0"
 description: A Helm chart for the Audit Service
 name: audit-service
-version: 0.5.0
+version: 0.5.1

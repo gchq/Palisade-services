@@ -16,22 +16,22 @@ apiVersion: v2
 appVersion: 1.0
 description: A Helm chart for the Palisade Service layer
 name: Palisade-services
-version: 0.5.0
+version: 0.5.1
 dependencies:
   - name: traefik
-    version: 0.5.0
+    version: 8.8.1
     repository: file://charts/traefik
     condition: traefik.install
   - name: dashboard
-    version: 0.5.0
+    version: 0.5.1
     repository: file://charts/dashboard
     condition: dashboard.install
   - name: metrics-server
-    version: 0.5.0
+    version: 0.5.1
     repository: file://charts/metrics-server
     condition: metrics-server.install
   - name: kafka
-    version: 0.5.0
+    version: 0.20.9
     repository: file://charts/kafka
     condition: global.kafka.install
     import-values:
@@ -40,11 +40,11 @@ dependencies:
     - child: zookeeper.exports
       parent: global.zookeeper.exports
   - name: create-kafka-queues
-    version: 0.5.0
+    version: 0.5.1
     repository: file://charts/create-kafka-queues
     condition: global.kafka.install
   - name: redis
-    version: 0.5.0
+    version: 10.6.15
     repository: file://charts/redis
     condition: global.redis.install
     import-values:
@@ -53,7 +53,7 @@ dependencies:
     - child: exports
       parent: global.redis.exports
   - name: redis-cluster
-    version: 0.5.0
+    version: 2.1.1
     repository: file://charts/redis-cluster
     condition: global.redis-cluster.install
     import-values:
