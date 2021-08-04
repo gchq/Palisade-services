@@ -53,9 +53,9 @@ image:
   name: create-kafka-queues
   base: jre
   pullPolicy: IfNotPresent
-  gitHash: "dcfe1cb"
+  gitHash: "79ab9a9"
   versionNumber: 0.5.2
-  revision: RELEASE
+  revision: SNAPSHOT
 
 resources:
   limits:
