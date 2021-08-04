@@ -108,7 +108,7 @@ Calculate a storage name based on the code release artifact values
 
 {{/*
 Calculate the image name based on the image revision
-If this is a release, then $revision-$version (e.g. RELEASE-0.5.1), otherwise $revision-$gitHash (e.g. SNAPSHOT-abcdef0)
+If this is a release, then $revision-$version (e.g. RELEASE-0.5.2), otherwise $revision-$gitHash (e.g. SNAPSHOT-abcdef0)
 */}}
 {{- define "attribute-masking-service.image.name" }}
 {{- if contains .Values.image.revision .Values.global.releaseTag -}}
