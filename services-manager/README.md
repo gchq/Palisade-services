@@ -25,9 +25,13 @@ The source for this file can be found at `services-manager/src/resources/doc/REA
 
 # Palisade Services Manager
 
+## Documentation
+
+The documentation for the latest release can be found [here](https://gchq.github.io/Palisade).
+
 ## Getting started
 
-The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs.
+The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs. It is not a core part of Palisade and is purely a helper service.
 
 The manager is designed to be used by defining a collection of SpringBoot configuration files:
  * One set for the manager itself - this defines how it should start up further services or reconfigure those already running

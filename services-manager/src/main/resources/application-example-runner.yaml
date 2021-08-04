@@ -27,7 +27,7 @@ spring:
 example:
   version: '@examples.app.version@'
   path: ../Palisade-examples
-  model: ${example.path}/example-runner/target/example-runner-${example.version}-exec.jar
+  runner: ${example.path}/example-runner/target/example-runner-${example.version}-exec.jar
 
 manager:
   mode: run
