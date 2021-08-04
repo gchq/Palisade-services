@@ -60,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {RedisPersistenceTest.class, ResourceApplication.class},
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.data.redis.repositories.key-prefix=test:"}
+        properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import({KafkaTestConfiguration.class})
 @ContextConfiguration(initializers = {RedisInitialiser.class})
@@ -110,8 +110,8 @@ class RedisPersistenceTest {
     private static final User USER = new User().userId("test-user");
     private static final String EMPLOYEE_TYPE = "employee";
     private static final String CLIENT_TYPE = "client";
-    private static final String AVRO_FORMAT = "avro";
-    private static final String JSON_FORMAT = "json";
+    private static final String AVRO_FORMAT = "avro/binary";
+    private static final String JSON_FORMAT = "application/json";
 
     @BeforeAll
     static void startup() throws IOException {
@@ -121,16 +121,16 @@ class RedisPersistenceTest {
         tempClientAvroFile = Files.createFile(tempDir.resolve("client.avro")).toFile();
 
         // Create the test resources from the temp files
-        testDirectory = (DirectoryResource) AbstractResourceBuilder.create("file:" + tempDir + "/");
-        employeeAvroFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempEmployeeAvroFile.getPath()))
+        testDirectory = (DirectoryResource) AbstractResourceBuilder.create(tempDir.toUri());
+        employeeAvroFile = ((FileResource) AbstractResourceBuilder.create(tempEmployeeAvroFile.toURI()))
                 .type(EMPLOYEE_TYPE)
                 .serialisedFormat(AVRO_FORMAT)
                 .connectionDetail(DETAIL);
-        employeeJsonFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempEmployeeJsonFile.getPath()))
+        employeeJsonFile = ((FileResource) AbstractResourceBuilder.create(tempEmployeeJsonFile.toURI()))
                 .type(EMPLOYEE_TYPE)
                 .serialisedFormat(JSON_FORMAT)
                 .connectionDetail(DETAIL);
-        clientAvroFile = ((FileResource) AbstractResourceBuilder.create("file:" + tempClientAvroFile.getPath()))
+        clientAvroFile = ((FileResource) AbstractResourceBuilder.create(tempClientAvroFile.toURI()))
                 .type(CLIENT_TYPE)
                 .serialisedFormat(AVRO_FORMAT)
                 .connectionDetail(DETAIL);
@@ -184,7 +184,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(resourceResult)
                 .as("Check that when getting a Resource by its directory, the correct resources are returned")
-                .containsOnly(employeeJsonFile, employeeAvroFile, clientAvroFile);
+                .contains(employeeJsonFile, employeeAvroFile, clientAvroFile);
 
         // When making a get request to the resource service by resource for a specific file
         resourceAuditable = service.getResourcesByResource(employeeAvroRequest)
@@ -212,7 +212,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we get resources by the Id of the repository, the correct resources are returned")
-                .containsOnly(employeeJsonFile, employeeAvroFile, clientAvroFile);
+                .contains(employeeJsonFile, employeeAvroFile, clientAvroFile);
         idResult.clear();
 
         // When making a get request to the resource service by resourceId for a specific file
@@ -224,7 +224,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(idResult)
                 .as("Check that when we request one resource by its ID, only the correct resource is returned")
-                .containsOnly(employeeAvroFile);
+                .contains(employeeAvroFile);
     }
 
     @Test
@@ -241,7 +241,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resources are returned")
-                .containsOnly(employeeJsonFile, employeeAvroFile);
+                .contains(employeeJsonFile, employeeAvroFile);
         typeResult.clear();
 
         // When making a get request to the resource service by type
@@ -253,7 +253,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(typeResult)
                 .as("Check that when we request a resource by the directory and type, the correct resource is returned")
-                .containsOnly(clientAvroFile);
+                .contains(clientAvroFile);
     }
 
     @Test
@@ -282,7 +282,7 @@ class RedisPersistenceTest {
         // Then assert that the expected resource(s) are returned
         assertThat(formatResult)
                 .as("Check that when we request a Resource by its format and directory, the correct resource is returned")
-                .containsOnly(employeeJsonFile);
+                .contains(employeeJsonFile);
     }
 
 }

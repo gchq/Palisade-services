@@ -16,6 +16,7 @@ spring:
   profiles:
     include:
     - akka
+    - akka-http
     - default-config
 ---
 
@@ -32,6 +33,7 @@ spring:
 
 server:
   port: 8082
+  address: "0.0.0.0"
 
 management:
   endpoints:
@@ -49,15 +51,13 @@ management:
 
 data:
   implementation: simple
-
-population:
-  serialiserProvder: std
-
-async:
-  webMvcTimeout: 300000
-  corePoolSize: 6
+  # Map of <serialisedFormat : serialiserClassName>
+  # Note that yaml keys need to be wrapped in "[ .. ]" to be treated literally (if containing '.' or '/' etc.)
+  # See https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-Configuration-Binding#map-based-binding
+  serialisers:
+    "[text/plain]": "uk.gov.gchq.palisade.service.data.service.serialiser.StringLineSerialiser"
 
 logging:
   level:
-    org.apache.kafka: WARN
+    org.apache.kafka: ERROR
 

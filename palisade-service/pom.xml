@@ -22,7 +22,7 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.5.0-${revision}</version>
+        <version>0.5.1-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -75,7 +75,7 @@
             <!-- Common types (User, Resource, Context) -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
+            <version>0.5.1-${common.revision}</version>
         </dependency>
         <!--
         ~ Akka and Alpakka (Kafka)
@@ -248,7 +248,8 @@
                 <configuration>
                     <dateFormat>yyyyMMdd-HHmmss</dateFormat>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
@@ -288,7 +289,7 @@
                         <replacement>
                             <token>image.tag</token>
                             <!--suppress UnresolvedMavenProperty -->
-                            <value>${image.tag}</value>
+                            <value>${version}-${git.commit.id.abbrev}</value>
                         </replacement>
                     </replacements>
                 </configuration>
@@ -349,8 +350,7 @@
                 <configuration>
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <tag>${dockerfile.base.tag}-${image.tag}</tag>
+                    <tag>${dockerfile.base.tag}-${dockerfile.version.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
                         <BASE_IMG>${dockerfile.base.image}</BASE_IMG>

@@ -105,16 +105,16 @@ class ScenarioPersistenceTest {
 
     private static final FileResource MULTI_FILE_ONE = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileOne.txt").toURI()))
             .type("java.lang.String")
-            .serialisedFormat("txt")
+            .serialisedFormat("text/plain")
             .connectionDetail(DETAIL);
     private static final FileResource MULTI_FILE_TWO = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/multi-file-dir/multiFileTwo.txt").toURI()))
             .type("java.lang.String")
-            .serialisedFormat("txt")
+            .serialisedFormat("text/plain")
             .connectionDetail(DETAIL);
 
     private static final FileResource SINGLE_FILE = ((FileResource) AbstractResourceBuilder.create(new File(ROOT_PATH + "top-level-dir/single-file-dir/singleFile.txt").toURI()))
             .type("java.lang.String")
-            .serialisedFormat("txt")
+            .serialisedFormat("text/plain")
             .connectionDetail(DETAIL);
 
     private static final ResourceRequest MULTI_FILE_ONE_REQUEST = ResourceRequest.Builder.create()

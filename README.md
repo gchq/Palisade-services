@@ -18,7 +18,17 @@ limitations under the License.
 
 ## A Tool for Complex and Scalable Data Access Policy Enforcement
 
-## Overview
+# Palisade Services
+
+## Status
+<span style="color:red">Palisade is no longer under active development.</span>
+
+Windows is not an explicitly supported environment, although where possible Palisade has been made compatible.  
+For Windows developer environments, we recommend setting up [WSL](https://docs.microsoft.com/en-us/windows/wsl/).
+
+For an overview of Palisade, start with the Palisade introduction and the accompanying guides: QuickStart Guide; and Developer Guide which are found in the [Palisade README](https://github.com/gchq/Palisade/README.md).
+
+## Overview of Palisade Services
 
 From the client’s perspective, they submit a request to examine data and receive a reference for this data. 
 This reference can then be used to view the data after it has been retrieved and possibly redacted or filtered based on the context of the query and the permissions of the user making the request.
@@ -43,17 +53,15 @@ See doc/services.drawio for the source of this diagram
 --->
 ![Service Sequence diagram](doc/services.png)
 
-[Palisade Service](palisade-service/README.md) recieves a clients request, returns a unique token and initiates the processing of resources.
-[User Service](user-service/README.md) connects to User Service providers to ensure the user exists.  
-[Resource Service](resource-service/README.md) communicates with the backing stores to ensure the resource exists.
-[Policy Service](policy-service/README.md) checks that policies exist for each resource in a request.  
-[Attribute-Masking Service](attribute-masking-service/README.md) applies policies from the Policy Service against the resources in the request.
-[Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
-[Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the data to the client.  
-
-[Data Service](data-service/README.md) retrieves resources from the relevant backing stores. 
-
-[Audit Service](audit-service/README.md) operates in the background providing an audit log for each request. 
+1. [Palisade Service](palisade-service/README.md) receives a client's request, returns a unique token and initiates the processing of resources.
+1. [User Service](user-service/README.md) connects to User Service providers to acquire the requested user details.  
+1. [Resource Service](resource-service/README.md) connects to Resource Service providers to get the metadata for the requested resource(s).
+1. [Policy Service](policy-service/README.md) connects to Policy Service providers to acquire the rules that must apply to each resource in a request, checking that at least some policy exists, and applies resource-level rules to each resource.
+1. [Attribute-Masking Service](attribute-masking-service/README.md) stores the User, Resource, Context and Rules of an authorised request for a token.
+1. [Topic-Offset Service](topic-offset-service/README.md) listens to kafka topics to inform the Filtered-Resource Service where on the topic (at what offset) the first message for each token appears.
+1. [Filtered-Resource Service](filtered-resource-service/README.md) readies the resources and later handles passing the resource metadata to the client.
+1. [Data Service](data-service/README.md) retrieves the data for each of the resources from the relevant data store providers.
+1. [Audit Service](audit-service/README.md) operates in the background providing an audit log for each request. 
 
 For an overview of all Palisade components, see the root [Palisade README](https://github.com/gchq/Palisade#readme). 
 
@@ -77,11 +85,13 @@ This is achieved via profile activation (**pi**, "push image"), eg:
 ```
 mvn clean install -pl <module name> -P pi
 ```
-
+This will only create new charts and Docker images with a new tag value.
+These new charts and images will still need to be deployed to any current helm deployments of Palisade.
+This can be done by using the `helm upgrade` command or by doing a new `helm install` if Palisade has not been deployed.
 
 ### Considerations for running under Windows
 
-In order to mount local directories to the data service, ***Windows users*** may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private via PowerShell:
+In order to mount local directories to the Data Service, ***Windows users*** may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private via PowerShell:
 ```
 Set-NetConnectionProfile -InterfaceAlias "vEthernet (DockerNAT)" -NetworkCategory Private
 ```
@@ -96,11 +106,10 @@ options = "metadata"
 ```
 Changes will require a reboot to take effect.
 
-
 ### Helm Install
 
 It is recommended that Palisade is released to Kubernetes via helm using the templates included within this project.
-As a prerequisite, the helm client will need to be installed on the client and the Kubernetes context will need to be configured to point at the target cluster.
+As a prerequisite, the helm client will need to be installed on the client, and the Kubernetes context will need to be configured to point at the target cluster.
 ```
 kubectl config get-contexts
 kubectl config use-context <name>
@@ -111,10 +120,10 @@ Example first deployment to a local cluster (from the project root directory):
 helm upgrade --install palisade . \
   --set global.persistence.dataStores.palisade-data-store.local.hostPath=${pwd}  \
   --set global.persistence.classpathJars.local.hostPath=${pwd}  \
-  --timeout=200s
+  --timeout=600s
 ```
 The working directory from `$(pwd)` will be used as the mount-point for the Data Service, as well as for finding classpath-jars.
-Kafka and redis persistence is mounted using the `/tmp` directory by default.
+Kafka and Redis persistence is mounted using the `/tmp` directory by default.
 
 An example second deployment may want to use traefik to enable access into the cluster.
 This can be done by adding the additional flag:
@@ -164,7 +173,7 @@ Some more important arguments are as follows:
 | global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
-| global.redis-cluster-enabled            | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
+| global.redis-cluster-enabled            | Set to true to use Redis-cluster or false to use Redis. Useful if Redis is already installed. **default=false**
 
 #### Base Image Variants
 The base image used can be customised using the maven property `dockerfile.base.image` and labelled with `dockerfile.base.tag`.
@@ -220,3 +229,11 @@ Use the `-h` flag to see usage instructions.
 ## Palisade Flow Diagram
 ![Palisade Flow Diagram](doc/palisade-flow-diagram.png)
 
+
+## FAQ
+Q: What is the version of Java is supported?  
+A: The existing version of the application is built with Java 11. It should work with later versions of Java, but this has not been tested.
+
+Q: What build environments are supported?  
+A: We currently support macOS and Linux environments. Windows can be configured  _although there are some caveats for Windows users wishing to use Hadoop components.
+As such, WSL is preferred._

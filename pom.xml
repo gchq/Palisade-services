@@ -27,7 +27,7 @@
 
     <groupId>uk.gov.gchq.palisade</groupId>
     <artifactId>service</artifactId>
-    <version>0.5.0-${revision}</version>
+    <version>0.5.1-${revision}</version>
     <name>GCHQ Palisade Services Parent</name>
     <description>Palisade services interfaces, data-types and core feature implementations</description>
     <url>https://github.com/gchq/Palisade-services</url>
@@ -43,7 +43,7 @@
     <properties>
         <!-- Project properties -->
         <java.version>11</java.version>
-        <version.number>0.5.0</version.number>
+        <version.number>0.5.1</version.number>
         <revision>SNAPSHOT</revision>
         <common.revision>SNAPSHOT</common.revision>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -86,6 +86,10 @@
         <scm.url>https://github.com/gchq/Palisade-services</scm.url>
         <scm.connection>scm:git:https://github.com/gchq/Palisade-services.git</scm.connection>
         <scm.developer.connection>scm:git:https://github.com/gchq/Palisade-services.git</scm.developer.connection>
+
+        <!-- Set the version-tag depending on profile (defaults to SNAPSHOT-$githash, but may be RELEASE-$version for releases) -->
+        <!--suppress UnresolvedMavenProperty -->
+        <dockerfile.version.tag>${revision}-${git.commit.id.abbrev}</dockerfile.version.tag>
     </properties>
 
     <modules>
@@ -142,7 +146,7 @@
                 <common.revision>RELEASE</common.revision>
                 <maven.test.skip>true</maven.test.skip>
                 <dockerfile.push.skip>true</dockerfile.push.skip>
-                <image.tag>${revision}-${version.number}</image.tag>
+                <dockerfile.version.tag>${revision}-${version.number}</dockerfile.version.tag>
             </properties>
             <build>
                 <plugins>

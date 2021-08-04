@@ -40,14 +40,14 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
-Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+Calculate a pv name based on the jars name
 */}}
 {{- define "palisade.classpathJars.name" }}
 {{- printf "%s" .Values.global.persistence.classpathJars.name | replace "/" "-"}}
 {{- end }}
 
 {{/*
-Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage path based on the jars mount path
 */}}
 {{- define "palisade.classpathJars.mounts" }}
 {{- if eq .Values.global.hosting "local" }}
@@ -58,10 +58,10 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 
 {{/*
-Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+Calculate a storage name based on the code release artifact values
 */}}
 {{- define "palisade.deployment.revision" }}
-{{- $revision := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
+{{- $revision := printf "%s-%s" (index .Values "palisade-service" "image" "versionNumber") (index .Values "palisade-service" "image" "revision") | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.deployment $revision }}
 {{- end }}
 

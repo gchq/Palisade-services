@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.resource.domain.AbstractOrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
@@ -38,7 +37,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -195,41 +193,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     }
 
     /**
-     * Iterate over each parent-child pair, with the parent resolved by querying persistence
-     * Apply the callback predicate to each parent-child pair
-     * Stop if the predicate is not satisfied or if no further parents exist
-     *
-     * @param <T>          the type of this initial resource, e.g. {@link LeafResource}
-     * @param resource     the initial resource to begin operating and recursing up from
-     * @param callbackPred callback function to apply to each parent-child pair, return false to stop recursion
-     * @return the resource passed as the first argument, useful for Stream.map operations
-     */
-    private <T extends Resource> CompletableFuture<Void> traverseParentsByEntity(final T resource, final BiPredicate<ParentResource, ChildResource> callbackPred) {
-        if (resource instanceof ChildResource) {
-            LOGGER.debug("Traversing child '{}' until predicate is not satisfied", resource.getId());
-            // Treat resource as a ChildResource
-            ChildResource childResource = (ChildResource) resource;
-            LOGGER.debug("Getting ResourceEntity for childResource '{}'", childResource.getId());
-            return resourceRepository.findOneByResourceId(childResource.getId()).toFuture()
-                    .thenCompose((ResourceEntity childEntity) -> {
-                        LOGGER.debug("Getting ResourceEntity for parentResource '{}'", childEntity.getParentId());
-                        return resourceRepository.findOneByResourceId(childEntity.getParentId()).toFuture();
-                    })
-                    .thenCompose((ResourceEntity parentEntity) -> {
-                        ParentResource parentResource = (ParentResource) parentEntity.getResource();
-                        if (callbackPred.test(parentResource, childResource)) {
-                            LOGGER.debug("Pair '{}' and '{}' satisfied predicate, recursing", parentResource.getId(), childResource.getId());
-                            return traverseParentsByEntity(parentResource, callbackPred);
-                        } else {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                    });
-        } else {
-            return CompletableFuture.completedFuture(null);
-        }
-    }
-
-    /**
      * Iterate over each parent-child pair, with the parent resolved by getting from the child resource
      * Apply the callback function to each parent-child pair
      * Stop if the predicate is not satisfied or if no further parents exist
@@ -270,71 +233,18 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
             // Treat resource as a ParentResource
             ParentResource parentResource = (ParentResource) resource;
             // Get the children
+            LOGGER.debug("Get leaves for {}", resource.getId());
             return resourceRepository.streamFindAllByParentId(parentResource.getId())
                     .map(ResourceEntity::getResource)
                     // Recurse over further children
-                    .flatMapConcat(this::collectLeaves)
-                    .mapAsync(PARALLELISM, leafResource -> resolveParentsUpto(leafResource, resource));
+                    .flatMapConcat(this::collectLeaves);
         } else if (resource instanceof LeafResource) {
             // If we have reached a leaf, then done
+            LOGGER.debug("Got leaf {}", resource.getId());
             return Source.single((LeafResource) resource);
         } else {
+            LOGGER.warn("Got resource that was neither Parent nor Leaf: {}", resource.getClass());
             throw new UnknownResourceTypeException(String.format("Resource '%s' is neither Parent nor Leaf", resource.getId()));
-        }
-    }
-
-    /**
-     * Given a resource, get from persistence its grand*parents and set them up appropriately
-     * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
-     * This is effectively undoing the effects of serialisation using the {@link AbstractOrphanedChildJsonMixin}
-     *
-     * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
-     * @param childResource the initial resource to recurse up from
-     * @return the resource with all parents resolved up-to some 'root' resource, usually the first {@link Resource}
-     * that wasn't an instance of {@link ChildResource}
-     */
-    private <T extends Resource> CompletableFuture<T> resolveParents(final T childResource) {
-        return traverseParentsByEntity(
-                childResource,
-                (ParentResource parent, ChildResource child) -> {
-                    child.setParent(parent);
-                    return true;
-                }
-        ).thenApply(ignored -> childResource);
-    }
-
-    /**
-     * Given a resource, get from persistence its grand*parents and set them up appropriately
-     * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
-     * Stop once a given 'root' resource has been reached at either the parent or the child
-     * In practice, this check is only satisfied by the child when childResource == rootResource
-     * Otherwise it will always be satisfied by the parent first before it is satisfied by the child
-     * Subsequently, this is split as one initial check by child and all subsequent checks by parent
-     *
-     * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
-     * @param childResource the initial resource to recurse up from
-     * @param rootResource  the resource at which to stop recursion
-     * @return the resource with all parents resolved up-to the given rootResource
-     */
-    private <T extends Resource> CompletableFuture<T> resolveParentsUpto(final T childResource, final Resource rootResource) {
-        if (!childResource.getId().equals(rootResource.getId())) {
-            return traverseParentsByEntity(
-                    childResource,
-                    (ParentResource parent, ChildResource child) -> {
-                        if (parent.getId().equals(rootResource.getId())) {
-                            if (rootResource instanceof ParentResource) {
-                                child.setParent((ParentResource) rootResource);
-                            }
-                            return false;
-                        } else {
-                            child.setParent(parent);
-                            return true;
-                        }
-                    }
-            ).thenApply(ignored -> childResource);
-        } else {
-            // See traverseParentsByEntity, nice for transparency, even though the reference has been mutated
-            return CompletableFuture.completedFuture(childResource);
         }
     }
 
@@ -347,21 +257,22 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveIncompleteResource(final Resource resource) {
-        // Since this is a 'low-quality' set of information, we never want to overwrite a 'high-quality' (complete) entity
-        // There is no benefit to overwrite a 'low-quality' (incomplete) entity as it should be equivalent
-        // Therefore, if this resource is already persisted, skip
         return isResourceIdPersisted(resource.getId())
                 .thenCompose((Boolean result) -> {
-                    if (result.equals(Boolean.FALSE)) {
-                        // Create an entity
-                        ResourceEntity entity = new ResourceEntity(resource);
-                        // Save to db
-                        return resourceRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
-                        // Don't save to completeness db
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing resource '{}'", resource);
+                        return resourceRepository.futureDeleteByResourceId(resource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    ResourceEntity entity = new ResourceEntity(resource);
+                    // Save to db
+                    return resourceRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId()));
+
                 });
     }
 
@@ -385,9 +296,9 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         return completenessRepository.futureSave(EntityType.RESOURCE, resource.getId())
                                 .thenRun(() -> LOGGER.debug("Persistence save for complete entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId()));
                     } else {
-                        return saveIncompleteResource(resource);
+                        return CompletableFuture.completedFuture(null);
                     }
-                });
+                }).thenCompose(ignored -> saveIncompleteResource(resource));
     }
 
     /**
@@ -410,11 +321,10 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // If an incomplete resource is found, overwrite it as it is now complete
         // This is a 'high-quality' set of information (as it is complete) that the persistence layer will report as 'truth'
         return traverseParentsByResource(leafResource,
-                (ParentResource parent, ChildResource child) -> {
-                    saveCompleteResource(child);
-                    return recurseToRootId(parentResourceId, parentReference).apply(parent, child);
-                }
-        ).thenApply(ignored -> Optional.ofNullable(parentReference.get()));
+                (ParentResource parent, ChildResource child) ->
+                        saveCompleteResource(child).thenCompose(ignored ->
+                                recurseToRootId(parentResourceId, parentReference).apply(parent, child)))
+                .thenApply(ignored -> Optional.ofNullable(parentReference.get()));
     }
 
     /**
@@ -446,14 +356,20 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      */
     private CompletableFuture<Void> saveType(final String type, final LeafResource leafResource) {
         return typeRepository.futureExistsByResourceId(leafResource.getId())
-                .thenCompose((Boolean alreadySaved) -> {
-                    if (alreadySaved.equals(Boolean.FALSE)) {
-                        TypeEntity entity = new TypeEntity(type, leafResource.getId());
-                        return typeRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType()));
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing type '{}' resource  '{}'", type, leafResource);
+                        return typeRepository.futureDeleteByResourceId(leafResource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    TypeEntity entity = new TypeEntity(type, leafResource.getId());
+                    return typeRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with type '{}'",
+                                    entity.getResourceId(), entity.getType()));
                 });
     }
 
@@ -467,16 +383,21 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      * @return a {@link CompletableFuture} of type {@link Void}
      */
     private CompletableFuture<Void> saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
-        return serialisedFormatRepository.futureExistsFindOneByResourceId(leafResource.getId())
-                .thenCompose((Boolean alreadySaved) -> {
-                    if (alreadySaved.equals(Boolean.FALSE)) {
-                        SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
-                        return serialisedFormatRepository.futureSave(entity)
-                                .thenRun(() -> LOGGER.debug("Persistence save for type entity '{}' with serialisedFormat '{}'",
-                                        entity.getResourceId(), entity.getSerialisedFormat()));
+        return serialisedFormatRepository.futureExistsByResourceId(leafResource.getId())
+                .thenCompose((Boolean result) -> {
+                    if (result.equals(Boolean.TRUE)) {
+                        // If there is a pre-existing entity, delete it first
+                        LOGGER.debug("Deleting a pre-existing seralisedFormat '{}' resource '{}'", serialisedFormat, leafResource);
+                        return serialisedFormatRepository.futureDeleteByResourceId(leafResource.getId());
+
                     } else {
                         return CompletableFuture.completedFuture(null);
                     }
+                }).thenCompose((Void ignored) -> {
+                    SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
+                    return serialisedFormatRepository.futureSave(entity)
+                            .thenRun(() -> LOGGER.debug("Persistence save for serialisedFormat entity '{}' with serialisedFormat '{}'",
+                                    entity.getResourceId(), entity.getSerialisedFormat()));
                 });
     }
 
@@ -490,9 +411,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
         // Get resource entity from db
         return resourceRepository.streamFindOneByResourceId(resourceId)
                 // Get resource from db entity
-                .map(ResourceEntity::getResource)
-                // Resolve this resource's parents until no more parents found in db
-                .mapAsync(PARALLELISM, this::resolveParents);
+                .map(ResourceEntity::getResource);
     }
 
     // ~~~ Actual method implementations/overrides for PersistenceLayer interface ~~~ //
@@ -510,10 +429,6 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
                         return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
                                 // Get resource from db entity
                                 .map(ResourceEntity::getResource)
-                                // Optimisation - resolve this resource's parents as itself is a parent of each leaf
-                                // This means leaves have fewer parents to resolve AND may help with memory usage
-                                // Each resource pulled from the database is unique, even for the same entity
-                                .mapAsync(PARALLELISM, this::resolveParents)
                                 // Get all leaves of this resource with parents resolved up to this resource
                                 // See above, all parents are now resolved
                                 .flatMapConcat(this::collectLeaves));

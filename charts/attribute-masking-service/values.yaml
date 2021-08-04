@@ -22,11 +22,9 @@ service:
 image:
   name: attribute-masking-service
   base: jre
-  tag: RELEASE-955749b
   pullPolicy: IfNotPresent
-  gitHash: 955749b
-  versionNumber: 0.5.0
-  codeRelease: 0.5.0-RELEASE
+  gitHash: "dcfe1cb"
+  versionNumber: 0.5.1
   revision: RELEASE
 
 resources:

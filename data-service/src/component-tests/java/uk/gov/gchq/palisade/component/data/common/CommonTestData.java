@@ -19,7 +19,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
@@ -56,9 +55,8 @@ public class CommonTestData {
 
     public static final LeafResource RESOURCE = new FileResource().id(LEAF_RESOURCE_ID)
             .type("java.lang.String")
-            .serialisedFormat("format")
-            .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-            .parent(new SystemResource().id("/test"));
+            .serialisedFormat("text/plain")
+            .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
 
@@ -112,8 +110,7 @@ public class CommonTestData {
             new FileResource().id(RESOURCE_ID + "1")
                     .type("type")
                     .serialisedFormat("fmt")
-                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
-                    .parent(new SystemResource().id("system")),
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc")),
             new Context(),
             new Rules<>()
     );
@@ -124,8 +121,7 @@ public class CommonTestData {
             new FileResource().id(RESOURCE_ID + "1")
                     .type("type")
                     .serialisedFormat("fmt")
-                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
-                    .parent(new SystemResource().id("system")),
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc")),
             new Context(),
             new Rules<>()
     );
@@ -136,8 +132,7 @@ public class CommonTestData {
             new FileResource().id(RESOURCE_ID + "3")
                     .type("type")
                     .serialisedFormat("fmt")
-                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc"))
-                    .parent(new SystemResource().id("system")),
+                    .connectionDetail(new SimpleConnectionDetail().serviceName("svc")),
             new Context(),
             new Rules<>()
     );

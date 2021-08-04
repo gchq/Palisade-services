@@ -26,7 +26,7 @@ maintainers:
 icon: https://kafka.apache.org/images/logo.png
 dependencies:
 - name: zookeeper
-  version: 0.5.0
+  version: 2.1.0
   repository: file://charts/zookeeper
   condition: zookeeper.enabled
   import-values:
