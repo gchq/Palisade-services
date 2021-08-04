@@ -53,6 +53,7 @@ manager:
       jar: ${example.perf}
       profiles:
       - create
+      - static
       log: create-perf-data.log
       err: create-perf-data.err
 
