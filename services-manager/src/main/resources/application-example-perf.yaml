@@ -54,12 +54,14 @@ manager:
       profiles:
       - create
       log: create-perf-data.log
+      err: create-perf-data.err
 
     performance-test:
       jar: ${example.perf}
       profiles:
         - static
       log: performance-test.log
+      err: performance-test.err
 
     attribute-masking-service:
       profiles: *profiles
