@@ -21,7 +21,7 @@ limitations under the License.
 # Palisade Services
 
 ## Status
-<span style="color:red">Palisade is no longer under active development</span>
+<span style="color:red">Palisade is no longer under active development.</span>
 
 Windows is not an explicitly supported environment, although where possible Palisade has been made compatible.  
 For Windows developer environments, we recommend setting up [WSL](https://docs.microsoft.com/en-us/windows/wsl/).
